@@ -216,12 +216,13 @@ export function BodyMap({ painPoints, onAddPainPoint, date }: BodyMapProps) {
             </ScrollView>
 
             <Button
-              title="Save Pain Point"
               onPress={handleSave}
               disabled={!painType || severity === 0}
               style={styles.saveButton}
               testID="save-pain-point"
-            />
+            >
+              Save Pain Point
+            </Button>
           </ThemedView>
         </View>
       </Modal>

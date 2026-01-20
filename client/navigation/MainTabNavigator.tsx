@@ -5,7 +5,7 @@ import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
-import TrackStackNavigator from "@/navigation/TrackStackNavigator";
+import CheckInStackNavigator from "@/navigation/CheckInStackNavigator";
 import HealthStackNavigator from "@/navigation/HealthStackNavigator";
 import LearnStackNavigator from "@/navigation/LearnStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
@@ -13,7 +13,7 @@ import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
-  TrackTab: undefined;
+  CheckInTab: undefined;
   HealthTab: undefined;
   LearnTab: undefined;
   ProfileTab: undefined;
@@ -65,12 +65,12 @@ export default function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="TrackTab"
-        component={TrackStackNavigator}
+        name="CheckInTab"
+        component={CheckInStackNavigator}
         options={{
-          title: "Track",
+          title: "Check-in",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="edit-3" size={size} color={color} />
+            <Feather name="check-circle" size={size} color={color} />
           ),
         }}
       />
