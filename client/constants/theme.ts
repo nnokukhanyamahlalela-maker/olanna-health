@@ -8,6 +8,7 @@ export const Spacing = {
   "3xl": 32,
   "4xl": 40,
   inputHeight: 52,
+  buttonHeight: 52,
 } as const;
 
 export const BorderRadius = {
@@ -23,6 +24,53 @@ export const Fonts = {
   body: "Nunito_400Regular",
   semibold: "Nunito_600SemiBold",
   mono: "SpaceMono-Regular",
+} as const;
+
+export const Typography = {
+  h1: {
+    fontFamily: Fonts.heading,
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "700" as const,
+  },
+  h2: {
+    fontFamily: Fonts.heading,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "700" as const,
+  },
+  h3: {
+    fontFamily: Fonts.semibold,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: "600" as const,
+  },
+  h4: {
+    fontFamily: Fonts.semibold,
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "600" as const,
+  },
+  body: {
+    fontFamily: Fonts.body,
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  small: {
+    fontFamily: Fonts.body,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  caption: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  link: {
+    fontFamily: Fonts.body,
+    fontSize: 16,
+    lineHeight: 22,
+  },
 } as const;
 
 export const Shadows = {
@@ -152,6 +200,8 @@ export const Colors = {
     lotusPetal: OlannaColors.dustyRose,
     lotusGlow: "rgba(212, 168, 75, 0.2)",
     waterRipple: "rgba(123, 163, 135, 0.15)",
+
+    link: OlannaColors.sage,
   },
   dark: {
     text: "#F5F0EB",
@@ -195,5 +245,7 @@ export const Colors = {
     lotusPetal: OlannaColors.dustyRose,
     lotusGlow: "rgba(232, 201, 122, 0.15)",
     waterRipple: "rgba(155, 196, 167, 0.1)",
+
+    link: OlannaColors.sageLight,
   },
 };

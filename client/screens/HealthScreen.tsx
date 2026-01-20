@@ -10,6 +10,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { HealthModuleCard } from "@/components/HealthModuleCard";
 import { InsightCard } from "@/components/InsightCard";
 import { EmptyState } from "@/components/EmptyState";
+import { AfricanPattern } from "@/components/AfricanPattern";
+import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile, Screening } from "@/lib/storage";
@@ -94,19 +96,21 @@ export default function HealthScreen() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: tabBarHeight + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
+    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+      <AfricanPattern opacity={0.02} variant="triangles" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: tabBarHeight + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
       {upcomingScreenings.length > 0 ? (
         <View style={styles.alertSection}>
           <ThemedText type="h3" style={styles.sectionTitle}>
@@ -193,12 +197,18 @@ export default function HealthScreen() {
           />
         </View>
       </View>
-    </ScrollView>
+
+      <PrivacyBadge message="Your health data is encrypted and stored locally on your device" />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   loadingContainer: {
