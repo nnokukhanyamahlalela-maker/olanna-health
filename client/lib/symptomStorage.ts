@@ -172,50 +172,196 @@ export const clearAllSymptomData = async (): Promise<void> => {
 export const generateSeedData = async (): Promise<void> => {
   const today = new Date();
   const logs: SymptomLog[] = [];
+  const painPoints: BodyPainPoint[] = [];
   
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 60; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
+    const cycleDay = i % 28;
     
-    if (i % 28 < 5) {
+    // Menstrual phase (days 0-5)
+    if (cycleDay < 5) {
       logs.push({
         id: `seed-${dateStr}-cramps`,
         date: dateStr,
         symptomId: 'cramps',
         categoryId: 'core-cycle',
         value: true,
-        severity: Math.floor(Math.random() * 3) + 2,
+        severity: cycleDay < 2 ? 4 : Math.floor(Math.random() * 2) + 2,
+        tags: cycleDay < 2 ? ['poor sleep'] : undefined,
         timestamp: date.getTime(),
       });
       logs.push({
         id: `seed-${dateStr}-flow`,
         date: dateStr,
-        symptomId: i % 28 < 2 ? 'flow-heavy' : 'flow-medium',
+        symptomId: cycleDay < 2 ? 'flow-heavy' : cycleDay < 4 ? 'flow-medium' : 'flow-light',
         categoryId: 'flow',
         value: true,
         timestamp: date.getTime(),
       });
+      logs.push({
+        id: `seed-${dateStr}-fatigue`,
+        date: dateStr,
+        symptomId: cycleDay < 2 ? 'fatigue-extreme' : 'fatigue-moderate',
+        categoryId: 'core-cycle',
+        value: true,
+        timestamp: date.getTime(),
+      });
+      if (cycleDay < 3) {
+        logs.push({
+          id: `seed-${dateStr}-low-mood`,
+          date: dateStr,
+          symptomId: 'low-mood',
+          categoryId: 'emotional',
+          value: true,
+          severity: 2,
+          timestamp: date.getTime(),
+        });
+        painPoints.push({
+          id: `seed-${dateStr}-pelvic`,
+          date: dateStr,
+          region: 'pelvic',
+          painType: 'cramping',
+          severity: 3,
+          duration: 'hours',
+          timestamp: date.getTime(),
+        });
+      }
     }
     
-    if (i % 28 >= 20 && i % 28 < 28) {
+    // Follicular phase (days 6-13) - rising energy
+    if (cycleDay >= 6 && cycleDay < 14) {
+      if (cycleDay === 6 || cycleDay === 7) {
+        logs.push({
+          id: `seed-${dateStr}-spotting`,
+          date: dateStr,
+          symptomId: 'spotting',
+          categoryId: 'flow',
+          value: true,
+          timestamp: date.getTime(),
+        });
+      }
+      if (cycleDay > 9) {
+        logs.push({
+          id: `seed-${dateStr}-energy`,
+          date: dateStr,
+          symptomId: 'physical-energy-high',
+          categoryId: 'energy',
+          value: true,
+          timestamp: date.getTime(),
+        });
+        logs.push({
+          id: `seed-${dateStr}-clarity`,
+          date: dateStr,
+          symptomId: 'mental-clarity',
+          categoryId: 'cognitive',
+          value: true,
+          timestamp: date.getTime(),
+        });
+      }
+    }
+    
+    // Ovulation window (days 14-16)
+    if (cycleDay >= 14 && cycleDay < 17) {
+      logs.push({
+        id: `seed-${dateStr}-cm`,
+        date: dateStr,
+        symptomId: 'cm-eggwhite',
+        categoryId: 'vaginal',
+        value: true,
+        timestamp: date.getTime(),
+      });
+      logs.push({
+        id: `seed-${dateStr}-libido`,
+        date: dateStr,
+        symptomId: 'libido-up',
+        categoryId: 'sexual',
+        value: true,
+        timestamp: date.getTime(),
+      });
+      if (cycleDay === 14) {
+        logs.push({
+          id: `seed-${dateStr}-ovary`,
+          date: dateStr,
+          symptomId: Math.random() > 0.5 ? 'left-ovary-pain' : 'right-ovary-pain',
+          categoryId: 'pain-mapping',
+          value: true,
+          severity: 2,
+          timestamp: date.getTime(),
+        });
+      }
+    }
+    
+    // Luteal phase (days 17-27) - PMS symptoms
+    if (cycleDay >= 20) {
       logs.push({
         id: `seed-${dateStr}-bloating`,
         date: dateStr,
         symptomId: 'bloating',
         categoryId: 'core-cycle',
         value: true,
-        severity: Math.floor(Math.random() * 2) + 1,
+        severity: cycleDay > 24 ? 3 : 2,
+        timestamp: date.getTime(),
+      });
+      if (cycleDay > 22) {
+        logs.push({
+          id: `seed-${dateStr}-irritable`,
+          date: dateStr,
+          symptomId: 'irritable',
+          categoryId: 'emotional',
+          value: true,
+          severity: cycleDay > 25 ? 3 : 2,
+          timestamp: date.getTime(),
+        });
+        logs.push({
+          id: `seed-${dateStr}-cravings`,
+          date: dateStr,
+          symptomId: 'sugar-cravings',
+          categoryId: 'gut',
+          value: true,
+          timestamp: date.getTime(),
+        });
+      }
+      if (cycleDay > 24) {
+        logs.push({
+          id: `seed-${dateStr}-breast`,
+          date: dateStr,
+          symptomId: 'breast-tenderness',
+          categoryId: 'core-cycle',
+          value: true,
+          severity: 2,
+          timestamp: date.getTime(),
+        });
+        logs.push({
+          id: `seed-${dateStr}-sleep`,
+          date: dateStr,
+          symptomId: 'sleep-quality-poor',
+          categoryId: 'energy',
+          value: true,
+          timestamp: date.getTime(),
+        });
+      }
+    }
+    
+    // Random environmental/stress factors
+    if (i % 7 === 0) {
+      logs.push({
+        id: `seed-${dateStr}-stress`,
+        date: dateStr,
+        symptomId: 'commute-stress',
+        categoryId: 'environmental',
+        value: true,
+        severity: Math.floor(Math.random() * 2) + 2,
         timestamp: date.getTime(),
       });
     }
-    
-    if (i % 3 === 0) {
+    if (i % 10 === 0) {
       logs.push({
-        id: `seed-${dateStr}-fatigue`,
+        id: `seed-${dateStr}-load`,
         date: dateStr,
-        symptomId: 'fatigue-mild',
-        categoryId: 'core-cycle',
+        symptomId: 'load-shedding',
+        categoryId: 'environmental',
         value: true,
         timestamp: date.getTime(),
       });
@@ -223,4 +369,45 @@ export const generateSeedData = async (): Promise<void> => {
   }
   
   await AsyncStorage.setItem(STORAGE_KEYS.SYMPTOM_LOGS, JSON.stringify(logs));
+  await AsyncStorage.setItem(STORAGE_KEYS.PAIN_POINTS, JSON.stringify(painPoints));
+};
+
+export interface CustomSymptom {
+  id: string;
+  name: string;
+  categoryId: string;
+  icon: string;
+  inputType: 'toggle' | 'severity';
+  createdAt: number;
+}
+
+export const getCustomSymptoms = async (): Promise<CustomSymptom[]> => {
+  try {
+    const symptoms = await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_SYMPTOMS);
+    return symptoms ? JSON.parse(symptoms) : [];
+  } catch (error) {
+    console.error('Error getting custom symptoms:', error);
+    return [];
+  }
+};
+
+export const saveCustomSymptom = async (symptom: CustomSymptom): Promise<void> => {
+  try {
+    const existing = await getCustomSymptoms();
+    await AsyncStorage.setItem(STORAGE_KEYS.CUSTOM_SYMPTOMS, JSON.stringify([...existing, symptom]));
+  } catch (error) {
+    console.error('Error saving custom symptom:', error);
+    throw error;
+  }
+};
+
+export const deleteCustomSymptom = async (id: string): Promise<void> => {
+  try {
+    const existing = await getCustomSymptoms();
+    const filtered = existing.filter(s => s.id !== id);
+    await AsyncStorage.setItem(STORAGE_KEYS.CUSTOM_SYMPTOMS, JSON.stringify(filtered));
+  } catch (error) {
+    console.error('Error deleting custom symptom:', error);
+    throw error;
+  }
 };

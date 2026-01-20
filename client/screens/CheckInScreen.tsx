@@ -39,6 +39,10 @@ import {
   saveHiddenSymptoms,
   getCategoryOrder,
   saveCategoryOrder,
+  generateSeedData,
+  getCustomSymptoms,
+  saveCustomSymptom,
+  CustomSymptom,
 } from '@/lib/symptomStorage';
 
 type ViewMode = 'categories' | 'bodymap' | 'patterns';
@@ -64,6 +68,11 @@ export default function CheckInScreen() {
   const [hiddenSymptoms, setHiddenSymptoms] = useState<string[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const [customSymptoms, setCustomSymptoms] = useState<CustomSymptom[]>([]);
+  const [showAddCustom, setShowAddCustom] = useState(false);
+  const [newCustomName, setNewCustomName] = useState('');
+  const [newCustomCategory, setNewCustomCategory] = useState('core-cycle');
+  const [loadingDemo, setLoadingDemo] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -85,6 +94,31 @@ export default function CheckInScreen() {
     setHiddenSymptoms(hidden);
     const order = await getCategoryOrder();
     setCategoryOrder(order);
+    const custom = await getCustomSymptoms();
+    setCustomSymptoms(custom);
+  };
+
+  const handleLoadDemoData = async () => {
+    setLoadingDemo(true);
+    await generateSeedData();
+    setLoadingDemo(false);
+    setShowCustomizeModal(false);
+  };
+
+  const handleAddCustomSymptom = async () => {
+    if (!newCustomName.trim()) return;
+    const newSymptom: CustomSymptom = {
+      id: `custom-${Date.now()}`,
+      name: newCustomName.trim(),
+      categoryId: newCustomCategory,
+      icon: 'plus',
+      inputType: 'severity',
+      createdAt: Date.now(),
+    };
+    await saveCustomSymptom(newSymptom);
+    setCustomSymptoms([...customSymptoms, newSymptom]);
+    setNewCustomName('');
+    setShowAddCustom(false);
   };
 
   const toggleHideSymptom = async (symptomId: string) => {
@@ -559,6 +593,96 @@ export default function CheckInScreen() {
                   )
                 )}
               </View>
+
+              <View style={styles.customizeSection}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+                  <ThemedText type="h4">Custom Symptoms ({customSymptoms.length})</ThemedText>
+                  <Pressable
+                    onPress={() => setShowAddCustom(!showAddCustom)}
+                    style={[styles.addButton, { backgroundColor: `${theme.primary}15` }]}
+                    testID="add-custom-symptom"
+                  >
+                    <Feather name={showAddCustom ? 'minus' : 'plus'} size={18} color={theme.primary} />
+                  </Pressable>
+                </View>
+                {showAddCustom ? (
+                  <View style={[styles.addCustomForm, { backgroundColor: theme.backgroundSecondary, borderColor: theme.border }]}>
+                    <TextInput
+                      value={newCustomName}
+                      onChangeText={setNewCustomName}
+                      placeholder="Symptom name..."
+                      placeholderTextColor={theme.textSecondary}
+                      style={[styles.customInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
+                      testID="custom-symptom-name"
+                    />
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: Spacing.md }}>
+                      <View style={{ flexDirection: 'row', gap: Spacing.xs }}>
+                        {SYMPTOM_CATEGORIES.slice(0, 6).map(cat => (
+                          <Pressable
+                            key={cat.id}
+                            onPress={() => setNewCustomCategory(cat.id)}
+                            style={[
+                              styles.categoryPill,
+                              {
+                                backgroundColor: newCustomCategory === cat.id ? cat.color : `${cat.color}20`,
+                                borderColor: cat.color,
+                              },
+                            ]}
+                          >
+                            <ThemedText type="caption" style={{ color: newCustomCategory === cat.id ? '#fff' : cat.color }}>
+                              {cat.name.split(' ')[0]}
+                            </ThemedText>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </ScrollView>
+                    <Pressable
+                      onPress={handleAddCustomSymptom}
+                      style={[styles.addCustomButton, { backgroundColor: theme.primary }]}
+                      testID="save-custom-symptom"
+                    >
+                      <ThemedText type="small" style={{ color: theme.buttonText, fontWeight: '600' }}>Add Symptom</ThemedText>
+                    </Pressable>
+                  </View>
+                ) : customSymptoms.length === 0 ? (
+                  <View style={styles.emptyHidden}>
+                    <Feather name="plus-circle" size={32} color={theme.textSecondary} style={{ marginBottom: Spacing.sm }} />
+                    <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: 'center' }}>
+                      Add your own symptoms to track things unique to you.
+                    </ThemedText>
+                  </View>
+                ) : (
+                  customSymptoms.map(symptom => (
+                    <View key={symptom.id} style={[styles.customizeItem, { borderColor: theme.border }]}>
+                      <View style={styles.customizeItemLeft}>
+                        <Feather name="plus" size={18} color={theme.primary} />
+                        <View>
+                          <ThemedText>{symptom.name}</ThemedText>
+                          <ThemedText type="caption" style={{ color: theme.textSecondary }}>Custom</ThemedText>
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
+
+              <View style={[styles.demoSection, { borderTopColor: theme.border }]}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.sm }}>Demo Mode</ThemedText>
+                <ThemedText type="small" style={{ color: theme.textSecondary, marginBottom: Spacing.md }}>
+                  Load 60 days of sample data to explore patterns and insights.
+                </ThemedText>
+                <Pressable
+                  onPress={handleLoadDemoData}
+                  style={[styles.demoButton, { borderColor: theme.tertiary }]}
+                  disabled={loadingDemo}
+                  testID="load-demo-data"
+                >
+                  <Feather name="database" size={18} color={theme.tertiary} />
+                  <ThemedText type="small" style={{ color: theme.tertiary, fontWeight: '600' }}>
+                    {loadingDemo ? 'Loading...' : 'Load Demo Data'}
+                  </ThemedText>
+                </Pressable>
+              </View>
             </ScrollView>
           </ThemedView>
         </View>
@@ -726,6 +850,50 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+  },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCustomForm: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+  },
+  customInput: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  categoryPill: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  addCustomButton: {
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+  },
+  demoSection: {
+    borderTopWidth: 1,
+    paddingTop: Spacing.lg,
+    marginTop: Spacing.md,
+  },
+  demoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
     borderWidth: 1,
     borderRadius: BorderRadius.md,
   },
