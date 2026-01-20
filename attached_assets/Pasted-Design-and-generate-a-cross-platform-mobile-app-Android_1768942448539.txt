@@ -1,0 +1,63 @@
+Design and generate a cross‑platform mobile app (Android and iOS) called Olanna Health. The app will be a context‑sensitive femtech platform for African women (especially South African) that combines period tracking with broader sexual and reproductive health tools. It must be based on evidence‑based research and guidelines for women’s health and incorporate design cues from the Stardust and Lively period tracking apps. The UI should blend Stardust’s cosmic, playful aesthetic (moon phases, cycle‑coloured backgrounds and daily insights) with Lively’s calm dashboards and AI‑driven advice. Use responsive layouts, light and dark modes, accessible colour palettes and text sizes. Include multilingual support (English, isiZulu, isiXhosa and Afrikaans) and offline capability for users with limited connectivity.
+
+Required features and scientific rationale
+
+Menstrual & fertility tracking
+
+Provide accurate cycle prediction and ovulation windows using an algorithm that learns from each user’s data. Offer a calendar view, cycle wheel and cosmic‑themed colour coding to indicate phases. Include optional lunar phase alignment similar to Stardust. Let users track flow, pain, mood, energy, libido, sleep and lifestyle factors. Research shows that personalised symptom tracking helps women with PCOS and endometriosis understand patterns and manage health.
+
+Offer daily insights across mind, body, gut health, movement, work, sex and beauty (Stardust’s Daily Decode). Provide cycle‑specific affirmations and archetype‑based content like Stardust’s “period personality” deep dives. Include an AI advisor like Lively’s to summarise trends and suggest actions.
+
+PCOS module
+
+Create a dedicated section for women with Polycystic Ovary Syndrome. Allow tracking of symptoms such as irregular periods, acne, hair loss, hirsutism, weight changes and mood. Provide lifestyle management tools (nutrition advice, exercise plans, stress‑reduction techniques) and goal‑setting with reminders. Research shows that digital health tools with AI‑based analysis improve early detection and tailored interventions for PCOS. Use machine‑learning algorithms to detect patterns in cycle length, hormonal symptoms and biometric data, then flag potential PCOS and prompt users to seek medical evaluation. Offer a question‑prompt list and discussion guides for doctor visits; the AskPCOS app co‑developed with the international guideline includes such features. Provide educational resources based on the 2023 international PCOS guideline and warn users about misinformation on social media.
+
+Endometriosis module
+
+Include a module for Endometriosis with symptom logging (pelvic pain, fatigue, bowel/bladder symptoms) and visual correlation charts that show how lifestyle factors (exercise, diet, stress) relate to symptom flares (similar to Bearable’s correlation grids). Offer calls‑to‑action and goal setting (e.g., limiting caffeine, scheduling rest or moderate exercise) and let users generate reports to share with healthcare providers. Provide supportive language (“you are not alone”) and access to a moderated forum or chat for peer support. Enable scheduling of webinars or telehealth sessions with specialists, inspired by Phendo and other endometriosis apps.
+
+Sexual health & STD screening prompts
+
+Integrate a sexual health checklist that educates users about sexually transmitted infections (STIs), provides risk‑based questionnaires and sends reminders for testing. Follow the Southern African HIV Clinicians Society 2022 guideline: adolescent girls and young women, people living with HIV and individuals at increased risk should undergo annual diagnostic screening for chlamydia and gonorrhoea and syphilis. Pregnant women should be tested at their first antenatal visit and again at 32 weeks. Users under 25 should be prompted yearly for chlamydia and gonorrhoea testing; women with new or multiple partners should also receive prompts. Provide HIV testing reminders and information about hepatitis B/C and HPV where appropriate. Educate users on safe sex, consent and partner communication.
+
+Cervical cancer screening (Pap smear/HPV test)
+
+Implement a Pap smear and HPV test scheduler. South African guidelines recommend HPV testing every 5 years for women aged 25 – 65, replacing the older Pap‐smear–every‑3‑years schedule; where HPV testing is unavailable, Pap smears every 3 years remain effective. The BetterGyn/SASOG guideline states that screening generally begins at 25 years, with an exit age around 60; high‑risk women (HIV positive or HPV 16/18/45 positive) require more frequent screening. The app should collect age and risk factors, calculate next due dates, send culturally sensitive reminders, and offer educational content on cervical cancer prevention.
+
+Health screenings and self‑care
+
+Offer reminders for general health check‑ups (blood pressure, cholesterol, blood sugar), mammograms, bone density scans and mental‑health assessments. Encourage annual physicals and personalised screening schedules. Provide content on nutrition, sleep hygiene and exercise routines.
+
+Education library & localised content
+
+Build a searchable Cyclepedia/encyclopedia with evidence‑based articles, infographics and videos covering menstruation, sexual health, fertility, contraception, pregnancy, menopause, mental health, chronic conditions, and local cultural practices. Present content in multiple languages and using simple, non‑stigmatising language to address low digital literacy and cultural taboos. Include offline content packages for users with limited internet. Provide AI‑generated daily tips and highlight credible local health resources (clinics, hotlines, NGOs). Ensure information reflects African contexts and addresses the challenges and opportunities in African femtech, such as regulatory gaps, affordability, digital literacy and data privacy.
+
+Community and support
+
+Integrate a secure, anonymous community space where users can share experiences and support each other. Offer partner and friend modes (like Stardust and Lively) so users can share their cycle status with trusted contacts or healthcare providers. Provide moderated forums for PCOS and endometriosis communities, with options to join local groups. Include an option to chat with healthcare professionals or mental‑health counsellors (telehealth integration). Ensure that community content is moderated to prevent misinformation and harassment.
+
+AI assistant & chatbot
+
+Add a conversational AI assistant trained on validated guidelines (international PCOS guideline, SAHCS STI guideline, SASOG cervical screening guideline) to answer questions, deliver personalised insights and assist with symptom triage. Research shows that AI chatbots can generate empathetic responses and improve referral rates, particularly among minority groups. The chatbot should explain that it does not replace medical advice and should provide referral links to clinics or telehealth services.
+
+Integration & data export
+
+Allow integration with wearable devices (e.g., fitness trackers, smart rings) to import heart‑rate, sleep and activity data to refine cycle predictions and correlate lifestyle factors. Provide data export in PDF/CSV format so users can share reports with healthcare providers. Offer options to donate anonymised data for research in partnership with universities and public‑health agencies (following the “alternative governance models” recommended in the High Stakes of Tracking Menstruation report). Explain clearly how data will be used and obtain informed consent.
+
+Ensure data privacy and security: store sensitive health data locally with end‑to‑end encryption, allow users to control what is synced, and never sell data. Address African femtech sector concerns about data privacy and trust.
+
+Offline access & low bandwidth design
+
+Optimise the app for low bandwidth by caching data and enabling offline tracking, with sync when connectivity is available. Provide SMS‑based reminders for tests and appointments. Implement compressed media and allow users to download content bundles over Wi‑Fi. Offer peer‑to‑peer sharing of the app and educational materials in communities with limited internet, inspired by UNICEF’s Oky app’s offline peer‑to‑peer approach.
+
+User experience (UX) and aesthetics
+
+Combine the cosmic, mystical aesthetic of Stardust (moon phases, star‑dust backgrounds, astrology‑inspired icons) with Lively’s clean, pastel dashboards and intuitive navigation. Use inclusive, gender‑neutral imagery and avoid stereotypical pinks; include dark mode and high‑contrast options. Provide a cycle dashboard that gives a 360° view of past cycles, trends and health markers like basal‑body temperature and weight, similar to Lively’s cycle dashboard. Offer AI‑driven health reports and a journal for moods and feelings (Lively’s features). Incorporate Daily Decode‑style notifications for each cycle phase and Archetype Deep Dives into period personalities (Stardust features). Integrate a friend/partner sync feature to share cycle information and a pregnancy/postpartum mode with week‑at‑a‑glance insights and AR visualisations. Ensure the app is intuitive for users with varying levels of digital literacy; include onboarding tutorials and tooltips.
+
+Technical instructions
+
+Use a modern cross‑platform framework (e.g., Flutter or React Native) and modular architecture. Implement local database storage (e.g., SQLite or Realm) with encryption. Integrate push notifications (and SMS fallback) for reminders. Provide a settings page where users can opt‑in/out of features (PCOS module, pregnancy mode, data donation). Use environment variables or secure storage for API keys if connecting to external services.
+
+The code should be well‑commented and modular to facilitate future localisation or feature expansion. Include unit tests for core functionalities (cycle calculation, reminder scheduling, data encryption). Provide clear documentation and instructions for building and deploying the app.
+
+By following these guidelines, the Olanna Health mobile app will deliver an empowering, culturally relevant femtech solution for African women. It will integrate evidence‑based recommendations for menstrual health, PCOS, endometriosis, sexual health and cervical cancer screening, while respecting privacy, affordability and accessibility.
