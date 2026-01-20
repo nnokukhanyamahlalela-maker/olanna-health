@@ -36,7 +36,8 @@ client/
 │   └── ...
 ├── screens/               # Screen components
 │   ├── HomeScreen.tsx     # Cycle dashboard
-│   ├── TrackScreen.tsx    # Daily logging
+│   ├── CheckInScreen.tsx  # Daily symptom check-in
+│   ├── PatternsScreen.tsx # Symptom patterns & trends
 │   ├── HealthScreen.tsx   # Health modules hub
 │   ├── LearnScreen.tsx    # Education library
 │   ├── ProfileScreen.tsx  # User settings
@@ -84,6 +85,14 @@ server/
 - PrivacyBadge component for trust indicators on sensitive screens
 - 5-step onboarding: Welcome, Profile Setup, Health Goals, Lotus Explanation, View Selection
 - Theme presets (Earth, Sunrise, Moonlight) for personalization
-- 5-tab navigation: Home, Track, Health, Learn, Profile
+- 5-tab navigation: Home, Check-in, Health, Learn, Profile
 - Health modules for PCOS, Endometriosis, Sexual Health, Cervical Screening
 - AI Health Assistant chat interface
+- Comprehensive symptom tracking system (January 2026):
+  - 15 symptom categories with 200+ symptoms
+  - SeveritySlider with lotus petal-inspired design
+  - BodyMap with SVG silhouette and 17 touchable pain regions
+  - TagSelector for context tracking (including South African-specific tags)
+  - CheckInScreen with favorites quick access
+  - PatternsScreen with calendar heatmap and trend analysis
+  - Local insights engine for pattern detection (non-diagnostic)
