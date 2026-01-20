@@ -35,6 +35,10 @@ import {
   getDailyCheckIn,
   getFavoriteSymptoms,
   saveFavoriteSymptoms,
+  getHiddenSymptoms,
+  saveHiddenSymptoms,
+  getCategoryOrder,
+  saveCategoryOrder,
 } from '@/lib/symptomStorage';
 
 type ViewMode = 'categories' | 'bodymap' | 'patterns';
@@ -57,6 +61,9 @@ export default function CheckInScreen() {
   const [currentTags, setCurrentTags] = useState<string[]>([]);
   const [currentNotes, setCurrentNotes] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [hiddenSymptoms, setHiddenSymptoms] = useState<string[]>([]);
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -74,6 +81,35 @@ export default function CheckInScreen() {
     }
     const favs = await getFavoriteSymptoms();
     setFavorites(favs);
+    const hidden = await getHiddenSymptoms();
+    setHiddenSymptoms(hidden);
+    const order = await getCategoryOrder();
+    setCategoryOrder(order);
+  };
+
+  const toggleHideSymptom = async (symptomId: string) => {
+    const newHidden = hiddenSymptoms.includes(symptomId)
+      ? hiddenSymptoms.filter(h => h !== symptomId)
+      : [...hiddenSymptoms, symptomId];
+    setHiddenSymptoms(newHidden);
+    await saveHiddenSymptoms(newHidden);
+  };
+
+  const getOrderedCategories = () => {
+    if (categoryOrder.length === 0) return SYMPTOM_CATEGORIES;
+    const ordered: SymptomCategory[] = [];
+    categoryOrder.forEach(id => {
+      const cat = SYMPTOM_CATEGORIES.find(c => c.id === id);
+      if (cat) ordered.push(cat);
+    });
+    SYMPTOM_CATEGORIES.forEach(cat => {
+      if (!categoryOrder.includes(cat.id)) ordered.push(cat);
+    });
+    return ordered;
+  };
+
+  const getVisibleSymptoms = (category: SymptomCategory) => {
+    return category.items.filter(item => !hiddenSymptoms.includes(item.id));
   };
 
   const handleSymptomPress = (category: SymptomCategory, symptom: SymptomItem) => {
@@ -187,7 +223,7 @@ export default function CheckInScreen() {
         ) : null}
       </View>
       <View style={styles.symptomsGrid}>
-        {category.items.map(symptom => {
+        {getVisibleSymptoms(category).map(symptom => {
           const key = `${category.id}-${symptom.id}`;
           const isSelected = selectedSymptoms.has(key);
           const log = selectedSymptoms.get(key);
@@ -224,11 +260,20 @@ export default function CheckInScreen() {
             })}
           </ThemedText>
         </View>
-        <View style={[styles.progressBadge, { backgroundColor: `${theme.primary}15` }]}>
-          <Feather name="check-circle" size={16} color={theme.primary} />
-          <ThemedText type="small" style={{ color: theme.primary, fontWeight: '600' }}>
-            {loggedCount} logged
-          </ThemedText>
+        <View style={styles.headerRight}>
+          <View style={[styles.progressBadge, { backgroundColor: `${theme.primary}15` }]}>
+            <Feather name="check-circle" size={16} color={theme.primary} />
+            <ThemedText type="small" style={{ color: theme.primary, fontWeight: '600' }}>
+              {loggedCount} logged
+            </ThemedText>
+          </View>
+          <Pressable
+            onPress={() => setShowCustomizeModal(true)}
+            style={[styles.settingsButton, { backgroundColor: `${theme.textSecondary}15` }]}
+            testID="customize-symptoms"
+          >
+            <Feather name="sliders" size={18} color={theme.textSecondary} />
+          </Pressable>
         </View>
       </View>
 
@@ -324,7 +369,7 @@ export default function CheckInScreen() {
               </View>
             ) : null}
 
-            {SYMPTOM_CATEGORIES.map((category, index) => renderCategorySection(category, index))}
+            {getOrderedCategories().map((category, index) => renderCategorySection(category, index))}
           </>
         ) : viewMode === 'bodymap' ? (
           <View style={styles.bodyMapContainer}>
@@ -395,9 +440,126 @@ export default function CheckInScreen() {
               testID="symptom-notes-input"
             />
 
-            <Button onPress={saveSymptomDetail} testID="save-symptom-detail">
-              {currentSeverity > 0 ? 'Save' : 'Clear'}
-            </Button>
+            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+              <Pressable
+                onPress={() => {
+                  if (currentSymptom) {
+                    toggleHideSymptom(currentSymptom.id);
+                    setShowDetailModal(false);
+                  }
+                }}
+                style={[styles.hideButton, { borderColor: theme.textSecondary }]}
+                testID="hide-symptom"
+              >
+                <Feather name="eye-off" size={16} color={theme.textSecondary} />
+                <ThemedText type="small" style={{ color: theme.textSecondary }}>Hide</ThemedText>
+              </Pressable>
+              <View style={{ flex: 1 }}>
+                <Button onPress={saveSymptomDetail} testID="save-symptom-detail">
+                  {currentSeverity > 0 ? 'Save' : 'Clear'}
+                </Button>
+              </View>
+            </View>
+          </ThemedView>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showCustomizeModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowCustomizeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <ThemedView style={[styles.modalContent, { backgroundColor: theme.background, maxHeight: '70%' }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Customize Symptoms</ThemedText>
+              <Pressable onPress={() => setShowCustomizeModal(false)} testID="close-customize-modal">
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ThemedText type="small" style={{ color: theme.textSecondary, marginBottom: Spacing.md }}>
+              Long-press any symptom to add it to Quick Access. Hidden symptoms appear below.
+            </ThemedText>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.customizeSection}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Hidden Symptoms ({hiddenSymptoms.length})
+                </ThemedText>
+                {hiddenSymptoms.length === 0 ? (
+                  <View style={styles.emptyHidden}>
+                    <Feather name="eye" size={32} color={theme.textSecondary} style={{ marginBottom: Spacing.sm }} />
+                    <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: 'center' }}>
+                      No hidden symptoms. All symptoms are visible.
+                    </ThemedText>
+                  </View>
+                ) : (
+                  SYMPTOM_CATEGORIES.flatMap(cat =>
+                    cat.items
+                      .filter(item => hiddenSymptoms.includes(item.id))
+                      .map(symptom => (
+                        <View
+                          key={symptom.id}
+                          style={[styles.customizeItem, { borderColor: theme.border }]}
+                        >
+                          <View style={styles.customizeItemLeft}>
+                            <Feather name={symptom.icon as any} size={18} color={cat.color} />
+                            <View>
+                              <ThemedText>{symptom.name}</ThemedText>
+                              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                                {cat.name}
+                              </ThemedText>
+                            </View>
+                          </View>
+                          <Pressable onPress={() => toggleHideSymptom(symptom.id)} testID={`restore-${symptom.id}`}>
+                            <Feather name="eye" size={20} color={theme.primary} />
+                          </Pressable>
+                        </View>
+                      ))
+                  )
+                )}
+              </View>
+
+              <View style={styles.customizeSection}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Quick Access ({favorites.length})
+                </ThemedText>
+                {favorites.length === 0 ? (
+                  <View style={styles.emptyHidden}>
+                    <Feather name="star" size={32} color={theme.textSecondary} style={{ marginBottom: Spacing.sm }} />
+                    <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: 'center' }}>
+                      Long-press any symptom to add it to Quick Access.
+                    </ThemedText>
+                  </View>
+                ) : (
+                  SYMPTOM_CATEGORIES.flatMap(cat =>
+                    cat.items
+                      .filter(item => favorites.includes(item.id))
+                      .map(symptom => (
+                        <View
+                          key={`fav-${symptom.id}`}
+                          style={[styles.customizeItem, { borderColor: theme.border }]}
+                        >
+                          <View style={styles.customizeItemLeft}>
+                            <Feather name={symptom.icon as any} size={18} color={cat.color} />
+                            <View>
+                              <ThemedText>{symptom.name}</ThemedText>
+                              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                                {cat.name}
+                              </ThemedText>
+                            </View>
+                          </View>
+                          <Pressable onPress={() => handleSymptomLongPress(symptom)} testID={`unfav-${symptom.id}`}>
+                            <Feather name="star" size={20} color={theme.tertiary} />
+                          </Pressable>
+                        </View>
+                      ))
+                  )
+                )}
+              </View>
+            </ScrollView>
           </ThemedView>
         </View>
       </Modal>
@@ -524,5 +686,47 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
     marginBottom: Spacing.xl,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  settingsButton: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  customizeSection: {
+    marginBottom: Spacing.lg,
+  },
+  customizeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  customizeItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    flex: 1,
+  },
+  emptyHidden: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+  },
+  hideButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
   },
 });

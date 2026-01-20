@@ -89,10 +89,12 @@ server/
 - Health modules for PCOS, Endometriosis, Sexual Health, Cervical Screening
 - AI Health Assistant chat interface
 - Comprehensive symptom tracking system (January 2026):
-  - 15 symptom categories with 200+ symptoms
+  - 15 symptom categories with 200+ symptoms covering physical, emotional, cognitive, metabolic, reproductive, pain-mapping, PCOS-specific, endometriosis-specific, environmental, and psychosocial symptoms
   - SeveritySlider with lotus petal-inspired design
   - BodyMap with SVG silhouette and 17 touchable pain regions
   - TagSelector for context tracking (including South African-specific tags)
-  - CheckInScreen with favorites quick access
+  - CheckInScreen with favorites quick access and customization modal
   - PatternsScreen with calendar heatmap and trend analysis
   - Local insights engine for pattern detection (non-diagnostic)
+  - Symptom customization: hide/restore symptoms, favorites via long-press, category reordering
+  - Free-text notes support for detailed symptom context

@@ -1,0 +1,77 @@
+You are extending an existing cross-platform mobile app called “Olanna Health” (women’s health hub for African—especially South African—women). The app already has: cycle tracking, PCOS & endometriosis modules, STI + Pap smear reminders, privacy-first storage, and a Lotus Flower cycle visualization (menstruation=closed bud, follicular=opening bud, ovulation=full bloom, luteal=petals closing/falling). 
+
+TASK: Build a Stardust-level symptom & experience tracker (and better) with UI visuals that match the ENTIRE app aesthetic: “science meets softness”, minimalist, feminine, calm, premium; earthy neutrals + soft blushes + warm browns + muted gold accents; organic shapes; gentle gradients; subtle moonlight/cosmic glow; LOTUS motif consistent across screens; no harsh neon; excellent readability; accessibility-friendly contrast; light and dark mode.
+
+1) Symptom Tracker System (Core Requirements)
+- Create a structured symptom system with categories + items + icons + severity + notes.
+- Reminder: user should be able to customize: pin favorites, hide symptoms, add custom symptoms, reorder categories.
+- Input types: 
+  a) quick-tap toggle (present/absent)
+  b) severity slider 0–5
+  c) optional free-text note
+  d) optional tags (e.g., “work stress”, “heat”, “dehydration”, “load shedding”, “travel”, “poor sleep”)
+- Add “Body Map Pain” feature: a simple front/back female silhouette or pelvic-focused map; user taps a region and logs pain type + severity + duration + triggers.
+
+2) Symptom Categories & Items (Build all of these)
+A. Core Cycle & Hormonal
+- cramps, pelvic heaviness, back pain (upper/lower), breast tenderness/swelling, headaches/migraines, nausea, bloating/water retention, fatigue (mild/moderate/extreme), dizziness, appetite changes
+B. Flow
+- spotting, light/medium/heavy flow, clots (small/large), color (bright red/dark red/brown), irregular bleeding
+C. Emotional
+- calm/grounded, irritable, anxious, low mood/sadness, emotional sensitivity, anger/rage, tearfulness, emotional numbness
+D. Cognitive
+- brain fog, mental clarity, poor concentration, racing thoughts, decision fatigue, creativity surge, motivation boost/drop
+E. Energy & Rhythm
+- physical energy, social energy, need for rest, need for solitude, desire to move, sleep quality, insomnia/early waking, afternoon crash, overstimulation sensitivity
+F. Sexual & Reproductive
+- libido up/down, pain during sex, vaginal dryness, sensitivity/discomfort, desire for intimacy (emotional vs physical)
+G. Vaginal/Cervical
+- cervical mucus (dry/sticky/creamy/egg-white), itching, burning, unusual discharge, odor changes
+H. Gut/Metabolic/Inflammatory
+- constipation, diarrhea, IBS-like symptoms, bloating after meals, sugar cravings, salt cravings, nausea with food, reflux, food sensitivity reactions
+I. Skin/Hair (PCOS-relevant)
+- acne (jawline/cheeks/back/chest), oily skin, dry skin, hair thinning/shedding, excess facial hair, darkened patches (neck/underarms), brittle nails, hives/sensitivity
+J. Pain Mapping (Endometriosis-relevant)
+- left/right ovary pain, deep pelvic pain, rectal pain, pain radiating down legs, hip pain, pain during bowel movements, pain before/after period, pain after sex
+K. PCOS Module (extra tracking)
+- irregular cycles, missed ovulation, long cycles >35 days, sudden weight changes, insulin-resistance symptoms, reactive hypoglycemia, fatigue after meals, blood-sugar mood swings
+L. Endometriosis Module (extra tracking)
+- chronic pelvic pain, pain outside menstruation, pain severity score, medication effectiveness, stress-triggered pain, movement-triggered pain, flare duration
+M. Immune/Stress Indicators
+- frequent infections, slow recovery, stress flare-ups, “inflamed/heavy” feeling, heat intolerance, cold sensitivity
+N. Environmental/Contextual (Olanna differentiator)
+- weather sensitivity, heat exposure, dehydration, physical labor, commute stress, load-shedding disruption, financial stress, caregiving burden
+O. Spiritual/Intuitive (optional toggle)
+- feeling intuitive, need for reflection, desire for grounding/ritual, feeling disconnected, feeling aligned, emotional release days
+
+3) Visuals + UI (must match Olanna Health aesthetic)
+- Each category gets a small, elegant icon set (line icons, soft rounded edges).
+- Use consistent design tokens: typography, spacing, corner radius, shadows (soft), and muted palette. 
+- Create a “Symptom Check-in” screen that feels like Stardust (playful, modern) + Lively (clean, dashboard-like) but aligned with Olanna’s softer premium feel.
+- Create visuals:
+  - a “Daily Check-in” card with lotus/moon accent
+  - category chips/pills with subtle gradient
+  - severity slider styled like a lotus petal fill
+  - body map with gentle highlight states (no harsh red); show pain as soft glow points
+- Add data visualizations:
+  - “Patterns” screen: calendar heatmap + trend lines across cycles (cramps, mood, acne, pain, sleep)
+  - “Cycle Phase Insight” screen: show current lotus stage + top symptoms commonly logged in this phase for this user
+- Ensure all visuals are generated as SVG (preferred) or vector components. No heavy images. Provide fallback static assets for offline.
+
+4) Smart Insights (privacy-first)
+- Build local-only pattern detection:
+  - show gentle insights like: “You often report bloating 2–3 days before your period” or “Pelvic pain spikes mid-luteal phase.”
+- Never diagnose. Use supportive wording + “Consider speaking to a clinician” suggestions.
+- For PCOS/endometriosis modules, show “red flags” education (e.g., severe pain, heavy bleeding, frequent spotting) with “Seek care” guidance.
+
+5) Engineering Requirements
+- Keep architecture modular: symptom schema in a single file, UI driven by configuration.
+- Store logs in encrypted local storage; sync optional and off by default.
+- Include unit tests for symptom schema + logging + insights logic.
+- Add seed data and a “Demo mode” with sample logs.
+
+OUTPUT
+- Implement the entire symptom tracker feature end-to-end:
+  - data model + UI screens + icons/visuals + pattern screens + insights
+  - integrate into bottom navigation as “Check-in”
+  - ensure it matches the existing Olanna Health look & feel and lotus/lunar motif.
