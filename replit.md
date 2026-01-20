@@ -74,7 +74,7 @@ server/
 - Evidence-based health information following South African guidelines (SAHCS, SASOG)
 - "Science meets Softness" aesthetic with soft pastel colors (pink, lavender, mint, peach)
 - Privacy-focused with local data storage and trust indicators
-- Accessibility with dark mode support
+- Light mode only (no dark mode)
 - Lotus flower visualization with option to switch to cycle wheel
 - African-centered design with subtle cultural patterns
 
