@@ -1,0 +1,39 @@
+You are working on the “Olanna Health” cycle screen. The current lotus flower graphic in the center looks busy and not minimal. Revamp it to be cute, minimalistic, and modern, while keeping the “Day of Cycle” number as the primary focus.
+
+Goal
+	•	Replace the existing lotus illustration with a simple 5–6 petal rounded lotus icon (flat design, no texture, no complex layers).
+	•	The lotus must feel calm, friendly, and “cute” (rounded teardrop petals, soft symmetry).
+	•	Keep the center Day number large and readable.
+	•	The lotus should not overpower the UI; it’s a supporting accent.
+
+Design Specs
+	•	Lotus: 5 petals (1 center + 2 left + 2 right) OR 6 petals total. Petals are rounded teardrops (no sharp points).
+	•	Flat fills only (no gradients, no patterns). Optional: a very subtle shadow at 5–10% opacity.
+	•	Use one accent color per phase:
+	•	Menstrual: soft blush (#E8A2B0)
+	•	Follicular: peach (#F4C6A6)
+	•	Ovulation: mint/sage (#A7D7C5)
+	•	Luteal: lavender (#C7B6E8)
+	•	Outer ring (cycle progress) should use the same phase color at ~20–30% opacity.
+	•	Background behind the lotus must be plain (remove any wavy texture/pattern inside the circle).
+	•	Center text:
+	•	Large number (e.g., 48–64px depending on device)
+	•	Label “DAY OF CYCLE” smaller (12–14px), muted gray (#6B6B6B)
+	•	Ensure contrast meets accessibility (AA if possible).
+
+Implementation Requirements
+	•	Identify where the lotus is currently rendered (SVG/Canvas/image).
+	•	Replace it with a new SVG component (preferred) called MinimalLotus.
+	•	MinimalLotus should accept props: color, size, and optional opacity.
+	•	Ensure it scales cleanly across screen sizes (no blur).
+	•	Do not change business logic for cycle calculations—only the visuals.
+	•	Keep existing layout spacing, but adjust padding if the new lotus needs more breathing room.
+
+Deliverables
+	1.	Create MinimalLotus (SVG) component with rounded petals.
+	2.	Replace old lotus usage with the new component.
+	3.	Update styles to remove patterns/extra layers in the center circle.
+	4.	Verify the “Day of Cycle” number remains centered and readable.
+	5.	Provide the exact files changed and a short summary of what you updated.
+
+Proceed by first locating the current lotus asset/component and show me where it lives, then implement the replacement.

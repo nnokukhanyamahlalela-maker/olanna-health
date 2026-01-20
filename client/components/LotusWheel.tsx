@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import Animated, {
   useSharedValue,
@@ -9,7 +9,7 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
-import Svg, { Path, Circle, Defs, RadialGradient, Stop, G, Ellipse } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -17,21 +17,24 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { CycleData } from "@/lib/storage";
 
 const { width: screenWidth } = Dimensions.get("window");
-const WHEEL_SIZE = Math.min(screenWidth - 64, 300);
+const WHEEL_SIZE = Math.min(screenWidth - 64, 280);
 
 interface LotusWheelProps {
   cycleData: CycleData;
   showReminders?: boolean;
 }
 
-const AnimatedG = Animated.createAnimatedComponent(G);
+const PHASE_COLORS = {
+  menstrual: "#E8A2B0",
+  follicular: "#F4C6A6",
+  ovulation: "#A7D7C5",
+  luteal: "#C7B6E8",
+};
 
 export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
   const { theme } = useTheme();
 
   const breatheValue = useSharedValue(0);
-  const glowValue = useSharedValue(0);
-  const rippleValue = useSharedValue(0);
 
   useEffect(() => {
     breatheValue.value = withRepeat(
@@ -42,25 +45,10 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
       -1,
       false
     );
-
-    glowValue.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.5, { duration: 2000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      false
-    );
-
-    rippleValue.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: Easing.out(Easing.ease) }),
-      -1,
-      false
-    );
   }, []);
 
   const breatheStyle = useAnimatedStyle(() => {
-    const scale = interpolate(breatheValue.value, [0, 1], [0.95, 1.02]);
+    const scale = interpolate(breatheValue.value, [0, 1], [0.98, 1.02]);
     return {
       transform: [{ scale }],
     };
@@ -80,101 +68,85 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
   };
 
   const getPhaseColor = (phase: CycleData["phase"]) => {
-    switch (phase) {
-      case "menstrual":
-        return theme.phaseMenstrual;
-      case "follicular":
-        return theme.phaseFollicular;
-      case "ovulation":
-        return theme.phaseOvulation;
-      case "luteal":
-        return theme.phaseLuteal;
-    }
+    return PHASE_COLORS[phase];
   };
 
-  const getPetalOpacity = (petalPhase: CycleData["phase"]) => {
-    return cycleData.phase === petalPhase ? 1 : 0.4;
-  };
-
+  const phaseColor = getPhaseColor(cycleData.phase);
   const centerX = WHEEL_SIZE / 2;
   const centerY = WHEEL_SIZE / 2;
-  const petalLength = WHEEL_SIZE * 0.35;
-  const petalWidth = WHEEL_SIZE * 0.15;
+  const lotusSize = WHEEL_SIZE * 0.55;
 
-  const createPetalPath = (angle: number, length: number, width: number) => {
+  const createRoundedPetal = (angle: number, length: number, width: number) => {
     const rad = (angle * Math.PI) / 180;
     const tipX = centerX + Math.cos(rad) * length;
     const tipY = centerY + Math.sin(rad) * length;
+    
     const leftRad = ((angle - 90) * Math.PI) / 180;
     const rightRad = ((angle + 90) * Math.PI) / 180;
+    
     const baseOffset = width * 0.3;
     const leftX = centerX + Math.cos(leftRad) * baseOffset;
     const leftY = centerY + Math.sin(leftRad) * baseOffset;
     const rightX = centerX + Math.cos(rightRad) * baseOffset;
     const rightY = centerY + Math.sin(rightRad) * baseOffset;
-    const ctrl1X = centerX + Math.cos(rad) * (length * 0.5) + Math.cos(leftRad) * (width * 0.6);
-    const ctrl1Y = centerY + Math.sin(rad) * (length * 0.5) + Math.sin(leftRad) * (width * 0.6);
-    const ctrl2X = centerX + Math.cos(rad) * (length * 0.5) + Math.cos(rightRad) * (width * 0.6);
-    const ctrl2Y = centerY + Math.sin(rad) * (length * 0.5) + Math.sin(rightRad) * (width * 0.6);
+    
+    const ctrl1X = centerX + Math.cos(rad) * (length * 0.5) + Math.cos(leftRad) * (width * 0.5);
+    const ctrl1Y = centerY + Math.sin(rad) * (length * 0.5) + Math.sin(leftRad) * (width * 0.5);
+    const ctrl2X = centerX + Math.cos(rad) * (length * 0.5) + Math.cos(rightRad) * (width * 0.5);
+    const ctrl2Y = centerY + Math.sin(rad) * (length * 0.5) + Math.sin(rightRad) * (width * 0.5);
 
-    return `M ${leftX} ${leftY} Q ${ctrl1X} ${ctrl1Y} ${tipX} ${tipY} Q ${ctrl2X} ${ctrl2Y} ${rightX} ${rightY} Z`;
+    return `M ${leftX} ${leftY} 
+            Q ${ctrl1X} ${ctrl1Y} ${tipX} ${tipY}
+            Q ${ctrl2X} ${ctrl2Y} ${rightX} ${rightY} 
+            Z`;
   };
 
-  const petals = useMemo(() => {
-    const phases: { phase: CycleData["phase"]; angle: number }[] = [
-      { phase: "menstrual", angle: -90 },
-      { phase: "follicular", angle: 0 },
-      { phase: "ovulation", angle: 90 },
-      { phase: "luteal", angle: 180 },
-    ];
+  const petalLength = lotusSize * 0.45;
+  const petalWidth = lotusSize * 0.25;
 
-    return phases.map(({ phase, angle }) => ({
-      phase,
-      path: createPetalPath(angle, petalLength, petalWidth),
-      color: getPhaseColor(phase),
-      opacity: getPetalOpacity(phase),
-    }));
-  }, [cycleData.phase, theme]);
+  const petals = [
+    { angle: -90, scale: 1, opacity: 1 },
+    { angle: -50, scale: 0.8, opacity: 0.7 },
+    { angle: -130, scale: 0.8, opacity: 0.7 },
+    { angle: 30, scale: 0.65, opacity: 0.5 },
+    { angle: 150, scale: 0.65, opacity: 0.5 },
+  ];
 
-  const secondaryPetals = useMemo(() => {
-    const angles = [45, 135, 225, 315];
-    return angles.map((angle) => ({
-      path: createPetalPath(angle, petalLength * 0.7, petalWidth * 0.7),
-      color: theme.lotusPetal,
-    }));
-  }, [theme]);
+  const progress = cycleData.currentDay / cycleData.cycleLength;
+  const progressRadius = WHEEL_SIZE * 0.46;
 
   return (
     <View style={styles.container}>
-      <View style={[styles.waterBackground, { backgroundColor: theme.waterRipple }]}>
-        <Animated.View style={[styles.ripple, { borderColor: theme.primary + "20" }]} />
-      </View>
-
       <Animated.View style={[styles.lotusContainer, breatheStyle]}>
-        <View style={[styles.glowRing, { backgroundColor: theme.lotusGlow }]} />
-
         <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
-          <Defs>
-            <RadialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={theme.lotusCenter} stopOpacity="1" />
-              <Stop offset="100%" stopColor={theme.tertiary} stopOpacity="0.8" />
-            </RadialGradient>
-          </Defs>
+          <Circle
+            cx={centerX}
+            cy={centerY}
+            r={progressRadius}
+            fill="none"
+            stroke={phaseColor}
+            strokeOpacity={0.2}
+            strokeWidth={6}
+          />
+          
+          <Circle
+            cx={centerX}
+            cy={centerY}
+            r={progressRadius}
+            fill="none"
+            stroke={phaseColor}
+            strokeOpacity={0.6}
+            strokeWidth={6}
+            strokeDasharray={`${progress * 2 * Math.PI * progressRadius} ${2 * Math.PI * progressRadius}`}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${centerX} ${centerY})`}
+          />
 
-          {secondaryPetals.map((petal, index) => (
+          {petals.map((petal, index) => (
             <Path
-              key={`secondary-${index}`}
-              d={petal.path}
-              fill={petal.color}
-              opacity={0.3}
-            />
-          ))}
-
-          {petals.map((petal) => (
-            <Path
-              key={petal.phase}
-              d={petal.path}
-              fill={petal.color}
+              key={index}
+              d={createRoundedPetal(petal.angle, petalLength * petal.scale, petalWidth * petal.scale)}
+              fill={phaseColor}
               opacity={petal.opacity}
             />
           ))}
@@ -182,38 +154,26 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
           <Circle
             cx={centerX}
             cy={centerY}
-            r={WHEEL_SIZE * 0.12}
-            fill="url(#centerGradient)"
-          />
-
-          <Circle
-            cx={centerX}
-            cy={centerY}
-            r={WHEEL_SIZE * 0.06}
-            fill={theme.lotusCenter}
+            r={lotusSize * 0.1}
+            fill={phaseColor}
+            opacity={0.8}
           />
         </Svg>
 
         <View style={styles.centerContent}>
-          <ThemedText type="h1" style={[styles.dayNumber, { color: theme.text }]}>
+          <ThemedText style={[styles.dayNumber, { color: theme.text }]}>
             {cycleData.currentDay}
           </ThemedText>
-          <ThemedText type="caption" style={[styles.dayLabel, { color: theme.textSecondary }]}>
-            Day of Cycle
+          <ThemedText style={[styles.dayLabel, { color: "#6B6B6B" }]}>
+            DAY OF CYCLE
           </ThemedText>
         </View>
       </Animated.View>
 
-      <View style={[styles.phaseLabel, { backgroundColor: getPhaseColor(cycleData.phase) + "20" }]}>
-        <View style={[styles.phaseDot, { backgroundColor: getPhaseColor(cycleData.phase) }]} />
-        <ThemedText type="body" style={[styles.phaseText, { color: getPhaseColor(cycleData.phase) }]}>
+      <View style={[styles.phaseLabel, { backgroundColor: phaseColor + "30" }]}>
+        <View style={[styles.phaseDot, { backgroundColor: phaseColor }]} />
+        <ThemedText type="body" style={[styles.phaseText, { color: phaseColor }]}>
           {getPhaseLabel(cycleData.phase)}
-        </ThemedText>
-      </View>
-
-      <View style={styles.symbolismHint}>
-        <ThemedText type="caption" style={[styles.symbolismText, { color: theme.textSecondary }]}>
-          The lotus rises through muddy water to bloom beautifully—symbolizing resilience and renewal in your cycle
         </ThemedText>
       </View>
     </View>
@@ -223,22 +183,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    gap: Spacing.lg,
-  },
-  waterBackground: {
-    position: "absolute",
-    width: WHEEL_SIZE + 40,
-    height: WHEEL_SIZE + 40,
-    borderRadius: (WHEEL_SIZE + 40) / 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  ripple: {
-    position: "absolute",
-    width: WHEEL_SIZE + 60,
-    height: WHEEL_SIZE + 60,
-    borderRadius: (WHEEL_SIZE + 60) / 2,
-    borderWidth: 2,
+    gap: Spacing.xl,
   },
   lotusContainer: {
     width: WHEEL_SIZE,
@@ -246,27 +191,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  glowRing: {
-    position: "absolute",
-    width: WHEEL_SIZE * 0.7,
-    height: WHEEL_SIZE * 0.7,
-    borderRadius: WHEEL_SIZE * 0.35,
-  },
   centerContent: {
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
   },
   dayNumber: {
-    fontSize: 36,
+    fontSize: 52,
     fontWeight: "700",
-    lineHeight: 42,
+    lineHeight: 58,
+    fontFamily: "Nunito_700Bold",
   },
   dayLabel: {
-    fontSize: 11,
+    fontSize: 12,
     textTransform: "uppercase",
-    letterSpacing: 1,
-    marginTop: 2,
+    letterSpacing: 1.5,
+    marginTop: 4,
+    fontFamily: "Nunito_400Regular",
   },
   phaseLabel: {
     flexDirection: "row",
@@ -283,14 +224,5 @@ const styles = StyleSheet.create({
   },
   phaseText: {
     fontWeight: "600",
-  },
-  symbolismHint: {
-    paddingHorizontal: Spacing.xl,
-    maxWidth: 280,
-  },
-  symbolismText: {
-    textAlign: "center",
-    fontStyle: "italic",
-    lineHeight: 18,
   },
 });
