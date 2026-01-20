@@ -47,49 +47,44 @@ export default function AIChatScreen() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [languageMode, setLanguageMode] = useState<LanguageMode>("auto");
-  const [lastDetectedLanguage, setLastDetectedLanguage] = useState<DetectedLanguage>("en");
+  const [lastDetectedLang, setLastDetectedLang] = useState<DetectedLanguage>("en");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    loadLanguageMode();
+    const loadStoredMode = async () => {
+      try {
+        const v = await AsyncStorage.getItem(LANGUAGE_MODE_KEY);
+        if (v === "en" || v === "zu" || v === "auto") {
+          setLanguageMode(v);
+        }
+      } catch (e) {}
+      setIsInitialized(true);
+    };
+    loadStoredMode();
   }, []);
 
   useEffect(() => {
-    const welcomeMessage: Message = {
-      id: "welcome",
-      role: "assistant",
-      content: getWelcomeMessage(languageMode === "auto" ? lastDetectedLanguage : languageMode === "zu" ? "zu" : "en"),
-      timestamp: new Date(),
-    };
+    if (isInitialized) {
+      AsyncStorage.setItem(LANGUAGE_MODE_KEY, languageMode).catch(() => {});
+    }
+  }, [languageMode, isInitialized]);
+
+  useEffect(() => {
     if (messages.length === 0) {
-      setMessages([welcomeMessage]);
+      const lang = languageMode === "auto" ? lastDetectedLang : languageMode === "zu" ? "zu" : "en";
+      setMessages([{
+        id: "welcome",
+        role: "assistant",
+        content: getWelcomeMessage(lang),
+        timestamp: new Date(),
+      }]);
     }
   }, [languageMode]);
 
-  const loadLanguageMode = async () => {
-    try {
-      const saved = await AsyncStorage.getItem(LANGUAGE_MODE_KEY);
-      if (saved && (saved === "auto" || saved === "en" || saved === "zu")) {
-        setLanguageMode(saved as LanguageMode);
-      }
-    } catch (e) {
-      console.log("Failed to load language mode");
-    }
-  };
-
-  const saveLanguageMode = async (mode: LanguageMode) => {
-    try {
-      await AsyncStorage.setItem(LANGUAGE_MODE_KEY, mode);
-      setLanguageMode(mode);
-    } catch (e) {
-      console.log("Failed to save language mode");
-    }
-  };
-
   const cycleLanguageMode = () => {
     const modes: LanguageMode[] = ["auto", "en", "zu"];
-    const currentIndex = modes.indexOf(languageMode);
-    const nextMode = modes[(currentIndex + 1) % modes.length];
-    saveLanguageMode(nextMode);
+    const nextMode = modes[(modes.indexOf(languageMode) + 1) % modes.length];
+    setLanguageMode(nextMode);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -99,8 +94,8 @@ export default function AIChatScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const userText = inputText.trim();
-    const detected = detectLanguage(userText, lastDetectedLanguage);
-    setLastDetectedLanguage(detected);
+    const detected = detectLanguage(userText, lastDetectedLang);
+    setLastDetectedLang(detected);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -229,7 +224,7 @@ export default function AIChatScreen() {
         <View style={styles.disclaimerRow}>
           <Feather name="info" size={14} color={theme.textSecondary} />
           <ThemedText type="caption" style={styles.disclaimerText}>
-            {languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+            {languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
               ? "Lo msizi we-AI unikeza ulwazi olujwayelekile kuphela."
               : "This AI provides general health information only."}
           </ThemedText>
@@ -241,7 +236,7 @@ export default function AIChatScreen() {
         >
           <Feather name="globe" size={14} color={theme.primary} />
           <ThemedText type="caption" style={[styles.languageText, { color: theme.primary }]}>
-            {languageLabel(languageMode, lastDetectedLanguage)}
+            {languageLabel(languageMode, lastDetectedLang)}
           </ThemedText>
         </Pressable>
       </View>
@@ -264,7 +259,7 @@ export default function AIChatScreen() {
         <View style={styles.loadingContainer}>
           <View style={[styles.loadingBubble, { backgroundColor: theme.backgroundDefault }]}>
             <ThemedText type="small" style={styles.loadingText}>
-              {languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+              {languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
                 ? "Ngicabanga..."
                 : "Thinking..."}
             </ThemedText>
@@ -290,7 +285,7 @@ export default function AIChatScreen() {
           <TextInput
             style={[styles.input, { color: theme.text }]}
             placeholder={
-              languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+              languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
                 ? "Buza umbuzo wezempilo..."
                 : "Ask a health question..."
             }
