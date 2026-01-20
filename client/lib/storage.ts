@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   HEALTH_GOALS: "@olanna_health_goals",
   SCREENINGS: "@olanna_screenings",
   ONBOARDING_COMPLETE: "@olanna_onboarding_complete",
+  PREFERENCES: "@olanna_preferences",
 };
 
 export interface UserProfile {
@@ -138,6 +139,27 @@ export const storage = {
 
   async clearAllData(): Promise<void> {
     await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
+  },
+
+  async getPreference(key: string): Promise<string | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.PREFERENCES);
+      const prefs = data ? JSON.parse(data) : {};
+      return prefs[key] ?? null;
+    } catch {
+      return null;
+    }
+  },
+
+  async setPreference(key: string, value: string): Promise<void> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.PREFERENCES);
+      const prefs = data ? JSON.parse(data) : {};
+      prefs[key] = value;
+      await AsyncStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(prefs));
+    } catch {
+      console.error("Failed to save preference");
+    }
   },
 };
 

@@ -1,0 +1,37 @@
+e have already built a cross‑platform femtech app called Olanna Health. It tracks menstrual cycles, sexual and reproductive health, and includes PCOS/endometriosis modules, STI/Pap‑smear reminders, community support and a privacy‑first design based on the previous prompts. In a subsequent enhancement we added a lotus flower metaphor to visually represent the phases of the menstrual cycle. Your task now is to refine the app design so that it fully reflects Olanna Health’s aesthetic while maintaining the lotus‑cycle visualisation and the mixed Stardust and Lively inspirations.
+
+Brand aesthetic guidelines
+
+Science meets softness – Olanna Health positions itself as a women’s health hub where evidence‑based medicine meets gentle, nurturing care. The brand aesthetic should therefore balance clinical credibility with warmth and approachability. Use clean, modern typography reminiscent of health‑tech interfaces, but pair it with rounded edges, organic shapes and a colour palette that conveys calm and softness (e.g., warm earth tones, pastel pinks, coral, sage green, soft lavender). Avoid sterile white; instead, use off‑whites or light neutral backgrounds to reduce glare and convey comfort.
+
+African‑centred design – The brand serves African women, so incorporate subtle patterns, textures or motifs inspired by African art and textiles without resorting to clichés. Use diverse illustrations or silhouettes of African women in onboarding or informational screens to foster representation. Ensure text is available in multiple South African languages (English, isiZulu, isiXhosa, Afrikaans) and that the UI layouts support right‑to‑left languages if needed.
+
+Minimalist yet expressive – Maintain a minimalist layout to keep information digestible, but add expressive touches—hand‑drawn icons, gentle gradients, and micro‑animations—to bring warmth. Employ soft shadows and layered card interfaces to create depth without clutter. Colour‑code sections (cycle phases, PCOS/endometriosis modules, STI reminders) consistently with the brand palette so users can navigate intuitively.
+
+Privacy and trust visual cues – Since Olanna champions data privacy, the design should reinforce trust. Incorporate discreet lock icons near personal data inputs and use calming colours (e.g., muted blues or greens) for sensitive screens (health history, sexual health prompts). Include brief notes or tooltips explaining data encryption and consent in user‑friendly language.
+
+Lotus‑cycle integration
+
+Harmonise the lotus with the brand palette – Adapt the animated lotus visualisation to use Olanna’s warm, earthy colours. For example, depict menstruation with soft burgundy petals, the follicular phase with fresh sage green, ovulation with radiant golden yellow, and the luteal phase with muted coral or terracotta. Ensure these colours complement the cosmic‑lunar backgrounds from the Stardust influence and the clean dashboards from Lively.
+
+Blend cosmic and natural motifs – Retain the subtle starfields and moonlight glows behind the lotus to honour the Stardust aesthetic, but incorporate organic textures (e.g., water ripples or woven patterns) in the base layers to echo African craft traditions and connect the lotus to the pond environment. Use the same font family across all screens to unify the experience.
+
+Responsive and accessible – Offer both light and dark modes with colour adjustments that preserve Olanna’s aesthetic. Provide high‑contrast options for visually impaired users and ensure animations can be toggled off. Include a simplified static lotus icon for users on low‑resource devices or those who prefer minimal visuals.
+
+Technical implementation
+
+Reusable brand theme module – Create a theme configuration file containing colour variables (primary, secondary, accent, neutral), typography styles (headers, body text, captions), and spacing values that reflect Olanna’s aesthetic. Apply this theme across all components, including the lotus animation, buttons, cards and charts. Use Flutter’s ThemeData or React Native’s theming libraries for consistent styling.
+
+Animated lotus component – Continue using vector or Lottie animations for the lotus, but refactor the component to accept colour parameters from the theme. Expose props for cycle length, current day and ovulation date so the animation can adjust stage durations. Include optional overlays for reminders (e.g., small icons on petals to indicate upcoming Pap smear or STI screening).
+
+Cultural content module – Add a content section explaining the symbolism of the lotus in an African context (purity rising from muddy water, resilience, rebirth). Localise this text and allow users to skip or revisit it later. Provide an opt‑out toggle for users who prefer not to use the lotus metaphor; in that case, display a traditional cycle wheel styled with Olanna’s brand colours.
+
+User experience enhancements
+
+Onboarding – Introduce users to Olanna’s mission and aesthetic with a series of short, illustrated screens. Explain how the app blends science with softness and respects African heritage. Present the option to choose between the lotus view and the standard cycle wheel.
+
+Personalisation – Allow users to select accent colours from a subset of the brand palette to personalise their dashboard while staying within brand guidelines. Offer themes like “Earth”, “Sunrise”, “Moonlight” that adjust the lotus colours, cosmic backgrounds and UI accents.
+
+Integrate reminders gently – Use gentle haptic feedback and soft colour flashes on the lotus or dashboard cards to notify users of upcoming screenings or health actions. Avoid harsh alerts; align the notifications with Olanna’s calm aesthetic.
+
+By following these instructions, Replit will enhance the existing Olanna Health app with a lotus‑cycle visualisation that not only educates and engages users but also fully embodies the brand’s warm, science‑meets‑softness aesthetic and African‑centred identity.

@@ -1,58 +1,3 @@
-import { Platform } from "react-native";
-
-export const Colors = {
-  light: {
-    text: "#111827",
-    textSecondary: "#6B7280",
-    buttonText: "#FFFFFF",
-    tabIconDefault: "#9CA3AF",
-    tabIconSelected: "#8B5CF6",
-    link: "#8B5CF6",
-    backgroundRoot: "#F9FAFB",
-    backgroundDefault: "#FFFFFF",
-    backgroundSecondary: "#F3F4F6",
-    backgroundTertiary: "#E5E7EB",
-    primary: "#8B5CF6",
-    secondary: "#14B8A6",
-    tertiary: "#F59E0B",
-    success: "#10B981",
-    warning: "#F59E0B",
-    error: "#EF4444",
-    info: "#3B82F6",
-    phaseMenstrual: "#EF4444",
-    phaseFollicular: "#8B5CF6",
-    phaseOvulation: "#F59E0B",
-    phaseLuteal: "#14B8A6",
-    border: "#E5E7EB",
-    cardShadow: "rgba(0, 0, 0, 0.05)",
-  },
-  dark: {
-    text: "#F9FAFB",
-    textSecondary: "#D1D5DB",
-    buttonText: "#FFFFFF",
-    tabIconDefault: "#6B7280",
-    tabIconSelected: "#A78BFA",
-    link: "#A78BFA",
-    backgroundRoot: "#1F2937",
-    backgroundDefault: "#374151",
-    backgroundSecondary: "#4B5563",
-    backgroundTertiary: "#6B7280",
-    primary: "#A78BFA",
-    secondary: "#2DD4BF",
-    tertiary: "#FBBF24",
-    success: "#34D399",
-    warning: "#FBBF24",
-    error: "#F87171",
-    info: "#60A5FA",
-    phaseMenstrual: "#F87171",
-    phaseFollicular: "#A78BFA",
-    phaseOvulation: "#FBBF24",
-    phaseLuteal: "#2DD4BF",
-    border: "#4B5563",
-    cardShadow: "rgba(0, 0, 0, 0.3)",
-  },
-};
-
 export const Spacing = {
   xs: 4,
   sm: 8,
@@ -62,111 +7,193 @@ export const Spacing = {
   "2xl": 24,
   "3xl": 32,
   "4xl": 40,
-  "5xl": 48,
-  "6xl": 64,
-  inputHeight: 48,
-  buttonHeight: 52,
-};
+  inputHeight: 52,
+} as const;
 
 export const BorderRadius = {
-  xs: 8,
-  sm: 12,
-  md: 16,
-  lg: 20,
+  sm: 6,
+  md: 12,
+  lg: 16,
   xl: 24,
-  "2xl": 32,
-  "3xl": 40,
-  full: 9999,
-};
+  full: 999,
+} as const;
 
-export const Typography = {
-  h1: {
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "700" as const,
-    fontFamily: "Nunito_700Bold",
-  },
-  h2: {
-    fontSize: 24,
-    lineHeight: 32,
-    fontWeight: "700" as const,
-    fontFamily: "Nunito_700Bold",
-  },
-  h3: {
-    fontSize: 20,
-    lineHeight: 28,
-    fontWeight: "600" as const,
-    fontFamily: "Nunito_600SemiBold",
-  },
-  h4: {
-    fontSize: 18,
-    lineHeight: 26,
-    fontWeight: "600" as const,
-    fontFamily: "Nunito_600SemiBold",
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "400" as const,
-  },
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "400" as const,
-  },
-  caption: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "400" as const,
-  },
-  link: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "500" as const,
-  },
-};
+export const Fonts = {
+  heading: "Nunito_700Bold",
+  body: "Nunito_400Regular",
+  semibold: "Nunito_600SemiBold",
+  mono: "SpaceMono-Regular",
+} as const;
 
 export const Shadows = {
   sm: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: 3,
     elevation: 1,
   },
   md: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   lg: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+} as const;
+
+const OlannaColors = {
+  burgundy: "#8B3A4C",
+  burgundyLight: "#A85D6F",
+  burgundyDark: "#6B2A3C",
+  sage: "#7BA387",
+  sageLight: "#9BC4A7",
+  sageDark: "#5B8367",
+  golden: "#D4A84B",
+  goldenLight: "#E8C97A",
+  goldenDark: "#B48B2B",
+  coral: "#C4826B",
+  coralLight: "#DBA799",
+  coralDark: "#A4624B",
+  lavender: "#9B8AA8",
+  lavenderLight: "#BDB0C8",
+  lavenderDark: "#7B6A88",
+  cream: "#FDF8F3",
+  warmWhite: "#FAF7F4",
+  earthBrown: "#5C4A42",
+  dustyRose: "#D4A5A5",
+  terracotta: "#C9735B",
+  sand: "#E8DDD4",
+};
+
+export const ThemePresets = {
+  earth: {
+    name: "Earth",
+    primary: OlannaColors.sage,
+    secondary: OlannaColors.coral,
+    tertiary: OlannaColors.golden,
+    accent: OlannaColors.burgundy,
+    phaseMenstrual: OlannaColors.burgundy,
+    phaseFollicular: OlannaColors.sage,
+    phaseOvulation: OlannaColors.golden,
+    phaseLuteal: OlannaColors.coral,
+  },
+  sunrise: {
+    name: "Sunrise",
+    primary: OlannaColors.coral,
+    secondary: OlannaColors.golden,
+    tertiary: OlannaColors.dustyRose,
+    accent: OlannaColors.terracotta,
+    phaseMenstrual: OlannaColors.burgundy,
+    phaseFollicular: OlannaColors.sage,
+    phaseOvulation: OlannaColors.golden,
+    phaseLuteal: OlannaColors.coral,
+  },
+  moonlight: {
+    name: "Moonlight",
+    primary: OlannaColors.lavender,
+    secondary: OlannaColors.sage,
+    tertiary: OlannaColors.dustyRose,
+    accent: OlannaColors.burgundy,
+    phaseMenstrual: OlannaColors.burgundyLight,
+    phaseFollicular: OlannaColors.sageLight,
+    phaseOvulation: OlannaColors.goldenLight,
+    phaseLuteal: OlannaColors.coralLight,
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    sans: "system-ui",
-    serif: "ui-serif",
-    rounded: "ui-rounded",
-    mono: "ui-monospace",
+export const Colors = {
+  light: {
+    text: OlannaColors.earthBrown,
+    textSecondary: "#7A6B63",
+    background: OlannaColors.cream,
+    backgroundRoot: OlannaColors.warmWhite,
+    backgroundDefault: "#FFFFFF",
+    backgroundSecondary: OlannaColors.sand,
+    border: "#E5DDD5",
+    tint: OlannaColors.sage,
+
+    primary: OlannaColors.sage,
+    primaryLight: OlannaColors.sageLight,
+    primaryDark: OlannaColors.sageDark,
+    secondary: OlannaColors.coral,
+    secondaryLight: OlannaColors.coralLight,
+    tertiary: OlannaColors.golden,
+    tertiaryLight: OlannaColors.goldenLight,
+    accent: OlannaColors.burgundy,
+
+    phaseMenstrual: OlannaColors.burgundy,
+    phaseFollicular: OlannaColors.sage,
+    phaseOvulation: OlannaColors.golden,
+    phaseLuteal: OlannaColors.coral,
+
+    success: "#5B9A6F",
+    warning: "#D4A84B",
+    error: "#C4574A",
+    info: "#6B8DA8",
+
+    tabIconDefault: "#9A8B83",
+    tabIconSelected: OlannaColors.sage,
+
+    buttonText: "#FFFFFF",
+    buttonSecondaryText: OlannaColors.earthBrown,
+
+    cardBackground: "#FFFFFF",
+    cardBorder: "#F0E8E0",
+
+    lotusCenter: OlannaColors.golden,
+    lotusPetal: OlannaColors.dustyRose,
+    lotusGlow: "rgba(212, 168, 75, 0.2)",
+    waterRipple: "rgba(123, 163, 135, 0.15)",
   },
-  default: {
-    sans: "normal",
-    serif: "serif",
-    rounded: "normal",
-    mono: "monospace",
+  dark: {
+    text: "#F5F0EB",
+    textSecondary: "#A89B93",
+    background: "#1A1614",
+    backgroundRoot: "#0F0D0C",
+    backgroundDefault: "#252220",
+    backgroundSecondary: "#2F2A27",
+    border: "#3A3530",
+    tint: OlannaColors.sageLight,
+
+    primary: OlannaColors.sageLight,
+    primaryLight: OlannaColors.sage,
+    primaryDark: OlannaColors.sageLight,
+    secondary: OlannaColors.coralLight,
+    secondaryLight: OlannaColors.coral,
+    tertiary: OlannaColors.goldenLight,
+    tertiaryLight: OlannaColors.golden,
+    accent: OlannaColors.burgundyLight,
+
+    phaseMenstrual: OlannaColors.burgundyLight,
+    phaseFollicular: OlannaColors.sageLight,
+    phaseOvulation: OlannaColors.goldenLight,
+    phaseLuteal: OlannaColors.coralLight,
+
+    success: "#7BC48F",
+    warning: "#E8C97A",
+    error: "#E4776A",
+    info: "#8BADC8",
+
+    tabIconDefault: "#6A5B53",
+    tabIconSelected: OlannaColors.sageLight,
+
+    buttonText: "#1A1614",
+    buttonSecondaryText: "#F5F0EB",
+
+    cardBackground: "#252220",
+    cardBorder: "#3A3530",
+
+    lotusCenter: OlannaColors.goldenLight,
+    lotusPetal: OlannaColors.dustyRose,
+    lotusGlow: "rgba(232, 201, 122, 0.15)",
+    waterRipple: "rgba(155, 196, 167, 0.1)",
   },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  },
-});
+};

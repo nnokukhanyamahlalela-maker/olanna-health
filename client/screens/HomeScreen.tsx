@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { CycleWheel } from "@/components/CycleWheel";
+import { LotusWheel } from "@/components/LotusWheel";
 import { InsightCard } from "@/components/InsightCard";
 import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
+import { AfricanPattern } from "@/components/AfricanPattern";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return date.toLocaleDateString("en-US", options);
-}
 
 function getDaysUntil(dateString: string): number {
   const date = new Date(dateString);
@@ -47,22 +44,22 @@ function getPhaseInsight(phase: CycleData["phase"]): {
     case "menstrual":
       return {
         title: "Rest & Restore",
-        description: "Your body is renewing itself. Focus on gentle movement and nourishing foods.",
+        description: "Your body is renewing itself. Focus on gentle movement and nourishing foods rich in iron.",
       };
     case "follicular":
       return {
         title: "Rising Energy",
-        description: "Great time for new projects and creative thinking. Your energy is building.",
+        description: "Like the lotus rising from the water, your energy is building. Great time for new beginnings.",
       };
     case "ovulation":
       return {
         title: "Peak Vitality",
-        description: "You may feel more social and confident. This is your fertile window.",
+        description: "You are in full bloom. Your energy and confidence are at their highest.",
       };
     case "luteal":
       return {
         title: "Wind Down",
-        description: "Prioritize self-care and completion of tasks. Your body is preparing for the next cycle.",
+        description: "Time to nurture yourself. Your body is preparing for renewal, like a flower closing for the night.",
       };
   }
 }
@@ -78,11 +75,16 @@ export default function HomeScreen() {
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [useLotusView, setUseLotusView] = useState(true);
 
   const loadData = async () => {
     try {
-      const userProfile = await storage.getUserProfile();
+      const [userProfile, lotusPreference] = await Promise.all([
+        storage.getUserProfile(),
+        storage.getPreference("useLotusView"),
+      ]);
       setProfile(userProfile);
+      setUseLotusView(lotusPreference !== "false");
       if (userProfile) {
         const cycle = calculateCycleData(userProfile);
         setCycleData(cycle);
@@ -98,10 +100,22 @@ export default function HomeScreen() {
     loadData();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  const toggleView = async () => {
+    const newValue = !useLotusView;
+    setUseLotusView(newValue);
+    await storage.setPreference("useLotusView", newValue ? "true" : "false");
   };
 
   if (isLoading) {
@@ -117,11 +131,12 @@ export default function HomeScreen() {
   if (!profile || !cycleData) {
     return (
       <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+        <AfricanPattern opacity={0.03} variant="waves" />
         <View style={[styles.emptyContainer, { paddingTop: headerHeight }]}>
           <EmptyState
             image={require("../../assets/images/empty-cycle.png")}
-            title="Start Your Wellness Journey"
-            description="Set up your profile to track your cycle and receive personalized insights."
+            title="Begin Your Wellness Journey"
+            description="Set up your profile to track your cycle and receive personalized insights rooted in science and care."
             actionLabel="Get Started"
             onAction={() => navigation.navigate("Onboarding")}
           />
@@ -135,99 +150,125 @@ export default function HomeScreen() {
   const daysUntilOvulation = getDaysUntil(cycleData.ovulationDate);
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: tabBarHeight + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      <View style={styles.greeting}>
-        <ThemedText type="h2">
-          {getGreeting()}, {profile.name.split(" ")[0]}
-        </ThemedText>
-        <ThemedText type="body" style={styles.dateText}>
-          {new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
-        </ThemedText>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+      <AfricanPattern opacity={0.02} variant="waves" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: tabBarHeight + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        <View style={styles.greeting}>
+          <ThemedText type="h2">
+            {getGreeting()}, {profile.name.split(" ")[0]}
+          </ThemedText>
+          <ThemedText type="body" style={styles.dateText}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </ThemedText>
+        </View>
 
-      <View style={styles.wheelSection}>
-        <CycleWheel cycleData={cycleData} />
-      </View>
+        <View style={styles.wheelSection}>
+          <View style={styles.viewToggle}>
+            <Pressable
+              onPress={toggleView}
+              style={[styles.toggleButton, { backgroundColor: theme.backgroundDefault }]}
+            >
+              <Feather
+                name={useLotusView ? "circle" : "sun"}
+                size={16}
+                color={theme.textSecondary}
+              />
+              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                {useLotusView ? "Switch to Wheel" : "Switch to Lotus"}
+              </ThemedText>
+            </Pressable>
+          </View>
 
-      <View style={styles.quickStats}>
-        <QuickStatCard
-          title="Next Period"
-          value={daysUntilPeriod > 0 ? `${daysUntilPeriod}` : "Today"}
-          subtitle={daysUntilPeriod > 0 ? "days" : ""}
-          icon="calendar"
-          color={theme.phaseMenstrual}
-        />
-        <QuickStatCard
-          title="Ovulation"
-          value={daysUntilOvulation > 0 ? `${daysUntilOvulation}` : "Today"}
-          subtitle={daysUntilOvulation > 0 ? "days" : ""}
-          icon="star"
-          color={theme.phaseOvulation}
-        />
-        <QuickStatCard
-          title="Cycle"
-          value={`${cycleData.cycleLength}`}
-          subtitle="days"
-          icon="repeat"
-          color={theme.secondary}
-        />
-      </View>
+          {useLotusView ? (
+            <LotusWheel cycleData={cycleData} />
+          ) : (
+            <CycleWheel cycleData={cycleData} />
+          )}
+        </View>
 
-      <View style={styles.insightSection}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          Daily Insight
-        </ThemedText>
-        <InsightCard
-          title={insight.title}
-          description={insight.description}
-          icon="sun"
-          color={theme.primary}
-        />
-      </View>
-
-      <View style={styles.insightSection}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          Quick Actions
-        </ThemedText>
-        <View style={styles.quickActions}>
-          <InsightCard
-            title="Log Today"
-            description="Track your symptoms, mood, and more"
-            icon="edit-3"
-            color={theme.secondary}
-            onPress={() => navigation.navigate("Main", { screen: "TrackTab" })}
+        <View style={styles.quickStats}>
+          <QuickStatCard
+            title="Next Period"
+            value={daysUntilPeriod > 0 ? `${daysUntilPeriod}` : "Today"}
+            subtitle={daysUntilPeriod > 0 ? "days" : ""}
+            icon="calendar"
+            color={theme.phaseMenstrual}
           />
-          <InsightCard
-            title="Health Check"
-            description="View your screening reminders"
-            icon="heart"
-            color={theme.tertiary}
-            onPress={() => navigation.navigate("Main", { screen: "HealthTab" })}
+          <QuickStatCard
+            title="Ovulation"
+            value={daysUntilOvulation > 0 ? `${daysUntilOvulation}` : "Today"}
+            subtitle={daysUntilOvulation > 0 ? "days" : ""}
+            icon="star"
+            color={theme.phaseOvulation}
+          />
+          <QuickStatCard
+            title="Cycle"
+            value={`${cycleData.cycleLength}`}
+            subtitle="days"
+            icon="repeat"
+            color={theme.phaseFollicular}
           />
         </View>
-      </View>
-    </ScrollView>
+
+        <View style={styles.insightSection}>
+          <ThemedText type="h3" style={styles.sectionTitle}>
+            Daily Insight
+          </ThemedText>
+          <InsightCard
+            title={insight.title}
+            description={insight.description}
+            icon="sun"
+            color={theme.primary}
+          />
+        </View>
+
+        <View style={styles.insightSection}>
+          <ThemedText type="h3" style={styles.sectionTitle}>
+            Quick Actions
+          </ThemedText>
+          <View style={styles.quickActions}>
+            <InsightCard
+              title="Log Today"
+              description="Track your symptoms, mood, and energy"
+              icon="edit-3"
+              color={theme.secondary}
+              onPress={() => navigation.navigate("Main", { screen: "TrackTab" })}
+            />
+            <InsightCard
+              title="Health Center"
+              description="View modules and screening reminders"
+              icon="heart"
+              color={theme.tertiary}
+              onPress={() => navigation.navigate("Main", { screen: "HealthTab" })}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   loadingContainer: {
@@ -248,6 +289,18 @@ const styles = StyleSheet.create({
   wheelSection: {
     alignItems: "center",
     marginBottom: Spacing["2xl"],
+  },
+  viewToggle: {
+    alignSelf: "flex-end",
+    marginBottom: Spacing.md,
+  },
+  toggleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
   },
   quickStats: {
     flexDirection: "row",
