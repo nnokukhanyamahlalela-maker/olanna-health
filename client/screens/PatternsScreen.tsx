@@ -127,7 +127,7 @@ export default function PatternsScreen() {
         title: 'Cramp Pattern Detected',
         description: `You've logged cramps ${crampLogs.length} times. Consider tracking what helps relieve them.`,
         icon: 'zap',
-        color: '#8B3A4C',
+        color: '#FFB6C1',
       });
     }
 
@@ -138,7 +138,7 @@ export default function PatternsScreen() {
         title: 'Bloating Trends',
         description: 'Bloating appears regularly. This is common 2-3 days before your period.',
         icon: 'circle',
-        color: '#C4826B',
+        color: '#FFDAB9',
       });
     }
 
@@ -149,7 +149,7 @@ export default function PatternsScreen() {
         title: 'Mood Changes',
         description: 'You may experience mood shifts related to your cycle. This is completely normal.',
         icon: 'heart',
-        color: '#D4A5A5',
+        color: '#E6E6FA',
       });
     }
 
@@ -160,7 +160,7 @@ export default function PatternsScreen() {
         title: 'Significant Pain Logged',
         description: 'You\'ve logged severe symptoms. Consider speaking with a healthcare provider.',
         icon: 'alert-circle',
-        color: '#C4574A',
+        color: '#F8A5B0',
       });
     }
 

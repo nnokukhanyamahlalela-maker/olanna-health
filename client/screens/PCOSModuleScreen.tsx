@@ -26,25 +26,25 @@ const lifestyleTips = [
     title: "Anti-inflammatory Diet",
     description: "Focus on whole foods, lean proteins, and healthy fats to reduce inflammation.",
     icon: "coffee" as const,
-    color: "#10B981",
+    color: "#B5EAD7",
   },
   {
     title: "Regular Exercise",
     description: "30 minutes of moderate activity daily helps manage insulin resistance.",
     icon: "activity" as const,
-    color: "#3B82F6",
+    color: "#B4D7E8",
   },
   {
     title: "Stress Management",
     description: "Practice mindfulness, meditation, or yoga to reduce cortisol levels.",
     icon: "heart" as const,
-    color: "#8B5CF6",
+    color: "#E6E6FA",
   },
   {
     title: "Quality Sleep",
     description: "Aim for 7-9 hours of sleep to support hormone regulation.",
     icon: "moon" as const,
-    color: "#6366F1",
+    color: "#FFDAB9",
   },
 ];
 
