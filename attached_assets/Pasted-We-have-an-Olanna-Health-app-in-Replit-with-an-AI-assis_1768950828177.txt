@@ -1,0 +1,87 @@
+We have an Olanna Health app in Replit with an AI assistant chat. Update it to be bilingual: isiZulu + English.
+
+Goals
+	1.	Auto-detect whether the user is writing in isiZulu or English.
+	2.	Reply in the same language as the user by default.
+	3.	Add a manual language toggle in the chat UI:
+	•	Auto (default)
+	•	English
+	•	isiZulu
+	4.	If the user selects a language, the assistant must force replies in that language until changed back to Auto.
+	5.	Do not change any existing cycle logic—only the assistant/chat behavior.
+
+⸻
+
+Implementation Requirements
+
+A) Add “language mode” state
+
+Create a chat setting called languageMode with values:
+	•	"auto"
+	•	"en"
+	•	"zu"
+
+Persist it (preferably in localStorage or your existing user settings store).
+
+B) Language detection (simple + reliable)
+
+Implement a lightweight detectLanguage(text) function:
+	•	If text contains common isiZulu markers/words (examples below), return "zu".
+	•	Otherwise default to "en".
+	•	If input is very short (e.g., < 3 words), use the last detected language from the conversation, else "en".
+
+Use these isiZulu markers (case-insensitive):
+ngiy, ngicela, sawubona, unjani, ngikhathazekile, ubuhlungu, izinsuku, umjikelezo, ukuya esikhathini, igazi, namuhla, kusasa, ngabe, yebo, cha, kakhulu, kancane, phesheya, lapha
+
+C) Build the system prompt with bilingual rules
+
+When calling the AI endpoint, include a system/developer message that enforces language:
+
+System prompt logic
+	•	Determine replyLanguage:
+	•	If languageMode is "en" → reply in English
+	•	If "zu" → reply in isiZulu
+	•	If "auto" → reply in detected language (from user message, or last language)
+	•	The assistant must:
+	•	Use warm, supportive tone.
+	•	Keep medical advice cautious (not a doctor).
+	•	Ask 1 short follow-up question if user message is ambiguous.
+	•	Keep responses concise (3–8 short paragraphs/bullets).
+
+Add this instruction exactly:
+	•	“Reply ONLY in {replyLanguage}. Do not translate unless the user asks.”
+
+D) Add a “language hint” UI (small)
+
+In the chat header or near the input, show:
+	•	Language: Auto / Language: English / Language: isiZulu
+If Auto, also show the detected language for the last user message (e.g., “Auto (detected: isiZulu)”).
+
+E) Safety text localized
+
+Add brief localized safety line at the end only when health symptoms are mentioned:
+	•	English: “If symptoms are severe or sudden, please seek urgent medical care.”
+	•	isiZulu: “Uma izimpawu zinzima noma ziqala ngokuzumayo, sicela ufune usizo lwezokwelashwa ngokushesha.”
+
+Detect symptoms with simple keywords like:
+	•	English: bleeding heavy, severe pain, faint, pregnant, fever
+	•	Zulu: igazi eliningi, ubuhlungu obukhulu, ngiyawa, ngikhulelwe, umkhuhlane
+
+⸻
+
+Deliverables
+	1.	Show me the files changed.
+	2.	Show the new detectLanguage() function.
+	3.	Show where languageMode is stored and how the toggle works.
+	4.	Confirm the assistant replies correctly in:
+	•	English input → English reply
+	•	isiZulu input → isiZulu reply
+	•	Forced toggle overrides detection
+
+⸻
+
+Notes
+	•	If an AI API call already exists, reuse it—just modify messages sent (system prompt + language routing).
+	•	If there is no AI endpoint yet, create a simple /api/chat route that receives {messages, languageMode} and returns the model response.
+
+Proceed now: locate the chat component + API call, then implement the bilingual language mode + detection + prompt enforcement.
