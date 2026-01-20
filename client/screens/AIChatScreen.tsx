@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -12,10 +12,21 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { getApiUrl } from "@/lib/query-client";
+import {
+  detectLanguage,
+  languageLabel,
+  getSafetyMessage,
+  containsSymptomKeywords,
+  getWelcomeMessage,
+  type LanguageMode,
+  type DetectedLanguage,
+} from "@/lib/languageDetection";
 
 interface Message {
   id: string;
@@ -24,15 +35,7 @@ interface Message {
   timestamp: Date;
 }
 
-const initialMessages: Message[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content:
-      "Hello! I'm your Olanna Health assistant. I can answer questions about menstrual health, PCOS, endometriosis, sexual health, and wellness. How can I help you today?\n\nPlease note: I provide general health information only and don't replace professional medical advice.",
-    timestamp: new Date(),
-  },
-];
+const LANGUAGE_MODE_KEY = "olanna_language_mode";
 
 export default function AIChatScreen() {
   const { theme } = useTheme();
@@ -40,19 +43,69 @@ export default function AIChatScreen() {
   const headerHeight = useHeaderHeight();
   const flatListRef = useRef<FlatList>(null);
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [languageMode, setLanguageMode] = useState<LanguageMode>("auto");
+  const [lastDetectedLanguage, setLastDetectedLanguage] = useState<DetectedLanguage>("en");
+
+  useEffect(() => {
+    loadLanguageMode();
+  }, []);
+
+  useEffect(() => {
+    const welcomeMessage: Message = {
+      id: "welcome",
+      role: "assistant",
+      content: getWelcomeMessage(languageMode === "auto" ? lastDetectedLanguage : languageMode === "zu" ? "zu" : "en"),
+      timestamp: new Date(),
+    };
+    if (messages.length === 0) {
+      setMessages([welcomeMessage]);
+    }
+  }, [languageMode]);
+
+  const loadLanguageMode = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(LANGUAGE_MODE_KEY);
+      if (saved && (saved === "auto" || saved === "en" || saved === "zu")) {
+        setLanguageMode(saved as LanguageMode);
+      }
+    } catch (e) {
+      console.log("Failed to load language mode");
+    }
+  };
+
+  const saveLanguageMode = async (mode: LanguageMode) => {
+    try {
+      await AsyncStorage.setItem(LANGUAGE_MODE_KEY, mode);
+      setLanguageMode(mode);
+    } catch (e) {
+      console.log("Failed to save language mode");
+    }
+  };
+
+  const cycleLanguageMode = () => {
+    const modes: LanguageMode[] = ["auto", "en", "zu"];
+    const currentIndex = modes.indexOf(languageMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    saveLanguageMode(nextMode);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+    const userText = inputText.trim();
+    const detected = detectLanguage(userText, lastDetectedLanguage);
+    setLastDetectedLanguage(detected);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: inputText.trim(),
+      content: userText,
       timestamp: new Date(),
     };
 
@@ -60,24 +113,57 @@ export default function AIChatScreen() {
     setInputText("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      const responses = [
-        "That's a great question about your health! Based on general wellness guidelines, here's what you should know...",
-        "I understand your concern. Many women experience similar symptoms. Here are some helpful insights...",
-        "This is an important topic for women's health. Let me share some evidence-based information...",
-        "Thank you for asking! Here's some guidance based on current health recommendations...",
-      ];
+    try {
+      const chatHistory = [...messages].reverse().map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+      chatHistory.push({ role: "user", content: userText });
+
+      const response = await fetch(new URL("/api/chat", getApiUrl()).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: chatHistory,
+          languageMode,
+          detectedLanguage: detected,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get response");
+      }
+
+      const data = await response.json();
+      let assistantContent = data.content;
+
+      const replyLang = languageMode === "auto" ? detected : languageMode === "zu" ? "zu" : "en";
+      if (containsSymptomKeywords(userText, replyLang)) {
+        assistantContent += "\n\n" + getSafetyMessage(replyLang);
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: assistantContent,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [assistantMessage, ...prev]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: languageMode === "zu" || (languageMode === "auto" && detected === "zu")
+          ? "Ngiyaxolisa, kunenkinga. Sicela uzame futhi."
+          : "I'm sorry, there was an issue. Please try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [errorMessage, ...prev]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
@@ -123,10 +209,12 @@ export default function AIChatScreen() {
         <Feather name="message-circle" size={32} color={theme.primary} />
       </View>
       <ThemedText type="h3" style={styles.emptyTitle}>
-        Ask Me Anything
+        {languageMode === "zu" ? "Buza Noma Yini" : "Ask Me Anything"}
       </ThemedText>
       <ThemedText type="body" style={styles.emptyDescription}>
-        I'm here to help with questions about menstrual health, fertility, PCOS, endometriosis, and more.
+        {languageMode === "zu"
+          ? "Lapha ukusiza ngemibuzo mayelana nempilo yabesifazane, ukuzala, PCOS, endometriosis, nokunye."
+          : "I'm here to help with questions about menstrual health, fertility, PCOS, endometriosis, and more."}
       </ThemedText>
     </View>
   );
@@ -137,11 +225,25 @@ export default function AIChatScreen() {
       behavior="padding"
       keyboardVerticalOffset={0}
     >
-      <View style={[styles.disclaimer, { paddingTop: headerHeight + Spacing.sm }]}>
-        <Feather name="info" size={14} color={theme.textSecondary} />
-        <ThemedText type="caption" style={styles.disclaimerText}>
-          This AI assistant provides general health information and does not replace medical advice.
-        </ThemedText>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.sm }]}>
+        <View style={styles.disclaimerRow}>
+          <Feather name="info" size={14} color={theme.textSecondary} />
+          <ThemedText type="caption" style={styles.disclaimerText}>
+            {languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+              ? "Lo msizi we-AI unikeza ulwazi olujwayelekile kuphela."
+              : "This AI provides general health information only."}
+          </ThemedText>
+        </View>
+        
+        <Pressable
+          onPress={cycleLanguageMode}
+          style={[styles.languageToggle, { backgroundColor: theme.primary + "15" }]}
+        >
+          <Feather name="globe" size={14} color={theme.primary} />
+          <ThemedText type="caption" style={[styles.languageText, { color: theme.primary }]}>
+            {languageLabel(languageMode, lastDetectedLanguage)}
+          </ThemedText>
+        </Pressable>
       </View>
 
       <FlatList
@@ -162,7 +264,9 @@ export default function AIChatScreen() {
         <View style={styles.loadingContainer}>
           <View style={[styles.loadingBubble, { backgroundColor: theme.backgroundDefault }]}>
             <ThemedText type="small" style={styles.loadingText}>
-              Thinking...
+              {languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+                ? "Ngicabanga..."
+                : "Thinking..."}
             </ThemedText>
           </View>
         </View>
@@ -185,7 +289,11 @@ export default function AIChatScreen() {
         >
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder="Ask a health question..."
+            placeholder={
+              languageMode === "zu" || (languageMode === "auto" && lastDetectedLanguage === "zu")
+                ? "Buza umbuzo wezempilo..."
+                : "Ask a health question..."
+            }
             placeholderTextColor={theme.textSecondary}
             value={inputText}
             onChangeText={setInputText}
@@ -219,16 +327,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  disclaimer: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  disclaimerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
     gap: Spacing.xs,
   },
   disclaimerText: {
     flex: 1,
     opacity: 0.7,
+  },
+  languageToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
+  },
+  languageText: {
+    fontWeight: "600",
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,

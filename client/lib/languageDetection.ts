@@ -1,38 +1,11 @@
 export type LanguageMode = "auto" | "en" | "zu";
 export type DetectedLanguage = "en" | "zu";
 
-const ISIZULU_MARKERS = [
-  "ngiy",
-  "ngicela",
-  "sawubona",
-  "unjani",
-  "ngikhathazekile",
-  "ubuhlungu",
-  "izinsuku",
-  "umjikelezo",
-  "ukuya",
-  "esikhathini",
-  "igazi",
-  "namuhla",
-  "kusasa",
-  "ngabe",
-  "yebo",
-  "cha",
-  "kakhulu",
-  "kancane",
-  "phesheya",
-  "lapha",
-  "ngingakusiza",
-  "ngifuna",
-  "ngithanda",
-  "usizo",
-  "lwezempilo",
-  "izimpawu",
-  "umkhuhlane",
-  "ngikhulelwe",
-  "ngiyawa",
-  "eliningi",
-  "obukhulu",
+const ZU_MARKERS = [
+  "ngiy", "ngicela", "sawubona", "unjani", "ngikhathazekile",
+  "ubuhlungu", "izinsuku", "umjikelezo", "ukuya", "esikhathini",
+  "igazi", "namuhla", "kusasa", "ngabe", "yebo", "cha",
+  "kakhulu", "kancane", "lapha"
 ];
 
 const ENGLISH_SYMPTOM_KEYWORDS = [
@@ -58,21 +31,22 @@ const ZULU_SYMPTOM_KEYWORDS = [
   "ngokushesha",
 ];
 
-export function detectLanguage(text: string, lastDetectedLanguage?: DetectedLanguage): DetectedLanguage {
-  const lowerText = text.toLowerCase();
-  const words = lowerText.split(/\s+/);
+export function detectLanguage(text: string, lastLang: DetectedLanguage = "en"): DetectedLanguage {
+  const t = (text || "").toLowerCase().trim();
+  if (!t) return lastLang;
 
-  if (words.length < 3 && lastDetectedLanguage) {
-    return lastDetectedLanguage;
+  const words = t.split(/\s+/).filter(Boolean);
+  if (words.length < 3) return lastLang;
+
+  let score = 0;
+  for (const m of ZU_MARKERS) {
+    if (t.includes(m)) score += 1;
   }
 
-  for (const marker of ISIZULU_MARKERS) {
-    if (lowerText.includes(marker.toLowerCase())) {
-      return "zu";
-    }
-  }
+  if (/\buku[a-z]+\b/.test(t)) score += 1;
+  if (/\bngi[a-z]+\b/.test(t)) score += 1;
 
-  return "en";
+  return score >= 2 ? "zu" : "en";
 }
 
 export function containsSymptomKeywords(text: string, language: DetectedLanguage): boolean {
@@ -92,8 +66,11 @@ export function getSafetyMessage(language: DetectedLanguage): string {
   return "If symptoms are severe or sudden, please seek urgent medical care.";
 }
 
-export function getLanguageDisplayName(language: DetectedLanguage | "auto"): string {
-  switch (language) {
+export function languageLabel(lang: DetectedLanguage | "auto", detectedLang?: DetectedLanguage): string {
+  if (lang === "auto" && detectedLang) {
+    return `Auto (${detectedLang === "zu" ? "isiZulu" : "English"})`;
+  }
+  switch (lang) {
     case "en":
       return "English";
     case "zu":
