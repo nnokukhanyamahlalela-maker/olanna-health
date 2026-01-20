@@ -1,0 +1,33 @@
+We are working on the Olanna Health cycle screen. I am not satisfied with the current lotus icon. Replace the existing lotus with the exact lotus image I attached (soft pink, minimal lotus with 5 petals).
+
+IMPORTANT SETUP
+	•	I will upload the lotus image into the project. First, locate it in the file tree (likely in public/, assets/, or src/assets/).
+	•	If the image has a white background, convert it to a transparent PNG (or apply a CSS/SVG masking approach so the white background does not show). Prefer transparency.
+
+TASK
+	1.	Find the component where the lotus is rendered in the “Day of Cycle” circle (currently a simple lotus icon).
+	2.	Remove the old lotus SVG/icon code.
+	3.	Render the uploaded lotus image instead:
+	•	Use an <img> (web) or <Image> (React Native) depending on the codebase.
+	•	Center it behind/around the day number.
+	•	Keep the day number on top (higher z-index).
+	4.	Styling requirements:
+	•	Lotus size: about 72–96px wide (responsive; scale down on smaller screens).
+	•	Opacity: 0.9–1.0 (do not make it too faint).
+	•	No extra gradients/patterns in the background circle.
+	•	Ensure number “1” remains the primary focus and stays readable.
+	5.	Do NOT change any cycle logic—only visuals.
+
+DELIVERABLES
+	•	Tell me the exact file path of the lotus image you used.
+	•	List the exact files you modified.
+	•	Show the final code changes.
+
+IMPLEMENTATION NOTES (choose what matches the project)
+	•	If this is React (web): put the image in public/ and use src="/lotus.png" OR import from src/assets and use <img src={lotus} />.
+	•	If Tailwind is used, apply w-20 h-20 object-contain and absolute inset-0 m-auto.
+	•	Ensure the lotus is layered behind the number:
+	•	lotus container: position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; z-index: 1;
+	•	number text: position: relative; z-index: 2;
+
+Proceed now by locating the current lotus render code, then replacing it with the uploaded lotus image and adjusting layout so it looks clean and minimal.
