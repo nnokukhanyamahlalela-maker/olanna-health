@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
@@ -17,6 +17,11 @@ interface SymptomChipProps {
   icon?: keyof typeof Feather.glyphMap;
   selected?: boolean;
   onPress?: () => void;
+  onLongPress?: () => void;
+  severity?: number;
+  color?: string;
+  isFavorite?: boolean;
+  variant?: 'pill' | 'card';
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -26,9 +31,15 @@ export function SymptomChip({
   icon,
   selected = false,
   onPress,
+  onLongPress,
+  severity,
+  color,
+  isFavorite,
+  variant = 'pill',
 }: SymptomChipProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
+  const chipColor = color || theme.primary;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -47,19 +58,76 @@ export function SymptomChip({
     scale.value = withSpring(1, { damping: 15, stiffness: 200 });
   };
 
+  if (variant === 'card') {
+    return (
+      <AnimatedPressable
+        onPress={handlePress}
+        onLongPress={onLongPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[
+          styles.cardContainer,
+          {
+            backgroundColor: selected ? `${chipColor}15` : theme.cardBackground,
+            borderColor: selected ? chipColor : theme.border,
+          },
+          animatedStyle,
+        ]}
+        testID={`symptom-chip-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <View style={styles.cardContent}>
+          <View style={[styles.iconContainer, { backgroundColor: selected ? chipColor : theme.border }]}>
+            {icon ? (
+              <Feather
+                name={icon}
+                size={14}
+                color={selected ? '#FFFFFF' : theme.textSecondary}
+              />
+            ) : null}
+          </View>
+          <ThemedText
+            type="small"
+            style={[
+              styles.cardLabel,
+              { color: selected ? chipColor : theme.text },
+            ]}
+            numberOfLines={2}
+          >
+            {label}
+          </ThemedText>
+          {isFavorite ? (
+            <Feather name="star" size={12} color={theme.tertiary} style={styles.favoriteIcon} />
+          ) : null}
+        </View>
+        {severity !== undefined && severity > 0 ? (
+          <View style={styles.severityIndicator}>
+            {Array.from({ length: severity }, (_, i) => (
+              <View
+                key={i}
+                style={[styles.severityDot, { backgroundColor: chipColor }]}
+              />
+            ))}
+          </View>
+        ) : null}
+      </AnimatedPressable>
+    );
+  }
+
   return (
     <AnimatedPressable
       onPress={handlePress}
+      onLongPress={onLongPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[
         styles.container,
         {
-          backgroundColor: selected ? theme.primary : theme.backgroundSecondary,
-          borderColor: selected ? theme.primary : theme.border,
+          backgroundColor: selected ? chipColor : theme.backgroundSecondary,
+          borderColor: selected ? chipColor : theme.border,
         },
         animatedStyle,
       ]}
+      testID={`symptom-chip-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       {icon ? (
         <Feather
@@ -77,6 +145,9 @@ export function SymptomChip({
       >
         {label}
       </ThemedText>
+      {isFavorite ? (
+        <Feather name="star" size={10} color={selected ? theme.buttonText : theme.tertiary} />
+      ) : null}
     </AnimatedPressable>
   );
 }
@@ -93,5 +164,44 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: "500",
+  },
+  cardContainer: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    minWidth: 100,
+    maxWidth: 140,
+  },
+  cardContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardLabel: {
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  favoriteIcon: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+  },
+  severityIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 3,
+    marginTop: Spacing.xs,
+  },
+  severityDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 });
