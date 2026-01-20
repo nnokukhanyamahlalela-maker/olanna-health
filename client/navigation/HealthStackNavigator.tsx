@@ -1,24 +1,24 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ProfileScreen from "@/screens/ProfileScreen";
+import HealthScreen from "@/screens/HealthScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
-export type ProfileStackParamList = {
-  Profile: undefined;
+export type HealthStackParamList = {
+  Health: undefined;
 };
 
-const Stack = createNativeStackNavigator<ProfileStackParamList>();
+const Stack = createNativeStackNavigator<HealthStackParamList>();
 
-export default function ProfileStackNavigator() {
+export default function HealthStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="Health"
+        component={HealthScreen}
         options={{
-          headerTitle: "Profile",
+          headerTitle: "Health Center",
         }}
       />
     </Stack.Navigator>

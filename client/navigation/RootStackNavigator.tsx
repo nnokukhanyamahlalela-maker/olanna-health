@@ -1,12 +1,26 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import MainTabNavigator from "@/navigation/MainTabNavigator";
-import ModalScreen from "@/screens/ModalScreen";
+import { NavigatorScreenParams } from "@react-navigation/native";
+
+import MainTabNavigator, { MainTabParamList } from "@/navigation/MainTabNavigator";
+import OnboardingScreen from "@/screens/OnboardingScreen";
+import AIChatScreen from "@/screens/AIChatScreen";
+import PCOSModuleScreen from "@/screens/PCOSModuleScreen";
+import EndometriosisModuleScreen from "@/screens/EndometriosisModuleScreen";
+import SexualHealthModuleScreen from "@/screens/SexualHealthModuleScreen";
+import CervicalScreeningModuleScreen from "@/screens/CervicalScreeningModuleScreen";
+import EditProfileScreen from "@/screens/EditProfileScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type RootStackParamList = {
-  Main: undefined;
-  Modal: undefined;
+  Main: NavigatorScreenParams<MainTabParamList>;
+  Onboarding: undefined;
+  AIChat: undefined;
+  PCOSModule: undefined;
+  EndometriosisModule: undefined;
+  SexualHealthModule: undefined;
+  CervicalScreeningModule: undefined;
+  EditProfile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,11 +36,51 @@ export default function RootStackNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Modal"
-        component={ModalScreen}
+        name="Onboarding"
+        component={OnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AIChat"
+        component={AIChatScreen}
         options={{
+          headerTitle: "Health Assistant",
           presentation: "modal",
-          headerTitle: "Modal",
+        }}
+      />
+      <Stack.Screen
+        name="PCOSModule"
+        component={PCOSModuleScreen}
+        options={{
+          headerTitle: "PCOS Management",
+        }}
+      />
+      <Stack.Screen
+        name="EndometriosisModule"
+        component={EndometriosisModuleScreen}
+        options={{
+          headerTitle: "Endometriosis Care",
+        }}
+      />
+      <Stack.Screen
+        name="SexualHealthModule"
+        component={SexualHealthModuleScreen}
+        options={{
+          headerTitle: "Sexual Health",
+        }}
+      />
+      <Stack.Screen
+        name="CervicalScreeningModule"
+        component={CervicalScreeningModuleScreen}
+        options={{
+          headerTitle: "Cervical Screening",
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          headerTitle: "Edit Profile",
         }}
       />
     </Stack.Navigator>

@@ -1,0 +1,194 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEYS = {
+  USER_PROFILE: "@olanna_user_profile",
+  CYCLE_DATA: "@olanna_cycle_data",
+  DAILY_LOGS: "@olanna_daily_logs",
+  HEALTH_GOALS: "@olanna_health_goals",
+  SCREENINGS: "@olanna_screenings",
+  ONBOARDING_COMPLETE: "@olanna_onboarding_complete",
+};
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  dateOfBirth: string;
+  cycleLength: number;
+  periodLength: number;
+  lastPeriodStart: string;
+  healthGoals: string[];
+  hasPCOS: boolean;
+  hasEndometriosis: boolean;
+  createdAt: string;
+}
+
+export interface DailyLog {
+  id: string;
+  date: string;
+  flow?: "spotting" | "light" | "medium" | "heavy";
+  symptoms: string[];
+  mood?: string;
+  energy?: number;
+  sleep?: number;
+  notes?: string;
+  temperature?: number;
+  weight?: number;
+  sexualActivity?: boolean;
+  createdAt: string;
+}
+
+export interface CycleData {
+  currentDay: number;
+  cycleLength: number;
+  periodLength: number;
+  lastPeriodStart: string;
+  nextPeriodStart: string;
+  ovulationDate: string;
+  fertileWindowStart: string;
+  fertileWindowEnd: string;
+  phase: "menstrual" | "follicular" | "ovulation" | "luteal";
+  cycles: {
+    startDate: string;
+    endDate: string;
+    length: number;
+  }[];
+}
+
+export interface Screening {
+  id: string;
+  type: "pap_smear" | "hpv_test" | "sti_screening" | "mammogram" | "general_checkup";
+  lastDate?: string;
+  nextDueDate: string;
+  reminderEnabled: boolean;
+  notes?: string;
+}
+
+export const storage = {
+  async getUserProfile(): Promise<UserProfile | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_PROFILE);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async setUserProfile(profile: UserProfile): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+  },
+
+  async getCycleData(): Promise<CycleData | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.CYCLE_DATA);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async setCycleData(cycleData: CycleData): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.CYCLE_DATA, JSON.stringify(cycleData));
+  },
+
+  async getDailyLogs(): Promise<DailyLog[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.DAILY_LOGS);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  async addDailyLog(log: DailyLog): Promise<void> {
+    const logs = await this.getDailyLogs();
+    const existingIndex = logs.findIndex((l) => l.date === log.date);
+    if (existingIndex >= 0) {
+      logs[existingIndex] = log;
+    } else {
+      logs.push(log);
+    }
+    await AsyncStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(logs));
+  },
+
+  async getScreenings(): Promise<Screening[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.SCREENINGS);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  async setScreenings(screenings: Screening[]): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.SCREENINGS, JSON.stringify(screenings));
+  },
+
+  async isOnboardingComplete(): Promise<boolean> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+      return data === "true";
+    } catch {
+      return false;
+    }
+  },
+
+  async setOnboardingComplete(complete: boolean): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, complete ? "true" : "false");
+  },
+
+  async clearAllData(): Promise<void> {
+    await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
+  },
+};
+
+export function calculateCycleData(profile: UserProfile): CycleData {
+  const lastPeriodStart = new Date(profile.lastPeriodStart);
+  const today = new Date();
+  const daysSinceLastPeriod = Math.floor(
+    (today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const currentDay = (daysSinceLastPeriod % profile.cycleLength) + 1;
+
+  const nextPeriodStart = new Date(lastPeriodStart);
+  nextPeriodStart.setDate(nextPeriodStart.getDate() + profile.cycleLength);
+  while (nextPeriodStart < today) {
+    nextPeriodStart.setDate(nextPeriodStart.getDate() + profile.cycleLength);
+  }
+
+  const ovulationDate = new Date(nextPeriodStart);
+  ovulationDate.setDate(ovulationDate.getDate() - 14);
+
+  const fertileWindowStart = new Date(ovulationDate);
+  fertileWindowStart.setDate(fertileWindowStart.getDate() - 5);
+
+  const fertileWindowEnd = new Date(ovulationDate);
+  fertileWindowEnd.setDate(fertileWindowEnd.getDate() + 1);
+
+  let phase: CycleData["phase"];
+  if (currentDay <= profile.periodLength) {
+    phase = "menstrual";
+  } else if (currentDay <= profile.cycleLength - 14) {
+    phase = "follicular";
+  } else if (currentDay <= profile.cycleLength - 12) {
+    phase = "ovulation";
+  } else {
+    phase = "luteal";
+  }
+
+  return {
+    currentDay,
+    cycleLength: profile.cycleLength,
+    periodLength: profile.periodLength,
+    lastPeriodStart: profile.lastPeriodStart,
+    nextPeriodStart: nextPeriodStart.toISOString().split("T")[0],
+    ovulationDate: ovulationDate.toISOString().split("T")[0],
+    fertileWindowStart: fertileWindowStart.toISOString().split("T")[0],
+    fertileWindowEnd: fertileWindowEnd.toISOString().split("T")[0],
+    phase,
+    cycles: [],
+  };
+}
+
+export function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}

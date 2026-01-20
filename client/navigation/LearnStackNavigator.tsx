@@ -1,24 +1,24 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ProfileScreen from "@/screens/ProfileScreen";
+import LearnScreen from "@/screens/LearnScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
-export type ProfileStackParamList = {
-  Profile: undefined;
+export type LearnStackParamList = {
+  Learn: undefined;
 };
 
-const Stack = createNativeStackNavigator<ProfileStackParamList>();
+const Stack = createNativeStackNavigator<LearnStackParamList>();
 
-export default function ProfileStackNavigator() {
+export default function LearnStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="Learn"
+        component={LearnScreen}
         options={{
-          headerTitle: "Profile",
+          headerTitle: "Education",
         }}
       />
     </Stack.Navigator>
