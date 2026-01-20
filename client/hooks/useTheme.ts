@@ -3,7 +3,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 
 export type ThemePreset = keyof typeof ThemePresets;
 
-export function useTheme(preset: ThemePreset = "earth") {
+export function useTheme(preset: ThemePreset = "blossom") {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 

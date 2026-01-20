@@ -111,7 +111,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'core-cycle',
     name: 'Core Cycle & Hormonal',
     icon: 'activity',
-    color: '#8B3A4C',
+    color: '#FFB6C1',
     items: [
       { id: 'cramps', name: 'Cramps', icon: 'zap', inputType: 'severity' },
       { id: 'pelvic-heaviness', name: 'Pelvic Heaviness', icon: 'circle', inputType: 'severity' },
@@ -136,7 +136,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'flow',
     name: 'Flow',
     icon: 'droplet',
-    color: '#C4574A',
+    color: '#F8A5B0',
     items: [
       { id: 'spotting', name: 'Spotting', icon: 'droplet', inputType: 'toggle' },
       { id: 'flow-light', name: 'Light Flow', icon: 'droplet', inputType: 'toggle' },
@@ -154,7 +154,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'emotional',
     name: 'Emotional',
     icon: 'heart',
-    color: '#D4A5A5',
+    color: '#E6E6FA',
     items: [
       { id: 'calm', name: 'Calm & Grounded', icon: 'sun', inputType: 'toggle' },
       { id: 'irritable', name: 'Irritable', icon: 'zap', inputType: 'severity' },
@@ -170,7 +170,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'cognitive',
     name: 'Cognitive',
     icon: 'cpu',
-    color: '#6B8DA8',
+    color: '#B4D7E8',
     items: [
       { id: 'brain-fog', name: 'Brain Fog', icon: 'cloud', inputType: 'severity' },
       { id: 'mental-clarity', name: 'Mental Clarity', icon: 'sun', inputType: 'toggle' },
@@ -186,7 +186,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'energy',
     name: 'Energy & Rhythm',
     icon: 'battery-charging',
-    color: '#D4A84B',
+    color: '#FFFACD',
     items: [
       { id: 'physical-energy-high', name: 'High Physical Energy', icon: 'zap', inputType: 'toggle' },
       { id: 'physical-energy-low', name: 'Low Physical Energy', icon: 'battery', inputType: 'toggle' },
@@ -207,7 +207,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'sexual',
     name: 'Sexual & Reproductive',
     icon: 'heart',
-    color: '#C4826B',
+    color: '#FFDAB9',
     items: [
       { id: 'libido-up', name: 'Libido Up', icon: 'trending-up', inputType: 'toggle' },
       { id: 'libido-down', name: 'Libido Down', icon: 'trending-down', inputType: 'toggle' },
@@ -222,7 +222,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'vaginal',
     name: 'Vaginal & Cervical',
     icon: 'shield',
-    color: '#9B8AA8',
+    color: '#D8D8F0',
     items: [
       { id: 'cm-dry', name: 'Cervical Mucus: Dry', icon: 'minus', inputType: 'toggle' },
       { id: 'cm-sticky', name: 'Cervical Mucus: Sticky', icon: 'droplet', inputType: 'toggle' },
@@ -238,7 +238,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'gut',
     name: 'Gut & Metabolic',
     icon: 'coffee',
-    color: '#C9735B',
+    color: '#F5C8A0',
     items: [
       { id: 'constipation', name: 'Constipation', icon: 'minus-circle', inputType: 'severity' },
       { id: 'diarrhea', name: 'Diarrhea', icon: 'alert-circle', inputType: 'severity' },
@@ -255,7 +255,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'skin-hair',
     name: 'Skin & Hair',
     icon: 'sun',
-    color: '#B48B2B',
+    color: '#F5E8A0',
     isPCOS: true,
     items: [
       { id: 'acne-jawline', name: 'Acne: Jawline', icon: 'circle', inputType: 'severity' },
@@ -275,7 +275,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'pain-mapping',
     name: 'Pain Mapping',
     icon: 'map-pin',
-    color: '#A4624B',
+    color: '#FFD1DC',
     isEndometriosis: true,
     items: [
       { id: 'left-ovary-pain', name: 'Left Ovary Pain', icon: 'circle', inputType: 'severity' },
@@ -294,7 +294,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'pcos',
     name: 'PCOS Indicators',
     icon: 'activity',
-    color: '#7BA387',
+    color: '#B5EAD7',
     isPCOS: true,
     items: [
       { id: 'irregular-cycles', name: 'Irregular Cycles', icon: 'refresh-cw', inputType: 'toggle' },
@@ -311,7 +311,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'endometriosis',
     name: 'Endometriosis Indicators',
     icon: 'shield',
-    color: '#8B3A4C',
+    color: '#F8A5B0',
     isEndometriosis: true,
     items: [
       { id: 'chronic-pelvic-pain', name: 'Chronic Pelvic Pain', icon: 'alert-circle', inputType: 'severity' },
@@ -328,7 +328,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'immune-stress',
     name: 'Immune & Stress',
     icon: 'shield',
-    color: '#5B9A6F',
+    color: '#D4F5E9',
     items: [
       { id: 'frequent-infections', name: 'Frequent Infections', icon: 'alert-circle', inputType: 'toggle' },
       { id: 'slow-recovery', name: 'Slow Recovery', icon: 'clock', inputType: 'toggle' },
@@ -342,7 +342,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'environmental',
     name: 'Environmental',
     icon: 'globe',
-    color: '#7A6B63',
+    color: '#D0E8F5',
     items: [
       { id: 'weather-sensitivity', name: 'Weather Sensitivity', icon: 'cloud', inputType: 'toggle' },
       { id: 'heat-exposure', name: 'Heat Exposure', icon: 'sun', inputType: 'toggle' },
@@ -358,7 +358,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
     id: 'spiritual',
     name: 'Spiritual & Intuitive',
     icon: 'feather',
-    color: '#9B8AA8',
+    color: '#F0F0FF',
     isOptional: true,
     items: [
       { id: 'feeling-intuitive', name: 'Feeling Intuitive', icon: 'eye', inputType: 'toggle' },
