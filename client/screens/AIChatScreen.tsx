@@ -13,6 +13,7 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from "@react-native-picker/picker";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -80,13 +81,6 @@ export default function AIChatScreen() {
       }]);
     }
   }, [languageMode]);
-
-  const cycleLanguageMode = () => {
-    const modes: LanguageMode[] = ["auto", "en", "zu"];
-    const nextMode = modes[(modes.indexOf(languageMode) + 1) % modes.length];
-    setLanguageMode(nextMode);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -230,15 +224,31 @@ export default function AIChatScreen() {
           </ThemedText>
         </View>
         
-        <Pressable
-          onPress={cycleLanguageMode}
-          style={[styles.languageToggle, { backgroundColor: theme.primary + "15" }]}
-        >
-          <Feather name="globe" size={14} color={theme.primary} />
-          <ThemedText type="caption" style={[styles.languageText, { color: theme.primary }]}>
-            {languageLabel(languageMode, lastDetectedLang)}
+        <View style={styles.languageSelector}>
+          <ThemedText type="caption" style={[styles.languageLabelText, { color: theme.textSecondary }]}>
+            Language:
           </ThemedText>
-        </Pressable>
+          <View style={[styles.pickerContainer, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}>
+            <Picker
+              selectedValue={languageMode}
+              onValueChange={(value: LanguageMode) => {
+                setLanguageMode(value);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              style={[styles.picker, { color: theme.text }]}
+              dropdownIconColor={theme.primary}
+            >
+              <Picker.Item label="Auto" value="auto" />
+              <Picker.Item label="English" value="en" />
+              <Picker.Item label="isiZulu" value="zu" />
+            </Picker>
+          </View>
+          {languageMode === "auto" ? (
+            <ThemedText type="caption" style={[styles.detectedHint, { color: theme.textSecondary }]}>
+              (detected: {lastDetectedLang === "zu" ? "isiZulu" : "English"})
+            </ThemedText>
+          ) : null}
+        </View>
       </View>
 
       <FlatList
@@ -340,16 +350,28 @@ const styles = StyleSheet.create({
     flex: 1,
     opacity: 0.7,
   },
-  languageToggle: {
+  languageSelector: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.full,
     gap: Spacing.xs,
+    flexWrap: "wrap",
   },
-  languageText: {
-    fontWeight: "600",
+  languageLabelText: {
+    fontSize: 12,
+  },
+  pickerContainer: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    overflow: "hidden",
+    minWidth: 100,
+  },
+  picker: {
+    height: 32,
+    fontSize: 12,
+  },
+  detectedHint: {
+    fontSize: 11,
+    opacity: 0.7,
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,
