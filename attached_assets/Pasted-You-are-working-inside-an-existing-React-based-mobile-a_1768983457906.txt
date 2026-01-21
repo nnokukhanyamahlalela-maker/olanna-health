@@ -1,0 +1,172 @@
+You are working inside an existing React-based mobile app (React Native preferred; if it’s React web, adapt accordingly). The app is called “Olanna Health” and already includes: cycle tracking, PCOS & endometriosis modules, STI + Pap smear reminders, and a Lotus Flower cycle visualization.
+
+GOAL: Implement a Stardust-level symptom + experience tracker (and better) with visuals that match Olanna Health’s aesthetic across the entire app: “science meets softness”, minimalist, feminine, calm, premium; earthy neutrals + soft blushes + warm browns + muted gold accents; organic shapes; gentle gradients; subtle moonlight/cosmic glow; lotus motif; no harsh neon; accessibility-friendly contrast; light and dark mode.
+
+IMPORTANT: Do NOT redesign the whole app. Extend it. Use the existing navigation and theme system. If none exists, create a theme/tokens layer and apply it only to new screens/components.
+
+--------------------------------------------
+1) Detect the stack and set up foundations
+--------------------------------------------
+- Confirm whether this is React Native (Expo or bare RN). If Expo, use expo packages.
+- Add or standardize:
+  - src/theme/tokens.ts (colors, spacing, radii, typography, shadows)
+  - src/theme/ThemeProvider.tsx (light/dark themes)
+  - src/components/ui/ (Button, Card, Chip, Slider, Icon, Text, Divider)
+
+Visual rules (Olanna aesthetic):
+- Cards: soft rounded corners, subtle shadow, warm neutrals.
+- Gradients: very subtle; avoid neon.
+- Icons: simple line icons, rounded stroke, consistent style.
+- Lotus/lunar accents: gentle glow behind headers or in corner ornaments (SVG).
+
+--------------------------------------------
+2) Build symptom schema (config-driven)
+--------------------------------------------
+Create:
+- src/features/checkin/symptoms/schema.ts
+This should export:
+- categories[] where each category has:
+  id, title, description (optional), iconName, items[]
+- each item has:
+  id, label, type (toggle|severity|both), defaultEnabled, tags (optional), bodyMapEligible (boolean)
+
+Add these categories and items EXACTLY:
+
+A. Core Cycle & Hormonal
+- cramps, pelvic heaviness, back pain (upper/lower), breast tenderness/swelling, headaches/migraines, nausea, bloating/water retention, fatigue (mild/moderate/extreme), dizziness, appetite changes
+B. Flow
+- spotting, light/medium/heavy flow, clots (small/large), color (bright red/dark red/brown), irregular bleeding
+C. Emotional
+- calm/grounded, irritable, anxious, low mood/sadness, emotional sensitivity, anger/rage, tearfulness, emotional numbness
+D. Cognitive
+- brain fog, mental clarity, poor concentration, racing thoughts, decision fatigue, creativity surge, motivation boost/drop
+E. Energy & Rhythm
+- physical energy, social energy, need for rest, need for solitude, desire to move, sleep quality, insomnia/early waking, afternoon crash, overstimulation sensitivity
+F. Sexual & Reproductive
+- libido up/down, pain during sex, vaginal dryness, sensitivity/discomfort, desire for intimacy (emotional vs physical)
+G. Vaginal/Cervical
+- cervical mucus (dry/sticky/creamy/egg-white), itching, burning, unusual discharge, odor changes
+H. Gut/Metabolic/Inflammatory
+- constipation, diarrhea, IBS-like symptoms, bloating after meals, sugar cravings, salt cravings, nausea with food, reflux, food sensitivity reactions
+I. Skin/Hair (PCOS-relevant)
+- acne (jawline/cheeks/back/chest), oily skin, dry skin, hair thinning/shedding, excess facial hair, darkened patches (neck/underarms), brittle nails, hives/sensitivity
+J. Pain Mapping (Endometriosis-relevant)
+- left/right ovary pain, deep pelvic pain, rectal pain, pain radiating down legs, hip pain, pain during bowel movements, pain before/after period, pain after sex
+K. PCOS Module (extra tracking)
+- irregular cycles, missed ovulation, long cycles >35 days, sudden weight changes, insulin-resistance symptoms, reactive hypoglycemia, fatigue after meals, blood-sugar mood swings
+L. Endometriosis Module (extra tracking)
+- chronic pelvic pain, pain outside menstruation, pain severity score, medication effectiveness, stress-triggered pain, movement-triggered pain, flare duration
+M. Immune/Stress Indicators
+- frequent infections, slow recovery, stress flare-ups, “inflamed/heavy” feeling, heat intolerance, cold sensitivity
+N. Environmental/Contextual (Olanna differentiator)
+- weather sensitivity, heat exposure, dehydration, physical labor, commute stress, load-shedding disruption, financial stress, caregiving burden
+O. Spiritual/Intuitive (optional toggle)
+- feeling intuitive, need for reflection, desire for grounding/ritual, feeling disconnected, feeling aligned, emotional release days
+
+Also support:
+- Custom symptoms: user can add label + category + type.
+- Favorites/pinning.
+- Hide/disable.
+
+--------------------------------------------
+3) Data model + encrypted storage (privacy-first)
+--------------------------------------------
+Create:
+- src/features/checkin/storage/checkinStore.ts
+Data entities:
+- SymptomLog { dateISO, symptomId, value (boolean or 0-5), note?, tags?[] }
+- BodyMapPainLog { dateISO, regionId, painType, severity 0-5, duration, triggers?[], note? }
+- UserSymptomPrefs { pinnedIds[], hiddenIds[], customSymptoms[] }
+
+Storage:
+- Prefer encrypted local storage if already in app. If not available:
+  - use expo-secure-store for small prefs
+  - use AsyncStorage for logs (or MMKV if already installed)
+Keep sync OFF by default.
+
+--------------------------------------------
+4) UI Screens (Olanna visual consistency)
+--------------------------------------------
+Add “Check-in” to existing bottom tab navigation.
+Create screens:
+
+A) src/features/checkin/screens/CheckInTodayScreen.tsx
+- Header: “Daily Check-in” + lotus/moon accent (SVG corner ornament).
+- Shows today’s date, current cycle phase + lotus stage (read from existing cycle module).
+- Quick sections:
+  - “Top picks” (pinned symptoms as chips)
+  - “Browse categories”
+  - “Body Map Pain” entry point
+- Each symptom row:
+  - toggle + optional severity slider
+  - add note (modal)
+  - add tags (chips)
+Visual requirements:
+- Sliders styled like a lotus petal fill (rounded track; muted gold on active)
+- Chips with subtle gradient, warm neutral background
+- No harsh red for pain; use soft glow points.
+
+B) src/features/checkin/screens/CategoryDetailScreen.tsx
+- List symptoms in that category.
+- Search within category.
+
+C) src/features/checkin/screens/BodyMapPainScreen.tsx
+- Use an SVG body map (front/back OR pelvic-focused map).
+- User taps region -> opens bottom sheet:
+  severity slider, pain type (cramp/sharp/burning/dull), duration, triggers, note.
+- Store BodyMapPainLog.
+
+D) src/features/checkin/screens/PatternsScreen.tsx
+- Calendar heatmap (symptom intensity over time)
+- Trend lines across cycles for selected symptoms:
+  cramps, mood, acne, sleep, pelvic pain
+Use a lightweight chart lib already in project; otherwise:
+- react-native-svg + simple custom charts.
+All charts must match Olanna aesthetic (minimal, soft gridlines).
+
+E) src/features/checkin/screens/InsightsScreen.tsx
+- Local-only insights:
+  - “You often report bloating 2–3 days before your period.”
+  - “Pelvic pain tends to increase in luteal phase.”
+- No diagnosing. Provide gentle CTA:
+  “Consider speaking to a clinician if symptoms are severe or worsening.”
+
+--------------------------------------------
+5) Visual Assets: icons + lotus accents (SVG)
+--------------------------------------------
+Create:
+- src/assets/icons/ (SVG line icons, consistent stroke width)
+- src/assets/ornaments/lotusMoonCorner.svg
+- src/components/illustrations/LotusGlow.tsx (optional)
+
+Rules:
+- Prefer SVG via react-native-svg.
+- No heavy PNGs.
+- Include light/dark variants if needed.
+
+--------------------------------------------
+6) UX: onboarding + customization
+--------------------------------------------
+Add a short onboarding modal the first time user opens Check-in:
+- Explain: “Track what you feel. Spot patterns. Science meets softness.”
+- Let user:
+  - choose starter pinned symptoms
+  - enable/disable Spiritual/Intuitive category
+  - opt into Body Map tracking
+
+Add Settings:
+- Manage pinned/hidden/custom symptoms
+- Export data (JSON) locally (optional)
+
+--------------------------------------------
+7) Quality
+--------------------------------------------
+- Add unit tests for schema + insight logic (e.g., computeInsights.ts).
+- Add basic UI tests if project already uses them.
+- Ensure performance: list virtualization (FlatList/SectionList), memoization.
+
+DELIVERABLE
+Implement the entire Check-in feature end-to-end:
+- schema + storage + screens + navigation + SVG visuals
+- integrated with existing cycle phase + lotus stage
+- matching Olanna Health aesthetic consistently across new UI.
