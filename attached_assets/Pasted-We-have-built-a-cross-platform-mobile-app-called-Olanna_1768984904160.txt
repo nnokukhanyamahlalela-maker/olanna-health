@@ -1,0 +1,57 @@
+We have built a cross‑platform mobile app called Olanna Health. It is a period, sexual and reproductive health tracker targeted at African women and built with React (React Native). The app already includes cycle tracking, PCOS/endometriosis modules, STI and Pap‑smear reminders, community support, a privacy‑first storage design, a lotus‑cycle visualisation, and an aesthetic that combines stardust and lively design elements with Olanna’s own warm, science‑meets‑softness palette.
+
+In light of user research and an analysis of mainstream period‑tracking apps (Flo, Stardust, Lively, Harmony), we need to make Olanna Health the gold standard by addressing common shortcomings. Your task is to integrate the following enhancements and safeguard features into the existing app without breaking current functionality or aesthetic coherence.
+
+1. Reinforce privacy and transparency
+
+Local, encrypted storage by default – Ensure that all cycle logs, symptom logs, and personal data are stored on‑device using robust encryption. Synchronisation to cloud back‑ups or partner sharing must be opt‑in and clearly explained. Never integrate third‑party analytics or advertising SDKs that could transmit sensitive data. For any external service (e.g., notifications), list it explicitly in the privacy policy and allow users to opt out.
+
+Anonymous mode and minimal sign‑up – Allow users to use the app anonymously. If they choose to create an account, support simple email/phone registration. Remove mandatory social logins and Google/Apple single‑sign‑on. When users register, minimise personal information collection and store identity separate from health data.
+
+Granular data control – Implement a privacy settings screen where users can export, delete, or selectively erase their data. Provide toggles for sharing anonymised data with research projects or partner sync. Document all data flows in a concise, readable privacy policy accessible inside the app.
+
+2. Build an inclusive and flexible cycle engine
+
+Multiple fertility indicators – Go beyond the rhythm method used by some mainstream apps. Accept inputs for basal body temperature, cervical mucus descriptions, LH/ovulation test results, and hormone levels. Use these to adjust cycle phase predictions. Allow manual editing of ovulation and fertile window dates and support cycles shorter than 21 days or longer than 35 days.
+
+Irregular cycles and conditions – Incorporate logic for users with PCOS, endometriosis, anovulatory cycles or postpartum return to menstruation. Let users flag long cycles and skipped periods without breaking predictions. Provide separate algorithms for PCOS or endo modules when enough data is available.
+
+Adaptive insights – Use on‑device analytics to detect patterns such as premenstrual headaches, mid‑cycle mood spikes, or luteal phase bloating. Generate simple insights (e.g., “your luteal phase lasts longer than average; consider consulting a clinician”) while keeping all computations local. Never diagnose or replace medical advice.
+
+3. Make data meaningful — not just logged
+
+Personalised recommendations – The current app collects rich symptom data (energy, mood, pain, cravings, etc.). Add a layer that correlates these logs with cycle phases and suggests context‑specific actions, such as hydration reminders when bloating is common, relaxation exercises before expected PMS, or nutrition tips when fatigue spikes. These recommendations should adapt as the user logs more information.
+
+Dynamic dashboards – Enhance the existing dashboards to visualise correlations between symptoms and lifestyle factors. For example, show how sleep quality affects pain or energy; display heatmaps of symptom intensity by cycle day. Keep charts simple, with warm, earth‑tone colours consistent with Olanna’s palette.
+
+4. Integrate context for African women
+
+Localised content – Embed educational articles and micro‑lessons in multiple South‑African languages (English, isiZulu, isiXhosa, Afrikaans). Topics should include menstrual health, PCOS, endometriosis, STD prevention, Pap smears, and reproductive rights. Ensure all medical guidance aligns with South‑African and WHO guidelines.
+
+Culturally relevant notifications – Base Pap‑smear reminders on South‑African guidelines (e.g., every 3 years from age 21, with co‑testing every 5 years from age 30), and STI screening prompts on local recommendations for adolescent girls and high‑risk groups. Allow users to set their own intervals if their clinician advises more frequent testing.
+
+Offline capability and low‑data mode – Offer offline access to educational content and cycle tracking features. Optimise images and assets for low bandwidth and provide a “low‑data” mode that disables auto‑play animations and high‑resolution assets.
+
+5. Enhance inclusivity and representation
+
+Diverse avatars and illustrations – Update onboarding and education screens with illustrations that reflect diverse African body types, skin tones and cultural backgrounds. Avoid pink‑only or cis‑normative imagery. Provide an option to disable gendered language for users who do not identify as women but menstruate.
+
+Customisable symptom sets – Allow users to add their own symptoms or rename existing ones. Provide categories for mental health, gut health, social context, and environmental stressors unique to the African context (e.g., heat exposure, load‑shedding disruptions, commuting stress). Let users rearrange or hide categories to suit their needs.
+
+6. Robustness and transparency in the user experience
+
+Bug‑free and accessible – Address reliability issues seen in some mainstream apps by establishing automated tests and continuous integration. Ensure the app handles late or missed periods gracefully. Provide voiceover labels and larger font options for visually impaired users.
+
+Clear pricing and value – Clearly state which features are free and which require premium membership. Offer a generous free tier that includes basic tracking and health education. Notify users of subscription renewal and provide an easy cancellation process.
+
+Community and clinician links – Maintain community support features (forums or chats) moderated by trained professionals. Provide optional telehealth links to local clinics or hotlines. Highlight when users should seek medical attention based on symptom patterns.
+
+7. Technical implementation guidelines
+
+Maintain modular architecture. Place new logic in src/features/tracking/ (e.g., cycleEngine.ts, insights.ts) and new UI in src/screens/CheckIn/ and src/screens/Dashboard/. Update the central theme in src/theme/ to include new colours and typography variations.
+
+Use TypeScript interfaces to define new data structures (e.g., FertilityData, Insight, UserPrivacySettings). Write unit tests with Jest for data processing functions. Use React Navigation to add new screens while preserving existing navigation patterns.
+
+Keep the lotus visualisation and current aesthetic. When adding charts or new components, adhere to the warm pastel palette, soft shadows and rounded corners. Use lightweight libraries (e.g., Victory Native or Recharts) for graphs and ensure they respect dark mode.
+
+By following these instructions, Replit should evolve the Olanna Health app into a robust, privacy‑first, inclusive and culturally sensitive femtech platform that remedies the flaws of mainstream period trackers while remaining visually beautiful and easy to use.
