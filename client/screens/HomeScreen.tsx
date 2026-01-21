@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl, Pressable, Image } from "react-native";
+import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -163,17 +163,16 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        <View style={styles.brandHeader}>
-          <Image
-            source={require("../assets/images/olanna-o-logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <ThemedText style={[styles.brandName, { color: theme.primary }]}>
-            Olanna
-          </ThemedText>
-          <ThemedText type="body" style={[styles.greeting, { color: theme.textSecondary }]}>
+        <View style={styles.greeting}>
+          <ThemedText type="h2">
             {getGreeting()}, {profile.name.split(" ")[0]}
+          </ThemedText>
+          <ThemedText type="body" style={styles.dateText}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
           </ThemedText>
         </View>
 
@@ -278,24 +277,12 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
-  brandHeader: {
-    alignItems: "center",
-    marginBottom: Spacing.xl,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: Spacing.sm,
-  },
-  brandName: {
-    fontSize: 36,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-    letterSpacing: 2,
-    marginBottom: Spacing.xs,
-  },
   greeting: {
-    opacity: 0.8,
+    marginBottom: Spacing.xl,
+    gap: Spacing.xs,
+  },
+  dateText: {
+    opacity: 0.7,
   },
   wheelSection: {
     alignItems: "center",

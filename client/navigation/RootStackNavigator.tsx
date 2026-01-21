@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigatorScreenParams } from "@react-navigation/native";
 
 import MainTabNavigator, { MainTabParamList } from "@/navigation/MainTabNavigator";
+import SplashScreen from "@/screens/SplashScreen";
 import OnboardingScreen from "@/screens/OnboardingScreen";
 import AIChatScreen from "@/screens/AIChatScreen";
 import PCOSModuleScreen from "@/screens/PCOSModuleScreen";
@@ -16,6 +17,7 @@ import InsightsScreen from "@/screens/InsightsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type RootStackParamList = {
+  Splash: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Onboarding: undefined;
   AIChat: undefined;
@@ -35,16 +37,21 @@ export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName="Splash">
+      <Stack.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{ headerShown: false, animation: "fade" }}
+      />
       <Stack.Screen
         name="Main"
         component={MainTabNavigator}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: "fade" }}
       />
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: "fade" }}
       />
       <Stack.Screen
         name="AIChat"
