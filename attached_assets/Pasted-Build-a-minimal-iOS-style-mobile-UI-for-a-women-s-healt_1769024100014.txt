@@ -1,0 +1,54 @@
+Build a minimal iOS-style mobile UI for a women’s health app called Olanna using React + TypeScript (Vite). Create a Cycle screen that shows a period wheel with a changing lotus flower in the center.
+
+Brand requirements
+	•	Use a clean white background.
+	•	Use the exact brand pink for all lotus elements and key accents: #F6A9D2 (soft Olanna pink).
+	•	Use a modern sans-serif font (e.g., Inter). Keep everything minimalist and premium (no playful or childish UI).
+
+Period wheel requirements
+	•	In the center of the screen, render a circular wheel representing a 28-day cycle.
+	•	The wheel must show 4 phase segments:
+	1.	Menstrual
+	2.	Follicular
+	3.	Ovulation
+	4.	Luteal
+	•	Use subtle tints of the brand pink for the segments (same hue, different opacity). Avoid bright red.
+	•	Add a small “TODAY” marker dot at the top of the wheel and a thin indicator line pointing inward.
+
+Changing lotus flower requirements
+	•	Place a lotus flower icon in the center of the wheel.
+	•	The lotus must visually “change” depending on the phase:
+	•	Menstrual: closed bud (few petals, mostly closed)
+	•	Follicular: partially open (more petals visible)
+	•	Ovulation: fully open lotus (widest petals)
+	•	Luteal: soft closing (slightly folded petals)
+	•	The lotus should be a simple vector (SVG) drawn in code (do NOT use external image files).
+	•	The lotus fill and/or stroke must be #F6A9D2 (brand pink). You may vary opacity to show change, but keep the same base shade.
+
+UI copy + controls
+	•	Above the wheel: title “Cycle”
+	•	Below the wheel: show:
+	•	“Day 12”
+	•	“Fertile Window” (or relevant label based on phase)
+	•	“Next period in 5 days”
+	•	Add a primary CTA button: “Log Period” (rounded pill, brand pink background, white text)
+	•	Add a bottom nav with 4 items: Calendar, Cycle (active), Insights, More.
+
+Interaction (must-have)
+	•	Add a small segmented control or buttons to simulate phases (Menstrual/Follicular/Ovulation/Luteal).
+	•	When the user switches phase, the wheel label updates AND the lotus morphs to the correct state.
+
+Implementation details
+	•	Use SVG to draw the wheel arcs and the lotus.
+	•	Keep layout responsive for iPhone-sized screens.
+	•	Provide clean, well-structured components:
+	•	CycleScreen.tsx
+	•	PeriodWheel.tsx
+	•	Lotus.tsx (receives phase prop and renders the correct SVG)
+	•	Include minimal styling with CSS modules or styled-components.
+	•	Make sure the app runs with npm install and npm run dev.
+
+Output the complete project code and explain where to edit:
+	•	brand color
+	•	cycle length
+	•	phase day ranges
