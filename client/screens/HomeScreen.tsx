@@ -194,7 +194,10 @@ export default function HomeScreen() {
           </View>
 
           {useLotusView ? (
-            <LotusWheel cycleData={cycleData} />
+            <LotusWheel 
+              cycleData={cycleData} 
+              onLogPeriod={() => navigation.navigate("Main", { screen: "CheckInTab" })}
+            />
           ) : (
             <CycleWheel cycleData={cycleData} />
           )}
