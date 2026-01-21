@@ -302,3 +302,138 @@ export function calculateSymptomTrends(
 
   return trends.sort((a, b) => b.frequency - a.frequency);
 }
+
+export interface Recommendation {
+  id: string;
+  title: string;
+  description: string;
+  category: "hydration" | "rest" | "exercise" | "nutrition" | "relaxation" | "medical";
+  triggers: string[];
+  phase?: string;
+  icon: string;
+}
+
+export function generateRecommendations(
+  logs: SymptomLog[],
+  cycleDay: number,
+  cycleLength: number = 28
+): Recommendation[] {
+  const recommendations: Recommendation[] = [];
+  
+  const symptomCounts = new Map<string, number>();
+  logs.forEach(log => {
+    symptomCounts.set(log.symptomId, (symptomCounts.get(log.symptomId) || 0) + 1);
+  });
+
+  // Bloating recommendations
+  if ((symptomCounts.get('bloating') || 0) >= 2) {
+    recommendations.push({
+      id: 'bloating-hydration',
+      title: 'Hydration for Bloating',
+      description: 'Increase water intake and reduce sodium to help with bloating. Herbal teas like peppermint may also help.',
+      category: 'hydration',
+      triggers: ['bloating'],
+      icon: 'droplet',
+    });
+  }
+
+  // Fatigue recommendations
+  const fatigueCount = ['fatigue-mild', 'fatigue-moderate', 'fatigue-extreme', 'afternoon-crash']
+    .reduce((sum, id) => sum + (symptomCounts.get(id) || 0), 0);
+  
+  if (fatigueCount >= 3) {
+    recommendations.push({
+      id: 'fatigue-rest',
+      title: 'Honor Your Rest Needs',
+      description: 'Your body is signaling a need for rest. Schedule lighter activities and aim for 7-9 hours of sleep.',
+      category: 'rest',
+      triggers: ['fatigue'],
+      icon: 'moon',
+    });
+  }
+
+  // Cramps recommendations
+  const crampsLogs = logs.filter(l => l.symptomId === 'cramps');
+  const avgCrampsSeverity = crampsLogs.length > 0 
+    ? crampsLogs.reduce((sum, l) => sum + (l.severity || 0), 0) / crampsLogs.length 
+    : 0;
+  
+  if (avgCrampsSeverity >= 2) {
+    recommendations.push({
+      id: 'cramps-relief',
+      title: 'Cramp Relief Strategies',
+      description: 'Apply heat to your lower abdomen, try gentle stretches, and consider magnesium-rich foods like dark chocolate and leafy greens.',
+      category: 'relaxation',
+      triggers: ['cramps'],
+      phase: 'menstrual',
+      icon: 'heart',
+    });
+  }
+
+  // Mood-related recommendations
+  const moodSymptoms = ['low-mood', 'anxious', 'irritable', 'tearful'];
+  const moodCount = moodSymptoms.reduce((sum, id) => sum + (symptomCounts.get(id) || 0), 0);
+  
+  if (moodCount >= 2) {
+    recommendations.push({
+      id: 'mood-support',
+      title: 'Mood Support',
+      description: 'Gentle movement like walking or yoga can help stabilize mood. Sunlight exposure and connecting with loved ones also help.',
+      category: 'exercise',
+      triggers: ['mood'],
+      icon: 'sun',
+    });
+  }
+
+  // Sugar cravings
+  if ((symptomCounts.get('sugar-cravings') || 0) >= 2) {
+    recommendations.push({
+      id: 'cravings-nutrition',
+      title: 'Balance Blood Sugar',
+      description: 'Pair carbs with protein and healthy fats. Slow-burning foods like oats and sweet potatoes can help reduce cravings.',
+      category: 'nutrition',
+      triggers: ['cravings'],
+      phase: 'luteal',
+      icon: 'coffee',
+    });
+  }
+
+  // Phase-specific recommendations
+  const menstrualEnd = 5;
+  const follicularEnd = Math.round(cycleLength * 0.35);
+  const ovulationEnd = Math.round(cycleLength * 0.55);
+
+  if (cycleDay <= menstrualEnd) {
+    recommendations.push({
+      id: 'menstrual-nutrition',
+      title: 'Iron-Rich Foods',
+      description: 'Support blood loss recovery with iron-rich foods like spinach, lentils, and fortified cereals. Vitamin C helps absorption.',
+      category: 'nutrition',
+      triggers: ['menstrual-phase'],
+      phase: 'menstrual',
+      icon: 'coffee',
+    });
+  } else if (cycleDay > follicularEnd && cycleDay <= ovulationEnd) {
+    recommendations.push({
+      id: 'ovulation-exercise',
+      title: 'High Energy Window',
+      description: 'Your energy is naturally higher now. Great time for challenging workouts and ambitious projects.',
+      category: 'exercise',
+      triggers: ['ovulation-phase'],
+      phase: 'ovulation',
+      icon: 'zap',
+    });
+  } else if (cycleDay > ovulationEnd) {
+    recommendations.push({
+      id: 'luteal-relaxation',
+      title: 'Wind Down Time',
+      description: 'Progesterone rises, which can feel calming but also cause PMS symptoms. Prioritize stress management and gentle activities.',
+      category: 'relaxation',
+      triggers: ['luteal-phase'],
+      phase: 'luteal',
+      icon: 'sunset',
+    });
+  }
+
+  return recommendations;
+}
