@@ -1,0 +1,411 @@
+Colours + Fonts (App-Ready)
+1. Brand Philosophy (anchor this in Replit)
+
+Soft, grounded, intelligent.
+Calm enough for vulnerable moments.
+Serious enough to be trusted for health.
+Feminine without being juvenile.
+
+2. Core Colour Palette
+🌺 Primary Brand Colours (used most often)
+
+Blush Lotus (Primary)
+
+HEX: #F4B6C2
+
+Usage: primary buttons, highlights, active states, icons, key accents
+
+Emotion: warmth, care, femininity, safety
+
+Soft Clay (Secondary)
+
+HEX: #D6B2A2
+
+Usage: cards, secondary buttons, background panels
+
+Emotion: grounded, earthy, African warmth
+
+🌿 Neutral Foundation (most of the UI lives here)
+
+Warm Ivory (Main Background)
+
+HEX: #FFF7F2
+
+Usage: app background, screens, modals
+
+Emotion: calm, breathable, gentle
+
+Sandstone Beige
+
+HEX: #F1E6DE
+
+Usage: card backgrounds, section dividers
+
+Taupe Brown (Text Secondary)
+
+HEX: #7A6A5F
+
+Usage: body text, helper text
+
+Deep Cocoa (Text Primary)
+
+HEX: #3A2F2A
+
+Usage: headings, important labels
+
+🌙 Accent & Insight Colours (use sparingly)
+
+Muted Gold (Insight / Fertility / Ovulation)
+
+HEX: #C9A24D
+
+Usage: ovulation indicators, insights, “peak” moments
+
+Dusty Lavender (Reflection / Luteal / Mood)
+
+HEX: #C8BFD6
+
+Usage: mood states, reflection prompts
+
+Sage Green (Balance / Healing)
+
+HEX: #A8BFA5
+
+Usage: gut health, recovery, “doing okay” states
+
+Soft Terracotta (Pain / Alert – gentle)
+
+HEX: #D98C7A
+
+Usage: pain indicators, warnings (never bright red)
+
+🚫 Colours to Avoid
+
+Bright red ❌
+
+Neon pink ❌
+
+Stark black (#000000) ❌
+
+Clinical blue ❌
+
+3. Semantic Colour Mapping (VERY important)
+
+This helps Replit apply colours correctly:
+
+Meaning	Colour
+Neutral / default	Warm Ivory
+Action / confirm	Blush Lotus
+Insight / highlight	Muted Gold
+Pain / concern	Soft Terracotta
+Calm / stable	Sage Green
+Reflection / emotions	Dusty Lavender
+Text (primary)	Deep Cocoa
+Text (secondary)	Taupe Brown
+4. Font System (Elegant + Readable)
+✨ Primary Font (Headings)
+
+Playfair Display
+
+Usage: screen titles, section headers
+
+Style: elegant, editorial, trustworthy
+
+Weight: Medium / SemiBold
+
+Alternative if unavailable:
+
+Libre Baskerville
+
+Cormorant Garamond
+
+✨ Secondary Font (Body & UI)
+
+Inter
+
+Usage: body text, buttons, labels, inputs
+
+Style: clean, modern, highly readable
+
+Weight: Regular / Medium
+
+Alternative:
+
+Source Sans 3
+
+DM Sans
+
+✨ Optional Accent Font (sparingly)
+
+Manrope
+
+Usage: numbers, charts, cycle days, stats
+
+Adds a modern, tech-clean feel
+
+5. Typography Scale (mobile-friendly)
+Type	Size
+Screen Title	28–32
+Section Header	20–22
+Card Title	16–18
+Body Text	14–16
+Helper Text	12–13
+Buttons	14–16 (Medium weight)
+
+Line height: 1.4–1.6
+Letter spacing: slightly loose for headings
+
+6. How This Looks in the App
+
+Backgrounds: Warm Ivory
+
+Cards: Sandstone Beige
+
+Buttons: Blush Lotus (text in Deep Cocoa)
+
+Sliders: Muted Gold fill on neutral track
+
+Pain map: Soft Terracotta glow (never harsh)
+
+Charts: Sage, Lavender, Gold on neutral background
+
+Lotus visuals: Blush + Gold gradients
+
+7. Give This Directly to Replit (pasteable)
+Use Olanna Health design system:
+
+Primary color: #F4B6C2 (Blush Lotus)
+Secondary: #D6B2A2 (Soft Clay)
+Background: #FFF7F2 (Warm Ivory)
+Card bg: #F1E6DE (Sandstone Beige)
+Text primary: #3A2F2A (Deep Cocoa)
+Text secondary: #7A6A5F (Taupe Brown)
+
+Accents:
+Gold insight: #C9A24D
+Sage calm: #A8BFA5
+Lavender mood: #C8BFD6
+Terracotta pain: #D98C7A
+
+Fonts:
+Headings: Playfair Display
+Body/UI: Inter
+Numbers (optional): Manrope
+
+Avoid neon, harsh red, pure black, clinical blues.
+Design should feel calm, editorial, feminine, and premium.
+
+8. Next (optional but powerful)
+
+I can:
+
+Map colours to cycle phases
+
+Design a lotus-based colour animation system
+
+Create a Figma-ready colour + type sheet
+
+Align push notifications tone + colour
+
+Just tell me 🌸
+
+yes pleasw
+
+Perfect 🌸
+I’ll give you all three, clearly and app-ready, so you can hand this straight to Replit and designers:
+
+Cycle-phase colour mapping
+
+Lotus-based animation & visual logic
+
+Figma-ready design tokens (copy-pasteable)
+
+1️⃣ Cycle Phase → Colour Mapping (Olanna Signature)
+
+This is how Olanna becomes emotionally intelligent, not just functional.
+
+🌑 Menstrual Phase — Rest & Release
+
+Lotus state: Closed bud, submerged
+Primary colour:
+
+Soft Terracotta #D98C7A
+Supporting colours:
+
+Warm Ivory #FFF7F2
+
+Taupe Brown #7A6A5F
+
+Use for:
+
+Flow tracking
+
+Pain indicators
+
+Rest prompts (“Slow down”, “Nourish yourself”)
+
+Visual tone: muted, grounded, protective
+Motion: very slow breathing / pulse (subtle)
+
+🌱 Follicular Phase — Emergence & Renewal
+
+Lotus state: Bud rising, gently opening
+Primary colour:
+
+Sage Green #A8BFA5
+Supporting colours:
+
+Sandstone Beige #F1E6DE
+
+Soft Clay #D6B2A2
+
+Use for:
+
+New cycle start
+
+Planning, learning, goal-setting
+
+Energy returning
+
+Visual tone: fresh, hopeful
+Motion: upward movement, petals easing open
+
+🌕 Ovulation — Peak & Radiance
+
+Lotus state: Full bloom
+Primary colour:
+
+Muted Gold #C9A24D
+Supporting colours:
+
+Blush Lotus #F4B6C2
+
+Warm Ivory #FFF7F2
+
+Use for:
+
+Fertility window
+
+Social energy
+
+Confidence, libido, clarity
+
+Visual tone: luminous, warm, celebratory
+Motion: gentle glow / halo effect (not flashy)
+
+🌘 Luteal Phase — Reflection & Integration
+
+Lotus state: Petals slowly closing
+Primary colour:
+
+Dusty Lavender #C8BFD6
+Supporting colours:
+
+Taupe Brown #7A6A5F
+
+Sandstone Beige #F1E6DE
+
+Use for:
+
+Mood tracking
+
+PMS/PMDD support
+
+Reflection & boundaries
+
+Visual tone: introspective, soft
+Motion: slow downward drift, petals folding
+
+2️⃣ Lotus-Based Animation System (App Logic)
+🌸 Core Concept
+
+The lotus is not decorative — it is data-driven.
+
+How it works:
+
+Cycle phase determines lotus state
+
+Symptoms affect petal behaviour
+
+Mood + energy subtly alter colour saturation
+
+Examples:
+
+Severe cramps → soft terracotta glow at base
+
+High energy → petals open slightly wider
+
+Low mood → colours desaturate gently
+
+Ovulation → soft gold halo appears briefly
+
+⚠️ Never spin, bounce, or sparkle.
+This is calm embodiment, not gamification.
+
+Where the Lotus Appears
+
+Home screen (primary anchor)
+
+Daily check-in header
+
+Cycle insights screen
+
+Subtle watermark in charts
+
+3️⃣ Figma-Ready Design Tokens (Paste This)
+🎨 Colours
+{
+  "background": "#FFF7F2",
+  "card": "#F1E6DE",
+  "primary": "#F4B6C2",
+  "secondary": "#D6B2A2",
+
+  "textPrimary": "#3A2F2A",
+  "textSecondary": "#7A6A5F",
+
+  "menstrual": "#D98C7A",
+  "follicular": "#A8BFA5",
+  "ovulation": "#C9A24D",
+  "luteal": "#C8BFD6"
+}
+
+🔤 Typography
+{
+  "headingFont": "Playfair Display",
+  "bodyFont": "Inter",
+  "numericFont": "Manrope",
+
+  "h1": 32,
+  "h2": 24,
+  "h3": 18,
+  "body": 16,
+  "small": 13
+}
+
+📐 UI Tokens
+{
+  "radiusSmall": 8,
+  "radiusMedium": 16,
+  "radiusLarge": 24,
+
+  "shadowSoft": "0px 4px 12px rgba(58,47,42,0.08)",
+  "shadowGlow": "0px 0px 20px rgba(201,162,77,0.25)",
+
+  "spacingXS": 4,
+  "spacingS": 8,
+  "spacingM": 16,
+  "spacingL": 24,
+  "spacingXL": 32
+}
+
+4️⃣ How This Beats Other Apps (Quietly)
+
+No neon → emotional safety
+
+No clinical blue → embodied trust
+
+No aggressive alerts → compassion first
+
+No generic pink → mature femininity
+
+Olanna will feel different — calmer, wiser, grounded.

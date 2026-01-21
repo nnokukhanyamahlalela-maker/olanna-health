@@ -1,0 +1,65 @@
+Integrate Olanna Health Site Aesthetics & Features into the Mobile App
+
+🌸 Overview
+
+The Olanna Health web site is now live and provides a rich, beautiful reference for the brand. Your task is to extend the existing Olanna Health mobile app (which already has cycle tracking, PCOS/endometriosis modules, a lotus flower‑cycle visual and privacy‑first storage) so that it looks and feels like the Olanna site and offers comparable educational tools. The app must remain a gentle, evidence‑driven hub for African women, where “science meets softness”.
+
+🎨 Design & Aesthetic Guidelines
+
+Palette & Mood – Use the site’s warm neutrals, soft blushes and pastel accents. Headings and call‑outs should be set against creamy off‑white backgrounds, while buttons and highlights use muted pinks, blues and purples. The overall mood should feel calm, compassionate and premium, matching the web site’s tagline that combines science with softness.
+
+Typography – Mirror the site’s typography: an elegant serif (e.g. Playfair Display or Georgia) for headlines and section titles, and a modern sans‑serif (e.g. Inter or Lato) for body copy. Ensure generous line spacing and legible sizes. Use bold or coloured text sparingly for emphasis.
+
+Imagery & Iconography – Use high‑quality, softly tinted photographs of African women similar to those on the site’s hero and feature sections. Illustrations should be organic and minimalist. Keep using the lotus‑flower motif and subtle lunar accents across screens. Icons should have rounded strokes and feel hand‑drawn; avoid harsh geometric shapes.
+
+Layout & Components – Maintain generous white space, rounded corners and soft drop shadows. Cards, chips and navigation elements should reflect the site’s gentle approach. Use section headers like “Tools to support your health” to clearly delineate features, and add background colour blocks to call attention to new modules (e.g. PCOS insights).
+
+Tone of Voice – Keep copy short, clear and compassionate. Reflect phrases from the site such as “track your cycle, symptoms and patterns in one gentle, easy‑to‑use space” and “compassionate, evidence‑based guidance created for African women”. Use inclusive language and avoid medical jargon without explanation.
+
+🛠 Feature Integration
+
+Cycle & Symptom Tracker – The existing tracker should be styled to match the site. Use pastel‑coloured progress bars and gentle lotus animations. Summarise cycle, symptoms and fertility patterns on a dashboard with cards similar to the site’s “Tools” section.
+
+Period & Late‑Period Calculator – Incorporate a calculator tool like the one on the site: help users estimate when their next period will arrive or why it might be late. Present inputs and results on a card with a pastel header and explanatory text.
+
+Ovulation Estimator – Build an ovulation estimator module that gives users a simple fertile‑window range without complex charts. Use soft accent colours and gently animated backgrounds to visualise fertile days.
+
+PCOS Insights – Add a dedicated section for PCOS that echoes the site’s promise to “learn how PCOS shows up in African women and what questions to ask your doctor”. Present educational cards, self‑assessment prompts, local resources and links to longer articles.
+
+Educational Library – Mirror the site’s “Learn About Women’s Health” hub. Create an in‑app library with categories such as Periods, PCOS, Endometriosis, Fertility and Mental Health. Each category should display article summaries with thumbnails and reading times. Provide a glossary with simple definitions of reproductive and hormonal health terms, similar to the site’s glossary page.
+
+Featured Stories & Alerts – Showcase featured articles, such as “We should all be worried about irregular periods” and other timely pieces, on the home screen. Use cards with an image on one side and a brief caption on the other. Allow users to set reminders to read later.
+
+Community & Newsletter – Provide a sign‑up prompt for the Olanna wellness community, echoing the site’s invitation to receive weekly insights on cycles, hormones, sexual wellness, fertility and everyday health. Allow in‑app newsletter registration or link users to the site’s form.
+
+Cross‑navigation with the Site – Add a “Visit Olanna Health” menu item that opens the web site in a secure in‑app browser. Ensure that pressing “Tools” or “Articles” in the app loads the corresponding web content seamlessly. Implement universal deep links so that article links shared from the app open either the site or the app, depending on device.
+
+🧩 Technical Implementation
+
+Theme Tokens – Extend the app’s theme system (e.g. in src/theme/tokens.ts) with colours, fonts and spacing constants derived from the web site’s style guide. Use these tokens throughout new and existing components to ensure consistency.
+
+Modular Components – Create reusable React components for cards, glossary entries, calculators and educational article previews. Each should accept props for title, subtitle, image and actions. Maintain separation of concerns: UI in src/components/, logic in src/features/.
+
+Data & Content – Store educational content in a local JSON or Markdown repository, synchronised with the site’s CMS. Provide offline access by caching text and images. For calculators and estimators, ensure formulas and logic are encapsulated in TypeScript files with unit tests.
+
+Navigation – Use the existing React Navigation stack. Add new screens for: LibraryHome, ArticleDetail, Glossary, PeriodCalculator, OvulationEstimator, PCOSInsights, and link them from the bottom tab or drawer. Use meaningful names and icons consistent with the site.
+
+Accessibility – Ensure all colours meet WCAG contrast standards; provide dark‑mode variants of the pastel palette. Add descriptive labels to icons and images. Support screen readers by marking headings and interactive elements correctly.
+
+Privacy & Consent – Maintain the app’s privacy‑first ethos. Provide clear explanations about any data sync between the app and site, obtain consent before any analytics, and ensure that educational content does not collect personal data.
+
+✅ Deliverables
+
+When executed in Replit, your implementation should:
+
+Apply the new theme tokens to existing and new components to match the Olanna web site’s aesthetic.
+
+Implement the Period Calculator, Ovulation Estimator, PCOS Insights and Educational Library modules as described above.
+
+Integrate deep links to the Olanna site so that users can seamlessly move between app and web content.
+
+Include unit tests for calculators and content loading.
+
+Update navigation to include a Learn tab with article categories and a Tools tab with calculators.
+
+By following these instructions you will create a cohesive user experience across the Olanna Health web site and mobile app, staying true to the brand’s promise of compassionate, evidence‑based guidance for African women.
