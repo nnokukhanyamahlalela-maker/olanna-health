@@ -94,7 +94,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
   });
 
   const phaseConfig = PHASE_CONFIG[cycleData.phase];
-  const phaseColor = phaseConfig.color;
+  const lotusColor = theme.primary;
   const centerX = WHEEL_SIZE / 2;
   const centerY = WHEEL_SIZE / 2;
 
@@ -107,8 +107,8 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
         <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
           <Defs>
             <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={phaseConfig.lightColor} stopOpacity={phaseConfig.glowOpacity} />
-              <Stop offset="100%" stopColor={phaseConfig.lightColor} stopOpacity={0} />
+              <Stop offset="0%" stopColor={lotusColor} stopOpacity={0.25} />
+              <Stop offset="100%" stopColor={lotusColor} stopOpacity={0} />
             </RadialGradient>
           </Defs>
 
@@ -124,7 +124,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
             cy={centerY}
             r={progressRadius}
             fill="none"
-            stroke={phaseColor}
+            stroke={lotusColor}
             strokeOpacity={0.2}
             strokeWidth={6}
           />
@@ -134,7 +134,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
             cy={centerY}
             r={progressRadius}
             fill="none"
-            stroke={phaseColor}
+            stroke={lotusColor}
             strokeOpacity={0.8}
             strokeWidth={6}
             strokeDasharray={`${progress * 2 * Math.PI * progressRadius} ${2 * Math.PI * progressRadius}`}
@@ -163,9 +163,9 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
         </View>
       </Animated.View>
 
-      <View style={[styles.phaseLabel, { backgroundColor: phaseColor + "25" }]}>
-        <View style={[styles.phaseDot, { backgroundColor: phaseColor }]} />
-        <ThemedText style={[styles.phaseText, { color: phaseColor }]}>
+      <View style={[styles.phaseLabel, { backgroundColor: lotusColor + "25" }]}>
+        <View style={[styles.phaseDot, { backgroundColor: lotusColor }]} />
+        <ThemedText style={[styles.phaseText, { color: lotusColor }]}>
           {phaseConfig.phaseName}
         </ThemedText>
       </View>

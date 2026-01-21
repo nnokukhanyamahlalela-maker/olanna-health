@@ -289,8 +289,8 @@ const styles = StyleSheet.create({
   },
   brandName: {
     fontSize: 36,
-    fontWeight: "600",
-    fontFamily: Typography.h1.fontFamily,
+    fontWeight: "700",
+    fontFamily: "Nunito_700Bold",
     letterSpacing: 2,
     marginBottom: Spacing.xs,
   },
