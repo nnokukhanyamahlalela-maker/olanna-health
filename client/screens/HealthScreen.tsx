@@ -137,6 +137,30 @@ export default function HealthScreen() {
 
       <View style={styles.section}>
         <ThemedText type="h3" style={styles.sectionTitle}>
+          Tracking & Insights
+        </ThemedText>
+
+        <View style={styles.modulesList}>
+          <HealthModuleCard
+            title="Fertility Tracking"
+            description="Log BBT, cervical mucus, and LH tests for accurate ovulation prediction."
+            icon="thermometer"
+            color={theme.accent}
+            onPress={() => navigation.navigate("FertilityTracking")}
+          />
+
+          <HealthModuleCard
+            title="Your Insights"
+            description="View patterns, trends, and personalized wellness recommendations."
+            icon="bar-chart-2"
+            color={theme.secondary}
+            onPress={() => navigation.navigate("Insights")}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="h3" style={styles.sectionTitle}>
           Health Modules
         </ThemedText>
 

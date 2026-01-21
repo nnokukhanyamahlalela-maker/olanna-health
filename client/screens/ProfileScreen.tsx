@@ -175,7 +175,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="lock"
             label="Privacy & Data"
-            onPress={() => {}}
+            onPress={() => navigation.navigate("PrivacySettings")}
           />
           <MenuItem
             icon="download"

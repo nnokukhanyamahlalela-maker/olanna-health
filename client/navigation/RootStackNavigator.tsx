@@ -10,6 +10,9 @@ import EndometriosisModuleScreen from "@/screens/EndometriosisModuleScreen";
 import SexualHealthModuleScreen from "@/screens/SexualHealthModuleScreen";
 import CervicalScreeningModuleScreen from "@/screens/CervicalScreeningModuleScreen";
 import EditProfileScreen from "@/screens/EditProfileScreen";
+import PrivacySettingsScreen from "@/screens/PrivacySettingsScreen";
+import FertilityTrackingScreen from "@/screens/FertilityTrackingScreen";
+import InsightsScreen from "@/screens/InsightsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type RootStackParamList = {
@@ -21,6 +24,9 @@ export type RootStackParamList = {
   SexualHealthModule: undefined;
   CervicalScreeningModule: undefined;
   EditProfile: undefined;
+  PrivacySettings: undefined;
+  FertilityTracking: undefined;
+  Insights: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -81,6 +87,27 @@ export default function RootStackNavigator() {
         component={EditProfileScreen}
         options={{
           headerTitle: "Edit Profile",
+        }}
+      />
+      <Stack.Screen
+        name="PrivacySettings"
+        component={PrivacySettingsScreen}
+        options={{
+          headerTitle: "Privacy & Data",
+        }}
+      />
+      <Stack.Screen
+        name="FertilityTracking"
+        component={FertilityTrackingScreen}
+        options={{
+          headerTitle: "Fertility Tracking",
+        }}
+      />
+      <Stack.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{
+          headerTitle: "Your Insights",
         }}
       />
     </Stack.Navigator>
