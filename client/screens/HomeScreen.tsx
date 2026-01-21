@@ -169,7 +169,7 @@ export default function HomeScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <ThemedText style={[styles.brandName, { color: theme.text }]}>
+          <ThemedText style={[styles.brandName, { color: theme.primary }]}>
             Olanna
           </ThemedText>
           <ThemedText type="body" style={[styles.greeting, { color: theme.textSecondary }]}>
@@ -288,10 +288,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   brandName: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: 36,
+    fontWeight: "600",
     fontFamily: Typography.h1.fontFamily,
-    letterSpacing: 1,
+    letterSpacing: 2,
     marginBottom: Spacing.xs,
   },
   greeting: {
