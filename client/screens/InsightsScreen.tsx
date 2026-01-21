@@ -25,7 +25,7 @@ import {
   SymptomTrend,
   Recommendation,
 } from "@/lib/insightsEngine";
-import { getAllCheckIns } from "@/lib/symptomStorage";
+import { getDailyCheckIns } from "@/lib/symptomStorage";
 import { storage } from "@/lib/storage";
 import { SymptomLog } from "@/lib/symptomSchema";
 
@@ -49,7 +49,7 @@ export default function InsightsScreen() {
 
   const loadData = async () => {
     try {
-      const checkIns = await getAllCheckIns();
+      const checkIns = await getDailyCheckIns();
       const cycleData = await storage.getCycleData();
       
       const allSymptomLogs: SymptomLog[] = checkIns.flatMap(c => c.symptoms);
