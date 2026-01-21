@@ -165,7 +165,7 @@ export default function HomeScreen() {
       >
         <View style={styles.brandHeader}>
           <Image
-            source={require("../assets/images/olanna-logo.png")}
+            source={require("../assets/images/olanna-o-logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />

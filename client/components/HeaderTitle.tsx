@@ -19,7 +19,7 @@ export function HeaderTitle({ title, showIcon = true, size = "small" }: HeaderTi
     <View style={[styles.container, isLarge && styles.containerLarge]}>
       {showIcon ? (
         <Image
-          source={require("../assets/images/olanna-logo.png")}
+          source={require("../assets/images/olanna-o-logo.png")}
           style={isLarge ? styles.iconLarge : styles.icon}
           resizeMode="contain"
         />
