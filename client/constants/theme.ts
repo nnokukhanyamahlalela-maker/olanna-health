@@ -20,8 +20,9 @@ export const BorderRadius = {
 } as const;
 
 export const Fonts = {
-  heading: "PlayfairDisplay_600SemiBold",
-  headingMedium: "PlayfairDisplay_500Medium",
+  heading: "PlayfairDisplay_700Bold",
+  headingMedium: "PlayfairDisplay_600SemiBold",
+  headingLight: "PlayfairDisplay_500Medium",
   body: "Inter_400Regular",
   bodyMedium: "Inter_500Medium",
   bodySemibold: "Inter_600SemiBold",
@@ -31,19 +32,19 @@ export const Fonts = {
 
 export const Typography = {
   h1: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.headingMedium,
     fontSize: 32,
     lineHeight: 40,
     fontWeight: "600" as const,
   },
   h2: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.headingMedium,
     fontSize: 24,
     lineHeight: 32,
     fontWeight: "600" as const,
   },
   h3: {
-    fontFamily: Fonts.headingMedium,
+    fontFamily: Fonts.headingLight,
     fontSize: 18,
     lineHeight: 26,
     fontWeight: "500" as const,

@@ -9,11 +9,11 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Fonts, PhaseColors } from "@/constants/theme";
 import { CycleData } from "@/lib/storage";
 
 const lotusImage = require("../assets/images/lotus-icon.png");
@@ -27,28 +27,64 @@ interface LotusWheelProps {
   showReminders?: boolean;
 }
 
-const PHASE_COLORS = {
-  menstrual: "#E8A2B0",
-  follicular: "#F4C6A6",
-  ovulation: "#A7D7C5",
-  luteal: "#C7B6E8",
+const PHASE_CONFIG = {
+  menstrual: {
+    color: PhaseColors.menstrual.primary,
+    lightColor: PhaseColors.menstrual.light,
+    label: "Rest & Release",
+    phaseName: "Menstrual Phase",
+    glowOpacity: 0.3,
+  },
+  follicular: {
+    color: PhaseColors.follicular.primary,
+    lightColor: PhaseColors.follicular.light,
+    label: "Emergence & Renewal",
+    phaseName: "Follicular Phase",
+    glowOpacity: 0.25,
+  },
+  ovulation: {
+    color: PhaseColors.ovulation.primary,
+    lightColor: PhaseColors.ovulation.light,
+    label: "Peak & Radiance",
+    phaseName: "Ovulation",
+    glowOpacity: 0.35,
+  },
+  luteal: {
+    color: PhaseColors.luteal.primary,
+    lightColor: PhaseColors.luteal.light,
+    label: "Reflection",
+    phaseName: "Luteal Phase",
+    glowOpacity: 0.25,
+  },
 };
 
 export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
   const { theme } = useTheme();
 
   const breatheValue = useSharedValue(0);
+  const glowValue = useSharedValue(0);
 
   useEffect(() => {
     breatheValue.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+        withTiming(1, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 3500, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       false
     );
-  }, []);
+
+    if (cycleData.phase === "ovulation") {
+      glowValue.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.5, { duration: 2000, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    }
+  }, [cycleData.phase]);
 
   const breatheStyle = useAnimatedStyle(() => {
     const scale = interpolate(breatheValue.value, [0, 1], [0.98, 1.02]);
@@ -57,24 +93,8 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
     };
   });
 
-  const getPhaseLabel = (phase: CycleData["phase"]) => {
-    switch (phase) {
-      case "menstrual":
-        return "Menstrual Phase";
-      case "follicular":
-        return "Follicular Phase";
-      case "ovulation":
-        return "Ovulation";
-      case "luteal":
-        return "Luteal Phase";
-    }
-  };
-
-  const getPhaseColor = (phase: CycleData["phase"]) => {
-    return PHASE_COLORS[phase];
-  };
-
-  const phaseColor = getPhaseColor(cycleData.phase);
+  const phaseConfig = PHASE_CONFIG[cycleData.phase];
+  const phaseColor = phaseConfig.color;
   const centerX = WHEEL_SIZE / 2;
   const centerY = WHEEL_SIZE / 2;
 
@@ -85,13 +105,27 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
     <View style={styles.container}>
       <Animated.View style={[styles.lotusContainer, breatheStyle]}>
         <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
+          <Defs>
+            <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+              <Stop offset="0%" stopColor={phaseConfig.lightColor} stopOpacity={phaseConfig.glowOpacity} />
+              <Stop offset="100%" stopColor={phaseConfig.lightColor} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+
+          <Circle
+            cx={centerX}
+            cy={centerY}
+            r={WHEEL_SIZE * 0.42}
+            fill="url(#centerGlow)"
+          />
+
           <Circle
             cx={centerX}
             cy={centerY}
             r={progressRadius}
             fill="none"
             stroke={phaseColor}
-            strokeOpacity={0.25}
+            strokeOpacity={0.2}
             strokeWidth={6}
           />
           
@@ -101,7 +135,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
             r={progressRadius}
             fill="none"
             stroke={phaseColor}
-            strokeOpacity={0.7}
+            strokeOpacity={0.8}
             strokeWidth={6}
             strokeDasharray={`${progress * 2 * Math.PI * progressRadius} ${2 * Math.PI * progressRadius}`}
             strokeLinecap="round"
@@ -122,19 +156,23 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
             <ThemedText style={[styles.dayNumber, { color: theme.text }]}>
               {cycleData.currentDay}
             </ThemedText>
-            <ThemedText style={[styles.dayLabel, { color: "#6B6B6B" }]}>
+            <ThemedText style={[styles.dayLabel, { color: theme.textSecondary }]}>
               DAY OF CYCLE
             </ThemedText>
           </View>
         </View>
       </Animated.View>
 
-      <View style={[styles.phaseLabel, { backgroundColor: phaseColor + "30" }]}>
+      <View style={[styles.phaseLabel, { backgroundColor: phaseColor + "25" }]}>
         <View style={[styles.phaseDot, { backgroundColor: phaseColor }]} />
-        <ThemedText type="body" style={[styles.phaseText, { color: phaseColor }]}>
-          {getPhaseLabel(cycleData.phase)}
+        <ThemedText style={[styles.phaseText, { color: phaseColor }]}>
+          {phaseConfig.phaseName}
         </ThemedText>
       </View>
+
+      <ThemedText style={[styles.phaseMood, { color: theme.textSecondary }]}>
+        {phaseConfig.label}
+      </ThemedText>
     </View>
   );
 }
@@ -142,7 +180,7 @@ export function LotusWheel({ cycleData, showReminders }: LotusWheelProps) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    gap: Spacing.xl,
+    gap: Spacing.md,
   },
   lotusContainer: {
     width: WHEEL_SIZE,
@@ -178,17 +216,17 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   dayNumber: {
-    fontSize: 52,
+    fontSize: 48,
     fontWeight: "700",
-    lineHeight: 58,
-    fontFamily: "Nunito_700Bold",
+    lineHeight: 54,
+    fontFamily: Fonts.numericBold,
   },
   dayLabel: {
-    fontSize: 12,
+    fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     marginTop: 4,
-    fontFamily: "Nunito_400Regular",
+    fontFamily: Fonts.body,
   },
   phaseLabel: {
     flexDirection: "row",
@@ -205,5 +243,12 @@ const styles = StyleSheet.create({
   },
   phaseText: {
     fontWeight: "600",
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 14,
+  },
+  phaseMood: {
+    fontSize: 14,
+    fontFamily: Fonts.body,
+    fontStyle: "italic",
   },
 });
