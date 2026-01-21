@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { View, ScrollView, StyleSheet, RefreshControl, Pressable, Image } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -15,7 +14,7 @@ import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -66,7 +65,6 @@ function getPhaseInsight(phase: CycleData["phase"]): {
 
 export default function HomeScreen() {
   const { theme } = useTheme();
-  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
@@ -132,7 +130,7 @@ export default function HomeScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
         <AfricanPattern opacity={0.03} variant="waves" />
-        <View style={[styles.emptyContainer, { paddingTop: headerHeight }]}>
+        <View style={[styles.emptyContainer, { paddingTop: insets.top + Spacing.xl }]}>
           <EmptyState
             image={require("../../assets/images/empty-cycle.png")}
             title="Begin Your Wellness Journey"
@@ -155,7 +153,7 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
-          paddingTop: headerHeight + Spacing.lg,
+          paddingTop: insets.top + Spacing.xl,
           paddingBottom: tabBarHeight + Spacing["2xl"],
           paddingHorizontal: Spacing.lg,
         }}
@@ -165,16 +163,17 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        <View style={styles.greeting}>
-          <ThemedText type="h2">
-            {getGreeting()}, {profile.name.split(" ")[0]}
+        <View style={styles.brandHeader}>
+          <Image
+            source={require("../assets/images/olanna-logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <ThemedText style={[styles.brandName, { color: theme.text }]}>
+            Olanna
           </ThemedText>
-          <ThemedText type="body" style={styles.dateText}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
+          <ThemedText type="body" style={[styles.greeting, { color: theme.textSecondary }]}>
+            {getGreeting()}, {profile.name.split(" ")[0]}
           </ThemedText>
         </View>
 
@@ -248,7 +247,7 @@ export default function HomeScreen() {
               description="Track your symptoms, mood, and energy"
               icon="edit-3"
               color={theme.secondary}
-              onPress={() => navigation.navigate("Main", { screen: "TrackTab" })}
+              onPress={() => navigation.navigate("Main", { screen: "CheckInTab" })}
             />
             <InsightCard
               title="Health Center"
@@ -279,12 +278,24 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
-  greeting: {
+  brandHeader: {
+    alignItems: "center",
     marginBottom: Spacing.xl,
-    gap: Spacing.xs,
   },
-  dateText: {
-    opacity: 0.7,
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: Spacing.sm,
+  },
+  brandName: {
+    fontSize: 32,
+    fontWeight: "700",
+    fontFamily: Typography.h1.fontFamily,
+    letterSpacing: 1,
+    marginBottom: Spacing.xs,
+  },
+  greeting: {
+    opacity: 0.8,
   },
   wheelSection: {
     alignItems: "center",
