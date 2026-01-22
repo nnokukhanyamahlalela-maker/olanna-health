@@ -14,6 +14,8 @@ import EditProfileScreen from "@/screens/EditProfileScreen";
 import PrivacySettingsScreen from "@/screens/PrivacySettingsScreen";
 import FertilityTrackingScreen from "@/screens/FertilityTrackingScreen";
 import InsightsScreen from "@/screens/InsightsScreen";
+import CheckInScreen from "@/screens/CheckInScreen";
+import ProfileScreen from "@/screens/ProfileScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type RootStackParamList = {
@@ -29,6 +31,8 @@ export type RootStackParamList = {
   PrivacySettings: undefined;
   FertilityTracking: undefined;
   Insights: undefined;
+  CheckIn: undefined;
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -115,6 +119,20 @@ export default function RootStackNavigator() {
         component={InsightsScreen}
         options={{
           headerTitle: "Your Insights",
+        }}
+      />
+      <Stack.Screen
+        name="CheckIn"
+        component={CheckInScreen}
+        options={{
+          headerTitle: "Check-in",
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          headerTitle: "Profile",
         }}
       />
     </Stack.Navigator>

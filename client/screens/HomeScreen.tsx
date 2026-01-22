@@ -196,7 +196,7 @@ export default function HomeScreen() {
           {useLotusView ? (
             <LotusWheel 
               cycleData={cycleData} 
-              onLogPeriod={() => navigation.navigate("Main", { screen: "CheckInTab" })}
+              onLogPeriod={() => navigation.navigate("CheckIn")}
             />
           ) : (
             <CycleWheel cycleData={cycleData} />
@@ -249,7 +249,7 @@ export default function HomeScreen() {
               description="Track your symptoms, mood, and energy"
               icon="edit-3"
               color={theme.secondary}
-              onPress={() => navigation.navigate("Main", { screen: "CheckInTab" })}
+              onPress={() => navigation.navigate("CheckIn")}
             />
             <InsightCard
               title="Health Center"

@@ -6,19 +6,15 @@ import { Platform, StyleSheet, View } from "react-native";
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
-import CheckInStackNavigator from "@/navigation/CheckInStackNavigator";
 import HealthStackNavigator from "@/navigation/HealthStackNavigator";
 import LearnStackNavigator from "@/navigation/LearnStackNavigator";
-import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
   CalendarTab: undefined;
-  CheckInTab: undefined;
   HealthTab: undefined;
   LearnTab: undefined;
-  ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -77,16 +73,6 @@ export default function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="CheckInTab"
-        component={CheckInStackNavigator}
-        options={{
-          title: "Check-in",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="check-circle" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="HealthTab"
         component={HealthStackNavigator}
         options={{
@@ -123,16 +109,6 @@ export default function MainTabNavigator() {
           ),
         }}
       />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStackNavigator}
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
+      </Tab.Navigator>
   );
 }

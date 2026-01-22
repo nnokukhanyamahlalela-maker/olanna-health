@@ -1,5 +1,5 @@
 import React from "react";
-import Svg, { Path, G } from "react-native-svg";
+import Svg, { Path, Circle, G } from "react-native-svg";
 
 interface LotusProps {
   phase: "menstrual" | "follicular" | "ovulation" | "luteal";
@@ -12,132 +12,109 @@ const BRAND_PINK = "#F6A9D2";
 export function Lotus({ phase, size = 80, color = BRAND_PINK }: LotusProps) {
   const cx = size / 2;
   const cy = size / 2;
-  const scale = size / 100;
 
   const renderMenstrualLotus = () => {
+    const petalWidth = size * 0.12;
+    const petalHeight = size * 0.28;
     return (
-      <G transform={`translate(${cx - 40 * scale}, ${cy - 35 * scale}) scale(${scale})`}>
+      <G>
         <Path
-          d="M40 70 Q30 50 40 25 Q50 50 40 70"
+          d={`M${cx} ${cy - petalHeight * 0.8} 
+              Q${cx - petalWidth} ${cy - petalHeight * 0.4} ${cx} ${cy + petalHeight * 0.1}
+              Q${cx + petalWidth} ${cy - petalHeight * 0.4} ${cx} ${cy - petalHeight * 0.8}`}
           fill={color}
           fillOpacity={0.9}
         />
         <Path
-          d="M40 70 Q20 55 25 35 Q35 45 40 70"
+          d={`M${cx - petalWidth * 1.2} ${cy - petalHeight * 0.5} 
+              Q${cx - petalWidth * 0.5} ${cy - petalHeight * 0.2} ${cx} ${cy + petalHeight * 0.1}
+              Q${cx - petalWidth * 1.5} ${cy - petalHeight * 0.1} ${cx - petalWidth * 1.2} ${cy - petalHeight * 0.5}`}
           fill={color}
           fillOpacity={0.7}
         />
         <Path
-          d="M40 70 Q60 55 55 35 Q45 45 40 70"
+          d={`M${cx + petalWidth * 1.2} ${cy - petalHeight * 0.5} 
+              Q${cx + petalWidth * 0.5} ${cy - petalHeight * 0.2} ${cx} ${cy + petalHeight * 0.1}
+              Q${cx + petalWidth * 1.5} ${cy - petalHeight * 0.1} ${cx + petalWidth * 1.2} ${cy - petalHeight * 0.5}`}
           fill={color}
           fillOpacity={0.7}
         />
+        <Circle cx={cx} cy={cy} r={size * 0.06} fill={color} />
       </G>
     );
   };
 
   const renderFollicularLotus = () => {
+    const r = size * 0.32;
+    const angles = [-90, -45, -135, 0, 180];
     return (
-      <G transform={`translate(${cx - 40 * scale}, ${cy - 35 * scale}) scale(${scale})`}>
-        <Path
-          d="M40 70 Q30 45 40 20 Q50 45 40 70"
-          fill={color}
-          fillOpacity={0.95}
-        />
-        <Path
-          d="M40 70 Q15 50 20 28 Q32 42 40 70"
-          fill={color}
-          fillOpacity={0.75}
-        />
-        <Path
-          d="M40 70 Q65 50 60 28 Q48 42 40 70"
-          fill={color}
-          fillOpacity={0.75}
-        />
-        <Path
-          d="M40 70 Q8 58 12 40 Q28 48 40 70"
-          fill={color}
-          fillOpacity={0.55}
-        />
-        <Path
-          d="M40 70 Q72 58 68 40 Q52 48 40 70"
-          fill={color}
-          fillOpacity={0.55}
-        />
+      <G>
+        {angles.map((angle, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const tipX = cx + Math.cos(rad) * r;
+          const tipY = cy + Math.sin(rad) * r * 0.9;
+          const opacity = i === 0 ? 0.95 : i < 3 ? 0.75 : 0.55;
+          return (
+            <Path
+              key={angle}
+              d={`M${cx} ${cy + size * 0.08} Q${cx + Math.cos(rad) * r * 0.3} ${cy + Math.sin(rad) * r * 0.5} ${tipX} ${tipY} 
+                  Q${cx - Math.cos(rad) * r * 0.3} ${cy + Math.sin(rad) * r * 0.5} ${cx} ${cy + size * 0.08}`}
+              fill={color}
+              fillOpacity={opacity}
+            />
+          );
+        })}
+        <Circle cx={cx} cy={cy + size * 0.05} r={size * 0.07} fill={color} />
       </G>
     );
   };
 
   const renderOvulationLotus = () => {
+    const r = size * 0.38;
+    const angles = [-90, -60, -120, -30, -150, 0, 180];
     return (
-      <G transform={`translate(${cx - 40 * scale}, ${cy - 35 * scale}) scale(${scale})`}>
-        <Path
-          d="M40 70 Q32 40 40 12 Q48 40 40 70"
-          fill={color}
-          fillOpacity={1}
-        />
-        <Path
-          d="M40 70 Q10 45 15 20 Q30 38 40 70"
-          fill={color}
-          fillOpacity={0.85}
-        />
-        <Path
-          d="M40 70 Q70 45 65 20 Q50 38 40 70"
-          fill={color}
-          fillOpacity={0.85}
-        />
-        <Path
-          d="M40 70 Q0 55 5 32 Q25 45 40 70"
-          fill={color}
-          fillOpacity={0.65}
-        />
-        <Path
-          d="M40 70 Q80 55 75 32 Q55 45 40 70"
-          fill={color}
-          fillOpacity={0.65}
-        />
-        <Path
-          d="M40 70 Q-5 65 2 48 Q22 52 40 70"
-          fill={color}
-          fillOpacity={0.45}
-        />
-        <Path
-          d="M40 70 Q85 65 78 48 Q58 52 40 70"
-          fill={color}
-          fillOpacity={0.45}
-        />
+      <G>
+        {angles.map((angle, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const tipX = cx + Math.cos(rad) * r;
+          const tipY = cy + Math.sin(rad) * r * 0.85;
+          const opacity = i === 0 ? 1 : i < 3 ? 0.85 : i < 5 ? 0.65 : 0.45;
+          return (
+            <Path
+              key={angle}
+              d={`M${cx} ${cy + size * 0.1} Q${cx + Math.cos(rad) * r * 0.35} ${cy + Math.sin(rad) * r * 0.55} ${tipX} ${tipY} 
+                  Q${cx - Math.cos(rad) * r * 0.35} ${cy + Math.sin(rad) * r * 0.55} ${cx} ${cy + size * 0.1}`}
+              fill={color}
+              fillOpacity={opacity}
+            />
+          );
+        })}
+        <Circle cx={cx} cy={cy + size * 0.06} r={size * 0.08} fill={color} />
       </G>
     );
   };
 
   const renderLutealLotus = () => {
+    const r = size * 0.34;
+    const angles = [-90, -50, -130, -15, -165];
     return (
-      <G transform={`translate(${cx - 40 * scale}, ${cy - 35 * scale}) scale(${scale})`}>
-        <Path
-          d="M40 70 Q32 45 40 18 Q48 45 40 70"
-          fill={color}
-          fillOpacity={0.9}
-        />
-        <Path
-          d="M40 70 Q18 52 22 30 Q33 44 40 70"
-          fill={color}
-          fillOpacity={0.7}
-        />
-        <Path
-          d="M40 70 Q62 52 58 30 Q47 44 40 70"
-          fill={color}
-          fillOpacity={0.7}
-        />
-        <Path
-          d="M40 70 Q10 60 15 42 Q30 50 40 70"
-          fill={color}
-          fillOpacity={0.5}
-        />
-        <Path
-          d="M40 70 Q70 60 65 42 Q50 50 40 70"
-          fill={color}
-          fillOpacity={0.5}
-        />
+      <G>
+        {angles.map((angle, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const tipX = cx + Math.cos(rad) * r;
+          const tipY = cy + Math.sin(rad) * r * 0.85;
+          const opacity = i === 0 ? 0.9 : i < 3 ? 0.7 : 0.5;
+          return (
+            <Path
+              key={angle}
+              d={`M${cx} ${cy + size * 0.08} Q${cx + Math.cos(rad) * r * 0.3} ${cy + Math.sin(rad) * r * 0.5} ${tipX} ${tipY} 
+                  Q${cx - Math.cos(rad) * r * 0.3} ${cy + Math.sin(rad) * r * 0.5} ${cx} ${cy + size * 0.08}`}
+              fill={color}
+              fillOpacity={opacity}
+            />
+          );
+        })}
+        <Circle cx={cx} cy={cy + size * 0.05} r={size * 0.065} fill={color} />
       </G>
     );
   };
@@ -160,4 +137,8 @@ export function Lotus({ phase, size = 80, color = BRAND_PINK }: LotusProps) {
       {renderLotus()}
     </Svg>
   );
+}
+
+export function LotusIcon({ phase, size = 20, color = BRAND_PINK }: LotusProps) {
+  return <Lotus phase={phase} size={size} color={color} />;
 }
