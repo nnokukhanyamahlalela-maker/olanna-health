@@ -6,8 +6,10 @@ import Animated, {
   withTiming,
   withSequence,
   withDelay,
+  withRepeat,
   Easing,
   runOnJS,
+  interpolate,
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -27,22 +29,26 @@ export default function SplashScreen() {
 
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.8);
-  const logoTranslateY = useSharedValue(20);
+  const floatValue = useSharedValue(0);
 
   useEffect(() => {
     logoOpacity.value = withSequence(
-      withTiming(1, { duration: 800, easing: Easing.out(Easing.ease) }),
-      withDelay(1200, withTiming(0, { duration: 500 }))
+      withTiming(1, { duration: 1000, easing: Easing.out(Easing.ease) }),
+      withDelay(5000, withTiming(0, { duration: 800 }))
     );
 
     logoScale.value = withSequence(
-      withTiming(1, { duration: 800, easing: Easing.out(Easing.back(1.2)) }),
-      withDelay(1200, withTiming(1.1, { duration: 500 }))
+      withTiming(1, { duration: 1000, easing: Easing.out(Easing.back(1.2)) }),
+      withDelay(5000, withTiming(1.05, { duration: 800 }))
     );
 
-    logoTranslateY.value = withSequence(
-      withTiming(0, { duration: 800, easing: Easing.out(Easing.ease) }),
-      withDelay(1200, withTiming(-20, { duration: 500 }))
+    floatValue.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
     );
 
     const navigateAway = async () => {
@@ -56,18 +62,22 @@ export default function SplashScreen() {
 
     const timer = setTimeout(() => {
       runOnJS(navigateAway)();
-    }, 2500);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const animatedLogoStyle = useAnimatedStyle(() => ({
-    opacity: logoOpacity.value,
-    transform: [
-      { scale: logoScale.value },
-      { translateY: logoTranslateY.value },
-    ],
-  }));
+  const animatedLogoStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(floatValue.value, [0, 1], [0, -12]);
+    
+    return {
+      opacity: logoOpacity.value,
+      transform: [
+        { scale: logoScale.value },
+        { translateY },
+      ],
+    };
+  });
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
