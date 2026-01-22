@@ -142,6 +142,14 @@ export default function HealthScreen() {
 
         <View style={styles.modulesList}>
           <HealthModuleCard
+            title="Cycle Calculator"
+            description="Predict your next period and ovulation based on your cycle length."
+            icon="calendar"
+            color={theme.primary}
+            onPress={() => navigation.navigate("CycleCalculator")}
+          />
+
+          <HealthModuleCard
             title="Fertility Tracking"
             description="Log BBT, cervical mucus, and LH tests for accurate ovulation prediction."
             icon="thermometer"
