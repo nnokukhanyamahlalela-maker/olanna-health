@@ -11,6 +11,7 @@ import Svg, { Path, Circle } from "react-native-svg";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
+import { AnimatedLogo } from "@/components/AnimatedLogo";
 import { SymptomChip } from "@/components/SymptomChip";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
@@ -142,10 +143,8 @@ export default function OnboardingScreen() {
 
   const renderStep1 = () => (
     <View style={styles.stepContent}>
-      <ThemedText type="h1" style={styles.title}>
-        Welcome to Olanna Health
-      </ThemedText>
-      <ThemedText type="body" style={styles.subtitle}>
+      <AnimatedLogo />
+      <ThemedText type="body" style={[styles.subtitle, { marginTop: 24 }]}>
         Where science meets softness. Your personal wellness companion blending evidence-based medicine with nurturing care for African women.
       </ThemedText>
       <View style={[styles.valueCard, { backgroundColor: theme.backgroundDefault }]}>
