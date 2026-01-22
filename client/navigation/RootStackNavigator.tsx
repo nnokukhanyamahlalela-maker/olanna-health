@@ -16,6 +16,7 @@ import FertilityTrackingScreen from "@/screens/FertilityTrackingScreen";
 import InsightsScreen from "@/screens/InsightsScreen";
 import CheckInScreen from "@/screens/CheckInScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
+import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type RootStackParamList = {
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   Insights: undefined;
   CheckIn: undefined;
   Profile: undefined;
+  CycleCalculator: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -133,6 +135,13 @@ export default function RootStackNavigator() {
         component={ProfileScreen}
         options={{
           headerTitle: "Profile",
+        }}
+      />
+      <Stack.Screen
+        name="CycleCalculator"
+        component={CycleCalculatorScreen}
+        options={{
+          headerTitle: "Cycle Calculator",
         }}
       />
     </Stack.Navigator>

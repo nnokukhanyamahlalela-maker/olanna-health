@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { LotusIcon } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { storage, DailyLog, UserProfile, calculateCycleData } from "@/lib/storage";
@@ -297,20 +298,20 @@ export default function CalendarScreen() {
 
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: BRAND_PINK + "40" }]} />
+            <LotusIcon phase="menstrual" size={18} color={BRAND_PINK} />
             <ThemedText type="caption">Period</ThemedText>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#A8BFA530" }]} />
+            <LotusIcon phase="follicular" size={18} color="#A8BFA5" />
             <ThemedText type="caption">Fertile</ThemedText>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#C9A24D40" }]} />
+            <LotusIcon phase="ovulation" size={18} color="#C9A24D" />
             <ThemedText type="caption">Ovulation</ThemedText>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: BRAND_PINK }]} />
-            <ThemedText type="caption">Logged</ThemedText>
+            <LotusIcon phase="luteal" size={18} color="#C8BFD6" />
+            <ThemedText type="caption">Luteal</ThemedText>
           </View>
         </View>
 

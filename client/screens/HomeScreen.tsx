@@ -163,17 +163,26 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        <View style={styles.greeting}>
-          <ThemedText type="h2">
-            {getGreeting()}, {profile.name.split(" ")[0]}
-          </ThemedText>
-          <ThemedText type="body" style={styles.dateText}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </ThemedText>
+        <View style={styles.greetingRow}>
+          <View style={styles.greeting}>
+            <ThemedText type="h2">
+              {getGreeting()}, {profile.name.split(" ")[0]}
+            </ThemedText>
+            <ThemedText type="body" style={styles.dateText}>
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </ThemedText>
+          </View>
+          <Pressable
+            onPress={() => navigation.navigate("Profile")}
+            style={[styles.profileButton, { backgroundColor: theme.backgroundSecondary }]}
+            testID="profile-button"
+          >
+            <Feather name="user" size={20} color={theme.text} />
+          </Pressable>
         </View>
 
         <View style={styles.wheelSection}>
@@ -280,9 +289,22 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
-  greeting: {
+  greetingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: Spacing.xl,
+  },
+  greeting: {
+    flex: 1,
     gap: Spacing.xs,
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   dateText: {
     opacity: 0.7,
