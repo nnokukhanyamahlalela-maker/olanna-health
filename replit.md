@@ -93,9 +93,8 @@ server/
 - AfricanPattern component for subtle cultural background textures
 - PrivacyBadge component for trust indicators on sensitive screens
 - 5-step onboarding: Welcome, Profile Setup, Health Goals, Lotus Explanation, View Selection
-- 4-tab navigation: Cycle, Calendar, Health (centered), Learn
+- 5-tab navigation: Cycle, Check-in, Calendar, Health (centered), Learn
 - Profile accessible via header button on Home screen
-- CheckIn accessible via stack navigation from Home screen actions
 - Health modules for PCOS, Endometriosis, Sexual Health, Cervical Screening
 - AI Health Assistant chat interface
 - Comprehensive symptom tracking system (January 2026):
@@ -110,8 +109,9 @@ server/
   - Local insights engine for pattern detection (non-diagnostic)
   - Symptom customization: hide/restore symptoms, favorites via long-press, category reordering
   - Free-text notes support for detailed symptom context
-- **Navigation Redesign (January 2026)**: Streamlined 4-tab bottom navigation
+- **Navigation Redesign (January 2026)**: Streamlined 5-tab bottom navigation
   - Moved Profile to header button (top right on Home screen)
+  - Restored Check-in tab to bottom navigation
   - Added CycleCalculator screen for period/ovulation predictions
   - Calendar legend now uses minimalistic lotus icons per phase
   - Splash screen with wavy animation and SVG lotus "O" logo

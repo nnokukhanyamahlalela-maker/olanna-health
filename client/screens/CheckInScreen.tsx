@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -49,6 +50,7 @@ type ViewMode = 'categories' | 'bodymap' | 'patterns';
 export default function CheckInScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
 
   const today = new Date().toISOString().split('T')[0];
@@ -361,7 +363,7 @@ export default function CheckInScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + Spacing.xl + 80 },
+          { paddingBottom: tabBarHeight + Spacing.xl + 80 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -420,7 +422,7 @@ export default function CheckInScreen() {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.saveButtonContainer, { bottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.saveButtonContainer, { bottom: tabBarHeight + Spacing.lg }]}>
         <Button onPress={handleSaveCheckIn} testID="save-checkin">
           Save Today's Check-in
         </Button>
