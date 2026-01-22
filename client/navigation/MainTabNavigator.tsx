@@ -5,6 +5,7 @@ import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
+import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
 import CheckInStackNavigator from "@/navigation/CheckInStackNavigator";
 import HealthStackNavigator from "@/navigation/HealthStackNavigator";
 import LearnStackNavigator from "@/navigation/LearnStackNavigator";
@@ -13,6 +14,7 @@ import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
+  CalendarTab: undefined;
   CheckInTab: undefined;
   HealthTab: undefined;
   LearnTab: undefined;
@@ -58,9 +60,19 @@ export default function MainTabNavigator() {
         name="HomeTab"
         component={HomeStackNavigator}
         options={{
-          title: "Home",
+          title: "Cycle",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="sun" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CalendarTab"
+        component={CalendarStackNavigator}
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="calendar" size={size} color={color} />
           ),
         }}
       />
