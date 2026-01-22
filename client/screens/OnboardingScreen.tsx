@@ -142,9 +142,6 @@ export default function OnboardingScreen() {
 
   const renderStep1 = () => (
     <View style={styles.stepContent}>
-      <View style={[styles.logoContainer, { backgroundColor: theme.primary + "15" }]}>
-        <MiniLotus color={theme.primary} size={100} />
-      </View>
       <ThemedText type="h1" style={styles.title}>
         Welcome to Olanna Health
       </ThemedText>
