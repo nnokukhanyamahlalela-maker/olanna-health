@@ -10,7 +10,7 @@ interface AnimatedLogoProps {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const VIDEO_SIZE = Math.min(SCREEN_WIDTH * 0.9, 350);
 
-const videoSource = require('../assets/videos/olanna-logo-animation.mp4');
+const videoSource = require('../assets/videos/olanna-logo-animation.mov');
 
 export function AnimatedLogo({ onAnimationComplete }: AnimatedLogoProps) {
   const { theme } = useTheme();
