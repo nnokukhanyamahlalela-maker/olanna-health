@@ -144,29 +144,9 @@ export default function OnboardingScreen() {
   const renderStep1 = () => (
     <View style={styles.stepContent}>
       <AnimatedLogo />
-      <ThemedText type="body" style={[styles.subtitle, { marginTop: 24 }]}>
-        Where science meets softness. Your personal wellness companion blending evidence-based medicine with nurturing care for African women.
+      <ThemedText type="body" style={[styles.subtitle, { marginTop: Spacing.md }]}>
+        Your personal wellness companion for African women
       </ThemedText>
-      <View style={[styles.valueCard, { backgroundColor: theme.backgroundDefault }]}>
-        <View style={styles.valueRow}>
-          <Feather name="shield" size={18} color={theme.info} />
-          <ThemedText type="small" style={{ flex: 1 }}>
-            Privacy-first: Your data stays on your device
-          </ThemedText>
-        </View>
-        <View style={styles.valueRow}>
-          <Feather name="heart" size={18} color={theme.secondary} />
-          <ThemedText type="small" style={{ flex: 1 }}>
-            Designed for African women's health needs
-          </ThemedText>
-        </View>
-        <View style={styles.valueRow}>
-          <Feather name="book-open" size={18} color={theme.primary} />
-          <ThemedText type="small" style={{ flex: 1 }}>
-            South African health guidelines integrated
-          </ThemedText>
-        </View>
-      </View>
       <Button onPress={handleNext} style={styles.button}>
         Get Started
       </Button>
@@ -523,7 +503,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: Spacing.sm,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.sm,
   },
   viewOptions: {
     flexDirection: "row",
