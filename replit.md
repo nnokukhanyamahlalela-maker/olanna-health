@@ -17,7 +17,7 @@ Olanna Health is a context-sensitive femtech mobile application designed for Afr
 - **Frontend**: React Native with Expo (Expo Go compatible)
 - **Backend**: Express.js with TypeScript
 - **Storage**: AsyncStorage for local data persistence
-- **UI**: "Soft, grounded, intelligent" aesthetic with Playfair Display headings, Inter body text, Feather icons
+- **UI**: "Soft, grounded, intelligent" aesthetic with Poppins font, Feather icons
 - **Navigation**: React Navigation with bottom tabs and stack navigators
 
 ## Project Structure
@@ -63,7 +63,7 @@ server/
 - **Text Secondary**: Taupe Brown (#7A6A5F)
 - **Accent Colors**: Muted Gold (#C9A24D), Dusty Lavender (#C8BFD6), Sage Green (#A8BFA5), Soft Terracotta (#D98C7A)
 - **Phase Colors**: Menstrual (Soft Terracotta #D98C7A), Follicular (Sage Green #A8BFA5), Ovulation (Muted Gold #C9A24D), Luteal (Dusty Lavender #C8BFD6)
-- **Fonts**: Playfair Display (headings), Inter (body/UI), Manrope (numbers)
+- **Fonts**: Poppins (all text - headings, body, and numbers)
 - **Aesthetic**: Earthy pastels with African warmth, subtle cultural patterns
 - **Theme Presets**: Olanna (default), Blossom, Garden, Dreamy
 - **Visualization**: Lotus flower (primary, phase-aware colors) or cycle wheel (user selectable)
