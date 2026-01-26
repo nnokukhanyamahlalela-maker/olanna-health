@@ -75,16 +75,6 @@ export default function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="CalendarTab"
-        component={CalendarStackNavigator}
-        options={{
-          title: "Calendar",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="calendar" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="HealthTab"
         component={HealthStackNavigator}
         options={{
@@ -108,6 +98,16 @@ export default function MainTabNavigator() {
             >
               <Feather name="heart" size={22} color="#FFFFFF" />
             </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CalendarTab"
+        component={CalendarStackNavigator}
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="calendar" size={size} color={color} />
           ),
         }}
       />
