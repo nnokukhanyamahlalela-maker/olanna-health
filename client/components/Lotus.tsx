@@ -53,6 +53,13 @@ export const PHASE_BG_COLORS = {
   luteal: PhaseColors.luteal.light,
 };
 
+export const PHASE_GRADIENTS = {
+  menstrual: [PhaseColors.menstrual.gradientStart, PhaseColors.menstrual.gradientEnd],
+  follicular: [PhaseColors.follicular.gradientStart, PhaseColors.follicular.gradientEnd],
+  ovulation: [PhaseColors.ovulation.gradientStart, PhaseColors.ovulation.gradientEnd],
+  luteal: [PhaseColors.luteal.gradientStart, PhaseColors.luteal.gradientEnd],
+};
+
 export function Lotus({ 
   phase, 
   size = 120, 

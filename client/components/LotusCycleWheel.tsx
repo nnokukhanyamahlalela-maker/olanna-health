@@ -1,16 +1,17 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Svg, { Circle, Path, G, Defs, LinearGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Path, G, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "./ThemedText";
-import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "./Lotus";
+import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_GRADIENTS, PHASE_BG_COLORS } from "./Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, PhaseColors } from "@/constants/theme";
 
-const DUSTY_ROSE = "#D4A99A";
-const DUSTY_ROSE_LIGHT = "#F5E8E4";
-const CREAM = "#FAF6F3";
-const CHARCOAL = "#3A3530";
+const PINK_PRIMARY = "#F6BFD3";
+const PINK_SOFT = "#FBE3EC";
+const BG_MAIN = "#FFF7FA";
+const CHARCOAL = "#3A2F35";
 
 interface LotusCycleWheelProps {
   currentDay: number;
@@ -138,10 +139,10 @@ export function LotusCycleWheel({
       <View style={styles.wheelContainer}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           <Defs>
-            <LinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={DUSTY_ROSE_LIGHT} />
-              <Stop offset="100%" stopColor={CREAM} />
-            </LinearGradient>
+            <SvgLinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor={PINK_SOFT} />
+              <Stop offset="100%" stopColor={BG_MAIN} />
+            </SvgLinearGradient>
           </Defs>
           
           <Circle
@@ -149,7 +150,7 @@ export function LotusCycleWheel({
             cy={center}
             r={outerRadius}
             fill="url(#bgGradient)"
-            stroke={DUSTY_ROSE}
+            stroke={PINK_PRIMARY}
             strokeWidth={1}
             opacity={0.5}
           />
@@ -158,8 +159,8 @@ export function LotusCycleWheel({
             cx={center}
             cy={center}
             r={innerRadius}
-            fill={CREAM}
-            stroke={`${DUSTY_ROSE}40`}
+            fill={BG_MAIN}
+            stroke={`${PINK_PRIMARY}40`}
             strokeWidth={1}
           />
           
@@ -167,14 +168,16 @@ export function LotusCycleWheel({
         </Svg>
         
         <View style={styles.lotusContainer}>
-          <View 
+          <LinearGradient 
+            colors={PHASE_GRADIENTS[phase] as [string, string]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={[
               styles.lotusBg, 
               { 
                 width: lotusSize * 0.75,
                 height: lotusSize * 0.75,
                 borderRadius: lotusSize * 0.375,
-                backgroundColor: phaseBgColor,
               }
             ]} 
           />
