@@ -8,11 +8,12 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { CycleWheel } from "@/components/CycleWheel";
-import { LotusWheel } from "@/components/LotusWheel";
+import { LotusCycleCard } from "@/components/LotusCycleCard";
 import { InsightCard } from "@/components/InsightCard";
 import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
+import { PHASE_INFO } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
@@ -39,28 +40,11 @@ function getPhaseInsight(phase: CycleData["phase"]): {
   title: string;
   description: string;
 } {
-  switch (phase) {
-    case "menstrual":
-      return {
-        title: "Rest & Restore",
-        description: "Your body is renewing itself. Focus on gentle movement and nourishing foods rich in iron.",
-      };
-    case "follicular":
-      return {
-        title: "Rising Energy",
-        description: "Like the lotus rising from the water, your energy is building. Great time for new beginnings.",
-      };
-    case "ovulation":
-      return {
-        title: "Peak Vitality",
-        description: "You are in full bloom. Your energy and confidence are at their highest.",
-      };
-    case "luteal":
-      return {
-        title: "Wind Down",
-        description: "Time to nurture yourself. Your body is preparing for renewal, like a flower closing for the night.",
-      };
-  }
+  const info = PHASE_INFO[phase];
+  return {
+    title: info.title,
+    description: info.description,
+  };
 }
 
 export default function HomeScreen() {
@@ -207,9 +191,11 @@ export default function HomeScreen() {
           </View>
 
           {useLotusView ? (
-            <LotusWheel 
-              cycleData={cycleData} 
-              onLogPeriod={() => navigation.navigate("CheckIn")}
+            <LotusCycleCard 
+              phase={cycleData.phase}
+              currentDay={cycleData.currentDay}
+              cycleLength={cycleData.cycleLength}
+              size={180}
             />
           ) : (
             <CycleWheel cycleData={cycleData} />

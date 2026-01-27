@@ -9,6 +9,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import {
   Poppins_300Light,
+  Poppins_300Light_Italic,
   Poppins_400Regular,
   Poppins_500Medium,
   Poppins_600SemiBold,
@@ -26,6 +27,7 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     Poppins_300Light,
+    Poppins_300Light_Italic,
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
