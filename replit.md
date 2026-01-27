@@ -54,19 +54,19 @@ server/
 ```
 
 ## Design System
-- **Brand Philosophy**: "Soft, grounded, intelligent" - calm enough for vulnerable moments, serious enough to be trusted for health
-- **Primary Color**: Blush Lotus (#F4B6C2)
-- **Secondary Color**: Soft Clay (#D6B2A2)
-- **Background**: Warm Ivory (#FFF7F2)
-- **Cards**: Sandstone Beige (#F1E6DE)
-- **Text Primary**: Deep Cocoa (#3A2F2A)
-- **Text Secondary**: Taupe Brown (#7A6A5F)
-- **Accent Colors**: Muted Gold (#C9A24D), Dusty Lavender (#C8BFD6), Sage Green (#A8BFA5), Soft Terracotta (#D98C7A)
-- **Phase Colors**: Menstrual (Soft Terracotta #D98C7A), Follicular (Sage Green #A8BFA5), Ovulation (Muted Gold #C9A24D), Luteal (Dusty Lavender #C8BFD6)
-- **Fonts**: Poppins (all text - headings, body, and numbers)
-- **Aesthetic**: Earthy pastels with African warmth, subtle cultural patterns
-- **Theme Presets**: Olanna (default), Blossom, Garden, Dreamy
-- **Visualization**: Lotus flower (primary, phase-aware colors) or cycle wheel (user selectable)
+- **Brand Philosophy**: "Editorial Elegance meets African Wellness" - sophisticated, refined, like a luxury wellness magazine
+- **Primary Color**: Dusty Rose (#D4A99A)
+- **Secondary Color**: Taupe (#C4B5AD)
+- **Background**: Cream (#FAF6F3)
+- **Cards**: Warm White (#FFFCFA) with Sand borders (#E5DDD8)
+- **Text Primary**: Charcoal (#3A3530)
+- **Text Secondary**: Warm Gray (#6B635C)
+- **Accent Colors**: Gold (#C9A86C), Sage (#B8C4B8), Lavender (#C8C0D0), Terracotta (#D4A090)
+- **Phase Colors**: Menstrual (Terracotta #D4A090), Follicular (Sage #B8C4B8), Ovulation (Gold #C9A86C), Luteal (Lavender #C8C0D0)
+- **Fonts**: Poppins throughout - Light (300) for body, Medium (500) for emphasis, SemiBold (600) for headings
+- **Aesthetic**: Vogue-inspired editorial elegance with muted tones, generous whitespace, thin dividers
+- **Typography Style**: Uppercase section labels with letter-spacing, pull quotes with left border accent
+- **Visualization**: Minimalist lotus flower (3-7 petals by phase) or cycle wheel (user selectable)
 
 ## Running the App
 1. Backend starts on port 5000
@@ -82,12 +82,16 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
-- **Design System Refresh (January 2026)**: Complete brand refresh with refined color palette
-  - New philosophy: "Soft, grounded, intelligent"
-  - New typography: Playfair Display (headings), Inter (body), Manrope (numbers)
-  - New colors: Blush Lotus, Soft Clay, Warm Ivory, Sandstone Beige, Deep Cocoa, Taupe Brown
+- **Magazine-Style Redesign (January 2026)**: Complete visual refresh with Vogue-inspired editorial aesthetic
+  - New philosophy: "Editorial Elegance meets African Wellness"
+  - Typography: Poppins Light for body, Medium/SemiBold for headings
+  - Colors: Muted cream/dusty rose palette (Cream #FAF6F3, Dusty Rose #D4A99A)
+  - Editorial elements: Uppercase section labels, pull quotes with left border, thin dividers
+  - Magazine-style ArticleCard with featured article layout
+  - Refined QuickStatCard with clean typography
+  - HomeScreen hero greeting with split styling
   - Phase-aware colors: Terracotta (menstrual), Sage (follicular), Gold (ovulation), Lavender (luteal)
-  - LotusWheel with phase-based glow effects and mood labels
+  - LotusWheel with minimalist petal design
 - Theme presets: Olanna (default), Blossom, Garden, Dreamy
 - LotusWheel component with breathing animation and phase-aware colors
 - AfricanPattern component for subtle cultural background textures
