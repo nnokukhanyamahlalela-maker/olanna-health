@@ -85,18 +85,18 @@ export function BodyMap({ painPoints, onAddPainPoint, date }: BodyMapProps) {
                 <Circle
                   cx={region.x}
                   cy={region.y}
-                  r={painLevel > 0 ? 6 + painLevel : 5}
+                  r={painLevel > 0 ? 3 + painLevel * 0.5 : 2.5}
                   fill={getPainColor(painLevel)}
                   stroke={painLevel > 0 ? theme.secondary : 'transparent'}
-                  strokeWidth={painLevel > 0 ? 1 : 0}
+                  strokeWidth={painLevel > 0 ? 0.5 : 0}
                   onPress={() => handleRegionPress(region)}
                 />
                 {painLevel > 0 ? (
                   <Circle
                     cx={region.x}
                     cy={region.y}
-                    r={3 + painLevel}
-                    fill={`${theme.secondary}40`}
+                    r={1.5 + painLevel * 0.5}
+                    fill={`${theme.secondary}60`}
                   />
                 ) : null}
               </G>
@@ -112,8 +112,8 @@ export function BodyMap({ painPoints, onAddPainPoint, date }: BodyMapProps) {
               style={[
                 styles.touchPoint,
                 {
-                  left: `${region.x - 5}%`,
-                  top: `${region.y - 2}%`,
+                  left: (region.x / 100) * 200 - 12,
+                  top: (region.y / 160) * 320 - 12,
                 },
               ]}
               testID={`body-region-${region.id}`}
