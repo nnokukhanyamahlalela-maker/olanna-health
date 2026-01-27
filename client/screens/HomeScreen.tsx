@@ -14,6 +14,7 @@ import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { HeroCard } from "@/components/HeroCard";
+import { PhaseBadge } from "@/components/PhaseBadge";
 import { PHASE_INFO } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
@@ -174,26 +175,29 @@ export default function HomeScreen() {
           </ThemedText>
         </View>
 
-        <HeroCard style={styles.heroCard}>
+        <HeroCard style={styles.heroCard} phase={cycleData.phase}>
           <View style={styles.heroHeader}>
-            <ThemedText style={[styles.phaseTitle, { color: theme.text }]}>
-              {insight.title}
-            </ThemedText>
+            <PhaseBadge phase={cycleData.phase} size="small" />
             <Pressable
               onPress={toggleView}
-              style={[styles.toggleButton, { backgroundColor: theme.backgroundSecondary }]}
+              style={[styles.toggleButton, { backgroundColor: "rgba(255,255,255,0.5)" }]}
             >
               <Feather
                 name={useLotusView ? "circle" : "sun"}
                 size={14}
-                color={theme.textSecondary}
+                color="#3A2F35"
               />
             </Pressable>
           </View>
-          
-          <ThemedText style={[styles.phaseSubtitle, { color: theme.textSecondary }]}>
-            {insight.description}
-          </ThemedText>
+
+          <View style={styles.cycleDayContainer}>
+            <ThemedText style={styles.cycleDayNumber}>
+              {cycleData.currentDay}
+            </ThemedText>
+            <ThemedText style={styles.cycleDayLabel}>
+              Day of {cycleData.cycleLength}
+            </ThemedText>
+          </View>
 
           <View style={styles.wheelContainer}>
             {useLotusView ? (
@@ -209,26 +213,22 @@ export default function HomeScreen() {
             )}
           </View>
 
-          <View style={styles.heroStats}>
-            <View style={styles.heroStat}>
-              <ThemedText style={[styles.heroStatValue, { color: theme.text }]}>
-                {daysUntilPeriod > 0 ? daysUntilPeriod : "Today"}
-              </ThemedText>
-              <ThemedText style={[styles.heroStatLabel, { color: theme.textSecondary }]}>
-                {daysUntilPeriod > 0 ? "days to period" : "period starts"}
-              </ThemedText>
-            </View>
-            <View style={[styles.heroStatDivider, { backgroundColor: theme.border }]} />
-            <View style={styles.heroStat}>
-              <ThemedText style={[styles.heroStatValue, { color: theme.text }]}>
-                Day {cycleData.currentDay}
-              </ThemedText>
-              <ThemedText style={[styles.heroStatLabel, { color: theme.textSecondary }]}>
-                of {cycleData.cycleLength}
-              </ThemedText>
-            </View>
-          </View>
+          <ThemedText style={styles.phasePoetic}>
+            {insight.title}
+          </ThemedText>
         </HeroCard>
+
+        <View style={styles.insightTimeline}>
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            TODAY'S GUIDANCE
+          </ThemedText>
+          <View style={[styles.gentleInsight, { backgroundColor: theme.backgroundDefault }]}>
+            <Feather name="sun" size={18} color={theme.primary} style={styles.insightIcon} />
+            <ThemedText style={[styles.insightText, { color: theme.text }]}>
+              {insight.description}
+            </ThemedText>
+          </View>
+        </View>
 
         <View style={styles.quickStats}>
           <QuickStatCard
@@ -354,49 +354,58 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.md,
   },
-  phaseTitle: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 22,
-    letterSpacing: -0.3,
+  cycleDayContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.sm,
   },
-  phaseSubtitle: {
-    fontFamily: "DMSans_300Light",
+  cycleDayNumber: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 64,
+    lineHeight: 72,
+    color: "#3A2F35",
+    letterSpacing: 0.5,
+  },
+  cycleDayLabel: {
+    fontFamily: "DMSans_400Regular",
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: Spacing.lg,
+    lineHeight: 22,
+    color: "#3A2F35",
+    opacity: 0.7,
+    letterSpacing: 0.3,
   },
   wheelContainer: {
     alignItems: "center",
-    marginBottom: Spacing.lg,
+    marginVertical: Spacing.lg,
   },
-  heroStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.06)",
-  },
-  heroStat: {
-    flex: 1,
-    alignItems: "center",
-  },
-  heroStatValue: {
-    fontFamily: "DMSans_600SemiBold",
+  phasePoetic: {
+    fontFamily: "DMSans_500Medium",
     fontSize: 18,
     lineHeight: 28,
+    color: "#3A2F35",
+    textAlign: "center",
+    letterSpacing: 0.2,
   },
-  heroStatLabel: {
+  insightTimeline: {
+    marginBottom: Spacing.xl,
+  },
+  gentleInsight: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: Spacing.md,
+    borderRadius: 16,
+    gap: Spacing.md,
+  },
+  insightIcon: {
+    marginTop: 2,
+  },
+  insightText: {
+    flex: 1,
     fontFamily: "DMSans_400Regular",
-    fontSize: 12,
-    lineHeight: 20,
-    marginTop: 4,
-  },
-  heroStatDivider: {
-    width: 1,
-    height: 32,
+    fontSize: 15,
+    lineHeight: 26,
+    letterSpacing: 0.2,
   },
   toggleButton: {
     width: 32,
