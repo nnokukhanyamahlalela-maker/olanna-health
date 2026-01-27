@@ -6,12 +6,18 @@ import {
   Pressable,
   TextInput,
   Modal,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { RootStackParamList } from '@/navigation/RootStackNavigator';
+import { generateDailyDecode, CyclePhase } from '@/lib/dailyDecode';
+import { storage, calculateCycleData } from '@/lib/storage';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -47,11 +53,14 @@ import {
 
 type ViewMode = 'categories' | 'bodymap' | 'patterns';
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function CheckInScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -223,13 +232,36 @@ export default function CheckInScreen() {
   };
 
   const handleSaveCheckIn = async () => {
-    const symptoms = Array.from(selectedSymptoms.values());
-    await saveDailyCheckIn({
-      date: today,
-      symptoms,
-      painPoints,
-      completedAt: Date.now(),
-    });
+    try {
+      const symptoms = Array.from(selectedSymptoms.values());
+      await saveDailyCheckIn({
+        date: today,
+        symptoms,
+        painPoints,
+        completedAt: Date.now(),
+      });
+
+      const userProfile = await storage.getUserProfile();
+      const cycleData = userProfile ? calculateCycleData(userProfile) : null;
+      
+      const phase: CyclePhase = (cycleData?.phase as CyclePhase) || 'follicular';
+      const hasPCOS = userProfile?.hasPCOS || false;
+
+      const decode = generateDailyDecode({
+        symptoms,
+        phase,
+        hasPCOS,
+        hasEndometriosis: userProfile?.hasEndometriosis,
+      });
+
+      navigation.navigate('DailyDecode', { decode });
+    } catch (error) {
+      Alert.alert(
+        "Hmm — that didn't save",
+        "Try once more, I've got you.",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const loggedCount = selectedSymptoms.size + painPoints.length;

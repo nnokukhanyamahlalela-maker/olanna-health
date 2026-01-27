@@ -17,7 +17,9 @@ import InsightsScreen from "@/screens/InsightsScreen";
 import CheckInScreen from "@/screens/CheckInScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
+import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -35,6 +37,7 @@ export type RootStackParamList = {
   CheckIn: undefined;
   Profile: undefined;
   CycleCalculator: undefined;
+  DailyDecode: { decode: DailyDecodeOutput };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -142,6 +145,13 @@ export default function RootStackNavigator() {
         component={CycleCalculatorScreen}
         options={{
           headerTitle: "Cycle Calculator",
+        }}
+      />
+      <Stack.Screen
+        name="DailyDecode"
+        component={DailyDecodeScreen}
+        options={{
+          headerTitle: "Your Daily Decode",
         }}
       />
     </Stack.Navigator>

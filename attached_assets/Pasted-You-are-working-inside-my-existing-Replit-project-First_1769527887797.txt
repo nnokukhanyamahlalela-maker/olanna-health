@@ -1,0 +1,94 @@
+You are working inside my existing Replit project. First, inspect the repo to determine what framework this app uses (React/Next, React Native, Expo, Flutter, etc.) and where the Daily Check-in “Save Today’s Check-in” action is implemented.
+
+Goal:
+After a user saves symptoms, show a new “Your Daily Decode” output screen immediately. This output must be written in a singular bestie voice named Olanna (first-person “I”, never “we/us/our”).
+
+Step 1 — Audit
+1) Find the Daily Check-in screen/component and the “Save Today’s Check-in” button.
+2) Locate the save handler (function that runs on tap/click) and confirm where symptoms are stored or posted (state/store/API).
+3) Identify the existing navigation/routing pattern in this project (router, stack navigator, etc.).
+
+Step 2 — Implement “Your Daily Decode”
+Create a new screen/route/page titled:
+💖 “Your Daily Decode”
+
+After a successful save:
+- Navigate automatically to the Daily Decode screen.
+If save fails:
+- Show an error message in Olanna voice: “Hmm — that didn’t save. Try once more, I’ve got you.”
+
+Daily Decode UI sections (simple card layout):
+1) “Today’s vibe” (1–2 sentence insight)
+2) “What I’d do today” (movement suggestion)
+3) “Foods that’ll love you back today” (simple foods only)
+4) “Tiny reset idea” (<5 minutes)
+5) A short reassuring closing line (ex: “You’re not behind. I promise.”)
+
+Voice requirements (non-negotiable):
+- Olanna is ONE person: use “I”, “I’d suggest”, “I’ve got you”.
+- Do NOT use “we/us/our”.
+- Warm “girl’s girl” tone. Not clinical. No shaming. No medical claims.
+
+Step 3 — Add decoding logic
+Create a module/function:
+`generateDailyDecode({ symptoms, phase, hasPCOS })`
+
+Inputs:
+- symptoms: array/list of selected symptom IDs/labels (acne jawline/cheeks/back/chest, oily skin, dry skin, hair thinning/shedding, excess facial hair, etc.)
+- phase: one of [follicular, ovulatory, luteal, menstrual] (use whatever the app currently computes; if not available, default to "follicular")
+- hasPCOS: boolean (if the app has profile flags; otherwise default false but keep it extensible)
+
+Output shape:
+{
+  vibeText: string,
+  movementTitle: string,
+  movementBody: string,
+  foodsTitle: string,
+  foodsList: string[],
+  foodsBody: string,
+  tinyReset: string,
+  closingLine: string
+}
+
+Minimum rule logic (keep simple and extensible):
+- If hasPCOS AND (acne OR oily skin OR hair thinning/shedding OR excess facial hair):
+  movement => recommend low intensity (hot girl walk, stretching), avoid pushing hard today
+  foods => focus on common blood-sugar-stabilizing foods (no supplements)
+- If dry skin:
+  vibe mentions dehydration/sensitivity
+  foods include hydration + healthy fats (water, olive oil, avocado, eggs, salmon if allowed, nuts)
+- If hair thinning/shedding:
+  foods emphasize protein + iron-forward common foods (eggs, chicken, lentils, beans, spinach)
+Always include phase-based food suggestions (common foods only):
+- Follicular: eggs, spinach, oats, apples, yogurt
+- Ovulatory: leafy greens, berries, fish or tofu, quinoa, lemon water
+- Luteal: sweet potatoes, brown rice, chicken, bananas, dark chocolate
+- Menstrual: soups, lentils, red meat or beans, toast, herbal tea
+
+Important: Don’t overwhelm the user.
+- Keep lists to ~5 items max.
+- Use short, friendly sentences.
+
+Step 4 — Wire data through
+- Ensure the Daily Decode screen receives the just-logged symptoms + phase + hasPCOS.
+- If the app uses a global store (context/redux/etc.), read from there. Otherwise pass via navigation params/router state.
+- The decode should reflect TODAY’s check-in.
+
+Step 5 — Tests (if the repo has testing set up)
+If tests exist, add unit tests for `generateDailyDecode`:
+1) PCOS + acne/oily skin => low intensity movement + includes phase foods
+2) Dry skin => hydration/fats emphasis
+3) Luteal phase => includes luteal foods list
+If no tests exist, create a minimal test setup compatible with the project OR add a simple script that runs sample cases and prints output.
+
+Deliverables:
+- New Daily Decode screen/route
+- Navigation from Save -> Decode
+- `generateDailyDecode` module
+- Error state copy update
+- A list of all user-facing strings added/changed (so I can review Olanna’s voice)
+
+Proceed now by scanning the project structure and showing me:
+- Which framework you detected
+- The file(s) you will modify
+- Then implement the changes.
