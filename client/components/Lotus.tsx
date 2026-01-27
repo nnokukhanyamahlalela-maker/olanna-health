@@ -1,5 +1,7 @@
 import React from "react";
+import { View, StyleSheet } from "react-native";
 import Svg, { Path, G, Circle } from "react-native-svg";
+import { PhaseColors } from "@/constants/theme";
 
 export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal";
 
@@ -8,6 +10,8 @@ interface LotusProps {
   size?: number;
   strokeColor?: string;
   strokeWidth?: number;
+  showBackground?: boolean;
+  backgroundColor?: string;
 }
 
 const CHARCOAL = "#3A3530";
@@ -35,57 +39,97 @@ export const PHASE_INFO = {
   },
 };
 
+export const PHASE_COLORS = {
+  menstrual: PhaseColors.menstrual.primary,
+  follicular: PhaseColors.follicular.primary,
+  ovulation: PhaseColors.ovulation.primary,
+  luteal: PhaseColors.luteal.primary,
+};
+
+export const PHASE_BG_COLORS = {
+  menstrual: PhaseColors.menstrual.light,
+  follicular: PhaseColors.follicular.light,
+  ovulation: PhaseColors.ovulation.light,
+  luteal: PhaseColors.luteal.light,
+};
+
 export function Lotus({ 
   phase, 
   size = 120, 
   strokeColor = CHARCOAL,
-  strokeWidth = 1.2
+  strokeWidth = 1.2,
+  showBackground = false,
+  backgroundColor,
 }: LotusProps) {
   const viewBoxSize = 100;
   const cx = viewBoxSize / 2;
-  const stemBase = 85;
+
+  const bgColor = backgroundColor || PHASE_BG_COLORS[phase];
 
   const renderMenstrualLotus = () => {
     return (
       <G>
         <Path
-          d="M50 65 Q50 45 50 35 Q42 40 38 50 Q36 58 42 64 Q46 66 50 65"
+          d="M50 75 L50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 55 50 40 Q44 48 42 56 Q41 63 46 67 Q48 68 50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M47 55 Q46 58 45 60"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 55 50 40 Q56 48 58 56 Q59 63 54 67 Q52 68 50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M53 55 Q54 58 55 60"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 52 50 35"
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M50 65 Q50 42 50 32 Q58 37 62 48 Q64 58 58 64 Q54 66 50 65"
+          d="M50 45 Q50 50 50 55"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.6}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M50 65 Q50 40 50 28 Q50 38 50 65"
+          d="M46 69 Q44 72 40 71"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d={`M${cx} ${stemBase - 20} L${cx} ${stemBase}`}
+          d="M54 69 Q56 72 60 71"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        <Path
-          d="M48 67 Q45 70 42 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M52 67 Q55 70 58 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
@@ -97,64 +141,96 @@ export function Lotus({
     return (
       <G>
         <Path
-          d="M50 60 Q50 40 50 25 Q40 35 38 48 Q38 56 44 60 Q47 62 50 60"
+          d="M50 78 L50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 50 50 32 Q43 42 40 54 Q39 62 46 67 Q48 68 50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M46 50 Q45 55 44 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 50 50 32 Q57 42 60 54 Q61 62 54 67 Q52 68 50 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M54 50 Q55 55 56 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M44 68 Q36 52 32 38 Q26 50 32 62 Q38 68 44 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M37 52 Q36 56 35 59"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M56 68 Q64 52 68 38 Q74 50 68 62 Q62 68 56 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M63 52 Q64 56 65 59"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 68 Q50 48 50 28"
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M50 60 Q50 40 50 25 Q60 35 62 48 Q62 56 56 60 Q53 62 50 60"
+          d="M50 40 Q50 48 50 55"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.6}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M44 62 Q38 45 32 35 Q28 45 32 55 Q36 62 44 62"
+          d="M44 70 Q40 74 35 72"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M56 62 Q62 45 68 35 Q72 45 68 55 Q64 62 56 62"
+          d="M56 70 Q60 74 65 72"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M38 64 Q32 52 25 45 Q22 55 28 62 Q34 66 38 64"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M62 64 Q68 52 75 45 Q78 55 72 62 Q66 66 62 64"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d={`M${cx} ${stemBase - 22} L${cx} ${stemBase}`}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        <Path
-          d="M46 65 Q42 70 38 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M54 65 Q58 70 62 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
@@ -166,78 +242,142 @@ export function Lotus({
     return (
       <G>
         <Path
-          d="M50 55 Q50 35 50 20 Q45 30 44 42 Q44 52 50 55"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M50 55 Q50 35 50 20 Q55 30 56 42 Q56 52 50 55"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M46 58 Q38 42 35 28 Q28 38 32 50 Q36 58 46 58"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M54 58 Q62 42 65 28 Q72 38 68 50 Q64 58 54 58"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M40 62 Q28 52 22 40 Q15 50 22 60 Q30 66 40 62"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M60 62 Q72 52 78 40 Q85 50 78 60 Q70 66 60 62"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M35 65 Q18 60 12 50 Q8 62 18 68 Q28 70 35 65"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M65 65 Q82 60 88 50 Q92 62 82 68 Q72 70 65 65"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d={`M${cx} ${stemBase - 24} L${cx} ${stemBase}`}
+          d="M50 80 L50 65"
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
         <Path
-          d="M44 68 Q38 73 32 70"
+          d="M50 65 Q50 50 50 30 Q45 40 44 52 Q44 60 50 65"
           stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M47 45 Q46 50 46 54"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M56 68 Q62 73 68 70"
+          d="M50 65 Q50 50 50 30 Q55 40 56 52 Q56 60 50 65"
           stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M53 45 Q54 50 54 54"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M46 66 Q38 50 34 35 Q26 48 34 62 Q40 68 46 66"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M38 48 Q36 54 36 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M54 66 Q62 50 66 35 Q74 48 66 62 Q60 68 54 66"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M62 48 Q64 54 64 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M40 68 Q28 58 22 42 Q14 56 24 66 Q34 72 40 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M28 54 Q26 58 26 62"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M60 68 Q72 58 78 42 Q86 56 76 66 Q66 72 60 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M72 54 Q74 58 74 62"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M34 70 Q18 65 12 50 Q6 66 18 72 Q30 76 34 70"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M20 60 Q18 64 18 67"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M66 70 Q82 65 88 50 Q94 66 82 72 Q70 76 66 70"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M80 60 Q82 64 82 67"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M42 72 Q36 78 28 76"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.7}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M58 72 Q64 78 72 76"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
@@ -249,64 +389,126 @@ export function Lotus({
     return (
       <G>
         <Path
-          d="M50 58 Q50 38 50 24 Q43 34 42 46 Q42 54 48 58 Q50 60 50 58"
+          d="M50 78 L50 66"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 66 Q50 48 50 30 Q44 40 42 52 Q41 60 48 66 Q50 67 50 66"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M46 48 Q45 52 45 56"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 66 Q50 48 50 30 Q56 40 58 52 Q59 60 52 66 Q50 67 50 66"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M54 48 Q55 52 55 56"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M44 68 Q36 52 30 36 Q22 50 30 62 Q38 70 44 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M35 50 Q34 55 34 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M56 68 Q64 52 70 36 Q78 50 70 62 Q62 70 56 68"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M65 50 Q66 55 66 58"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M38 70 Q26 60 20 44 Q12 58 22 68 Q32 74 38 70"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M26 56 Q24 60 24 64"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M62 70 Q74 60 80 44 Q88 58 78 68 Q68 74 62 70"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M74 56 Q76 60 76 64"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth * 0.6}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M50 66 Q50 45 50 26"
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M50 58 Q50 38 50 24 Q57 34 58 46 Q58 54 52 58 Q50 60 50 58"
+          d="M50 38 Q50 45 50 52"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.6}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M44 60 Q36 44 32 32 Q26 44 32 54 Q38 62 44 60"
+          d="M42 72 Q36 76 30 74"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
         <Path
-          d="M56 60 Q64 44 68 32 Q74 44 68 54 Q62 62 56 60"
+          d="M58 72 Q64 76 70 74"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M38 63 Q28 52 22 42 Q18 54 26 62 Q34 66 38 63"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M62 63 Q72 52 78 42 Q82 54 74 62 Q66 66 62 63"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d={`M${cx} ${stemBase - 23} L${cx} ${stemBase}`}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        <Path
-          d="M46 66 Q40 70 36 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <Path
-          d="M54 66 Q60 70 64 68"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidth * 0.7}
           fill="none"
           strokeLinecap="round"
         />
@@ -327,6 +529,32 @@ export function Lotus({
     }
   };
 
+  if (showBackground) {
+    return (
+      <View style={[styles.backgroundContainer, { width: size, height: size }]}>
+        <View 
+          style={[
+            styles.circleBackground, 
+            { 
+              width: size * 0.9, 
+              height: size * 0.9, 
+              borderRadius: size * 0.45,
+              backgroundColor: bgColor,
+            }
+          ]} 
+        />
+        <Svg 
+          width={size} 
+          height={size} 
+          viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+          style={styles.svg}
+        >
+          {renderLotus()}
+        </Svg>
+      </View>
+    );
+  }
+
   return (
     <Svg 
       width={size} 
@@ -341,3 +569,32 @@ export function Lotus({
 export function LotusIcon({ phase, size = 24, strokeColor = CHARCOAL }: LotusProps) {
   return <Lotus phase={phase} size={size} strokeColor={strokeColor} strokeWidth={1.5} />;
 }
+
+export function LotusWithBackground({ 
+  phase, 
+  size = 80, 
+  strokeColor = CHARCOAL 
+}: Omit<LotusProps, 'showBackground'>) {
+  return (
+    <Lotus 
+      phase={phase} 
+      size={size} 
+      strokeColor={strokeColor} 
+      strokeWidth={1.2}
+      showBackground={true}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  backgroundContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleBackground: {
+    position: 'absolute',
+  },
+  svg: {
+    zIndex: 1,
+  },
+});
