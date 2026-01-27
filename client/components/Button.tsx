@@ -85,11 +85,14 @@ export function Button({
 const styles = StyleSheet.create({
   button: {
     height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
   buttonText: {
-    fontWeight: "600",
+    fontWeight: "500",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    fontSize: 13,
   },
 });

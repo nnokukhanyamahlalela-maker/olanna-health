@@ -7,7 +7,7 @@ interface LotusProps {
   color?: string;
 }
 
-const BRAND_PINK = "#F6A9D2";
+const DUSTY_ROSE = "#D4A99A";
 
 function createPetalPath(
   cx: number,
@@ -37,7 +37,7 @@ function createPetalPath(
   return `M${baseLeftX} ${baseLeftY} Q${cp1X} ${cp1Y} ${tipX} ${tipY} Q${cp2X} ${cp2Y} ${baseRightX} ${baseRightY} Z`;
 }
 
-export function Lotus({ phase, size = 80, color = BRAND_PINK }: LotusProps) {
+export function Lotus({ phase, size = 80, color = DUSTY_ROSE }: LotusProps) {
   const cx = size / 2;
   const cy = size / 2;
 
@@ -157,6 +157,6 @@ export function Lotus({ phase, size = 80, color = BRAND_PINK }: LotusProps) {
   );
 }
 
-export function LotusIcon({ phase, size = 20, color = BRAND_PINK }: LotusProps) {
+export function LotusIcon({ phase, size = 20, color = DUSTY_ROSE }: LotusProps) {
   return <Lotus phase={phase} size={size} color={color} />;
 }

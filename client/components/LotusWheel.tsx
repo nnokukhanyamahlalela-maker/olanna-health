@@ -6,7 +6,7 @@ import { ThemedText } from "./ThemedText";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { CycleData } from "@/lib/storage";
 
-const BRAND_PINK = "#F6A9D2";
+const DUSTY_ROSE = "#D4A99A";
 
 interface LotusWheelProps {
   cycleData: CycleData;
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xl,
   },
   logButton: {
-    backgroundColor: BRAND_PINK,
+    backgroundColor: DUSTY_ROSE,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing["2xl"],
     borderRadius: BorderRadius.full,

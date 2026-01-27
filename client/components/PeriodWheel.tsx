@@ -10,7 +10,7 @@ const { width: screenWidth } = Dimensions.get("window");
 const WHEEL_SIZE = Math.min(screenWidth - 48, 300);
 const LOTUS_SIZE = WHEEL_SIZE * 0.35;
 
-const BRAND_PINK = "#F6A9D2";
+const DUSTY_ROSE = "#D4A99A";
 
 interface PeriodWheelProps {
   currentDay: number;
@@ -115,7 +115,7 @@ export function PeriodWheel({
               <Path
                 key={index}
                 d={describeArc(cx, cy, outerRadius, startAngle, endAngle)}
-                fill={BRAND_PINK}
+                fill={DUSTY_ROSE}
                 fillOpacity={phaseData.opacity}
               />
             );
@@ -127,20 +127,20 @@ export function PeriodWheel({
             cx={todayPos.x}
             cy={todayPos.y}
             r={6}
-            fill={BRAND_PINK}
+            fill={DUSTY_ROSE}
           />
           <Line
             x1={todayPos.x}
             y1={todayPos.y}
             x2={todayLineEnd.x}
             y2={todayLineEnd.y}
-            stroke={BRAND_PINK}
+            stroke={DUSTY_ROSE}
             strokeWidth={2}
           />
         </Svg>
 
         <View style={styles.centerContent}>
-          <Lotus phase={phase} size={LOTUS_SIZE} color={BRAND_PINK} />
+          <Lotus phase={phase} size={LOTUS_SIZE} color={DUSTY_ROSE} />
         </View>
       </View>
 
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   phaseText: {
     fontSize: 16,
     fontWeight: "500",
-    color: BRAND_PINK,
+    color: DUSTY_ROSE,
   },
   periodText: {
     fontSize: 14,
