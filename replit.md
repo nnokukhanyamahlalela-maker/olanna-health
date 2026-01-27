@@ -55,8 +55,9 @@ server/
 
 ## Design System
 - **Brand Philosophy**: "Editorial Elegance meets African Wellness" - sophisticated, refined, like a luxury wellness magazine
-- **Primary Color**: Dusty Rose (#D4A99A)
-- **Secondary Color**: Taupe (#C4B5AD)
+- **Primary Color**: Logo Pink (#FEC8EE) - used for tabs, primary buttons, and accents
+- **Secondary Color**: Dusty Rose (#D4A99A) - complementary accent
+- **Tertiary Color**: Taupe (#C4B5AD)
 - **Background**: Cream (#FAF6F3)
 - **Cards**: Warm White (#FFFCFA) with Sand borders (#E5DDD8)
 - **Text Primary**: Charcoal (#3A3530)
@@ -82,6 +83,11 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
+- **Logo Pink Theme Update (January 2026)**: Updated primary color scheme
+  - Logo Pink (#FEC8EE) now used as primary accent color throughout the app
+  - Tab bar selection uses logo pink instead of dusty rose
+  - Splash screen simplified to match reference logo (bold "OLANNA" + wide-spaced "HEALTH" in pink)
+  - Health tab maintains circular pink button design
 - **Magazine-Style Redesign (January 2026)**: Complete visual refresh with Vogue-inspired editorial aesthetic
   - New philosophy: "Editorial Elegance meets African Wellness"
   - Typography: Poppins Light for body, Medium/SemiBold for headings
