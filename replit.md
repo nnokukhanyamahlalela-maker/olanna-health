@@ -147,3 +147,14 @@ server/
   - Timeline view showing past 3 months of cycle events (period, fertile window, PMS)
   - Enhanced day styling with colored borders and backgrounds for cycle phases
   - Selected day card showing logged symptoms and flow
+  - "The Lotus Cycle" phase legend with lotus icons for all 4 phases
+- **Lotus Flower Redesign (January 2026)**:
+  - Minimalist line-art style matching reference design
+  - Four distinct phases with progressive blooming:
+    - Menstrual: Tight closed bud (3 petals) - Terracotta
+    - Follicular: Opening bud (5 petals) - Sage
+    - Ovulatory: Full bloom (7+ petals spread wide) - Gold
+    - Luteal: Closing flower (6 petals) - Lavender
+  - Consistent styling across LotusCycleWheel and CalendarScreen
+  - Each phase has colored circular background matching phase color
+  - Phase info displays: title, subtitle description, and day counter
