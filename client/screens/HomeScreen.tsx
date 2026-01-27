@@ -384,13 +384,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroStatValue: {
-    fontFamily: "DMSans_500Medium",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 18,
+    lineHeight: 28,
   },
   heroStatLabel: {
-    fontFamily: "DMSans_300Light",
+    fontFamily: "DMSans_400Regular",
     fontSize: 12,
-    marginTop: 2,
+    lineHeight: 20,
+    marginTop: 4,
   },
   heroStatDivider: {
     width: 1,
@@ -416,9 +418,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   sectionLabel: {
-    fontFamily: "DMSans_400Regular",
+    fontFamily: "DMSans_500Medium",
     fontSize: 11,
     letterSpacing: 2,
+    lineHeight: 18,
     marginBottom: Spacing.md,
   },
   pullQuote: {
@@ -429,9 +432,9 @@ const styles = StyleSheet.create({
   pullQuoteTitle: {
     fontFamily: "DMSans_500Medium",
     fontSize: 20,
-    lineHeight: 28,
+    lineHeight: 32,
     marginBottom: Spacing.sm,
-    letterSpacing: -0.3,
+    letterSpacing: 0.1,
   },
   pullQuoteText: {
     fontFamily: "DMSans_300Light",

@@ -67,19 +67,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   value: {
-    fontFamily: "DMSans_500Medium",
+    fontFamily: "DMSans_700Bold",
     fontSize: 28,
-    lineHeight: 34,
-    letterSpacing: -0.5,
+    lineHeight: 38,
+    letterSpacing: 0.1,
   },
   subtitle: {
-    fontFamily: "DMSans_300Light",
+    fontFamily: "DMSans_400Regular",
     fontSize: 13,
+    lineHeight: 20,
   },
   title: {
-    fontFamily: "DMSans_400Regular",
+    fontFamily: "DMSans_500Medium",
     fontSize: 11,
-    letterSpacing: 0.5,
+    lineHeight: 18,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
 });
