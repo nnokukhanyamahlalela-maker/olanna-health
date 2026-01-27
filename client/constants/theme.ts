@@ -283,9 +283,9 @@ export const Colors = {
     border: VogueColors.sand,
     tint: VogueColors.dustyRose,
 
-    primary: VogueColors.dustyRose,
-    primaryLight: VogueColors.blushLight,
-    primaryDark: VogueColors.blushMuted,
+    primary: VogueColors.logoPink,
+    primaryLight: VogueColors.logoPinkLight,
+    primaryDark: VogueColors.logoPinkDark,
     secondary: VogueColors.taupe,
     secondaryLight: VogueColors.taupeLight,
     tertiary: VogueColors.lavender,
@@ -304,7 +304,7 @@ export const Colors = {
     info: VogueColors.lavender,
 
     tabIconDefault: VogueColors.taupe,
-    tabIconSelected: VogueColors.dustyRose,
+    tabIconSelected: VogueColors.logoPink,
 
     buttonText: VogueColors.warmWhite,
     buttonSecondaryText: VogueColors.charcoal,
@@ -344,9 +344,9 @@ export const Colors = {
     border: VogueColors.sand,
     tint: VogueColors.dustyRose,
 
-    primary: VogueColors.dustyRose,
-    primaryLight: VogueColors.blushLight,
-    primaryDark: VogueColors.blushMuted,
+    primary: VogueColors.logoPink,
+    primaryLight: VogueColors.logoPinkLight,
+    primaryDark: VogueColors.logoPinkDark,
     secondary: VogueColors.taupe,
     secondaryLight: VogueColors.taupeLight,
     tertiary: VogueColors.lavender,
@@ -365,7 +365,7 @@ export const Colors = {
     info: VogueColors.lavender,
 
     tabIconDefault: VogueColors.taupe,
-    tabIconSelected: VogueColors.dustyRose,
+    tabIconSelected: VogueColors.logoPink,
 
     buttonText: VogueColors.warmWhite,
     buttonSecondaryText: VogueColors.charcoal,

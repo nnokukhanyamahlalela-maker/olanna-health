@@ -4,13 +4,11 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSequence,
   withDelay,
   withSpring,
-  Easing,
   runOnJS,
 } from "react-native-reanimated";
-import Svg, { Circle, Ellipse } from "react-native-svg";
+import Svg, { Ellipse } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -23,8 +21,8 @@ const { width: screenWidth } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const PINK = "#FEC8EE";
-const DUSTY_ROSE = "#F8B4D9";
+const LOGO_PINK = "#FEC8EE";
+const CREAM = "#FAF6F3";
 
 interface AnimatedLetterProps {
   letter: string;
@@ -71,9 +69,9 @@ function AnimatedLetter({ letter, delay, style, isO }: AnimatedLetterProps) {
   if (isO) {
     return (
       <Animated.View style={[styles.oContainer, animatedStyle]}>
-        <Svg width={56} height={56} viewBox="0 0 56 56">
-          <Ellipse cx={28} cy={28} rx={26} ry={26} fill={PINK} />
-          <Ellipse cx={28} cy={28} rx={10} ry={10} fill="#FAF6F3" />
+        <Svg width={52} height={52} viewBox="0 0 52 52">
+          <Ellipse cx={26} cy={26} rx={24} ry={24} fill={LOGO_PINK} />
+          <Ellipse cx={26} cy={26} rx={8} ry={8} fill={CREAM} />
         </Svg>
       </Animated.View>
     );
@@ -131,38 +129,6 @@ function AnimatedHealthLetter({ letter, delay }: { letter: string; delay: number
   );
 }
 
-function AnimatedTaglineLetter({ letter, delay }: { letter: string; delay: number }) {
-  const translateY = useSharedValue(15);
-  const opacity = useSharedValue(0);
-
-  useEffect(() => {
-    translateY.value = withDelay(
-      delay,
-      withSpring(0, {
-        damping: 12,
-        stiffness: 150,
-      })
-    );
-    opacity.value = withDelay(
-      delay,
-      withTiming(1, { duration: 200 })
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <ThemedText style={styles.taglineLetter}>
-        {letter === " " ? "  " : letter}
-      </ThemedText>
-    </Animated.View>
-  );
-}
-
 export default function SplashScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
@@ -171,16 +137,13 @@ export default function SplashScreen() {
 
   const olannaLetters = ["O", "L", "A", "N", "N", "A"];
   const healthLetters = ["H", "E", "A", "L", "T", "H"];
-  const taglineText = "YOUR CYCLE COMPANION";
-  const taglineLetters = taglineText.split("");
 
   const baseDelay = 300;
   const letterDelay = 80;
   const healthStartDelay = baseDelay + olannaLetters.length * letterDelay + 200;
-  const taglineStartDelay = healthStartDelay + healthLetters.length * letterDelay + 300;
 
   useEffect(() => {
-    const totalAnimationTime = taglineStartDelay + taglineLetters.length * 40 + 2500;
+    const totalAnimationTime = healthStartDelay + healthLetters.length * letterDelay + 2000;
 
     containerOpacity.value = withDelay(
       totalAnimationTime,
@@ -230,16 +193,6 @@ export default function SplashScreen() {
             />
           ))}
         </View>
-
-        <View style={styles.taglineRow}>
-          {taglineLetters.map((letter, index) => (
-            <AnimatedTaglineLetter
-              key={`tagline-${index}`}
-              letter={letter}
-              delay={taglineStartDelay + index * 40}
-            />
-          ))}
-        </View>
       </Animated.View>
     </View>
   );
@@ -260,38 +213,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   oContainer: {
-    marginRight: -2,
+    marginRight: -4,
   },
   olannaLetter: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 48,
-    color: PINK,
-    letterSpacing: 2,
-    lineHeight: 56,
+    fontSize: 44,
+    color: LOGO_PINK,
+    letterSpacing: 1,
+    lineHeight: 52,
   },
   healthRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   healthLetter: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 18,
-    color: DUSTY_ROSE,
-    letterSpacing: 8,
-  },
-  taglineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 32,
-    flexWrap: "wrap",
-    justifyContent: "center",
-    paddingHorizontal: 40,
-  },
-  taglineLetter: {
-    fontFamily: "Poppins_300Light",
-    fontSize: 12,
-    color: "#9A8A80",
-    letterSpacing: 3,
+    fontSize: 16,
+    color: LOGO_PINK,
+    letterSpacing: 10,
   },
 });
