@@ -1,19 +1,16 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Svg, { Circle, Path, G, Defs, LinearGradient, Stop, Ellipse } from "react-native-svg";
+import Svg, { Circle, Path, G, Defs, LinearGradient, Stop } from "react-native-svg";
 
 import { ThemedText } from "./ThemedText";
-import { CyclePhase, PHASE_INFO } from "./Lotus";
+import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "./Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing } from "@/constants/theme";
+import { Spacing, PhaseColors } from "@/constants/theme";
 
 const DUSTY_ROSE = "#D4A99A";
 const DUSTY_ROSE_LIGHT = "#F5E8E4";
-const SAGE = "#B8C4B8";
-const GOLD = "#C9A86C";
-const LAVENDER = "#C8C0D0";
-const TERRACOTTA = "#D4A090";
 const CREAM = "#FAF6F3";
+const CHARCOAL = "#3A3530";
 
 interface LotusCycleWheelProps {
   currentDay: number;
@@ -24,16 +21,7 @@ interface LotusCycleWheelProps {
 }
 
 const getPhaseColor = (phase: CyclePhase): string => {
-  switch (phase) {
-    case "menstrual":
-      return TERRACOTTA;
-    case "follicular":
-      return SAGE;
-    case "ovulation":
-      return GOLD;
-    case "luteal":
-      return LAVENDER;
-  }
+  return PHASE_COLORS[phase];
 };
 
 const getPhaseForDay = (
@@ -58,12 +46,13 @@ export function LotusCycleWheel({
   const { theme } = useTheme();
   const phaseInfo = PHASE_INFO[phase];
   const phaseColor = getPhaseColor(phase);
+  const phaseBgColor = PHASE_BG_COLORS[phase];
   
   const size = 280;
   const center = size / 2;
   const outerRadius = size / 2 - 20;
   const innerRadius = outerRadius - 35;
-  const lotusRadius = innerRadius - 15;
+  const lotusSize = innerRadius * 1.4;
 
   const createPetalPath = (
     cx: number,
@@ -118,62 +107,6 @@ export function LotusCycleWheel({
     return `M${leftX} ${leftY} Q${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q${ctrlRightX} ${ctrlRightY} ${rightX} ${rightY} Z`;
   };
 
-  const renderCentralLotus = () => {
-    const lx = center;
-    const ly = center;
-    const petalCount = phase === "ovulation" ? 8 : phase === "follicular" ? 6 : phase === "luteal" ? 6 : 4;
-    const petalLength = phase === "ovulation" ? lotusRadius * 0.7 : phase === "menstrual" ? lotusRadius * 0.5 : lotusRadius * 0.6;
-    
-    const petals = [];
-    for (let i = 0; i < petalCount; i++) {
-      const angle = (i / petalCount) * 2 * Math.PI - Math.PI / 2;
-      const tipX = lx + Math.cos(angle) * petalLength;
-      const tipY = ly + Math.sin(angle) * petalLength;
-      const perpAngle = angle + Math.PI / 2;
-      const width = petalLength * 0.35;
-      
-      const leftX = lx + Math.cos(perpAngle) * width * 0.3;
-      const leftY = ly + Math.sin(perpAngle) * width * 0.3;
-      const rightX = lx - Math.cos(perpAngle) * width * 0.3;
-      const rightY = ly - Math.sin(perpAngle) * width * 0.3;
-      
-      const ctrlLeftX = lx + Math.cos(angle) * petalLength * 0.5 + Math.cos(perpAngle) * width;
-      const ctrlLeftY = ly + Math.sin(angle) * petalLength * 0.5 + Math.sin(perpAngle) * width;
-      const ctrlRightX = lx + Math.cos(angle) * petalLength * 0.5 - Math.cos(perpAngle) * width;
-      const ctrlRightY = ly + Math.sin(angle) * petalLength * 0.5 - Math.sin(perpAngle) * width;
-      
-      const path = `M${leftX} ${leftY} Q${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q${ctrlRightX} ${ctrlRightY} ${rightX} ${rightY} Z`;
-      
-      petals.push(
-        <Path
-          key={`lotus-petal-${i}`}
-          d={path}
-          fill={`${phaseColor}40`}
-          stroke={phaseColor}
-          strokeWidth={1}
-        />
-      );
-    }
-    
-    return (
-      <G>
-        <Circle
-          cx={lx}
-          cy={ly}
-          r={lotusRadius}
-          fill={CREAM}
-        />
-        {petals}
-        <Circle
-          cx={lx}
-          cy={ly}
-          r={12}
-          fill={`${phaseColor}60`}
-        />
-      </G>
-    );
-  };
-
   const renderDayPetals = () => {
     const petals = [];
     
@@ -189,7 +122,7 @@ export function LotusCycleWheel({
           key={`petal-${day}`}
           d={path}
           fill={isCurrentDay ? color : `${color}70`}
-          stroke={isCurrentDay ? "#3A3530" : color}
+          stroke={isCurrentDay ? CHARCOAL : color}
           strokeWidth={isCurrentDay ? 1.5 : 0.5}
         />
       );
@@ -202,37 +135,57 @@ export function LotusCycleWheel({
 
   return (
     <View style={styles.container}>
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Defs>
-          <LinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor={DUSTY_ROSE_LIGHT} />
-            <Stop offset="100%" stopColor={CREAM} />
-          </LinearGradient>
-        </Defs>
+      <View style={styles.wheelContainer}>
+        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <Defs>
+            <LinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor={DUSTY_ROSE_LIGHT} />
+              <Stop offset="100%" stopColor={CREAM} />
+            </LinearGradient>
+          </Defs>
+          
+          <Circle
+            cx={center}
+            cy={center}
+            r={outerRadius}
+            fill="url(#bgGradient)"
+            stroke={DUSTY_ROSE}
+            strokeWidth={1}
+            opacity={0.5}
+          />
+          
+          <Circle
+            cx={center}
+            cy={center}
+            r={innerRadius}
+            fill={CREAM}
+            stroke={`${DUSTY_ROSE}40`}
+            strokeWidth={1}
+          />
+          
+          {renderDayPetals()}
+        </Svg>
         
-        <Circle
-          cx={center}
-          cy={center}
-          r={outerRadius}
-          fill="url(#bgGradient)"
-          stroke={DUSTY_ROSE}
-          strokeWidth={1}
-          opacity={0.5}
-        />
-        
-        <Circle
-          cx={center}
-          cy={center}
-          r={innerRadius}
-          fill={CREAM}
-          stroke={`${DUSTY_ROSE}40`}
-          strokeWidth={1}
-        />
-        
-        {renderDayPetals()}
-        
-        {renderCentralLotus()}
-      </Svg>
+        <View style={styles.lotusContainer}>
+          <View 
+            style={[
+              styles.lotusBg, 
+              { 
+                width: lotusSize * 0.75,
+                height: lotusSize * 0.75,
+                borderRadius: lotusSize * 0.375,
+                backgroundColor: phaseBgColor,
+              }
+            ]} 
+          />
+          <Lotus 
+            phase={phase} 
+            size={lotusSize} 
+            strokeColor={CHARCOAL}
+            strokeWidth={1}
+          />
+        </View>
+      </View>
       
       <View style={styles.infoContainer}>
         <View style={styles.dayBadge}>
@@ -264,6 +217,19 @@ export function LotusCycleWheel({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+  },
+  wheelContainer: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusContainer: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusBg: {
+    position: "absolute",
   },
   infoContainer: {
     alignItems: "center",

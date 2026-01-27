@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
@@ -462,6 +463,39 @@ export default function CalendarScreen() {
           </View>
         </View>
 
+        <View style={[styles.phaseLegend, { backgroundColor: theme.cardBackground }]}>
+          <ThemedText type="h4" style={styles.sectionTitle}>
+            The Lotus Cycle
+          </ThemedText>
+          <View style={styles.phaseGrid}>
+            {(["menstrual", "follicular", "ovulation", "luteal"] as CyclePhase[]).map((p) => (
+              <View key={p} style={styles.phaseItem}>
+                <View 
+                  style={[
+                    styles.phaseLotusContainer, 
+                    { backgroundColor: PHASE_BG_COLORS[p] }
+                  ]}
+                >
+                  <Lotus phase={p} size={40} strokeWidth={0.8} />
+                </View>
+                <ThemedText 
+                  style={[
+                    styles.phaseLabel, 
+                    { color: PHASE_COLORS[p] }
+                  ]}
+                >
+                  {p === "ovulation" ? "Ovulatory" : p.charAt(0).toUpperCase() + p.slice(1)}
+                </ThemedText>
+                <ThemedText 
+                  style={[styles.phaseDesc, { color: theme.textSecondary }]}
+                >
+                  {PHASE_INFO[p].title}
+                </ThemedText>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {timeline.length > 0 ? (
           <View style={styles.timelineSection}>
             <ThemedText type="h4" style={styles.sectionTitle}>
@@ -723,5 +757,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.full,
+  },
+  phaseLegend: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+  },
+  phaseGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  phaseItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  phaseLotusContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.xs,
+  },
+  phaseLabel: {
+    fontSize: 10,
+    fontFamily: Fonts.bodySemibold,
+    textAlign: "center",
+  },
+  phaseDesc: {
+    fontSize: 9,
+    textAlign: "center",
+    marginTop: 2,
   },
 });
