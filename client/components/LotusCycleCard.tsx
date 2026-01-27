@@ -77,18 +77,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   phaseName: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 18,
     letterSpacing: 0.5,
   },
   phaseTitle: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 14,
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   phaseSubtitle: {
-    fontFamily: "Poppins_300Light_Italic",
+    fontFamily: "DMSans_300Light_Italic",
     fontSize: 13,
     fontStyle: "italic",
     marginTop: 2,
@@ -101,18 +101,18 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   dayLabel: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 10,
     letterSpacing: 2,
     textTransform: "uppercase",
   },
   dayNumber: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 36,
     lineHeight: 42,
   },
   dayTotal: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 13,
   },
 });

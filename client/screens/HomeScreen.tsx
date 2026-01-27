@@ -330,19 +330,19 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   dateLabel: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 11,
     letterSpacing: 2,
     marginBottom: Spacing.md,
   },
   heroTitle: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 32,
     lineHeight: 40,
     letterSpacing: -0.5,
   },
   heroName: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 32,
     lineHeight: 40,
     letterSpacing: -0.5,
@@ -357,12 +357,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   phaseTitle: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 22,
     letterSpacing: -0.3,
   },
   phaseSubtitle: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 14,
     lineHeight: 20,
     marginBottom: Spacing.lg,
@@ -384,11 +384,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroStatValue: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 18,
   },
   heroStatLabel: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 12,
     marginTop: 2,
   },
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   sectionLabel: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 11,
     letterSpacing: 2,
     marginBottom: Spacing.md,
@@ -427,14 +427,14 @@ const styles = StyleSheet.create({
     borderLeftColor: "#D4A99A",
   },
   pullQuoteTitle: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 20,
     lineHeight: 28,
     marginBottom: Spacing.sm,
     letterSpacing: -0.3,
   },
   pullQuoteText: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 15,
     lineHeight: 24,
   },
@@ -464,11 +464,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   actionTitle: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 15,
   },
   actionDescription: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 13,
   },
 });

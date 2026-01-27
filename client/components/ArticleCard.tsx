@@ -142,19 +142,19 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   categoryLabel: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 10,
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   title: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 16,
     lineHeight: 22,
     letterSpacing: -0.2,
   },
   summary: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 13,
     lineHeight: 20,
     marginTop: 4,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   readTimeText: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 12,
   },
   thumbnail: {
@@ -201,13 +201,13 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   featuredTitle: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 22,
     lineHeight: 30,
     letterSpacing: -0.3,
   },
   featuredSummary: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 14,
     lineHeight: 22,
     marginTop: 4,

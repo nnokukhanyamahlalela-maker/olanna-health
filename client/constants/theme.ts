@@ -20,15 +20,15 @@ export const BorderRadius = {
 } as const;
 
 export const Fonts = {
-  heading: "Poppins_600SemiBold",
-  headingMedium: "Poppins_500Medium",
-  headingLight: "Poppins_400Regular",
-  body: "Poppins_300Light",
-  bodyMedium: "Poppins_400Regular",
-  bodySemibold: "Poppins_500Medium",
-  numeric: "Poppins_400Regular",
-  numericBold: "Poppins_600SemiBold",
-  light: "Poppins_300Light",
+  heading: "DMSans_600SemiBold",
+  headingMedium: "DMSans_500Medium",
+  headingLight: "DMSans_400Regular",
+  body: "DMSans_300Light",
+  bodyMedium: "DMSans_400Regular",
+  bodySemibold: "DMSans_500Medium",
+  numeric: "DMSans_400Regular",
+  numericBold: "DMSans_600SemiBold",
+  light: "DMSans_300Light",
 } as const;
 
 export const Typography = {

@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   label: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 15,
     letterSpacing: 0.3,
   },

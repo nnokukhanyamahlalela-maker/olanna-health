@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     marginRight: -4,
   },
   olannaLetter: {
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "DMSans_700Bold",
     fontSize: 44,
     color: PINK_PRIMARY,
     letterSpacing: 1,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   healthLetter: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 16,
     color: PINK_PRIMARY,
     letterSpacing: 10,

@@ -265,12 +265,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pageTitle: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 28,
     letterSpacing: -0.5,
   },
   pageSubtitle: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 14,
     marginTop: 4,
     marginBottom: Spacing.xl,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.lg,
   },
   sectionLabel: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 11,
     letterSpacing: 2,
     marginBottom: Spacing.lg,

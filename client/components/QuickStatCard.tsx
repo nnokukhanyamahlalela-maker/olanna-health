@@ -67,17 +67,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   value: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 28,
     lineHeight: 34,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 13,
   },
   title: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 11,
     letterSpacing: 0.5,
     textTransform: "uppercase",

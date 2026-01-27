@@ -246,32 +246,32 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   dayLabel: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "DMSans_400Regular",
     fontSize: 11,
     letterSpacing: 2,
   },
   dayNumber: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 28,
     lineHeight: 32,
   },
   cycleLength: {
-    fontFamily: "Poppins_300Light",
+    fontFamily: "DMSans_300Light",
     fontSize: 14,
   },
   phaseName: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "DMSans_500Medium",
     fontSize: 16,
     letterSpacing: 0.5,
   },
   phaseTitle: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 12,
     letterSpacing: 1.5,
     textTransform: "uppercase",
   },
   phaseSubtitle: {
-    fontFamily: "Poppins_300Light_Italic",
+    fontFamily: "DMSans_300Light_Italic",
     fontSize: 13,
     fontStyle: "italic",
     marginTop: 2,
