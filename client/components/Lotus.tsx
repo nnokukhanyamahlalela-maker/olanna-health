@@ -1,7 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
+  interpolate,
+} from "react-native-reanimated";
 import Svg, { Path, G, Circle } from "react-native-svg";
 import { PhaseColors } from "@/constants/theme";
+
+const TRANSITION_DURATION = 350;
+const PULSE_DURATION = 3000;
 
 export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal";
 
@@ -78,13 +90,37 @@ export function Lotus({
   const bgColor = backgroundColor || PHASE_BG_COLORS[phase];
   const isActive = phase === "ovulation" || showGlow;
   
-  const glowStyle = isActive ? {
-    shadowColor: PINK_PRIMARY,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 8,
-  } : {};
+  const pulseValue = useSharedValue(0);
+  
+  useEffect(() => {
+    pulseValue.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: PULSE_DURATION / 2, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: PULSE_DURATION / 2, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    const scale = interpolate(pulseValue.value, [0, 1], [1, 1.02]);
+    const shadowOpacity = isActive 
+      ? interpolate(pulseValue.value, [0, 1], [0.4, 0.7])
+      : 0;
+    const shadowRadius = isActive 
+      ? interpolate(pulseValue.value, [0, 1], [8, 16])
+      : 0;
+    
+    return {
+      transform: [{ scale }],
+      shadowColor: PINK_PRIMARY,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity,
+      shadowRadius,
+      elevation: isActive ? 8 : 0,
+    };
+  });
 
   const renderMenstrualLotus = () => {
     return (
@@ -551,7 +587,7 @@ export function Lotus({
 
   if (showBackground) {
     return (
-      <View style={[styles.backgroundContainer, { width: size, height: size }, glowStyle]}>
+      <Animated.View style={[styles.backgroundContainer, { width: size, height: size }, animatedContainerStyle]}>
         <View 
           style={[
             styles.circleBackground, 
@@ -571,12 +607,12 @@ export function Lotus({
         >
           {renderLotus()}
         </Svg>
-      </View>
+      </Animated.View>
     );
   }
 
   return (
-    <View style={[{ width: size, height: size }, glowStyle]}>
+    <Animated.View style={[{ width: size, height: size }, animatedContainerStyle]}>
       <Svg 
         width={size} 
         height={size} 
@@ -584,7 +620,7 @@ export function Lotus({
       >
         {renderLotus()}
       </Svg>
-    </View>
+    </Animated.View>
   );
 }
 
