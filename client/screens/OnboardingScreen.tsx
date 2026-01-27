@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Image, TextInput, Platform, Pressable } from "react-native";
+import { View, StyleSheet, Image, TextInput, Platform, Pressable, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -7,11 +7,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Svg, { Path, Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
-import { AnimatedLogo } from "@/components/AnimatedLogo";
+import { Lotus } from "@/components/Lotus";
 import { SymptomChip } from "@/components/SymptomChip";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
@@ -19,6 +20,11 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile, generateId } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PINK_PRIMARY = "#F6BFD3";
+const PINK_SOFT = "#FBE3EC";
+const CHARCOAL = "#3A2F35";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -143,12 +149,29 @@ export default function OnboardingScreen() {
 
   const renderStep1 = () => (
     <View style={styles.stepContent}>
-      <AnimatedLogo />
-      <ThemedText type="body" style={[styles.subtitle, { marginTop: Spacing.md }]}>
-        Your personal wellness companion for African women
+      <View style={styles.welcomeContainer}>
+        <View style={styles.lotusWrapper}>
+          <LinearGradient
+            colors={[PINK_SOFT, PINK_PRIMARY]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.lotusBgCircle}
+          />
+          <Lotus phase="ovulation" size={120} strokeColor={CHARCOAL} strokeWidth={1.2} />
+        </View>
+        
+        <View style={styles.brandContainer}>
+          <ThemedText style={styles.brandName}>OLANNA</ThemedText>
+          <ThemedText style={styles.brandTagline}>HEALTH</ThemedText>
+        </View>
+      </View>
+      
+      <ThemedText style={[styles.welcomeSubtitle, { color: theme.textSecondary }]}>
+        Your personal wellness companion{'\n'}for African women
       </ThemedText>
-      <Button onPress={handleNext} style={styles.button}>
-        Get Started
+      
+      <Button onPress={handleNext} style={styles.getStartedButton}>
+        GET STARTED
       </Button>
     </View>
   );
@@ -448,6 +471,49 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     gap: Spacing.lg,
+  },
+  welcomeContainer: {
+    alignItems: "center",
+    gap: Spacing.xl,
+  },
+  lotusWrapper: {
+    width: 160,
+    height: 160,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusBgCircle: {
+    position: "absolute",
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+  },
+  brandContainer: {
+    alignItems: "center",
+    gap: 4,
+  },
+  brandName: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 36,
+    letterSpacing: 8,
+    color: CHARCOAL,
+  },
+  brandTagline: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    letterSpacing: 6,
+    color: PINK_PRIMARY,
+  },
+  welcomeSubtitle: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 16,
+    lineHeight: 26,
+    textAlign: "center",
+    marginTop: Spacing.xl,
+  },
+  getStartedButton: {
+    marginTop: Spacing["2xl"],
+    backgroundColor: PINK_PRIMARY,
   },
   logoContainer: {
     width: 140,
