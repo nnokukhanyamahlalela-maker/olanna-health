@@ -101,6 +101,12 @@ server/
   - Phase messaging: "Rest & Release", "Growth & Renewal", "Radiance & Expression", "Boundaries & Reflection"
   - Day indicator showing "DAY X of Y"
   - Toggle between lotus wheel and traditional cycle wheel views
+- **Animated Splash Screen (January 2026)**: New opening screen with jumping typewriter animation
+  - "OLANNA" with stylized pink oval "O" and bold letters
+  - "HEALTH" in dusty rose with wide letter spacing
+  - "YOUR CYCLE COMPANION" tagline
+  - Each letter animates with spring-based jumping effect
+  - Staggered timing creates typewriter appearance
 - Theme presets: Olanna (default), Blossom, Garden, Dreamy
 - LotusWheel component with breathing animation and phase-aware colors
 - AfricanPattern component for subtle cultural background textures
