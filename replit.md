@@ -162,3 +162,10 @@ server/
   - Consistent styling across LotusCycleWheel and CalendarScreen
   - Each phase has colored circular background matching phase color
   - Phase info displays: title, subtitle description, and day counter
+- **Screen Blueprint Implementation (January 2026)**:
+  - HomeScreen: Hero card with phase gradient background, big cycle day number (64px DMSans_700Bold), PhaseBadge with poetic names ("Rest & Release", "Rising Energy", "Full Radiance", "Inner Reflection"), gentle insights timeline
+  - HeroCard component: Phase-aware gradient backgrounds transitioning at 135° angle, pink-tinted shadow (0 20px 40px rgba(246, 191, 211, 0.25))
+  - PhaseBadge component: Gradient backgrounds with poetic phase names, uppercase text with letter-spacing
+  - CalendarScreen: Soft glow dots for cycle phases (no harsh borders), pink halo for selected day with shadow effect, subtle transparent backgrounds
+  - CheckInScreen: View tabs with pink (#F6BFD3) highlight on active selection, consistent charcoal text on pink background
+  - LearnScreen: Clean white article cards, pink accents on category selection, no gradients for visual rest
