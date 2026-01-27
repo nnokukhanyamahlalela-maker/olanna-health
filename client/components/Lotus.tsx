@@ -12,9 +12,12 @@ interface LotusProps {
   strokeWidth?: number;
   showBackground?: boolean;
   backgroundColor?: string;
+  showGlow?: boolean;
 }
 
-const CHARCOAL = "#3A3530";
+const CHARCOAL = "#3A2F35";
+const PINK_PRIMARY = "#F6BFD3";
+const GLOW_COLOR = "rgba(246, 191, 211, 0.6)";
 
 export const PHASE_INFO = {
   menstrual: {
@@ -64,14 +67,24 @@ export function Lotus({
   phase, 
   size = 120, 
   strokeColor = CHARCOAL,
-  strokeWidth = 1.2,
+  strokeWidth = 1,
   showBackground = false,
   backgroundColor,
+  showGlow = false,
 }: LotusProps) {
   const viewBoxSize = 100;
   const cx = viewBoxSize / 2;
 
   const bgColor = backgroundColor || PHASE_BG_COLORS[phase];
+  const isActive = phase === "ovulation" || showGlow;
+  
+  const glowStyle = isActive ? {
+    shadowColor: PINK_PRIMARY,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
+  } : {};
 
   const renderMenstrualLotus = () => {
     return (
@@ -538,7 +551,7 @@ export function Lotus({
 
   if (showBackground) {
     return (
-      <View style={[styles.backgroundContainer, { width: size, height: size }]}>
+      <View style={[styles.backgroundContainer, { width: size, height: size }, glowStyle]}>
         <View 
           style={[
             styles.circleBackground, 
@@ -563,13 +576,15 @@ export function Lotus({
   }
 
   return (
-    <Svg 
-      width={size} 
-      height={size} 
-      viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
-    >
-      {renderLotus()}
-    </Svg>
+    <View style={[{ width: size, height: size }, glowStyle]}>
+      <Svg 
+        width={size} 
+        height={size} 
+        viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+      >
+        {renderLotus()}
+      </Svg>
+    </View>
   );
 }
 
