@@ -1,18 +1,17 @@
 import React from "react";
-import { StyleSheet, Pressable, ViewStyle } from "react-native";
+import { StyleSheet, Pressable, ViewStyle, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   WithSpringConfig,
 } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
 
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 
 interface CardProps {
-  elevation?: number;
   title?: string;
   description?: string;
   children?: React.ReactNode;
@@ -28,36 +27,16 @@ const springConfig: WithSpringConfig = {
   energyThreshold: 0.001,
 };
 
-const getBackgroundColorForElevation = (
-  elevation: number,
-  theme: any,
-): string => {
-  switch (elevation) {
-    case 1:
-      return theme.backgroundDefault;
-    case 2:
-      return theme.backgroundSecondary;
-    case 3:
-      return theme.backgroundTertiary;
-    default:
-      return theme.backgroundRoot;
-  }
-};
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function Card({
-  elevation = 1,
   title,
   description,
   children,
   onPress,
   style,
 }: CardProps) {
-  const { theme } = useTheme();
   const scale = useSharedValue(1);
-
-  const cardBackgroundColor = getBackgroundColorForElevation(elevation, theme);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -76,34 +55,38 @@ export function Card({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[
-        styles.card,
-        {
-          backgroundColor: cardBackgroundColor,
-        },
-        animatedStyle,
-        style,
-      ]}
+      style={[styles.card, animatedStyle, style]}
     >
-      {title ? (
-        <ThemedText type="h4" style={styles.cardTitle}>
-          {title}
-        </ThemedText>
-      ) : null}
-      {description ? (
-        <ThemedText type="small" style={styles.cardDescription}>
-          {description}
-        </ThemedText>
-      ) : null}
-      {children}
+      <BlurView intensity={16} tint="light" style={styles.blurContainer}>
+        <View style={styles.cardContent}>
+          {title ? (
+            <ThemedText type="h4" style={styles.cardTitle}>
+              {title}
+            </ThemedText>
+          ) : null}
+          {description ? (
+            <ThemedText type="small" style={styles.cardDescription}>
+              {description}
+            </ThemedText>
+          ) : null}
+          {children}
+        </View>
+      </BlurView>
     </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    padding: Spacing.xl,
-    borderRadius: BorderRadius["2xl"],
+    borderRadius: 20,
+    overflow: "hidden",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  blurContainer: {
+    flex: 1,
+  },
+  cardContent: {
+    padding: Spacing.md,
   },
   cardTitle: {
     marginBottom: Spacing.sm,
