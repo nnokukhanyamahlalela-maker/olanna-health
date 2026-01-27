@@ -139,3 +139,11 @@ server/
   - Follicular: 5 petals (opening)
   - Ovulation: 7 petals (full bloom)
   - Luteal: 5 petals (softening)
+- **Enhanced Calendar (January 2026)**:
+  - Logo pink color (#FEC8EE) integrated into color scheme
+  - New semantic colors: Period pink (#F472B6), Fertile coral (#FB923C), PMS lavender (#A78BFA)
+  - Filter chips to toggle view: Period, Fertile, PMS, All
+  - "About your cycle" stats section with average cycle/period length
+  - Timeline view showing past 3 months of cycle events (period, fertile window, PMS)
+  - Enhanced day styling with colored borders and backgrounds for cycle phases
+  - Selected day card showing logged symptoms and flow
