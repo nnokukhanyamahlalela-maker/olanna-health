@@ -13,20 +13,20 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { LotusIcon } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
-import { storage, DailyLog, UserProfile, calculateCycleData } from "@/lib/storage";
+import { storage, DailyLog, UserProfile } from "@/lib/storage";
 
 const { width: screenWidth } = Dimensions.get("window");
 const DAY_SIZE = Math.floor((screenWidth - Spacing.lg * 2 - 6) / 7);
-const BRAND_PINK = "#F6A9D2";
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+
+type FilterType = "all" | "period" | "fertile" | "pms";
 
 interface DayInfo {
   date: Date;
@@ -35,8 +35,17 @@ interface DayInfo {
   isPeriod: boolean;
   isFertile: boolean;
   isOvulation: boolean;
+  isPMS: boolean;
   hasLog: boolean;
   log?: DailyLog;
+}
+
+interface TimelineEvent {
+  date: Date;
+  endDate?: Date;
+  type: "period" | "fertile" | "pms";
+  label: string;
+  sublabel: string;
 }
 
 function isSameDay(d1: Date, d2: Date): boolean {
@@ -69,6 +78,8 @@ export default function CalendarScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [calendarDays, setCalendarDays] = useState<DayInfo[]>([]);
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
 
   const loadData = useCallback(async () => {
     const [userProfile, logs] = await Promise.all([
@@ -105,30 +116,37 @@ export default function CalendarScreen() {
       logMap.set(log.date, log);
     });
 
-    const isPeriodDay = (date: Date): boolean => {
+    const getDayInCycle = (date: Date): number => {
       const diffTime = date.getTime() - lastPeriodStart.getTime();
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays < 0) return false;
-      const dayInCycle = (diffDays % cycleLength) + 1;
+      if (diffDays < 0) return -1;
+      return (diffDays % cycleLength) + 1;
+    };
+
+    const isPeriodDay = (date: Date): boolean => {
+      const dayInCycle = getDayInCycle(date);
+      if (dayInCycle < 0) return false;
       return dayInCycle <= periodLength;
     };
 
     const isFertileDay = (date: Date): boolean => {
-      const diffTime = date.getTime() - lastPeriodStart.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays < 0) return false;
-      const dayInCycle = (diffDays % cycleLength) + 1;
+      const dayInCycle = getDayInCycle(date);
+      if (dayInCycle < 0) return false;
       const ovulationDay = cycleLength - 14;
       return dayInCycle >= ovulationDay - 5 && dayInCycle <= ovulationDay + 1;
     };
 
     const isOvulationDay = (date: Date): boolean => {
-      const diffTime = date.getTime() - lastPeriodStart.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays < 0) return false;
-      const dayInCycle = (diffDays % cycleLength) + 1;
+      const dayInCycle = getDayInCycle(date);
+      if (dayInCycle < 0) return false;
       const ovulationDay = cycleLength - 14;
       return dayInCycle === ovulationDay;
+    };
+
+    const isPMSDay = (date: Date): boolean => {
+      const dayInCycle = getDayInCycle(date);
+      if (dayInCycle < 0) return false;
+      return dayInCycle > cycleLength - 7 && dayInCycle <= cycleLength;
     };
 
     const days: DayInfo[] = [];
@@ -143,6 +161,7 @@ export default function CalendarScreen() {
         isPeriod: isPeriodDay(date),
         isFertile: isFertileDay(date),
         isOvulation: isOvulationDay(date),
+        isPMS: isPMSDay(date),
         hasLog: logMap.has(dateKey),
         log: logMap.get(dateKey),
       });
@@ -158,6 +177,7 @@ export default function CalendarScreen() {
         isPeriod: isPeriodDay(date),
         isFertile: isFertileDay(date),
         isOvulation: isOvulationDay(date),
+        isPMS: isPMSDay(date),
         hasLog: logMap.has(dateKey),
         log: logMap.get(dateKey),
       });
@@ -174,12 +194,62 @@ export default function CalendarScreen() {
         isPeriod: isPeriodDay(date),
         isFertile: isFertileDay(date),
         isOvulation: isOvulationDay(date),
+        isPMS: isPMSDay(date),
         hasLog: logMap.has(dateKey),
         log: logMap.get(dateKey),
       });
     }
 
     setCalendarDays(days);
+
+    const events: TimelineEvent[] = [];
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    let currentPeriodStart = new Date(lastPeriodStart);
+    while (currentPeriodStart < new Date()) {
+      if (currentPeriodStart >= threeMonthsAgo) {
+        const periodEnd = new Date(currentPeriodStart);
+        periodEnd.setDate(periodEnd.getDate() + periodLength - 1);
+        events.push({
+          date: new Date(currentPeriodStart),
+          endDate: periodEnd,
+          type: "period",
+          label: "Period",
+          sublabel: `${periodLength} days`,
+        });
+
+        const ovulationDate = new Date(currentPeriodStart);
+        ovulationDate.setDate(ovulationDate.getDate() + cycleLength - 14);
+        if (ovulationDate >= threeMonthsAgo && ovulationDate < new Date()) {
+          const fertileStart = new Date(ovulationDate);
+          fertileStart.setDate(fertileStart.getDate() - 5);
+          events.push({
+            date: fertileStart,
+            endDate: ovulationDate,
+            type: "fertile",
+            label: "Fertility window",
+            sublabel: `Ovulation ${ovulationDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+          });
+        }
+
+        const pmsStart = new Date(currentPeriodStart);
+        pmsStart.setDate(pmsStart.getDate() + cycleLength - 7);
+        if (pmsStart >= threeMonthsAgo && pmsStart < new Date()) {
+          events.push({
+            date: pmsStart,
+            type: "pms",
+            label: "PMS",
+            sublabel: pmsStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          });
+        }
+      }
+
+      currentPeriodStart.setDate(currentPeriodStart.getDate() + cycleLength);
+    }
+
+    events.sort((a, b) => b.date.getTime() - a.date.getTime());
+    setTimeline(events.slice(0, 6));
   }, [currentDate, profile, dailyLogs]);
 
   const goToPreviousMonth = () => {
@@ -195,6 +265,14 @@ export default function CalendarScreen() {
     setSelectedDate(new Date());
   };
 
+  const shouldShowDay = (day: DayInfo): boolean => {
+    if (filter === "all") return true;
+    if (filter === "period") return day.isPeriod;
+    if (filter === "fertile") return day.isFertile || day.isOvulation;
+    if (filter === "pms") return day.isPMS;
+    return true;
+  };
+
   const getDayStyle = (day: DayInfo) => {
     const baseStyle: any = {
       width: DAY_SIZE,
@@ -204,19 +282,32 @@ export default function CalendarScreen() {
       borderRadius: DAY_SIZE / 2,
     };
 
-    if (day.isToday) {
+    const isSelected = selectedDate && isSameDay(day.date, selectedDate);
+    const showHighlight = shouldShowDay(day);
+
+    if (day.isToday && !isSelected) {
       baseStyle.borderWidth = 2;
-      baseStyle.borderColor = BRAND_PINK;
+      baseStyle.borderColor = theme.periodPink;
     }
 
-    if (selectedDate && isSameDay(day.date, selectedDate)) {
-      baseStyle.backgroundColor = BRAND_PINK;
-    } else if (day.isPeriod) {
-      baseStyle.backgroundColor = BRAND_PINK + "40";
-    } else if (day.isOvulation) {
-      baseStyle.backgroundColor = "#C9A24D40";
-    } else if (day.isFertile) {
-      baseStyle.backgroundColor = "#A8BFA530";
+    if (isSelected) {
+      baseStyle.backgroundColor = theme.periodPink;
+    } else if (showHighlight) {
+      if (day.isPeriod) {
+        baseStyle.backgroundColor = theme.periodPinkLight;
+        baseStyle.borderWidth = 2;
+        baseStyle.borderColor = theme.periodPink;
+      } else if (day.isOvulation) {
+        baseStyle.backgroundColor = theme.fertileCoralLight;
+        baseStyle.borderWidth = 2;
+        baseStyle.borderColor = theme.fertileCoral;
+      } else if (day.isFertile) {
+        baseStyle.backgroundColor = theme.fertileCoralLight + "80";
+      } else if (day.isPMS) {
+        baseStyle.backgroundColor = theme.pmsLavenderLight;
+        baseStyle.borderWidth = 2;
+        baseStyle.borderColor = theme.pmsLavender;
+      }
     }
 
     return baseStyle;
@@ -229,12 +320,35 @@ export default function CalendarScreen() {
     if (!day.isCurrentMonth) {
       return theme.textSecondary + "60";
     }
+    if (day.isPeriod) {
+      return theme.periodPink;
+    }
     return theme.text;
+  };
+
+  const getEventColor = (type: string) => {
+    switch (type) {
+      case "period":
+        return theme.periodPink;
+      case "fertile":
+        return theme.fertileCoral;
+      case "pms":
+        return theme.pmsLavender;
+      default:
+        return theme.textSecondary;
+    }
   };
 
   const selectedLog = selectedDate
     ? dailyLogs.find((log) => log.date === formatDateKey(selectedDate))
     : null;
+
+  const filterChips: { key: FilterType; label: string; color: string }[] = [
+    { key: "period", label: "Period", color: theme.periodPink },
+    { key: "fertile", label: "Fertile", color: theme.fertileCoral },
+    { key: "pms", label: "PMS", color: theme.pmsLavender },
+    { key: "all", label: "All", color: theme.textSecondary },
+  ];
 
   return (
     <ThemedView style={styles.container}>
@@ -248,25 +362,23 @@ export default function CalendarScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Pressable onPress={goToPreviousMonth} style={styles.navButton}>
-            <Feather name="chevron-left" size={24} color={theme.text} />
-          </Pressable>
-
-          <Pressable onPress={goToToday}>
-            <ThemedText type="h2" style={styles.monthTitle}>
-              {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </ThemedText>
-          </Pressable>
-
-          <Pressable onPress={goToNextMonth} style={styles.navButton}>
-            <Feather name="chevron-right" size={24} color={theme.text} />
-          </Pressable>
+          <ThemedText type="h2" style={styles.monthTitle}>
+            {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()} {">"}
+          </ThemedText>
+          <View style={styles.navButtons}>
+            <Pressable onPress={goToPreviousMonth} style={styles.navButton}>
+              <Feather name="chevron-left" size={20} color={theme.text} />
+            </Pressable>
+            <Pressable onPress={goToNextMonth} style={styles.navButton}>
+              <Feather name="chevron-right" size={20} color={theme.text} />
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.weekdaysRow}>
           {WEEKDAYS.map((day) => (
             <View key={day} style={styles.weekdayCell}>
-              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+              <ThemedText type="caption" style={[styles.weekdayText, { color: theme.textSecondary }]}>
                 {day}
               </ThemedText>
             </View>
@@ -289,34 +401,100 @@ export default function CalendarScreen() {
               >
                 {day.date.getDate()}
               </ThemedText>
-              {day.hasLog ? (
-                <View style={[styles.logDot, { backgroundColor: BRAND_PINK }]} />
-              ) : null}
             </Pressable>
           ))}
         </View>
 
-        <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <LotusIcon phase="menstrual" size={18} color={BRAND_PINK} />
-            <ThemedText type="caption">Period</ThemedText>
-          </View>
-          <View style={styles.legendItem}>
-            <LotusIcon phase="follicular" size={18} color="#A8BFA5" />
-            <ThemedText type="caption">Fertile</ThemedText>
-          </View>
-          <View style={styles.legendItem}>
-            <LotusIcon phase="ovulation" size={18} color="#C9A24D" />
-            <ThemedText type="caption">Ovulation</ThemedText>
-          </View>
-          <View style={styles.legendItem}>
-            <LotusIcon phase="luteal" size={18} color="#C8BFD6" />
-            <ThemedText type="caption">Luteal</ThemedText>
+        <View style={styles.filterRow}>
+          {filterChips.map((chip) => (
+            <Pressable
+              key={chip.key}
+              onPress={() => setFilter(chip.key)}
+              style={[
+                styles.filterChip,
+                {
+                  backgroundColor: filter === chip.key ? chip.color : "transparent",
+                  borderColor: chip.color,
+                },
+              ]}
+            >
+              <ThemedText
+                type="caption"
+                style={{
+                  color: filter === chip.key ? "#FFFFFF" : chip.color,
+                  fontFamily: Fonts.bodySemibold,
+                }}
+              >
+                {chip.label}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
+
+        <View style={[styles.statsCard, { backgroundColor: theme.cardBackground }]}>
+          <ThemedText type="h4" style={styles.sectionTitle}>
+            About your cycle
+          </ThemedText>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <View style={styles.statIconContainer}>
+                <Feather name="repeat" size={20} color={theme.textSecondary} />
+              </View>
+              <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
+                Average cycle{"\n"}length
+              </ThemedText>
+              <ThemedText style={[styles.statValue, { color: theme.periodPink }]}>
+                {profile?.cycleLength || 28} days
+              </ThemedText>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <View style={styles.statIconContainer}>
+                <Feather name="droplet" size={20} color={theme.periodPink} />
+              </View>
+              <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
+                Average period{"\n"}length
+              </ThemedText>
+              <ThemedText style={[styles.statValue, { color: theme.periodPink }]}>
+                {profile?.periodLength || 5}-{(profile?.periodLength || 5) + 1} days
+              </ThemedText>
+            </View>
           </View>
         </View>
 
+        {timeline.length > 0 ? (
+          <View style={styles.timelineSection}>
+            <ThemedText type="h4" style={styles.sectionTitle}>
+              Timelines
+            </ThemedText>
+            {timeline.map((event, index) => (
+              <View key={index} style={styles.timelineItem}>
+                <View style={styles.timelineDateCol}>
+                  <ThemedText style={[styles.timelineDate, { color: theme.text }]}>
+                    {event.date.getDate()} {MONTHS[event.date.getMonth()].slice(0, 3).toLowerCase()}
+                  </ThemedText>
+                  {event.endDate ? (
+                    <ThemedText style={[styles.timelineDateSub, { color: theme.textSecondary }]}>
+                      {event.endDate.getDate()} {MONTHS[event.endDate.getMonth()].slice(0, 3).toLowerCase()}
+                    </ThemedText>
+                  ) : null}
+                </View>
+                <View style={[styles.timelineDot, { backgroundColor: getEventColor(event.type) }]} />
+                <View style={styles.timelineContent}>
+                  <ThemedText style={[styles.timelineLabel, { color: getEventColor(event.type) }]}>
+                    {event.label}
+                  </ThemedText>
+                  <ThemedText style={[styles.timelineSublabel, { color: theme.textSecondary }]}>
+                    {event.sublabel}
+                  </ThemedText>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
         {selectedDate ? (
-          <View style={[styles.selectedDayCard, { backgroundColor: theme.backgroundDefault }]}>
+          <View style={[styles.selectedDayCard, { backgroundColor: theme.cardBackground }]}>
             <ThemedText type="h3">
               {selectedDate.toLocaleDateString("en-US", {
                 weekday: "long",
@@ -329,7 +507,7 @@ export default function CalendarScreen() {
               <View style={styles.logDetails}>
                 {selectedLog.flow ? (
                   <View style={styles.logItem}>
-                    <Feather name="droplet" size={16} color={BRAND_PINK} />
+                    <Feather name="droplet" size={16} color={theme.periodPink} />
                     <ThemedText type="body" style={{ textTransform: "capitalize" }}>
                       {selectedLog.flow} flow
                     </ThemedText>
@@ -338,7 +516,7 @@ export default function CalendarScreen() {
 
                 {selectedLog.mood ? (
                   <View style={styles.logItem}>
-                    <Feather name="smile" size={16} color={theme.phaseOvulation} />
+                    <Feather name="smile" size={16} color={theme.fertileCoral} />
                     <ThemedText type="body" style={{ textTransform: "capitalize" }}>
                       {selectedLog.mood}
                     </ThemedText>
@@ -361,7 +539,7 @@ export default function CalendarScreen() {
                       {selectedLog.symptoms.slice(0, 5).map((symptom, i) => (
                         <View
                           key={i}
-                          style={[styles.symptomTag, { backgroundColor: BRAND_PINK + "20" }]}
+                          style={[styles.symptomTag, { backgroundColor: theme.periodPinkLight }]}
                         >
                           <ThemedText type="caption">{symptom}</ThemedText>
                         </View>
@@ -372,15 +550,6 @@ export default function CalendarScreen() {
                         </ThemedText>
                       ) : null}
                     </View>
-                  </View>
-                ) : null}
-
-                {selectedLog.notes ? (
-                  <View style={styles.notesContainer}>
-                    <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                      Notes:
-                    </ThemedText>
-                    <ThemedText type="body">{selectedLog.notes}</ThemedText>
                   </View>
                 ) : null}
               </View>
@@ -409,11 +578,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: Spacing.lg,
   },
+  navButtons: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
   navButton: {
-    padding: Spacing.sm,
+    padding: Spacing.xs,
   },
   monthTitle: {
-    textAlign: "center",
+    textAlign: "left",
   },
   weekdaysRow: {
     flexDirection: "row",
@@ -423,40 +596,105 @@ const styles = StyleSheet.create({
     width: DAY_SIZE,
     alignItems: "center",
   },
+  weekdayText: {
+    fontSize: 11,
+    letterSpacing: 0.5,
+  },
   calendarGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
   },
   dayText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Fonts.numeric,
   },
   otherMonthDay: {
     opacity: 0.4,
   },
-  logDot: {
-    position: "absolute",
-    bottom: 4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  legend: {
+  filterRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: Spacing.lg,
+    gap: Spacing.sm,
     marginTop: Spacing.xl,
     marginBottom: Spacing.lg,
   },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.xs,
+  filterChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1.5,
   },
-  legendDot: {
+  statsCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: Spacing.md,
+    fontFamily: Fonts.headingMedium,
+  },
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statIconContainer: {
+    marginBottom: Spacing.xs,
+  },
+  statLabel: {
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: Spacing.xs,
+    lineHeight: 16,
+  },
+  statValue: {
+    fontSize: 20,
+    fontFamily: Fonts.heading,
+  },
+  statDivider: {
+    width: 1,
+    height: 60,
+    backgroundColor: "#E5E5E5",
+    marginHorizontal: Spacing.md,
+  },
+  timelineSection: {
+    marginBottom: Spacing.lg,
+  },
+  timelineItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.md,
+    paddingLeft: Spacing.sm,
+  },
+  timelineDateCol: {
+    width: 50,
+  },
+  timelineDate: {
+    fontSize: 13,
+    fontFamily: Fonts.bodySemibold,
+  },
+  timelineDateSub: {
+    fontSize: 11,
+  },
+  timelineDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
+    marginHorizontal: Spacing.md,
+    marginTop: 4,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineLabel: {
+    fontSize: 14,
+    fontFamily: Fonts.bodySemibold,
+  },
+  timelineSublabel: {
+    fontSize: 12,
   },
   selectedDayCard: {
     padding: Spacing.lg,
@@ -485,9 +723,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.full,
-  },
-  notesContainer: {
-    marginTop: Spacing.sm,
-    gap: Spacing.xs,
   },
 });

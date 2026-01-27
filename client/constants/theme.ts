@@ -168,6 +168,15 @@ const VogueColors = {
   terracotta: "#D4A090",
   terracottaLight: "#E8C8C0",
   terracottaMuted: "#C08878",
+  logoPink: "#FEC8EE",
+  logoPinkLight: "#FFDDF5",
+  logoPinkDark: "#F8A5D8",
+  periodPink: "#F472B6",
+  periodPinkLight: "#FBCFE8",
+  fertileCoral: "#FB923C",
+  fertileCoralLight: "#FED7AA",
+  pmsLavender: "#A78BFA",
+  pmsLavenderLight: "#DDD6FE",
 };
 
 export const PhaseColors = {
@@ -315,6 +324,15 @@ export const Colors = {
     calmSage: VogueColors.sage,
     moodLavender: VogueColors.lavender,
     painTerracotta: VogueColors.terracotta,
+
+    logoPink: VogueColors.logoPink,
+    logoPinkLight: VogueColors.logoPinkLight,
+    periodPink: VogueColors.periodPink,
+    periodPinkLight: VogueColors.periodPinkLight,
+    fertileCoral: VogueColors.fertileCoral,
+    fertileCoralLight: VogueColors.fertileCoralLight,
+    pmsLavender: VogueColors.pmsLavender,
+    pmsLavenderLight: VogueColors.pmsLavenderLight,
   },
   dark: {
     text: VogueColors.charcoal,
@@ -367,5 +385,14 @@ export const Colors = {
     calmSage: VogueColors.sage,
     moodLavender: VogueColors.lavender,
     painTerracotta: VogueColors.terracotta,
+
+    logoPink: VogueColors.logoPink,
+    logoPinkLight: VogueColors.logoPinkLight,
+    periodPink: VogueColors.periodPink,
+    periodPinkLight: VogueColors.periodPinkLight,
+    fertileCoral: VogueColors.fertileCoral,
+    fertileCoralLight: VogueColors.fertileCoralLight,
+    pmsLavender: VogueColors.pmsLavender,
+    pmsLavenderLight: VogueColors.pmsLavenderLight,
   },
 };
