@@ -21,8 +21,8 @@ const { width: screenWidth } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const LOGO_PINK = "#FEC8EE";
-const CREAM = "#FAF6F3";
+const PINK_PRIMARY = "#F6BFD3";
+const BG_MAIN = "#FFF7FA";
 
 interface AnimatedLetterProps {
   letter: string;
@@ -70,8 +70,8 @@ function AnimatedLetter({ letter, delay, style, isO }: AnimatedLetterProps) {
     return (
       <Animated.View style={[styles.oContainer, animatedStyle]}>
         <Svg width={52} height={52} viewBox="0 0 52 52">
-          <Ellipse cx={26} cy={26} rx={24} ry={24} fill={LOGO_PINK} />
-          <Ellipse cx={26} cy={26} rx={8} ry={8} fill={CREAM} />
+          <Ellipse cx={26} cy={26} rx={24} ry={24} fill={PINK_PRIMARY} />
+          <Ellipse cx={26} cy={26} rx={8} ry={8} fill={BG_MAIN} />
         </Svg>
       </Animated.View>
     );
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   olannaLetter: {
     fontFamily: "Poppins_700Bold",
     fontSize: 44,
-    color: LOGO_PINK,
+    color: PINK_PRIMARY,
     letterSpacing: 1,
     lineHeight: 52,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   healthLetter: {
     fontFamily: "Poppins_400Regular",
     fontSize: 16,
-    color: LOGO_PINK,
+    color: PINK_PRIMARY,
     letterSpacing: 10,
   },
 });

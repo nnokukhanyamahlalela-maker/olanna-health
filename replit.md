@@ -55,15 +55,13 @@ server/
 
 ## Design System
 - **Brand Philosophy**: "Editorial Elegance meets African Wellness" - sophisticated, refined, like a luxury wellness magazine
-- **Primary Color**: Logo Pink (#FEC8EE) - used for tabs, primary buttons, and accents
-- **Secondary Color**: Dusty Rose (#D4A99A) - complementary accent
-- **Tertiary Color**: Taupe (#C4B5AD)
-- **Background**: Cream (#FAF6F3)
-- **Cards**: Warm White (#FFFCFA) with Sand borders (#E5DDD8)
-- **Text Primary**: Charcoal (#3A3530)
-- **Text Secondary**: Warm Gray (#6B635C)
-- **Accent Colors**: Gold (#C9A86C), Sage (#B8C4B8), Lavender (#C8C0D0), Terracotta (#D4A090)
-- **Phase Colors**: Menstrual (Terracotta #D4A090), Follicular (Sage #B8C4B8), Ovulation (Gold #C9A86C), Luteal (Lavender #C8C0D0)
+- **Primary Color**: Pink Primary (#F6BFD3) - used for tabs, primary buttons, and accents
+- **Soft Pink**: Pink Soft (#FBE3EC) - lighter accent
+- **Background**: BG Main (#FFF7FA)
+- **Text Primary**: Charcoal (#3A2F35)
+- **Text Secondary**: Warm Gray (#7A6A73)
+- **Phase Colors**: Menstrual (#E7B4B8), Follicular (#DDE5DC), Ovulatory (#E6D2A8), Luteal (#D6CEDD)
+- **Cards**: Warm White (#FFFFFF) with Sand borders (#E5DDD8)
 - **Fonts**: Poppins throughout - Light (300) for body, Medium (500) for emphasis, SemiBold (600) for headings
 - **Aesthetic**: Vogue-inspired editorial elegance with muted tones, generous whitespace, thin dividers
 - **Typography Style**: Uppercase section labels with letter-spacing, pull quotes with left border accent
