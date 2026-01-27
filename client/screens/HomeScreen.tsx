@@ -8,7 +8,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { CycleWheel } from "@/components/CycleWheel";
-import { LotusCycleCard } from "@/components/LotusCycleCard";
+import { LotusCycleWheel } from "@/components/LotusCycleWheel";
 import { InsightCard } from "@/components/InsightCard";
 import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
@@ -191,11 +191,12 @@ export default function HomeScreen() {
           </View>
 
           {useLotusView ? (
-            <LotusCycleCard 
+            <LotusCycleWheel 
               phase={cycleData.phase}
               currentDay={cycleData.currentDay}
               cycleLength={cycleData.cycleLength}
-              size={180}
+              ovulationDay={14}
+              periodLength={5}
             />
           ) : (
             <CycleWheel cycleData={cycleData} />
