@@ -1,17 +1,26 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import Svg, { Circle, Path, G, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring,
+  runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { ThemedText } from "./ThemedText";
 import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_GRADIENTS, PHASE_BG_COLORS } from "./Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, PhaseColors } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 
 const PINK_PRIMARY = "#F6BFD3";
 const PINK_SOFT = "#FBE3EC";
 const BG_MAIN = "#FFF7FA";
 const CHARCOAL = "#3A2F35";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface LotusCycleWheelProps {
   currentDay: number;
@@ -19,6 +28,9 @@ interface LotusCycleWheelProps {
   phase: CyclePhase;
   ovulationDay?: number;
   periodLength?: number;
+  size?: number;
+  onDayChange?: (day: number) => void;
+  showInfo?: boolean;
 }
 
 const getPhaseColor = (phase: CyclePhase): string => {
@@ -43,17 +55,71 @@ export function LotusCycleWheel({
   phase,
   ovulationDay = 14,
   periodLength = 5,
+  size = 280,
+  onDayChange,
+  showInfo = false,
 }: LotusCycleWheelProps) {
   const { theme } = useTheme();
   const phaseInfo = PHASE_INFO[phase];
   const phaseColor = getPhaseColor(phase);
-  const phaseBgColor = PHASE_BG_COLORS[phase];
   
-  const size = 280;
+  const rotation = useSharedValue(0);
+  const savedRotation = useSharedValue(0);
+  
   const center = size / 2;
   const outerRadius = size / 2 - 20;
   const innerRadius = outerRadius - 35;
   const lotusSize = innerRadius * 1.4;
+  
+  const anglePerDay = 360 / cycleLength;
+
+  const handleRotationEnd = (totalRotation: number) => {
+    if (onDayChange) {
+      const normalizedRotation = ((totalRotation % 360) + 360) % 360;
+      const dayOffset = Math.round(normalizedRotation / anglePerDay);
+      let newDay = currentDay - dayOffset;
+      while (newDay < 1) newDay += cycleLength;
+      while (newDay > cycleLength) newDay -= cycleLength;
+      onDayChange(newDay);
+    }
+  };
+
+  const rotateGesture = Gesture.Rotation()
+    .onUpdate((event) => {
+      rotation.value = savedRotation.value + (event.rotation * 180) / Math.PI;
+    })
+    .onEnd(() => {
+      savedRotation.value = rotation.value;
+      runOnJS(handleRotationEnd)(rotation.value);
+    });
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const startX = event.x - event.translationX - centerX;
+      const startY = event.y - event.translationY - centerY;
+      const currentX = event.x - centerX;
+      const currentY = event.y - centerY;
+      
+      const startAngle = Math.atan2(startY, startX);
+      const currentAngle = Math.atan2(currentY, currentX);
+      let deltaAngle = (currentAngle - startAngle) * (180 / Math.PI);
+      
+      rotation.value = savedRotation.value + deltaAngle;
+    })
+    .onEnd(() => {
+      savedRotation.value = rotation.value;
+      runOnJS(handleRotationEnd)(rotation.value);
+    });
+
+  const composedGesture = Gesture.Simultaneous(rotateGesture, panGesture);
+
+  const animatedWheelStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }],
+    };
+  });
 
   const createPetalPath = (
     cx: number,
@@ -62,8 +128,8 @@ export function LotusCycleWheel({
     dayPhase: CyclePhase,
     isCurrentDay: boolean
   ): string => {
-    const anglePerDay = (2 * Math.PI) / cycleLength;
-    const angle = anglePerDay * (day - 1) - Math.PI / 2;
+    const anglePerDayRad = (2 * Math.PI) / cycleLength;
+    const angle = anglePerDayRad * (day - 1) - Math.PI / 2;
     
     const baseRadius = innerRadius + 5;
     let petalLength = 22;
@@ -136,83 +202,87 @@ export function LotusCycleWheel({
 
   return (
     <View style={styles.container}>
-      <View style={styles.wheelContainer}>
-        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <Defs>
-            <SvgLinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={PINK_SOFT} />
-              <Stop offset="100%" stopColor={BG_MAIN} />
-            </SvgLinearGradient>
-          </Defs>
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={[styles.wheelContainer, animatedWheelStyle]}>
+          <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            <Defs>
+              <SvgLinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor={PINK_SOFT} />
+                <Stop offset="100%" stopColor={BG_MAIN} />
+              </SvgLinearGradient>
+            </Defs>
+            
+            <Circle
+              cx={center}
+              cy={center}
+              r={outerRadius}
+              fill="url(#bgGradient)"
+              stroke={PINK_PRIMARY}
+              strokeWidth={1}
+              opacity={0.5}
+            />
+            
+            <Circle
+              cx={center}
+              cy={center}
+              r={innerRadius}
+              fill={BG_MAIN}
+              stroke={`${PINK_PRIMARY}40`}
+              strokeWidth={1}
+            />
+            
+            {renderDayPetals()}
+          </Svg>
           
-          <Circle
-            cx={center}
-            cy={center}
-            r={outerRadius}
-            fill="url(#bgGradient)"
-            stroke={PINK_PRIMARY}
-            strokeWidth={1}
-            opacity={0.5}
-          />
-          
-          <Circle
-            cx={center}
-            cy={center}
-            r={innerRadius}
-            fill={BG_MAIN}
-            stroke={`${PINK_PRIMARY}40`}
-            strokeWidth={1}
-          />
-          
-          {renderDayPetals()}
-        </Svg>
-        
-        <View style={styles.lotusContainer}>
-          <LinearGradient 
-            colors={PHASE_GRADIENTS[phase] as [string, string]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[
-              styles.lotusBg, 
-              { 
-                width: lotusSize * 0.75,
-                height: lotusSize * 0.75,
-                borderRadius: lotusSize * 0.375,
-              }
-            ]} 
-          />
-          <Lotus 
-            phase={phase} 
-            size={lotusSize} 
-            strokeColor={CHARCOAL}
-            strokeWidth={1}
-          />
-        </View>
-      </View>
+          <View style={styles.lotusContainer}>
+            <LinearGradient 
+              colors={PHASE_GRADIENTS[phase] as [string, string]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[
+                styles.lotusBg, 
+                { 
+                  width: lotusSize * 0.75,
+                  height: lotusSize * 0.75,
+                  borderRadius: lotusSize * 0.375,
+                }
+              ]} 
+            />
+            <Lotus 
+              phase={phase} 
+              size={lotusSize} 
+              strokeColor={CHARCOAL}
+              strokeWidth={1}
+            />
+          </View>
+        </Animated.View>
+      </GestureDetector>
       
-      <View style={styles.infoContainer}>
-        <View style={styles.dayBadge}>
-          <ThemedText style={[styles.dayLabel, { color: theme.textSecondary }]}>
-            DAY
+      {showInfo ? (
+        <View style={styles.infoContainer}>
+          <View style={styles.dayBadge}>
+            <ThemedText style={[styles.dayLabel, { color: theme.textSecondary }]}>
+              DAY
+            </ThemedText>
+            <ThemedText style={[styles.dayNumber, { color: phaseColor }]}>
+              {currentDay}
+            </ThemedText>
+            <ThemedText style={[styles.cycleLength, { color: theme.textSecondary }]}>
+              of {cycleLength}
+            </ThemedText>
+          </View>
+          
+          <ThemedText style={[styles.phaseName, { color: theme.text }]}>
+            {phaseName}
           </ThemedText>
-          <ThemedText style={[styles.dayNumber, { color: phaseColor }]}>
-            {currentDay}
+          <ThemedText style={[styles.phaseTitle, { color: phaseColor }]}>
+            {phaseInfo.title}
           </ThemedText>
-          <ThemedText style={[styles.cycleLength, { color: theme.textSecondary }]}>
-            of {cycleLength}
+          <ThemedText style={[styles.phaseSubtitle, { color: theme.textSecondary }]}>
+            {phaseInfo.subtitle}
           </ThemedText>
         </View>
-        
-        <ThemedText style={[styles.phaseName, { color: theme.text }]}>
-          {phaseName}
-        </ThemedText>
-        <ThemedText style={[styles.phaseTitle, { color: phaseColor }]}>
-          {phaseInfo.title}
-        </ThemedText>
-        <ThemedText style={[styles.phaseSubtitle, { color: theme.textSecondary }]}>
-          {phaseInfo.subtitle}
-        </ThemedText>
-      </View>
+      ) : null}
     </View>
   );
 }

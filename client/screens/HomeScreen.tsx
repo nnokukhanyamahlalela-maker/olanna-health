@@ -1,52 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions, ScrollView } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { ThemedText } from "@/components/ThemedText";
 import { CycleWheel } from "@/components/CycleWheel";
 import { LotusCycleWheel } from "@/components/LotusCycleWheel";
-import { InsightCard } from "@/components/InsightCard";
-import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
-import { HeroCard } from "@/components/HeroCard";
-import { PhaseBadge } from "@/components/PhaseBadge";
 import { PHASE_INFO } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-function getDaysUntil(dateString: string): number {
-  const date = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
+const PINK_PRIMARY = "#F6BFD3";
+const PINK_SOFT = "#FBE3EC";
+const BG_MAIN = "#FFF7FA";
+const CHARCOAL = "#3A2F35";
 
-function getPhaseInsight(phase: CycleData["phase"]): {
-  title: string;
-  description: string;
-} {
-  const info = PHASE_INFO[phase];
-  return {
-    title: info.title,
-    description: info.description,
-  };
+function getPhaseTitle(phase: CycleData["phase"]): string {
+  return PHASE_INFO[phase].title;
 }
 
 export default function HomeScreen() {
@@ -57,7 +40,6 @@ export default function HomeScreen() {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [useLotusView, setUseLotusView] = useState(true);
 
@@ -89,12 +71,6 @@ export default function HomeScreen() {
       loadData();
     }, [])
   );
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };
 
   const toggleView = async () => {
     const newValue = !useLotusView;
@@ -129,180 +105,88 @@ export default function HomeScreen() {
     );
   }
 
-  const insight = getPhaseInsight(cycleData.phase);
-  const daysUntilPeriod = getDaysUntil(cycleData.nextPeriodStart);
-  const daysUntilOvulation = getDaysUntil(cycleData.ovulationDate);
+  const phaseTitle = getPhaseTitle(cycleData.phase);
+  const wheelSize = Math.min(SCREEN_WIDTH - 40, 320);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-      <AfricanPattern opacity={0.02} variant="waves" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={{
-          paddingTop: insets.top + Spacing.xl,
-          paddingBottom: tabBarHeight + Spacing["2xl"],
-          paddingHorizontal: Spacing.lg,
-        }}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      >
-        <View style={styles.headerRow}>
-          <Pressable
-            onPress={() => navigation.navigate("Profile")}
-            style={[styles.profileButton, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
-            testID="profile-button"
-          >
-            <Feather name="user" size={18} color={theme.textSecondary} />
-          </Pressable>
-        </View>
-
-        <View style={styles.greetingSection}>
-          <ThemedText style={[styles.dateLabel, { color: theme.textSecondary }]}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            }).toUpperCase()}
-          </ThemedText>
-          <ThemedText style={[styles.heroTitle, { color: theme.text }]}>
-            {getGreeting()},
-          </ThemedText>
-          <ThemedText style={[styles.heroName, { color: theme.primary }]}>
-            {profile.name.split(" ")[0]}
-          </ThemedText>
-        </View>
-
-        <HeroCard style={styles.heroCard} phase={cycleData.phase}>
-          <View style={styles.heroHeader}>
-            <PhaseBadge phase={cycleData.phase} size="small" />
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={[PINK_PRIMARY, PINK_SOFT]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={[
+            styles.heroGradient,
+            {
+              paddingTop: insets.top,
+              paddingBottom: tabBarHeight + Spacing.xl,
+            },
+          ]}
+        >
+          <View style={styles.header}>
+            <View style={styles.phaseBadge}>
+              <ThemedText style={styles.phaseBadgeText}>{phaseTitle.toUpperCase()}</ThemedText>
+            </View>
             <Pressable
               onPress={toggleView}
-              style={[styles.toggleButton, { backgroundColor: "rgba(255,255,255,0.5)" }]}
+              style={styles.toggleButton}
+              testID="toggle-view-button"
             >
-              <Feather
-                name={useLotusView ? "circle" : "sun"}
-                size={14}
-                color="#3A2F35"
-              />
+              <View style={styles.toggleCircle} />
             </Pressable>
           </View>
 
-          <View style={styles.cycleDayContainer}>
-            <ThemedText style={styles.cycleDayNumber}>
-              {cycleData.currentDay}
-            </ThemedText>
-            <ThemedText style={styles.cycleDayLabel}>
-              Day of {cycleData.cycleLength}
-            </ThemedText>
+          <View style={styles.cycleDaySection}>
+            <ThemedText style={styles.cycleDayNumber}>{cycleData.currentDay}</ThemedText>
+            <ThemedText style={styles.cycleDayLabel}>Day of {cycleData.cycleLength}</ThemedText>
           </View>
 
-          <View style={styles.wheelContainer}>
+          <View style={styles.wheelSection}>
             {useLotusView ? (
-              <LotusCycleWheel 
+              <LotusCycleWheel
                 phase={cycleData.phase}
                 currentDay={cycleData.currentDay}
                 cycleLength={cycleData.cycleLength}
                 ovulationDay={14}
                 periodLength={5}
+                size={wheelSize}
               />
             ) : (
               <CycleWheel cycleData={cycleData} />
             )}
           </View>
 
-          <ThemedText style={styles.phasePoetic}>
-            {insight.title}
-          </ThemedText>
-        </HeroCard>
-
-        <View style={styles.insightTimeline}>
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            TODAY'S GUIDANCE
-          </ThemedText>
-          <View style={[styles.gentleInsight, { backgroundColor: theme.backgroundDefault }]}>
-            <Feather name="sun" size={18} color={theme.primary} style={styles.insightIcon} />
-            <ThemedText style={[styles.insightText, { color: theme.text }]}>
-              {insight.description}
+          <View style={styles.bottomInfo}>
+            <View style={styles.dayIndicator}>
+              <ThemedText style={styles.dayIndicatorLabel}>DAY </ThemedText>
+              <ThemedText style={styles.dayIndicatorValue}>{cycleData.currentDay}</ThemedText>
+              <ThemedText style={styles.dayIndicatorLabel}> of {cycleData.cycleLength}</ThemedText>
+            </View>
+            
+            <ThemedText style={styles.phaseName}>
+              {cycleData.phase === "ovulation" 
+                ? "Ovulatory Phase" 
+                : `${cycleData.phase.charAt(0).toUpperCase() + cycleData.phase.slice(1)} Phase`}
             </ThemedText>
+            
+            <ThemedText style={styles.phaseSubtitle}>{phaseTitle}</ThemedText>
           </View>
-        </View>
 
-        <View style={styles.quickStats}>
-          <QuickStatCard
-            title="Next Period"
-            value={daysUntilPeriod > 0 ? `${daysUntilPeriod}` : "Today"}
-            subtitle={daysUntilPeriod > 0 ? "days" : ""}
-            icon="calendar"
-            color={theme.phaseMenstrual}
-          />
-          <QuickStatCard
-            title="Ovulation"
-            value={daysUntilOvulation > 0 ? `${daysUntilOvulation}` : "Today"}
-            subtitle={daysUntilOvulation > 0 ? "days" : ""}
-            icon="star"
-            color={theme.phaseOvulation}
-          />
-          <QuickStatCard
-            title="Cycle"
-            value={`${cycleData.cycleLength}`}
-            subtitle="days"
-            icon="repeat"
-            color={theme.phaseFollicular}
-          />
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-        <View style={styles.insightSection}>
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            QUICK ACTIONS
-          </ThemedText>
-          <View style={styles.quickActions}>
-            <Pressable
-              style={[styles.actionCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
-              onPress={() => navigation.navigate("CheckIn")}
-            >
-              <View style={[styles.actionIconContainer, { backgroundColor: theme.secondaryLight }]}>
-                <Feather name="edit-3" size={18} color={theme.textSecondary} />
-              </View>
-              <View style={styles.actionContent}>
-                <ThemedText style={[styles.actionTitle, { color: theme.text }]}>Log Today</ThemedText>
-                <ThemedText style={[styles.actionDescription, { color: theme.textSecondary }]}>
-                  Track symptoms, mood & energy
-                </ThemedText>
-              </View>
-              <Feather name="chevron-right" size={18} color={theme.textSecondary} />
-            </Pressable>
-            <Pressable
-              style={[styles.actionCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
-              onPress={() => navigation.navigate("Main", { screen: "HealthTab" })}
-            >
-              <View style={[styles.actionIconContainer, { backgroundColor: theme.tertiaryLight }]}>
-                <Feather name="heart" size={18} color={theme.textSecondary} />
-              </View>
-              <View style={styles.actionContent}>
-                <ThemedText style={[styles.actionTitle, { color: theme.text }]}>Health Center</ThemedText>
-                <ThemedText style={[styles.actionDescription, { color: theme.textSecondary }]}>
-                  Modules & screening reminders
-                </ThemedText>
-              </View>
-              <Feather name="chevron-right" size={18} color={theme.textSecondary} />
-            </Pressable>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
+          <Pressable
+            onPress={() => navigation.navigate("Profile")}
+            style={styles.profileButton}
+            testID="profile-button"
+          >
+            <Feather name="user" size={20} color={CHARCOAL} />
+          </Pressable>
+        </LinearGradient>
+      </View>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  scrollView: {
     flex: 1,
   },
   loadingContainer: {
@@ -313,174 +197,115 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: Spacing.lg,
+  heroGradient: {
+    flex: 1,
+    borderRadius: 32,
+    margin: 8,
   },
-  profileButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-  },
-  greetingSection: {
-    marginBottom: Spacing["2xl"],
-  },
-  dateLabel: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 11,
-    letterSpacing: 2,
-    marginBottom: Spacing.md,
-  },
-  heroTitle: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 32,
-    lineHeight: 40,
-    letterSpacing: -0.5,
-  },
-  heroName: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 32,
-    lineHeight: 40,
-    letterSpacing: -0.5,
-  },
-  heroCard: {
-    marginBottom: Spacing["2xl"],
-  },
-  heroHeader: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
   },
-  cycleDayContainer: {
-    alignItems: "center",
-    marginBottom: Spacing.sm,
+  phaseBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
   },
-  cycleDayNumber: {
-    fontFamily: "DMSans_700Bold",
-    fontSize: 64,
-    lineHeight: 72,
-    color: "#3A2F35",
-    letterSpacing: 0.5,
-  },
-  cycleDayLabel: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    lineHeight: 22,
-    color: "#3A2F35",
-    opacity: 0.7,
-    letterSpacing: 0.3,
-  },
-  wheelContainer: {
-    alignItems: "center",
-    marginVertical: Spacing.lg,
-  },
-  phasePoetic: {
+  phaseBadgeText: {
     fontFamily: "DMSans_500Medium",
-    fontSize: 18,
-    lineHeight: 28,
-    color: "#3A2F35",
-    textAlign: "center",
-    letterSpacing: 0.2,
-  },
-  insightTimeline: {
-    marginBottom: Spacing.xl,
-  },
-  gentleInsight: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: Spacing.md,
-    borderRadius: 16,
-    gap: Spacing.md,
-  },
-  insightIcon: {
-    marginTop: 2,
-  },
-  insightText: {
-    flex: 1,
-    fontFamily: "DMSans_400Regular",
-    fontSize: 15,
-    lineHeight: 26,
-    letterSpacing: 0.2,
+    fontSize: 11,
+    letterSpacing: 2,
+    color: CHARCOAL,
   },
   toggleButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
     alignItems: "center",
     justifyContent: "center",
   },
-  quickStats: {
+  toggleCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: CHARCOAL,
+  },
+  cycleDaySection: {
+    alignItems: "center",
+    marginTop: Spacing.xl,
+  },
+  cycleDayNumber: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 72,
+    lineHeight: 80,
+    color: CHARCOAL,
+    letterSpacing: 0.5,
+  },
+  cycleDayLabel: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 16,
+    color: CHARCOAL,
+    opacity: 0.7,
+    letterSpacing: 0.3,
+    marginTop: -4,
+  },
+  wheelSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+  },
+  bottomInfo: {
+    alignItems: "center",
+    paddingBottom: Spacing.lg,
+    gap: 4,
+  },
+  dayIndicator: {
     flexDirection: "row",
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  divider: {
-    height: 1,
-    marginVertical: Spacing.xl,
-  },
-  insightSection: {
-    marginBottom: Spacing["2xl"],
-  },
-  sectionLabel: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 11,
-    letterSpacing: 2,
-    lineHeight: 18,
-    marginBottom: Spacing.md,
-  },
-  pullQuote: {
-    paddingLeft: Spacing.lg,
-    borderLeftWidth: 2,
-    borderLeftColor: "#D4A99A",
-  },
-  pullQuoteTitle: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 20,
-    lineHeight: 32,
-    marginBottom: Spacing.sm,
-    letterSpacing: 0.1,
-  },
-  pullQuoteText: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 15,
-    lineHeight: 24,
-  },
-  sectionTitle: {
+    alignItems: "baseline",
     marginBottom: Spacing.xs,
   },
-  quickActions: {
-    gap: Spacing.md,
+  dayIndicatorLabel: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 12,
+    color: CHARCOAL,
+    opacity: 0.6,
+    letterSpacing: 1,
   },
-  actionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    gap: Spacing.md,
+  dayIndicatorValue: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 18,
+    color: CHARCOAL,
   },
-  actionIconContainer: {
+  phaseName: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 18,
+    color: CHARCOAL,
+    letterSpacing: 0.5,
+  },
+  phaseSubtitle: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 13,
+    color: CHARCOAL,
+    opacity: 0.6,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  profileButton: {
+    position: "absolute",
+    top: Spacing.md,
+    right: Spacing.lg,
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
     alignItems: "center",
     justifyContent: "center",
-  },
-  actionContent: {
-    flex: 1,
-    gap: 2,
-  },
-  actionTitle: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 15,
-  },
-  actionDescription: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 13,
   },
 });
