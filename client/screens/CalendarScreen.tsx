@@ -287,27 +287,25 @@ export default function CalendarScreen() {
     const showHighlight = shouldShowDay(day);
 
     if (day.isToday && !isSelected) {
-      baseStyle.borderWidth = 2;
-      baseStyle.borderColor = theme.periodPink;
+      baseStyle.backgroundColor = "rgba(246, 191, 211, 0.15)";
     }
 
     if (isSelected) {
-      baseStyle.backgroundColor = theme.periodPink;
+      baseStyle.backgroundColor = "#F6BFD3";
+      baseStyle.shadowColor = "#F6BFD3";
+      baseStyle.shadowOffset = { width: 0, height: 4 };
+      baseStyle.shadowOpacity = 0.4;
+      baseStyle.shadowRadius = 8;
+      baseStyle.elevation = 6;
     } else if (showHighlight) {
       if (day.isPeriod) {
-        baseStyle.backgroundColor = theme.periodPinkLight;
-        baseStyle.borderWidth = 2;
-        baseStyle.borderColor = theme.periodPink;
+        baseStyle.backgroundColor = "rgba(244, 114, 182, 0.2)";
       } else if (day.isOvulation) {
-        baseStyle.backgroundColor = theme.fertileCoralLight;
-        baseStyle.borderWidth = 2;
-        baseStyle.borderColor = theme.fertileCoral;
+        baseStyle.backgroundColor = "rgba(251, 146, 60, 0.25)";
       } else if (day.isFertile) {
-        baseStyle.backgroundColor = theme.fertileCoralLight + "80";
+        baseStyle.backgroundColor = "rgba(251, 146, 60, 0.12)";
       } else if (day.isPMS) {
-        baseStyle.backgroundColor = theme.pmsLavenderLight;
-        baseStyle.borderWidth = 2;
-        baseStyle.borderColor = theme.pmsLavender;
+        baseStyle.backgroundColor = "rgba(167, 139, 250, 0.2)";
       }
     }
 

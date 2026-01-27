@@ -317,8 +317,8 @@ export default function CheckInScreen() {
           style={[
             styles.viewTab,
             {
-              backgroundColor: viewMode === 'categories' ? theme.primary : 'transparent',
-              borderColor: theme.primary,
+              backgroundColor: viewMode === 'categories' ? "#F6BFD3" : 'transparent',
+              borderColor: "#F6BFD3",
             },
           ]}
           testID="tab-categories"
@@ -326,11 +326,11 @@ export default function CheckInScreen() {
           <Feather
             name="grid"
             size={16}
-            color={viewMode === 'categories' ? theme.buttonText : theme.primary}
+            color={viewMode === 'categories' ? "#3A2F35" : "#F6BFD3"}
           />
           <ThemedText
             type="small"
-            style={{ color: viewMode === 'categories' ? theme.buttonText : theme.primary }}
+            style={{ color: viewMode === 'categories' ? "#3A2F35" : "#F6BFD3" }}
           >
             Symptoms
           </ThemedText>
@@ -340,8 +340,8 @@ export default function CheckInScreen() {
           style={[
             styles.viewTab,
             {
-              backgroundColor: viewMode === 'bodymap' ? theme.secondary : 'transparent',
-              borderColor: theme.secondary,
+              backgroundColor: viewMode === 'bodymap' ? "#F6BFD3" : 'transparent',
+              borderColor: "#F6BFD3",
             },
           ]}
           testID="tab-bodymap"
@@ -349,11 +349,11 @@ export default function CheckInScreen() {
           <Feather
             name="user"
             size={16}
-            color={viewMode === 'bodymap' ? theme.buttonText : theme.secondary}
+            color={viewMode === 'bodymap' ? "#3A2F35" : "#F6BFD3"}
           />
           <ThemedText
             type="small"
-            style={{ color: viewMode === 'bodymap' ? theme.buttonText : theme.secondary }}
+            style={{ color: viewMode === 'bodymap' ? "#3A2F35" : "#F6BFD3" }}
           >
             Body Map
           </ThemedText>
