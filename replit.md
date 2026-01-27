@@ -91,7 +91,15 @@ server/
   - Refined QuickStatCard with clean typography
   - HomeScreen hero greeting with split styling
   - Phase-aware colors: Terracotta (menstrual), Sage (follicular), Gold (ovulation), Lavender (luteal)
-  - LotusWheel with minimalist petal design
+- **Lotus Cycle Visualization (January 2026)**: New lotus flower-based cycle tracking
+  - Line-drawing style lotus that morphs through cycle phases (bud to bloom)
+  - Menstrual: Closed bud (3 petals) - "Rest & Release" / "This is the wisdom phase."
+  - Follicular: Opening bud (5-6 petals) - "Growth & Renewal" / "This is the becoming phase."
+  - Ovulation: Full bloom (7+ petals) - "Radiance & Expression" / "This is the radiance phase."
+  - Luteal: Softening bloom (6 petals) - "Boundaries & Reflection" / "This is the refinement phase."
+  - LotusCycleCard component with circular pink background and phase messaging
+  - Cycle day indicator with current day and total cycle length
+  - Toggle between lotus and traditional wheel views
 - Theme presets: Olanna (default), Blossom, Garden, Dreamy
 - LotusWheel component with breathing animation and phase-aware colors
 - AfricanPattern component for subtle cultural background textures
