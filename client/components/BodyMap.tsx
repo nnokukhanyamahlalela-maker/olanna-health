@@ -112,8 +112,8 @@ export function BodyMap({ painPoints, onAddPainPoint, date }: BodyMapProps) {
               style={[
                 styles.touchPoint,
                 {
-                  left: (region.x / 100) * 200 - 12,
-                  top: (region.y / 160) * 320 - 12,
+                  left: (region.x / 100) * 200 - 10,
+                  top: (region.y / 160) * 320 - 10,
                 },
               ]}
               testID={`body-region-${region.id}`}
@@ -252,8 +252,8 @@ const styles = StyleSheet.create({
   },
   touchPoint: {
     position: 'absolute',
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
   },
   legend: {
     marginTop: Spacing.md,
