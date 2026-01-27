@@ -163,26 +163,30 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        <View style={styles.greetingRow}>
-          <View style={styles.greeting}>
-            <ThemedText type="h2">
-              {getGreeting()}, {profile.name.split(" ")[0]}
-            </ThemedText>
-            <ThemedText type="body" style={styles.dateText}>
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })}
-            </ThemedText>
-          </View>
+        <View style={styles.headerRow}>
           <Pressable
             onPress={() => navigation.navigate("Profile")}
-            style={[styles.profileButton, { backgroundColor: theme.backgroundSecondary }]}
+            style={[styles.profileButton, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
             testID="profile-button"
           >
-            <Feather name="user" size={20} color={theme.text} />
+            <Feather name="user" size={18} color={theme.textSecondary} />
           </Pressable>
+        </View>
+
+        <View style={styles.greetingSection}>
+          <ThemedText style={[styles.dateLabel, { color: theme.textSecondary }]}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            }).toUpperCase()}
+          </ThemedText>
+          <ThemedText style={[styles.heroTitle, { color: theme.text }]}>
+            {getGreeting()},
+          </ThemedText>
+          <ThemedText style={[styles.heroName, { color: theme.primary }]}>
+            {profile.name.split(" ")[0]}
+          </ThemedText>
         </View>
 
         <View style={styles.wheelSection}>
@@ -236,37 +240,59 @@ export default function HomeScreen() {
           />
         </View>
 
-        <View style={styles.insightSection}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            Daily Insight
-          </ThemedText>
-          <InsightCard
-            title={insight.title}
-            description={insight.description}
-            icon="sun"
-            color={theme.primary}
-          />
-        </View>
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
         <View style={styles.insightSection}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            Quick Actions
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            TODAY'S INSIGHT
+          </ThemedText>
+          <View style={styles.pullQuote}>
+            <ThemedText style={[styles.pullQuoteTitle, { color: theme.text }]}>
+              {insight.title}
+            </ThemedText>
+            <ThemedText style={[styles.pullQuoteText, { color: theme.textSecondary }]}>
+              {insight.description}
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+        <View style={styles.insightSection}>
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            QUICK ACTIONS
           </ThemedText>
           <View style={styles.quickActions}>
-            <InsightCard
-              title="Log Today"
-              description="Track your symptoms, mood, and energy"
-              icon="edit-3"
-              color={theme.secondary}
+            <Pressable
+              style={[styles.actionCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
               onPress={() => navigation.navigate("CheckIn")}
-            />
-            <InsightCard
-              title="Health Center"
-              description="View modules and screening reminders"
-              icon="heart"
-              color={theme.tertiary}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: theme.secondaryLight }]}>
+                <Feather name="edit-3" size={18} color={theme.textSecondary} />
+              </View>
+              <View style={styles.actionContent}>
+                <ThemedText style={[styles.actionTitle, { color: theme.text }]}>Log Today</ThemedText>
+                <ThemedText style={[styles.actionDescription, { color: theme.textSecondary }]}>
+                  Track symptoms, mood & energy
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+            </Pressable>
+            <Pressable
+              style={[styles.actionCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
               onPress={() => navigation.navigate("Main", { screen: "HealthTab" })}
-            />
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: theme.tertiaryLight }]}>
+                <Feather name="heart" size={18} color={theme.textSecondary} />
+              </View>
+              <View style={styles.actionContent}>
+                <ThemedText style={[styles.actionTitle, { color: theme.text }]}>Health Center</ThemedText>
+                <ThemedText style={[styles.actionDescription, { color: theme.textSecondary }]}>
+                  Modules & screening reminders
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -289,25 +315,39 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
-  greetingRow: {
+  headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: Spacing.xl,
-  },
-  greeting: {
-    flex: 1,
-    gap: Spacing.xs,
+    justifyContent: "flex-end",
+    marginBottom: Spacing.lg,
   },
   profileButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
-  dateText: {
-    opacity: 0.7,
+  greetingSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  dateLabel: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: Spacing.md,
+  },
+  heroTitle: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: -0.5,
+  },
+  heroName: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: -0.5,
   },
   wheelSection: {
     alignItems: "center",
@@ -328,16 +368,69 @@ const styles = StyleSheet.create({
   quickStats: {
     flexDirection: "row",
     gap: Spacing.md,
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.xl,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.xl,
   },
   insightSection: {
-    marginBottom: Spacing.xl,
-    gap: Spacing.md,
+    marginBottom: Spacing["2xl"],
+  },
+  sectionLabel: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: Spacing.md,
+  },
+  pullQuote: {
+    paddingLeft: Spacing.lg,
+    borderLeftWidth: 2,
+    borderLeftColor: "#D4A99A",
+  },
+  pullQuoteTitle: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 20,
+    lineHeight: 28,
+    marginBottom: Spacing.sm,
+    letterSpacing: -0.3,
+  },
+  pullQuoteText: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 15,
+    lineHeight: 24,
   },
   sectionTitle: {
     marginBottom: Spacing.xs,
   },
   quickActions: {
     gap: Spacing.md,
+  },
+  actionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    gap: Spacing.md,
+  },
+  actionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionContent: {
+    flex: 1,
+    gap: 2,
+  },
+  actionTitle: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 15,
+  },
+  actionDescription: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 13,
   },
 });
