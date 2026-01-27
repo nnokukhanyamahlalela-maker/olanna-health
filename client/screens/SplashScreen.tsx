@@ -6,107 +6,160 @@ import Animated, {
   withTiming,
   withSequence,
   withDelay,
-  withRepeat,
+  withSpring,
   Easing,
   runOnJS,
-  interpolate,
 } from "react-native-reanimated";
-import Svg, { Path, Circle, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, Ellipse } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
+import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { storage } from "@/lib/storage";
 
 const { width: screenWidth } = Dimensions.get("window");
-const LOGO_WIDTH = Math.min(screenWidth * 0.85, 320);
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-function OlannaLogo({ size = 280 }: { size?: number }) {
-  const letterHeight = size * 0.18;
-  const oSize = letterHeight * 1.1;
-  const spacing = size * 0.01;
-  
-  const renderLotusO = () => {
-    const s = oSize;
-    const cx = s / 2;
-    const cy = s / 2;
-    
-    const petals = [];
-    const petalAngles = [-90, -50, -130, -20, -160];
-    
-    for (let i = 0; i < petalAngles.length; i++) {
-      const angle = petalAngles[i];
-      const rad = (angle * Math.PI) / 180;
-      const petalLength = s * 0.38;
-      const tipX = cx + Math.cos(rad) * petalLength;
-      const tipY = cy + Math.sin(rad) * petalLength * 0.9;
-      const baseWidth = s * 0.12;
-      const opacity = i === 0 ? 1 : i < 3 ? 0.8 : 0.55;
-      
-      const leftRad = rad - Math.PI / 2;
-      const rightRad = rad + Math.PI / 2;
-      const baseY = cy + s * 0.08;
-      
-      petals.push(
-        <Path
-          key={i}
-          d={`M${cx + Math.cos(leftRad) * baseWidth * 0.5} ${baseY}
-              Q${cx + Math.cos(rad) * petalLength * 0.4 + Math.cos(leftRad) * baseWidth * 0.3} ${cy + Math.sin(rad) * petalLength * 0.5}
-              ${tipX} ${tipY}
-              Q${cx + Math.cos(rad) * petalLength * 0.4 + Math.cos(rightRad) * baseWidth * 0.3} ${cy + Math.sin(rad) * petalLength * 0.5}
-              ${cx + Math.cos(rightRad) * baseWidth * 0.5} ${baseY} Z`}
-          fill="#F6A9D2"
-          fillOpacity={opacity}
-        />
-      );
-    }
-    
-    return (
-      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-        {petals}
-        <Circle cx={cx} cy={cy + s * 0.05} r={s * 0.06} fill="#F6A9D2" fillOpacity={0.9} />
-      </Svg>
+const PINK = "#FEC8EE";
+const DUSTY_ROSE = "#F8B4D9";
+
+interface AnimatedLetterProps {
+  letter: string;
+  delay: number;
+  style?: object;
+  isO?: boolean;
+}
+
+function AnimatedLetter({ letter, delay, style, isO }: AnimatedLetterProps) {
+  const translateY = useSharedValue(30);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.5);
+
+  useEffect(() => {
+    translateY.value = withDelay(
+      delay,
+      withSpring(0, {
+        damping: 8,
+        stiffness: 150,
+        mass: 0.8,
+      })
     );
-  };
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 200 })
+    );
+    scale.value = withDelay(
+      delay,
+      withSpring(1, {
+        damping: 6,
+        stiffness: 200,
+      })
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
+
+  if (isO) {
+    return (
+      <Animated.View style={[styles.oContainer, animatedStyle]}>
+        <Svg width={56} height={56} viewBox="0 0 56 56">
+          <Ellipse cx={28} cy={28} rx={26} ry={26} fill={PINK} />
+          <Ellipse cx={28} cy={28} rx={10} ry={10} fill="#FAF6F3" />
+        </Svg>
+      </Animated.View>
+    );
+  }
 
   return (
-    <View style={styles.logoWrapper}>
-      <View style={styles.olannaRow}>
-        <View style={[styles.letterO, { width: oSize, height: oSize }]}>
-          {renderLotusO()}
-        </View>
-        <Svg width={size - oSize + spacing} height={letterHeight} viewBox="0 0 230 50">
-          <SvgText
-            x="0"
-            y="40"
-            fill="#FEC8EE"
-            fontFamily="Inter"
-            fontSize="46"
-            fontWeight="800"
-            letterSpacing="3"
-          >
-            LANNA
-          </SvgText>
-        </Svg>
-      </View>
-      <Svg width={size * 0.45} height={letterHeight * 0.5} viewBox="0 0 100 25" style={styles.healthText}>
-        <SvgText
-          x="50"
-          y="18"
-          fill="#F8B4D9"
-          fontFamily="Inter"
-          fontSize="16"
-          fontWeight="400"
-          textAnchor="middle"
-          letterSpacing="6"
-        >
-          HEALTH
-        </SvgText>
-      </Svg>
-    </View>
+    <Animated.View style={animatedStyle}>
+      <ThemedText style={[styles.olannaLetter, style]}>
+        {letter}
+      </ThemedText>
+    </Animated.View>
+  );
+}
+
+function AnimatedHealthLetter({ letter, delay }: { letter: string; delay: number }) {
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.7);
+
+  useEffect(() => {
+    translateY.value = withDelay(
+      delay,
+      withSpring(0, {
+        damping: 10,
+        stiffness: 180,
+      })
+    );
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 150 })
+    );
+    scale.value = withDelay(
+      delay,
+      withSpring(1, {
+        damping: 8,
+        stiffness: 200,
+      })
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <ThemedText style={styles.healthLetter}>
+        {letter}
+      </ThemedText>
+    </Animated.View>
+  );
+}
+
+function AnimatedTaglineLetter({ letter, delay }: { letter: string; delay: number }) {
+  const translateY = useSharedValue(15);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    translateY.value = withDelay(
+      delay,
+      withSpring(0, {
+        damping: 12,
+        stiffness: 150,
+      })
+    );
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 200 })
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <ThemedText style={styles.taglineLetter}>
+        {letter === " " ? "  " : letter}
+      </ThemedText>
+    </Animated.View>
   );
 }
 
@@ -114,28 +167,24 @@ export default function SplashScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
-  const logoOpacity = useSharedValue(0);
-  const logoScale = useSharedValue(0.85);
-  const floatY = useSharedValue(0);
+  const containerOpacity = useSharedValue(1);
+
+  const olannaLetters = ["O", "L", "A", "N", "N", "A"];
+  const healthLetters = ["H", "E", "A", "L", "T", "H"];
+  const taglineText = "YOUR CYCLE COMPANION";
+  const taglineLetters = taglineText.split("");
+
+  const baseDelay = 300;
+  const letterDelay = 80;
+  const healthStartDelay = baseDelay + olannaLetters.length * letterDelay + 200;
+  const taglineStartDelay = healthStartDelay + healthLetters.length * letterDelay + 300;
 
   useEffect(() => {
-    logoOpacity.value = withSequence(
-      withTiming(1, { duration: 1200, easing: Easing.out(Easing.ease) }),
-      withDelay(4800, withTiming(0, { duration: 800 }))
-    );
+    const totalAnimationTime = taglineStartDelay + taglineLetters.length * 40 + 2500;
 
-    logoScale.value = withSequence(
-      withTiming(1, { duration: 1200, easing: Easing.out(Easing.back(1.1)) }),
-      withDelay(4800, withTiming(1.02, { duration: 800 }))
-    );
-
-    floatY.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      false
+    containerOpacity.value = withDelay(
+      totalAnimationTime,
+      withTiming(0, { duration: 600 })
     );
 
     const navigateAway = async () => {
@@ -149,39 +198,48 @@ export default function SplashScreen() {
 
     const timer = setTimeout(() => {
       runOnJS(navigateAway)();
-    }, 7000);
+    }, totalAnimationTime + 600);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    const translateY = interpolate(floatY.value, [0, 1], [0, -10]);
-    return {
-      opacity: logoOpacity.value,
-      transform: [
-        { scale: logoScale.value },
-        { translateY },
-      ],
-    };
-  });
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+  }));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-      <Animated.View style={[styles.logoContainer, animatedContainerStyle]}>
-        <OlannaLogo size={LOGO_WIDTH} />
-        <Svg width={LOGO_WIDTH * 0.7} height={30} viewBox="0 0 200 30" style={styles.tagline}>
-          <SvgText
-            x="100"
-            y="20"
-            fill={theme.textSecondary}
-            fontFamily="Inter"
-            fontSize="12"
-            textAnchor="middle"
-            letterSpacing="3"
-          >
-            YOUR CYCLE COMPANION
-          </SvgText>
-        </Svg>
+      <Animated.View style={[styles.logoContainer, containerAnimatedStyle]}>
+        <View style={styles.olannaRow}>
+          {olannaLetters.map((letter, index) => (
+            <AnimatedLetter
+              key={`olanna-${index}`}
+              letter={letter}
+              delay={baseDelay + index * letterDelay}
+              isO={index === 0}
+            />
+          ))}
+        </View>
+
+        <View style={styles.healthRow}>
+          {healthLetters.map((letter, index) => (
+            <AnimatedHealthLetter
+              key={`health-${index}`}
+              letter={letter}
+              delay={healthStartDelay + index * letterDelay}
+            />
+          ))}
+        </View>
+
+        <View style={styles.taglineRow}>
+          {taglineLetters.map((letter, index) => (
+            <AnimatedTaglineLetter
+              key={`tagline-${index}`}
+              letter={letter}
+              delay={taglineStartDelay + index * 40}
+            />
+          ))}
+        </View>
       </Animated.View>
     </View>
   );
@@ -197,21 +255,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logoWrapper: {
-    alignItems: "center",
-  },
   olannaRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  letterO: {
-    marginRight: -4,
+  oContainer: {
+    marginRight: -2,
   },
-  healthText: {
-    marginTop: 4,
+  olannaLetter: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 48,
+    color: PINK,
+    letterSpacing: 2,
+    lineHeight: 56,
   },
-  tagline: {
-    marginTop: 20,
-    opacity: 0.6,
+  healthRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  healthLetter: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 18,
+    color: DUSTY_ROSE,
+    letterSpacing: 8,
+  },
+  taglineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 32,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingHorizontal: 40,
+  },
+  taglineLetter: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 12,
+    color: "#9A8A80",
+    letterSpacing: 3,
   },
 });
