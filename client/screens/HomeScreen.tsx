@@ -13,6 +13,7 @@ import { InsightCard } from "@/components/InsightCard";
 import { QuickStatCard } from "@/components/QuickStatCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
+import { HeroCard } from "@/components/HeroCard";
 import { PHASE_INFO } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
@@ -173,35 +174,61 @@ export default function HomeScreen() {
           </ThemedText>
         </View>
 
-        <View style={styles.wheelSection}>
-          <View style={styles.viewToggle}>
+        <HeroCard style={styles.heroCard}>
+          <View style={styles.heroHeader}>
+            <ThemedText style={[styles.phaseTitle, { color: theme.text }]}>
+              {insight.title}
+            </ThemedText>
             <Pressable
               onPress={toggleView}
-              style={[styles.toggleButton, { backgroundColor: theme.backgroundDefault }]}
+              style={[styles.toggleButton, { backgroundColor: theme.backgroundSecondary }]}
             >
               <Feather
                 name={useLotusView ? "circle" : "sun"}
-                size={16}
+                size={14}
                 color={theme.textSecondary}
               />
-              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                {useLotusView ? "Switch to Wheel" : "Switch to Lotus"}
-              </ThemedText>
             </Pressable>
           </View>
+          
+          <ThemedText style={[styles.phaseSubtitle, { color: theme.textSecondary }]}>
+            {insight.description}
+          </ThemedText>
 
-          {useLotusView ? (
-            <LotusCycleWheel 
-              phase={cycleData.phase}
-              currentDay={cycleData.currentDay}
-              cycleLength={cycleData.cycleLength}
-              ovulationDay={14}
-              periodLength={5}
-            />
-          ) : (
-            <CycleWheel cycleData={cycleData} />
-          )}
-        </View>
+          <View style={styles.wheelContainer}>
+            {useLotusView ? (
+              <LotusCycleWheel 
+                phase={cycleData.phase}
+                currentDay={cycleData.currentDay}
+                cycleLength={cycleData.cycleLength}
+                ovulationDay={14}
+                periodLength={5}
+              />
+            ) : (
+              <CycleWheel cycleData={cycleData} />
+            )}
+          </View>
+
+          <View style={styles.heroStats}>
+            <View style={styles.heroStat}>
+              <ThemedText style={[styles.heroStatValue, { color: theme.text }]}>
+                {daysUntilPeriod > 0 ? daysUntilPeriod : "Today"}
+              </ThemedText>
+              <ThemedText style={[styles.heroStatLabel, { color: theme.textSecondary }]}>
+                {daysUntilPeriod > 0 ? "days to period" : "period starts"}
+              </ThemedText>
+            </View>
+            <View style={[styles.heroStatDivider, { backgroundColor: theme.border }]} />
+            <View style={styles.heroStat}>
+              <ThemedText style={[styles.heroStatValue, { color: theme.text }]}>
+                Day {cycleData.currentDay}
+              </ThemedText>
+              <ThemedText style={[styles.heroStatLabel, { color: theme.textSecondary }]}>
+                of {cycleData.cycleLength}
+              </ThemedText>
+            </View>
+          </View>
+        </HeroCard>
 
         <View style={styles.quickStats}>
           <QuickStatCard
@@ -225,22 +252,6 @@ export default function HomeScreen() {
             icon="repeat"
             color={theme.phaseFollicular}
           />
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-        <View style={styles.insightSection}>
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            TODAY'S INSIGHT
-          </ThemedText>
-          <View style={styles.pullQuote}>
-            <ThemedText style={[styles.pullQuoteTitle, { color: theme.text }]}>
-              {insight.title}
-            </ThemedText>
-            <ThemedText style={[styles.pullQuoteText, { color: theme.textSecondary }]}>
-              {insight.description}
-            </ThemedText>
-          </View>
         </View>
 
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
@@ -336,21 +347,61 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     letterSpacing: -0.5,
   },
-  wheelSection: {
-    alignItems: "center",
+  heroCard: {
     marginBottom: Spacing["2xl"],
   },
-  viewToggle: {
-    alignSelf: "flex-end",
-    marginBottom: Spacing.md,
+  heroHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.xs,
   },
-  toggleButton: {
+  phaseTitle: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 22,
+    letterSpacing: -0.3,
+  },
+  phaseSubtitle: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
+  },
+  wheelContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  heroStats: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.full,
-    gap: Spacing.xs,
+    justifyContent: "center",
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.06)",
+  },
+  heroStat: {
+    flex: 1,
+    alignItems: "center",
+  },
+  heroStatValue: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 18,
+  },
+  heroStatLabel: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  heroStatDivider: {
+    width: 1,
+    height: 32,
+  },
+  toggleButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   quickStats: {
     flexDirection: "row",
