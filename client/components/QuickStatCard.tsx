@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface QuickStatCardProps {
   title: string;
@@ -27,23 +27,25 @@ export function QuickStatCard({
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundDefault },
+        { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: color + "20" }]}>
-        <Feather name={icon} size={18} color={color} />
+      <View style={[styles.iconRow]}>
+        <Feather name={icon} size={14} color={color} />
       </View>
-      <ThemedText type="small" style={styles.title}>
+      <View style={styles.valueRow}>
+        <ThemedText style={[styles.value, { color: theme.text }]}>
+          {value}
+        </ThemedText>
+        {subtitle ? (
+          <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
+            {subtitle}
+          </ThemedText>
+        ) : null}
+      </View>
+      <ThemedText style={[styles.title, { color: theme.textSecondary }]}>
         {title}
       </ThemedText>
-      <ThemedText type="h3" style={[styles.value, { color }]}>
-        {value}
-      </ThemedText>
-      {subtitle ? (
-        <ThemedText type="caption" style={styles.subtitle}>
-          {subtitle}
-        </ThemedText>
-      ) : null}
     </View>
   );
 }
@@ -51,29 +53,33 @@ export function QuickStatCard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
     gap: Spacing.xs,
-    ...Shadows.sm,
   },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.sm,
-    alignItems: "center",
-    justifyContent: "center",
+  iconRow: {
     marginBottom: Spacing.xs,
   },
-  title: {
-    opacity: 0.7,
-    textAlign: "center",
+  valueRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
   },
   value: {
-    fontWeight: "700",
+    fontFamily: "Poppins_500Medium",
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    opacity: 0.6,
-    textAlign: "center",
+    fontFamily: "Poppins_300Light",
+    fontSize: 13,
+  },
+  title: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 11,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
 });

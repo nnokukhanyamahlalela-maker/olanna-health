@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, FlatList, StyleSheet, TextInput, Pressable } from "react-native";
+import { View, FlatList, StyleSheet, TextInput, Pressable, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,7 +7,6 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ArticleCard } from "@/components/ArticleCard";
-import { SymptomChip } from "@/components/SymptomChip";
 import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
@@ -108,15 +107,25 @@ export default function LearnScreen() {
     return matchesSearch && matchesCategory;
   });
 
+  const featuredArticle = filteredArticles[0];
+  const remainingArticles = filteredArticles.slice(1);
+
   const renderHeader = () => (
     <View style={styles.headerContent}>
+      <ThemedText style={[styles.pageTitle, { color: theme.text }]}>
+        Learn
+      </ThemedText>
+      <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
+        Evidence-based health education
+      </ThemedText>
+
       <View
         style={[
           styles.searchContainer,
           { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
         ]}
       >
-        <Feather name="search" size={20} color={theme.textSecondary} />
+        <Feather name="search" size={18} color={theme.textSecondary} />
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}
           placeholder="Search articles..."
@@ -126,29 +135,61 @@ export default function LearnScreen() {
         />
         {searchQuery.length > 0 ? (
           <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={20} color={theme.textSecondary} />
+            <Feather name="x" size={18} color={theme.textSecondary} />
           </Pressable>
         ) : null}
       </View>
 
-      <FlatList
+      <ScrollView
         horizontal
-        data={categories}
-        keyExtractor={(item) => item}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesList}
-        renderItem={({ item }) => (
-          <SymptomChip
-            label={item}
-            selected={selectedCategory === item}
+      >
+        {categories.map((item) => (
+          <Pressable
+            key={item}
             onPress={() => setSelectedCategory(item)}
-          />
-        )}
-      />
+            style={[
+              styles.categoryChip,
+              {
+                backgroundColor: selectedCategory === item ? theme.primary : "transparent",
+                borderColor: selectedCategory === item ? theme.primary : theme.border,
+              },
+            ]}
+          >
+            <ThemedText
+              style={[
+                styles.categoryText,
+                {
+                  color: selectedCategory === item ? "#FFFCFA" : theme.textSecondary,
+                },
+              ]}
+            >
+              {item}
+            </ThemedText>
+          </Pressable>
+        ))}
+      </ScrollView>
 
-      <ThemedText type="h3" style={styles.sectionTitle}>
-        {selectedCategory === "All" ? "All Articles" : selectedCategory}
-      </ThemedText>
+      {featuredArticle ? (
+        <>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            FEATURED
+          </ThemedText>
+          <ArticleCard
+            title={featuredArticle.title}
+            summary={featuredArticle.summary}
+            category={featuredArticle.category}
+            readTime={featuredArticle.readTime}
+            featured
+          />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            MORE ARTICLES
+          </ThemedText>
+        </>
+      ) : null}
     </View>
   );
 
@@ -160,10 +201,14 @@ export default function LearnScreen() {
     />
   );
 
+  const renderSeparator = () => (
+    <View style={[styles.articleDivider, { backgroundColor: theme.border }]} />
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
       <FlatList
-        data={filteredArticles}
+        data={remainingArticles}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ArticleCard
@@ -174,7 +219,7 @@ export default function LearnScreen() {
           />
         )}
         ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
+        ListEmptyComponent={filteredArticles.length === 0 ? renderEmptyState : null}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
           paddingBottom: tabBarHeight + Spacing["2xl"],
@@ -183,7 +228,7 @@ export default function LearnScreen() {
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={renderSeparator}
       />
     </View>
   );
@@ -194,13 +239,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContent: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  pageTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 28,
+    letterSpacing: -0.5,
+  },
+  pageSubtitle: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: Spacing.xl,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    height: Spacing.inputHeight,
+    paddingHorizontal: Spacing.md,
+    height: 44,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     gap: Spacing.sm,
@@ -208,17 +264,36 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
     height: "100%",
   },
   categoriesList: {
     gap: Spacing.sm,
-    marginBottom: Spacing.xl,
+    paddingBottom: Spacing.sm,
   },
-  sectionTitle: {
-    marginBottom: Spacing.sm,
+  categoryChip: {
+    paddingVertical: 8,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
   },
-  separator: {
-    height: Spacing.md,
+  categoryText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.xl,
+  },
+  sectionLabel: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: Spacing.lg,
+  },
+  articleDivider: {
+    height: 1,
+    marginLeft: 0,
   },
 });

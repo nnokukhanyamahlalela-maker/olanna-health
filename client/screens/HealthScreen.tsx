@@ -111,10 +111,17 @@ export default function HealthScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
+        <ThemedText style={[styles.pageTitle, { color: theme.text }]}>
+          Health
+        </ThemedText>
+        <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
+          Your personalized wellness hub
+        </ThemedText>
+
       {upcomingScreenings.length > 0 ? (
         <View style={styles.alertSection}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            Upcoming Screenings
+          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            UPCOMING SCREENINGS
           </ThemedText>
           {upcomingScreenings.map((screening) => (
             <View
@@ -135,9 +142,11 @@ export default function HealthScreen() {
         </View>
       ) : null}
 
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
       <View style={styles.section}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          Tracking & Insights
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          TRACKING & INSIGHTS
         </ThemedText>
 
         <View style={styles.modulesList}>
@@ -167,9 +176,11 @@ export default function HealthScreen() {
         </View>
       </View>
 
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
       <View style={styles.section}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          Health Modules
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          HEALTH MODULES
         </ThemedText>
 
         <View style={styles.modulesList}>
@@ -209,9 +220,11 @@ export default function HealthScreen() {
         </View>
       </View>
 
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
       <View style={styles.section}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          General Health
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          GENERAL HEALTH
         </ThemedText>
 
         <View style={styles.healthChecksList}>
@@ -251,8 +264,29 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
   },
+  pageTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 28,
+    letterSpacing: -0.5,
+  },
+  pageSubtitle: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: Spacing.xl,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.lg,
+  },
+  sectionLabel: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: Spacing.lg,
+  },
   alertSection: {
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.lg,
   },
   alertCard: {
     flexDirection: "row",
@@ -275,10 +309,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   section: {
-    marginBottom: Spacing["2xl"],
-  },
-  sectionTitle: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   modulesList: {
     gap: Spacing.md,
