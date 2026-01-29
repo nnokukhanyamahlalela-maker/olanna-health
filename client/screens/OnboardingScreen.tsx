@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, TextInput, Platform, Pressable, Dimensions } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -12,16 +12,18 @@ import Animated, {
   useAnimatedStyle, 
   withTiming, 
   withDelay,
+  withSpring,
   withSequence,
+  withRepeat,
   Easing,
   runOnJS,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
-import Svg, { Path, Circle } from "react-native-svg";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { SymptomChip } from "@/components/SymptomChip";
-import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile, generateId } from "@/lib/storage";
@@ -29,17 +31,12 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Exact brand gradient colors from spec
 const BRAND_COLORS = {
-  hotPink: "#FF4FB8",
   sunsetOrange: "#F7A37A",
-  softLavender: "#C9B8E8",
-  lightBlush: "#FDF1F6",
+  hotPink: "#E85A9C",
+  softPink: "#D070A0",
   white: "#FFFFFF",
-  text: "#2D2A32",
 };
-
-const CHARCOAL = "#2D2A32";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -54,111 +51,82 @@ const healthGoals = [
   { id: "wellness", label: "General wellness" },
 ];
 
-function MiniLotus({ color, size = 80 }: { color: string; size?: number }) {
-  const center = size / 2;
-  const petalLength = size * 0.35;
+function AnimatedBlobbingText({ 
+  text, 
+  delay = 0, 
+  style,
+  onComplete,
+}: { 
+  text: string; 
+  delay?: number; 
+  style?: object;
+  onComplete?: () => void;
+}) {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.85);
+  const blur = useSharedValue(10);
 
-  const createPetal = (angle: number) => {
-    const rad = (angle * Math.PI) / 180;
-    const tipX = center + Math.cos(rad) * petalLength;
-    const tipY = center + Math.sin(rad) * petalLength;
-    const leftRad = ((angle - 90) * Math.PI) / 180;
-    const rightRad = ((angle + 90) * Math.PI) / 180;
-    const baseOffset = size * 0.08;
-    const leftX = center + Math.cos(leftRad) * baseOffset;
-    const leftY = center + Math.sin(leftRad) * baseOffset;
-    const rightX = center + Math.cos(rightRad) * baseOffset;
-    const rightY = center + Math.sin(rightRad) * baseOffset;
-    const ctrl1X = center + Math.cos(rad) * (petalLength * 0.5) + Math.cos(leftRad) * (size * 0.1);
-    const ctrl1Y = center + Math.sin(rad) * (petalLength * 0.5) + Math.sin(leftRad) * (size * 0.1);
-    const ctrl2X = center + Math.cos(rad) * (petalLength * 0.5) + Math.cos(rightRad) * (size * 0.1);
-    const ctrl2Y = center + Math.sin(rad) * (petalLength * 0.5) + Math.sin(rightRad) * (size * 0.1);
-    return `M ${leftX} ${leftY} Q ${ctrl1X} ${ctrl1Y} ${tipX} ${tipY} Q ${ctrl2X} ${ctrl2Y} ${rightX} ${rightY} Z`;
-  };
+  useEffect(() => {
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 1200, easing: Easing.out(Easing.cubic) })
+    );
+    scale.value = withDelay(
+      delay,
+      withSequence(
+        withTiming(1.05, { duration: 800, easing: Easing.out(Easing.cubic) }),
+        withTiming(1, { duration: 400, easing: Easing.inOut(Easing.cubic) })
+      )
+    );
+
+    if (onComplete) {
+      const timer = setTimeout(() => {
+        runOnJS(onComplete)();
+      }, delay + 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {[0, 90, 180, 270].map((angle) => (
-        <Path key={angle} d={createPetal(angle)} fill={color} opacity={0.7} />
-      ))}
-      {[45, 135, 225, 315].map((angle) => (
-        <Path key={angle} d={createPetal(angle)} fill={color} opacity={0.4} />
-      ))}
-      <Circle cx={center} cy={center} r={size * 0.08} fill={color} />
-    </Svg>
+    <Animated.View style={animatedStyle}>
+      <ThemedText style={[styles.blobbingText, style]}>{text}</ThemedText>
+    </Animated.View>
   );
 }
 
-// ============================================================================
-// ANIMATED INTRO COMPONENT
-// Starts white, fades in gradient and logo over 5 seconds
-// ============================================================================
-function AnimatedIntro({ onComplete }: { onComplete: () => void }) {
-  const insets = useSafeAreaInsets();
-  
-  // Animation values
-  const whiteOverlayOpacity = useSharedValue(1);
+function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
+  const gradientScale = useSharedValue(0);
   const gradientOpacity = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.8);
-  const textOpacity = useSharedValue(0);
-  const subtitleOpacity = useSharedValue(0);
-  const buttonOpacity = useSharedValue(0);
-  const buttonTranslateY = useSharedValue(30);
 
   useEffect(() => {
-    // Animation sequence (total ~5 seconds)
-    
-    // 1. Fade out white overlay, reveal gradient (0-1.5s)
-    whiteOverlayOpacity.value = withTiming(0, { 
-      duration: 1500, 
+    gradientOpacity.value = withTiming(1, { duration: 500 });
+    gradientScale.value = withTiming(1, { 
+      duration: 6000, 
       easing: Easing.out(Easing.cubic) 
     });
-    gradientOpacity.value = withTiming(1, { 
-      duration: 1500, 
-      easing: Easing.out(Easing.cubic) 
-    });
-    
-    // 2. Fade in logo with scale (0.8-2.3s)
-    logoOpacity.value = withDelay(800, withTiming(1, { 
-      duration: 1200, 
-      easing: Easing.out(Easing.cubic) 
-    }));
-    logoScale.value = withDelay(800, withTiming(1, { 
-      duration: 1200, 
-      easing: Easing.out(Easing.back(1.2)) 
-    }));
-    
-    // 3. Fade in "OLANNA" text (1.5-2.8s)
-    textOpacity.value = withDelay(1500, withTiming(1, { 
-      duration: 1000, 
-      easing: Easing.out(Easing.cubic) 
-    }));
-    
-    // 4. Fade in "HEALTH" subtitle (2.2-3.5s)
-    subtitleOpacity.value = withDelay(2200, withTiming(1, { 
-      duration: 800, 
-      easing: Easing.out(Easing.cubic) 
-    }));
-    
-    // 5. Fade in button with slide up (3.5-4.5s)
-    buttonOpacity.value = withDelay(3500, withTiming(1, { 
-      duration: 800, 
-      easing: Easing.out(Easing.cubic) 
-    }));
-    buttonTranslateY.value = withDelay(3500, withTiming(0, { 
-      duration: 800, 
-      easing: Easing.out(Easing.back(1.1)) 
-    }));
-  }, []);
 
-  // Animated styles
-  const whiteOverlayStyle = useAnimatedStyle(() => ({
-    opacity: whiteOverlayOpacity.value,
-  }));
+    logoOpacity.value = withDelay(4000, withTiming(1, { duration: 1500 }));
+    logoScale.value = withDelay(4000, withSpring(1, { damping: 10, stiffness: 100 }));
+
+    const timer = setTimeout(() => {
+      runOnJS(onComplete)();
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const gradientStyle = useAnimatedStyle(() => ({
     opacity: gradientOpacity.value,
+    transform: [
+      { scale: interpolate(gradientScale.value, [0, 1], [0.3, 1.5], Extrapolation.CLAMP) },
+    ],
   }));
 
   const logoStyle = useAnimatedStyle(() => ({
@@ -166,90 +134,413 @@ function AnimatedIntro({ onComplete }: { onComplete: () => void }) {
     transform: [{ scale: logoScale.value }],
   }));
 
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-  }));
-
-  const subtitleStyle = useAnimatedStyle(() => ({
-    opacity: subtitleOpacity.value,
-  }));
-
-  const buttonStyle = useAnimatedStyle(() => ({
-    opacity: buttonOpacity.value,
-    transform: [{ translateY: buttonTranslateY.value }],
-  }));
-
-  const handleGetStarted = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onComplete();
-  };
-
   return (
-    <View style={styles.introContainer}>
-      {/* Gradient background */}
+    <View style={styles.spillContainer}>
+      <View style={styles.spillBackground} />
       <AnimatedLinearGradient
-        colors={[
-          BRAND_COLORS.sunsetOrange,
-          BRAND_COLORS.hotPink,
-          BRAND_COLORS.softLavender,
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.introGradient, gradientStyle]}
+        colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.7, y: 1 }}
+        style={[styles.spillGradient, gradientStyle]}
       />
-      
-      {/* White overlay that fades out */}
-      <Animated.View style={[styles.whiteOverlay, whiteOverlayStyle]} />
-      
-      {/* Content */}
-      <View style={[styles.introContent, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        {/* Logo "O" icon */}
-        <Animated.View style={[styles.logoIconContainer, logoStyle]}>
-          <View style={styles.logoOuter}>
-            <View style={styles.logoInner} />
-          </View>
-        </Animated.View>
-        
-        {/* "OLANNA" text */}
-        <Animated.View style={textStyle}>
-          <ThemedText style={styles.olannaText}>OLANNA</ThemedText>
-        </Animated.View>
-        
-        {/* "HEALTH" subtitle */}
-        <Animated.View style={subtitleStyle}>
-          <ThemedText style={styles.healthText}>HEALTH</ThemedText>
-        </Animated.View>
-        
-        {/* Tagline */}
-        <Animated.View style={[styles.taglineContainer, subtitleStyle]}>
-          <ThemedText style={styles.taglineText}>
-            Keep track of{'\n'}your period
-          </ThemedText>
-          <ThemedText style={styles.taglineSubtext}>
-            Easily and accurately track each{'\n'}phase of your menstrual cycle
-          </ThemedText>
-        </Animated.View>
-        
-        {/* Get Started button */}
-        <Animated.View style={[styles.introButtonContainer, buttonStyle]}>
-          <Pressable style={styles.getStartedBtn} onPress={handleGetStarted}>
-            <ThemedText style={styles.getStartedBtnText}>Get started</ThemedText>
-          </Pressable>
-        </Animated.View>
-      </View>
+      <Animated.View style={[styles.logoContainer, logoStyle]}>
+        <ThemedText style={styles.logoOlanna}>OLANNA</ThemedText>
+        <ThemedText style={styles.logoHealth}>HEALTH</ThemedText>
+      </Animated.View>
     </View>
   );
 }
 
-// ============================================================================
-// MAIN ONBOARDING SCREEN
-// ============================================================================
-export default function OnboardingScreen() {
-  const { theme } = useTheme();
+function IntroScreen({ 
+  message, 
+  onComplete,
+  autoAdvance = true,
+  duration = 5000,
+}: { 
+  message: string; 
+  onComplete: () => void;
+  autoAdvance?: boolean;
+  duration?: number;
+}) {
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (autoAdvance) {
+      const timer = setTimeout(() => {
+        runOnJS(onComplete)();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [autoAdvance, duration]);
+
+  return (
+    <LinearGradient
+      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.fullScreen}
+    >
+      <View style={[styles.introMessageContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <AnimatedBlobbingText text={message} delay={300} />
+      </View>
+      {!autoAdvance && (
+        <Pressable style={styles.tapToContinue} onPress={onComplete}>
+          <ThemedText style={styles.tapText}>Tap to continue</ThemedText>
+        </Pressable>
+      )}
+    </LinearGradient>
+  );
+}
+
+function ProfileInputScreen({ 
+  name, 
+  setName, 
+  dateOfBirth, 
+  setDateOfBirth,
+  showDatePicker,
+  setShowDatePicker,
+  onComplete,
+}: { 
+  name: string;
+  setName: (name: string) => void;
+  dateOfBirth: Date;
+  setDateOfBirth: (date: Date) => void;
+  showDatePicker: boolean;
+  setShowDatePicker: (show: boolean) => void;
+  onComplete: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const textOpacity = useSharedValue(0);
+  const formOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    textOpacity.value = withTiming(1, { duration: 1000 });
+    formOpacity.value = withDelay(4500, withTiming(1, { duration: 800 }));
+  }, []);
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  const formStyle = useAnimatedStyle(() => ({
+    opacity: formOpacity.value,
+  }));
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const calculateAge = (birthDate: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  return (
+    <LinearGradient
+      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.fullScreen}
+    >
+      <KeyboardAwareScrollViewCompat
+        style={styles.flex1}
+        contentContainerStyle={[
+          styles.profileContent,
+          { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }
+        ]}
+      >
+        <Animated.View style={[styles.questionContainer, textStyle]}>
+          <AnimatedBlobbingText 
+            text="What shall I call you?" 
+            delay={300}
+            style={styles.questionText}
+          />
+        </Animated.View>
+
+        <Animated.View style={[styles.formContainer, formStyle]}>
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>Name</ThemedText>
+            <TextInput
+              style={styles.glassInput}
+              placeholder="Your name"
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>Date of Birth</ThemedText>
+            <Pressable
+              onPress={() => setShowDatePicker(true)}
+              style={styles.glassDateButton}
+            >
+              <ThemedText style={styles.dateText}>{formatDate(dateOfBirth)}</ThemedText>
+              <Feather name="calendar" size={20} color="rgba(255,255,255,0.8)" />
+            </Pressable>
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateOfBirth}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, date) => {
+                  setShowDatePicker(Platform.OS === "ios");
+                  if (date) setDateOfBirth(date);
+                }}
+                maximumDate={new Date()}
+                textColor="#FFFFFF"
+              />
+            )}
+          </View>
+
+          {name.trim() && (
+            <Pressable 
+              style={styles.continueButton}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onComplete();
+              }}
+            >
+              <ThemedText style={styles.continueButtonText}>Continue</ThemedText>
+              <Feather name="arrow-right" size={20} color="#FFFFFF" />
+            </Pressable>
+          )}
+        </Animated.View>
+      </KeyboardAwareScrollViewCompat>
+    </LinearGradient>
+  );
+}
+
+function CycleInputScreen({
+  cycleLength,
+  setCycleLength,
+  periodLength,
+  setPeriodLength,
+  lastPeriodStart,
+  setLastPeriodStart,
+  showLastPeriodPicker,
+  setShowLastPeriodPicker,
+  onComplete,
+}: {
+  cycleLength: string;
+  setCycleLength: (val: string) => void;
+  periodLength: string;
+  setPeriodLength: (val: string) => void;
+  lastPeriodStart: Date;
+  setLastPeriodStart: (date: Date) => void;
+  showLastPeriodPicker: boolean;
+  setShowLastPeriodPicker: (show: boolean) => void;
+  onComplete: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  return (
+    <LinearGradient
+      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.fullScreen}
+    >
+      <KeyboardAwareScrollViewCompat
+        style={styles.flex1}
+        contentContainerStyle={[
+          styles.profileContent,
+          { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }
+        ]}
+      >
+        <View style={styles.questionContainer}>
+          <ThemedText style={styles.sectionTitle}>Tell me about your cycle</ThemedText>
+        </View>
+
+        <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>Average cycle length (days)</ThemedText>
+            <TextInput
+              style={styles.glassInput}
+              placeholder="28"
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              value={cycleLength}
+              onChangeText={setCycleLength}
+              keyboardType="number-pad"
+              maxLength={2}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>Average period length (days)</ThemedText>
+            <TextInput
+              style={styles.glassInput}
+              placeholder="5"
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              value={periodLength}
+              onChangeText={setPeriodLength}
+              keyboardType="number-pad"
+              maxLength={2}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>When did your last period start?</ThemedText>
+            <Pressable
+              onPress={() => setShowLastPeriodPicker(true)}
+              style={styles.glassDateButton}
+            >
+              <ThemedText style={styles.dateText}>{formatDate(lastPeriodStart)}</ThemedText>
+              <Feather name="calendar" size={20} color="rgba(255,255,255,0.8)" />
+            </Pressable>
+            {showLastPeriodPicker && (
+              <DateTimePicker
+                value={lastPeriodStart}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, date) => {
+                  setShowLastPeriodPicker(Platform.OS === "ios");
+                  if (date) setLastPeriodStart(date);
+                }}
+                maximumDate={new Date()}
+                textColor="#FFFFFF"
+              />
+            )}
+          </View>
+
+          <Pressable 
+            style={styles.continueButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onComplete();
+            }}
+          >
+            <ThemedText style={styles.continueButtonText}>Continue</ThemedText>
+            <Feather name="arrow-right" size={20} color="#FFFFFF" />
+          </Pressable>
+        </View>
+      </KeyboardAwareScrollViewCompat>
+    </LinearGradient>
+  );
+}
+
+function HealthGoalsScreen({
+  selectedGoals,
+  toggleGoal,
+  onComplete,
+  isSaving,
+}: {
+  selectedGoals: string[];
+  toggleGoal: (id: string) => void;
+  onComplete: () => void;
+  isSaving: boolean;
+}) {
+  const insets = useSafeAreaInsets();
+  const textOpacity = useSharedValue(0);
+  const goalsOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    textOpacity.value = withTiming(1, { duration: 1000 });
+    goalsOpacity.value = withDelay(4500, withTiming(1, { duration: 800 }));
+  }, []);
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  const goalsStyle = useAnimatedStyle(() => ({
+    opacity: goalsOpacity.value,
+  }));
+
+  return (
+    <LinearGradient
+      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.fullScreen}
+    >
+      <ScrollView
+        style={styles.flex1}
+        contentContainerStyle={[
+          styles.profileContent,
+          { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }
+        ]}
+      >
+        <Animated.View style={[styles.questionContainer, textStyle]}>
+          <AnimatedBlobbingText 
+            text="And to what do I owe this pleasure?" 
+            delay={300}
+            style={styles.questionText}
+          />
+        </Animated.View>
+
+        <Animated.View style={[styles.goalsContainer, goalsStyle]}>
+          <ThemedText style={styles.goalsSubtitle}>
+            Select all that apply
+          </ThemedText>
+          <View style={styles.goalsGrid}>
+            {healthGoals.map((goal) => (
+              <Pressable
+                key={goal.id}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  toggleGoal(goal.id);
+                }}
+                style={[
+                  styles.goalChip,
+                  selectedGoals.includes(goal.id) && styles.goalChipSelected,
+                ]}
+              >
+                <ThemedText style={[
+                  styles.goalChipText,
+                  selectedGoals.includes(goal.id) && styles.goalChipTextSelected,
+                ]}>
+                  {goal.label}
+                </ThemedText>
+                {selectedGoals.includes(goal.id) && (
+                  <Feather name="check" size={16} color={BRAND_COLORS.hotPink} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+
+          {selectedGoals.length > 0 && (
+            <Pressable 
+              style={styles.completeButton}
+              onPress={() => {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                onComplete();
+              }}
+              disabled={isSaving}
+            >
+              <ThemedText style={styles.completeButtonText}>
+                {isSaving ? "Setting up..." : "Let's begin"}
+              </ThemedText>
+              <Feather name="heart" size={20} color={BRAND_COLORS.hotPink} />
+            </Pressable>
+          )}
+        </Animated.View>
+      </ScrollView>
+    </LinearGradient>
+  );
+}
+
+export default function OnboardingScreen() {
   const navigation = useNavigation<NavigationProp>();
 
-  // Start with animated intro (step 0), then proceed to form steps
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
@@ -259,30 +550,12 @@ export default function OnboardingScreen() {
   const [lastPeriodStart, setLastPeriodStart] = useState(new Date());
   const [showLastPeriodPicker, setShowLastPeriodPicker] = useState(false);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-  const [useLotusView, setUseLotusView] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const toggleGoal = (goalId: string) => {
     setSelectedGoals((prev) =>
       prev.includes(goalId) ? prev.filter((id) => id !== goalId) : [...prev, goalId]
     );
-  };
-
-  const handleIntroComplete = () => {
-    setStep(1);
-  };
-
-  const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    } else {
-      navigation.goBack();
-    }
   };
 
   const handleComplete = async () => {
@@ -302,8 +575,7 @@ export default function OnboardingScreen() {
       };
       await storage.setUserProfile(profile);
       await storage.setOnboardingComplete(true);
-      await storage.setPreference("useLotusView", useLotusView ? "true" : "false");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await storage.setPreference("useLotusView", "true");
       navigation.reset({
         index: 0,
         routes: [{ name: "Main" }],
@@ -316,474 +588,261 @@ export default function OnboardingScreen() {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  // Show animated intro for step 0
-  if (step === 0) {
-    return <AnimatedIntro onComplete={handleIntroComplete} />;
+  switch (step) {
+    case 0:
+      return <GradientSpillIntro onComplete={() => setStep(1)} />;
+    case 1:
+      return (
+        <IntroScreen 
+          message="Girl, hi! My name is Olanna." 
+          onComplete={() => setStep(2)}
+          duration={5000}
+        />
+      );
+    case 2:
+      return (
+        <ProfileInputScreen
+          name={name}
+          setName={setName}
+          dateOfBirth={dateOfBirth}
+          setDateOfBirth={setDateOfBirth}
+          showDatePicker={showDatePicker}
+          setShowDatePicker={setShowDatePicker}
+          onComplete={() => setStep(3)}
+        />
+      );
+    case 3:
+      return (
+        <IntroScreen 
+          message="And to what do I owe this pleasure?" 
+          onComplete={() => setStep(4)}
+          duration={5000}
+        />
+      );
+    case 4:
+      return (
+        <HealthGoalsScreen
+          selectedGoals={selectedGoals}
+          toggleGoal={toggleGoal}
+          onComplete={() => setStep(5)}
+          isSaving={false}
+        />
+      );
+    case 5:
+      return (
+        <CycleInputScreen
+          cycleLength={cycleLength}
+          setCycleLength={setCycleLength}
+          periodLength={periodLength}
+          setPeriodLength={setPeriodLength}
+          lastPeriodStart={lastPeriodStart}
+          setLastPeriodStart={setLastPeriodStart}
+          showLastPeriodPicker={showLastPeriodPicker}
+          setShowLastPeriodPicker={setShowLastPeriodPicker}
+          onComplete={handleComplete}
+        />
+      );
+    default:
+      return <GradientSpillIntro onComplete={() => setStep(1)} />;
   }
-
-  const renderStep1 = () => (
-    <View style={styles.stepContent}>
-      <ThemedText type="h2" style={styles.stepTitle}>
-        What should we call you?
-      </ThemedText>
-      <TextInput
-        style={[
-          styles.input,
-          { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-        ]}
-        placeholder="Your name"
-        placeholderTextColor={theme.textSecondary}
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="words"
-      />
-      <ThemedText type="h4" style={styles.fieldLabel}>
-        Date of Birth
-      </ThemedText>
-      <Pressable
-        onPress={() => setShowDatePicker(true)}
-        style={[
-          styles.dateButton,
-          { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-        ]}
-      >
-        <ThemedText type="body">{formatDate(dateOfBirth)}</ThemedText>
-        <Feather name="calendar" size={20} color={theme.textSecondary} />
-      </Pressable>
-      {showDatePicker ? (
-        <DateTimePicker
-          value={dateOfBirth}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={(event, date) => {
-            setShowDatePicker(Platform.OS === "ios");
-            if (date) setDateOfBirth(date);
-          }}
-          maximumDate={new Date()}
-        />
-      ) : null}
-      <PrivacyBadge message="Your personal data is encrypted and stored locally" />
-      <Button onPress={handleNext} disabled={!name.trim()} style={styles.button}>
-        Continue
-      </Button>
-    </View>
-  );
-
-  const renderStep2 = () => (
-    <View style={styles.stepContent}>
-      <ThemedText type="h2" style={styles.stepTitle}>
-        Tell us about your cycle
-      </ThemedText>
-      <ThemedText type="h4" style={styles.fieldLabel}>
-        Average cycle length (days)
-      </ThemedText>
-      <TextInput
-        style={[
-          styles.input,
-          { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-        ]}
-        placeholder="28"
-        placeholderTextColor={theme.textSecondary}
-        value={cycleLength}
-        onChangeText={setCycleLength}
-        keyboardType="number-pad"
-        maxLength={2}
-      />
-      <ThemedText type="h4" style={styles.fieldLabel}>
-        Average period length (days)
-      </ThemedText>
-      <TextInput
-        style={[
-          styles.input,
-          { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-        ]}
-        placeholder="5"
-        placeholderTextColor={theme.textSecondary}
-        value={periodLength}
-        onChangeText={setPeriodLength}
-        keyboardType="number-pad"
-        maxLength={2}
-      />
-      <ThemedText type="h4" style={styles.fieldLabel}>
-        When did your last period start?
-      </ThemedText>
-      <Pressable
-        onPress={() => setShowLastPeriodPicker(true)}
-        style={[
-          styles.dateButton,
-          { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-        ]}
-      >
-        <ThemedText type="body">{formatDate(lastPeriodStart)}</ThemedText>
-        <Feather name="calendar" size={20} color={theme.textSecondary} />
-      </Pressable>
-      {showLastPeriodPicker ? (
-        <DateTimePicker
-          value={lastPeriodStart}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={(event, date) => {
-            setShowLastPeriodPicker(Platform.OS === "ios");
-            if (date) setLastPeriodStart(date);
-          }}
-          maximumDate={new Date()}
-        />
-      ) : null}
-      <Button onPress={handleNext} style={styles.button}>
-        Continue
-      </Button>
-    </View>
-  );
-
-  const renderStep3 = () => (
-    <View style={styles.stepContent}>
-      <ThemedText type="h2" style={styles.stepTitle}>
-        What are your health goals?
-      </ThemedText>
-      <ThemedText type="body" style={styles.subtitle}>
-        Select all that apply. You can change these later.
-      </ThemedText>
-      <View style={styles.goalsGrid}>
-        {healthGoals.map((goal) => (
-          <SymptomChip
-            key={goal.id}
-            label={goal.label}
-            selected={selectedGoals.includes(goal.id)}
-            onPress={() => toggleGoal(goal.id)}
-          />
-        ))}
-      </View>
-      <Button
-        onPress={handleNext}
-        disabled={selectedGoals.length === 0}
-        style={styles.button}
-      >
-        Continue
-      </Button>
-    </View>
-  );
-
-  const renderStep4 = () => (
-    <View style={styles.stepContent}>
-      <ThemedText type="h2" style={styles.stepTitle}>
-        Choose Your View
-      </ThemedText>
-      <ThemedText type="body" style={styles.subtitle}>
-        How would you like to visualize your cycle?
-      </ThemedText>
-
-      <View style={styles.viewOptions}>
-        <Pressable
-          onPress={() => setUseLotusView(true)}
-          style={[
-            styles.viewOption,
-            {
-              backgroundColor: theme.backgroundDefault,
-              borderColor: useLotusView ? theme.primary : theme.border,
-              borderWidth: useLotusView ? 2 : 1,
-            },
-          ]}
-        >
-          <MiniLotus color={theme.primary} size={60} />
-          <ThemedText type="h4">Lotus View</ThemedText>
-          <ThemedText type="caption" style={styles.viewDescription}>
-            A blooming lotus represents your cycle phases
-          </ThemedText>
-          {useLotusView ? (
-            <View style={[styles.selectedBadge, { backgroundColor: theme.primary }]}>
-              <Feather name="check" size={14} color="#FFF" />
-            </View>
-          ) : null}
-        </Pressable>
-
-        <Pressable
-          onPress={() => setUseLotusView(false)}
-          style={[
-            styles.viewOption,
-            {
-              backgroundColor: theme.backgroundDefault,
-              borderColor: !useLotusView ? theme.primary : theme.border,
-              borderWidth: !useLotusView ? 2 : 1,
-            },
-          ]}
-        >
-          <View style={[styles.wheelPreview, { borderColor: theme.primary }]}>
-            <Feather name="circle" size={40} color={theme.primary} />
-          </View>
-          <ThemedText type="h4">Cycle Wheel</ThemedText>
-          <ThemedText type="caption" style={styles.viewDescription}>
-            A traditional circular view
-          </ThemedText>
-          {!useLotusView ? (
-            <View style={[styles.selectedBadge, { backgroundColor: theme.primary }]}>
-              <Feather name="check" size={14} color="#FFF" />
-            </View>
-          ) : null}
-        </Pressable>
-      </View>
-
-      <Button
-        onPress={handleComplete}
-        disabled={isSaving}
-        style={styles.button}
-      >
-        {isSaving ? "Setting up..." : "Complete Setup"}
-      </Button>
-    </View>
-  );
-
-  return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color={theme.text} />
-        </Pressable>
-        <View style={styles.progressContainer}>
-          {[1, 2, 3, 4].map((s) => (
-            <View
-              key={s}
-              style={[
-                styles.progressDot,
-                { backgroundColor: s <= step ? theme.primary : theme.backgroundSecondary },
-              ]}
-            />
-          ))}
-        </View>
-        <View style={styles.backButton} />
-      </View>
-
-      <KeyboardAwareScrollViewCompat
-        style={styles.scrollView}
-        contentContainerStyle={{
-          paddingHorizontal: Spacing.xl,
-          paddingBottom: insets.bottom + Spacing["2xl"],
-          flexGrow: 1,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {step === 1 && renderStep1()}
-        {step === 2 && renderStep2()}
-        {step === 3 && renderStep3()}
-        {step === 4 && renderStep4()}
-      </KeyboardAwareScrollViewCompat>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex1: {
+    flex: 1,
+  },
+  fullScreen: {
     flex: 1,
   },
   
-  // Animated Intro styles
-  introContainer: {
+  spillContainer: {
     flex: 1,
-    position: "relative",
-  },
-  introGradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  whiteOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#FFFFFF",
-  },
-  introContent: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Spacing.xl,
-  },
-  logoIconContainer: {
-    marginBottom: Spacing.xl,
-  },
-  logoOuter: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 30,
-    elevation: 10,
   },
-  logoInner: {
-    width: 40,
-    height: 28,
-    borderRadius: 20,
-    backgroundColor: "#E869A5",
+  spillBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#FFFFFF",
   },
-  olannaText: {
+  spillGradient: {
+    position: "absolute",
+    width: SCREEN_WIDTH * 2,
+    height: SCREEN_HEIGHT * 2,
+    borderRadius: SCREEN_WIDTH,
+  },
+  logoContainer: {
+    alignItems: "center",
+  },
+  logoOlanna: {
     fontFamily: "DMSans_700Bold",
     fontSize: 48,
     color: "#FFFFFF",
     letterSpacing: 2,
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
-  healthText: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 22,
+  logoHealth: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 18,
     color: "#FFFFFF",
     letterSpacing: 12,
-    textAlign: "center",
-    marginTop: 4,
-    opacity: 0.95,
-  },
-  taglineContainer: {
-    marginTop: SCREEN_HEIGHT * 0.08,
-    alignItems: "center",
-  },
-  taglineText: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 28,
-    color: "#FFFFFF",
-    textAlign: "center",
-    lineHeight: 36,
-  },
-  taglineSubtext: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    color: "#FFFFFF",
-    textAlign: "center",
-    opacity: 0.85,
-    marginTop: Spacing.md,
-    lineHeight: 22,
-  },
-  introButtonContainer: {
-    position: "absolute",
-    bottom: 60,
-    left: Spacing.xl,
-    right: Spacing.xl,
-  },
-  getStartedBtn: {
-    backgroundColor: "rgba(255,255,255,0.25)",
-    borderRadius: 30,
-    paddingVertical: 18,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
-  },
-  getStartedBtnText: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 16,
-    color: "#FFFFFF",
-    letterSpacing: 0.5,
+    marginTop: 8,
   },
   
-  // Form step styles
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+  introMessageContainer: {
+    flex: 1,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xl,
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
+  blobbingText: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 42,
+    color: "#FFFFFF",
+    lineHeight: 54,
+    textShadowColor: "rgba(0,0,0,0.1)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  tapToContinue: {
+    position: "absolute",
+    bottom: 60,
+    alignSelf: "center",
+  },
+  tapText: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    color: "rgba(255,255,255,0.7)",
+  },
+  
+  questionContainer: {
+    marginBottom: Spacing.xl,
+  },
+  questionText: {
+    fontSize: 38,
+    lineHeight: 50,
+  },
+  sectionTitle: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 32,
+    color: "#FFFFFF",
+    lineHeight: 42,
+  },
+  
+  profileContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
     justifyContent: "center",
   },
-  progressContainer: {
-    flexDirection: "row",
-    gap: Spacing.sm,
+  formContainer: {
+    marginTop: Spacing.xl,
   },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  inputGroup: {
+    marginBottom: Spacing.lg,
   },
-  scrollView: {
-    flex: 1,
-  },
-  stepContent: {
-    flex: 1,
-    justifyContent: "center",
-    gap: Spacing.lg,
-  },
-  stepTitle: {
-    textAlign: "center",
+  inputLabel: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
     marginBottom: Spacing.sm,
+    letterSpacing: 0.5,
   },
-  subtitle: {
-    textAlign: "center",
-    opacity: 0.7,
-  },
-  fieldLabel: {
-    marginTop: Spacing.md,
-    marginBottom: Spacing.xs,
-  },
-  input: {
-    height: Spacing.inputHeight,
+  glassInput: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 16,
     paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontFamily: "DMSans_500Medium",
     borderWidth: 1,
-    fontSize: 16,
+    borderColor: "rgba(255,255,255,0.3)",
   },
-  dateButton: {
-    height: Spacing.inputHeight,
+  glassDateButton: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 16,
     paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
+    paddingVertical: Spacing.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  dateText: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 16,
+    color: "#FFFFFF",
+  },
+  
+  continueButton: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 30,
+    paddingVertical: 18,
+    paddingHorizontal: Spacing.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: Spacing.xl,
+    gap: 8,
+  },
+  continueButtonText: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 16,
+    color: BRAND_COLORS.hotPink,
+  },
+  
+  goalsContainer: {
+    marginTop: Spacing.lg,
+  },
+  goalsSubtitle: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 16,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: Spacing.lg,
   },
   goalsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: Spacing.sm,
-    marginTop: Spacing.sm,
+    gap: 12,
   },
-  viewOptions: {
+  goalChip: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     flexDirection: "row",
-    gap: Spacing.md,
-    marginTop: Spacing.lg,
-  },
-  viewOption: {
-    flex: 1,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
     alignItems: "center",
-    gap: Spacing.sm,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
   },
-  viewDescription: {
-    textAlign: "center",
-    opacity: 0.7,
-    lineHeight: 18,
+  goalChipSelected: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderColor: "rgba(255,255,255,1)",
   },
-  wheelPreview: {
-    width: 60,
-    height: 60,
+  goalChipText: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 15,
+    color: "#FFFFFF",
+  },
+  goalChipTextSelected: {
+    color: BRAND_COLORS.hotPink,
+  },
+  
+  completeButton: {
+    backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: 30,
-    borderWidth: 3,
+    paddingVertical: 18,
+    paddingHorizontal: Spacing.xl,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    marginTop: Spacing["2xl"],
+    gap: 8,
   },
-  selectedBadge: {
-    position: "absolute",
-    top: Spacing.sm,
-    right: Spacing.sm,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button: {
-    marginTop: Spacing.xl,
+  completeButtonText: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 16,
+    color: BRAND_COLORS.hotPink,
   },
 });
