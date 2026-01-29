@@ -11,7 +11,7 @@ Olanna Health is a context-sensitive femtech mobile application designed for Afr
 - **Sexual Health**: STI screening reminders based on SAHCS 2022 guidelines
 - **Cervical Screening**: Pap smear/HPV test scheduling per SASOG guidelines
 - **Education Library**: Evidence-based articles on women's health topics
-- **AI Health Assistant**: Conversational support for health questions
+- **AI Health Assistant**: Multilingual chatbot supporting 6 South African languages (English, isiZulu, Afrikaans, Sesotho, isiXhosa, siSwati)
 
 ## Tech Stack
 - **Frontend**: React Native with Expo (Expo Go compatible)
