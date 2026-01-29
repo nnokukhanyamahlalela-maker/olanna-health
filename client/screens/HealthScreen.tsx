@@ -142,6 +142,16 @@ export default function HealthScreen() {
         </View>
       ) : null}
 
+      <View style={styles.aiAssistantSection}>
+        <HealthModuleCard
+          title="AI Health Assistant"
+          description="Ask questions in English, isiZulu, Afrikaans, Sesotho, isiXhosa, or siSwati"
+          icon="message-circle"
+          color={theme.primary}
+          onPress={() => navigation.navigate("AIChat")}
+        />
+      </View>
+
       <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
       <View style={styles.section}>
@@ -316,5 +326,8 @@ const styles = StyleSheet.create({
   },
   healthChecksList: {
     gap: Spacing.md,
+  },
+  aiAssistantSection: {
+    marginBottom: Spacing.sm,
   },
 });
