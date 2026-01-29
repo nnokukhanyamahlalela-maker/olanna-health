@@ -193,13 +193,7 @@ const FilledLotusFlower = ({
       const ctrlRightY = cy + Math.sin(rad) * ctrlDist + Math.sin(rightRad) * ctrlWidthOffset;
       
       // Create filled petal path
-      const path = `
-        M ${leftBaseX} ${leftBaseY}
-        Q ${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY}
-        Q ${ctrlRightX} ${ctrlRightY} ${rightBaseX} ${rightBaseY}
-        Q ${cx} ${cy + baseOffset * 0.5} ${leftBaseX} ${leftBaseY}
-        Z
-      `;
+      const path = `M ${leftBaseX} ${leftBaseY} Q ${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q ${ctrlRightX} ${ctrlRightY} ${rightBaseX} ${rightBaseY} Q ${cx} ${cy + baseOffset * 0.5} ${leftBaseX} ${leftBaseY} Z`;
       
       paths.push(
         <Path

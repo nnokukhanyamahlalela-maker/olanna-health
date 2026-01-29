@@ -11,6 +11,7 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { EmptyState } from "@/components/EmptyState";
 import { PHASE_INFO, CyclePhase } from "@/components/Lotus";
+import { LotusCycleWheel } from "@/components/LotusCycleWheel";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
@@ -391,8 +392,17 @@ export default function HomeScreen() {
         {/* Week Strip */}
         <WeekStrip cycleData={cycleData} />
         
-        {/* Hero Card */}
-        <HeroCard cycleData={cycleData} onCheckIn={handleCheckIn} />
+        {/* Lotus Cycle Wheel */}
+        <View style={styles.lotusWheelContainer}>
+          <LotusCycleWheel
+            currentDay={cycleData.currentDay}
+            cycleLength={cycleData.cycleLength}
+            phase={cycleData.phase}
+            periodLength={profile?.periodLength || 5}
+            size={280}
+            showInfo={true}
+          />
+        </View>
         
         {/* Timeline Section */}
         <View style={styles.timelineSection}>
@@ -435,6 +445,12 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
+  },
+  
+  // Lotus Wheel
+  lotusWheelContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
   },
   
   // Header
