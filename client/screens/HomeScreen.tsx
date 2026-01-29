@@ -21,26 +21,27 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // ============================================================================
-// DESIGN TOKENS - Premium feminine palette
+// DESIGN TOKENS - Exact brand colors from spec
 // ============================================================================
 const COLORS = {
-  // Gradient colors for the hero card
-  gradientStart: "#E8B4D9",    // Soft pink-lavender
-  gradientMid: "#F4A5B8",      // Warm coral pink
-  gradientEnd: "#F8C8A4",      // Peachy champagne
+  // Gradient colors (exact spec)
+  hotPink: "#FF4FB8",
+  sunsetOrange: "#F7A37A",
+  softLavender: "#C9B8E8",
+  lightBlush: "#FDF1F6",
   
   // Phase colors
-  period: "#E8839C",           // Soft pink-rose for period
-  fertile: "#F4A76C",          // Warm coral for fertile
-  pms: "#C4A5DE",              // Soft lavender for PMS
+  period: "#FF4FB8",           // Hot pink for period
+  fertile: "#F7A37A",          // Sunset orange for fertile
+  pms: "#C9B8E8",              // Soft lavender for PMS
   
   // UI colors
-  background: "#FAF8F7",       // Warm off-white
+  background: "#FDF1F6",       // Light blush background
   cardBg: "#FFFFFF",
   text: "#2D2A32",             // Near-black
   textSecondary: "#7A7580",    // Muted gray
   textLight: "#FFFFFF",
-  accent: "#E8839C",
+  accent: "#FF4FB8",
   border: "#F0EBE8",
 };
 
@@ -124,7 +125,7 @@ const WeekStrip = ({
           ]}>
             {day.isToday ? (
               <LinearGradient
-                colors={[COLORS.gradientStart, COLORS.gradientMid]}
+                colors={[COLORS.hotPink, COLORS.sunsetOrange]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.dayCircleGradient}
@@ -161,7 +162,7 @@ const HeroCard = ({
   
   return (
     <LinearGradient
-      colors={[COLORS.gradientStart, COLORS.gradientMid, COLORS.gradientEnd]}
+      colors={[COLORS.hotPink, COLORS.sunsetOrange, COLORS.softLavender]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.heroCard}

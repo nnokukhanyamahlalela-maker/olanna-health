@@ -29,16 +29,17 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// New brand gradient colors (matching the logo)
-const GRADIENT_COLORS = {
-  topLeft: "#FF7E5F",      // Warm orange-coral
-  topRight: "#E85A9C",     // Hot pink
-  center: "#E869A5",       // Pink
-  bottomLeft: "#F4A76C",   // Peachy orange  
-  bottomRight: "#D8A5E0",  // Soft lavender-pink
+// Exact brand gradient colors from spec
+const BRAND_COLORS = {
+  hotPink: "#FF4FB8",
+  sunsetOrange: "#F7A37A",
+  softLavender: "#C9B8E8",
+  lightBlush: "#FDF1F6",
+  white: "#FFFFFF",
+  text: "#2D2A32",
 };
 
-const CHARCOAL = "#3A2F35";
+const CHARCOAL = "#2D2A32";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -188,10 +189,9 @@ function AnimatedIntro({ onComplete }: { onComplete: () => void }) {
       {/* Gradient background */}
       <AnimatedLinearGradient
         colors={[
-          GRADIENT_COLORS.topLeft,
-          GRADIENT_COLORS.topRight,
-          GRADIENT_COLORS.center,
-          GRADIENT_COLORS.bottomRight,
+          BRAND_COLORS.sunsetOrange,
+          BRAND_COLORS.hotPink,
+          BRAND_COLORS.softLavender,
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
