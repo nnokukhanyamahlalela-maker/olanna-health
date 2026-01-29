@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Image, Dimensions } from "react-native";
+import { View, StyleSheet, Image, Dimensions, ImageBackground } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { storage } from "@/lib/storage";
@@ -58,25 +57,28 @@ export default function SplashScreen() {
 
   return (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
-      <LinearGradient
-        colors={["#F7A37A", "#E85A9C", "#D070A0"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-        <Image
-          source={require("@/assets/images/olanna-logo.png")}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-      </Animated.View>
+      <ImageBackground
+        source={require("@/assets/images/gradient-background.jpg")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
+          <Image
+            source={require("@/assets/images/olanna-logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
+      </ImageBackground>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  backgroundImage: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",

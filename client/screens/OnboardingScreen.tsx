@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView, Image } from "react-native";
+import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView, Image, ImageBackground } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -100,34 +100,19 @@ function AnimatedBlobbingText({
 }
 
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
-  const gradientScale = useSharedValue(0);
-  const gradientOpacity = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.85);
 
   useEffect(() => {
-    gradientOpacity.value = withTiming(1, { duration: 500 });
-    gradientScale.value = withTiming(1, { 
-      duration: 6000, 
-      easing: Easing.out(Easing.cubic) 
-    });
-
-    logoOpacity.value = withDelay(3500, withTiming(1, { duration: 1200 }));
-    logoScale.value = withDelay(3500, withSpring(1, { damping: 12, stiffness: 100 }));
+    logoOpacity.value = withDelay(500, withTiming(1, { duration: 1200 }));
+    logoScale.value = withDelay(500, withSpring(1, { damping: 12, stiffness: 100 }));
 
     const timer = setTimeout(() => {
       runOnJS(onComplete)();
-    }, 7000);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, []);
-
-  const gradientStyle = useAnimatedStyle(() => ({
-    opacity: gradientOpacity.value,
-    transform: [
-      { scale: interpolate(gradientScale.value, [0, 1], [0.3, 1.5], Extrapolation.CLAMP) },
-    ],
-  }));
 
   const logoStyle = useAnimatedStyle(() => ({
     opacity: logoOpacity.value,
@@ -135,14 +120,11 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   }));
 
   return (
-    <View style={styles.spillContainer}>
-      <View style={styles.spillBackground} />
-      <AnimatedLinearGradient
-        colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
-        start={{ x: 0.3, y: 0 }}
-        end={{ x: 0.7, y: 1 }}
-        style={[styles.spillGradient, gradientStyle]}
-      />
+    <ImageBackground
+      source={require("@/assets/images/gradient-background.jpg")}
+      style={styles.spillContainer}
+      resizeMode="cover"
+    >
       <Animated.View style={[styles.logoContainer, logoStyle]}>
         <Image
           source={require("@/assets/images/olanna-logo.png")}
@@ -150,7 +132,7 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
           resizeMode="contain"
         />
       </Animated.View>
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -177,11 +159,10 @@ function IntroScreen({
   }, [autoAdvance, duration]);
 
   return (
-    <LinearGradient
-      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <ImageBackground
+      source={require("@/assets/images/gradient-background.jpg")}
       style={styles.fullScreen}
+      resizeMode="cover"
     >
       <View style={[styles.introMessageContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <AnimatedBlobbingText text={message} delay={300} />
@@ -191,7 +172,7 @@ function IntroScreen({
           <ThemedText style={styles.tapText}>Tap to continue</ThemedText>
         </Pressable>
       )}
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -248,11 +229,10 @@ function ProfileInputScreen({
   };
 
   return (
-    <LinearGradient
-      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <ImageBackground
+      source={require("@/assets/images/gradient-background.jpg")}
       style={styles.fullScreen}
+      resizeMode="cover"
     >
       <KeyboardAwareScrollViewCompat
         style={styles.flex1}
@@ -320,7 +300,7 @@ function ProfileInputScreen({
           )}
         </Animated.View>
       </KeyboardAwareScrollViewCompat>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -356,11 +336,10 @@ function CycleInputScreen({
   };
 
   return (
-    <LinearGradient
-      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <ImageBackground
+      source={require("@/assets/images/gradient-background.jpg")}
       style={styles.fullScreen}
+      resizeMode="cover"
     >
       <KeyboardAwareScrollViewCompat
         style={styles.flex1}
@@ -436,7 +415,7 @@ function CycleInputScreen({
           </Pressable>
         </View>
       </KeyboardAwareScrollViewCompat>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -469,11 +448,10 @@ function HealthGoalsScreen({
   }));
 
   return (
-    <LinearGradient
-      colors={[BRAND_COLORS.sunsetOrange, BRAND_COLORS.hotPink, BRAND_COLORS.softPink]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <ImageBackground
+      source={require("@/assets/images/gradient-background.jpg")}
       style={styles.fullScreen}
+      resizeMode="cover"
     >
       <ScrollView
         style={styles.flex1}
@@ -537,7 +515,7 @@ function HealthGoalsScreen({
           )}
         </Animated.View>
       </ScrollView>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
