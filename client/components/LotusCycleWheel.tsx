@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, StyleSheet, Dimensions, Pressable } from "react-native";
 import Svg, { Circle, Path, G, Defs, RadialGradient, Stop } from "react-native-svg";
 import Animated, { 
@@ -18,54 +18,48 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
 // ============================================================================
-// DESIGN TOKENS - Exact brand colors from spec
+// DESIGN TOKENS - New gradient brand colors
 // ============================================================================
-const COLORS = {
-  // Brand gradient colors
-  hotPink: "#FF4FB8",
-  sunsetOrange: "#F7A37A",
-  softLavender: "#C9B8E8",
-  lightBlush: "#FDF1F6",
-  
-  // Phase colors - using brand palette
-  menstrual: "#FF4FB8",      // Hot pink - period
-  follicular: "#F7A37A",     // Sunset orange - growth
-  ovulation: "#FFB88C",      // Warm coral - peak
-  luteal: "#C9B8E8",         // Soft lavender - reflection
-  
-  // UI colors
-  background: "#FDF1F6",     // Light blush
-  text: "#2D2A32",           // Near black
-  textMuted: "#7A7580",      // Muted gray
-  ring: "#FF4FB8",           // Hot pink ring
-  ringLight: "#FDF1F6",      // Light blush
+const PHASE_COLORS = {
+  menstrual: "#F7A37A",      // Sunset Orange
+  follicular: "#E85A9C",     // Hot Pink
+  ovulation: "#D070A0",      // Soft Pink
+  luteal: "#B088C8",         // Purple/Lavender
 };
 
-// Phase arc definitions with emotional cues
+const COLORS = {
+  background: "#FFF7FA",     // Soft off-white pink
+  white: "#FFFFFF",
+  text: "#3A2F35",           // Charcoal
+  textMuted: "#7A6A73",      // Warm gray
+  ringTrack: "#F5E8ED",      // Very light pink for track background
+};
+
+// Phase configuration with emotional cues
 const PHASE_CONFIG = {
   menstrual: {
-    color: COLORS.menstrual,
+    color: PHASE_COLORS.menstrual,
     name: "MENSTRUAL",
     cue: "Rest & Release",
-    startPercent: 0,
+    petals: 3,  // Small, closed
   },
   follicular: {
-    color: COLORS.follicular,
+    color: PHASE_COLORS.follicular,
     name: "FOLLICULAR", 
     cue: "Rising Energy",
-    startPercent: 0,
+    petals: 5,  // Opening
   },
   ovulation: {
-    color: COLORS.ovulation,
+    color: PHASE_COLORS.ovulation,
     name: "OVULATORY",
     cue: "Full Radiance",
-    startPercent: 0,
+    petals: 7,  // Full bloom
   },
   luteal: {
-    color: COLORS.luteal,
+    color: PHASE_COLORS.luteal,
     name: "LUTEAL",
     cue: "Inner Reflection",
-    startPercent: 0,
+    petals: 5,  // Softening
   },
 };
 
@@ -125,7 +119,6 @@ const createArcPath = (
   radius: number,
   startAngle: number,
   endAngle: number,
-  strokeWidth: number
 ): string => {
   // Convert angles from percentage to radians (starting from top, -90 degrees)
   const startRad = (startAngle * 2 * Math.PI) - (Math.PI / 2);
@@ -142,147 +135,135 @@ const createArcPath = (
 };
 
 // ============================================================================
-// LOTUS BUD MARKER COMPONENT
-// Minimalist lotus bud that indicates current day position
+// FILLED LOTUS FLOWER COMPONENT
+// Simple white filled lotus that grows with each phase
 // ============================================================================
-const LotusBudMarker = ({ 
+const FilledLotusFlower = ({ 
+  phase, 
+  size = 80 
+}: { 
+  phase: CyclePhase; 
+  size?: number 
+}) => {
+  const config = PHASE_CONFIG[phase];
+  const petalCount = config.petals;
+  const cx = size / 2;
+  const cy = size / 2;
+  
+  // Lotus grows based on phase
+  const sizeMultiplier = {
+    menstrual: 0.6,   // Small, closed bud
+    follicular: 0.75, // Opening up
+    ovulation: 1.0,   // Full bloom
+    luteal: 0.85,     // Slightly closing
+  };
+  
+  const scale = sizeMultiplier[phase];
+  const petalLength = size * 0.38 * scale;
+  const petalWidth = size * 0.18 * scale;
+  
+  // Generate petals
+  const petals = useMemo(() => {
+    const paths = [];
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i * 360 / petalCount) - 90; // Start from top
+      const rad = (angle * Math.PI) / 180;
+      
+      // Tip of petal
+      const tipX = cx + Math.cos(rad) * petalLength;
+      const tipY = cy + Math.sin(rad) * petalLength;
+      
+      // Base points of petal
+      const leftRad = ((angle - 90) * Math.PI) / 180;
+      const rightRad = ((angle + 90) * Math.PI) / 180;
+      const baseOffset = size * 0.05;
+      
+      const leftBaseX = cx + Math.cos(leftRad) * baseOffset;
+      const leftBaseY = cy + Math.sin(leftRad) * baseOffset;
+      const rightBaseX = cx + Math.cos(rightRad) * baseOffset;
+      const rightBaseY = cy + Math.sin(rightRad) * baseOffset;
+      
+      // Control points for curves
+      const ctrlDist = petalLength * 0.65;
+      const ctrlWidthOffset = petalWidth * 0.8;
+      
+      const ctrlLeftX = cx + Math.cos(rad) * ctrlDist + Math.cos(leftRad) * ctrlWidthOffset;
+      const ctrlLeftY = cy + Math.sin(rad) * ctrlDist + Math.sin(leftRad) * ctrlWidthOffset;
+      const ctrlRightX = cx + Math.cos(rad) * ctrlDist + Math.cos(rightRad) * ctrlWidthOffset;
+      const ctrlRightY = cy + Math.sin(rad) * ctrlDist + Math.sin(rightRad) * ctrlWidthOffset;
+      
+      // Create filled petal path
+      const path = `
+        M ${leftBaseX} ${leftBaseY}
+        Q ${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY}
+        Q ${ctrlRightX} ${ctrlRightY} ${rightBaseX} ${rightBaseY}
+        Q ${cx} ${cy + baseOffset * 0.5} ${leftBaseX} ${leftBaseY}
+        Z
+      `;
+      
+      paths.push(
+        <Path
+          key={i}
+          d={path}
+          fill={COLORS.white}
+          stroke={COLORS.white}
+          strokeWidth={0.5}
+        />
+      );
+    }
+    return paths;
+  }, [petalCount, cx, cy, petalLength, petalWidth, size, phase]);
+  
+  // Center circle (stigma)
+  const centerRadius = size * 0.08 * scale;
+  
+  return (
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {petals}
+      <Circle 
+        cx={cx} 
+        cy={cy} 
+        r={centerRadius} 
+        fill={COLORS.white}
+      />
+    </Svg>
+  );
+};
+
+// ============================================================================
+// CURRENT DAY MARKER
+// Small dot to indicate current position on the ring
+// ============================================================================
+const DayMarker = ({ 
   cx, 
   cy, 
-  color, 
-  size = 18,
-  isToday = true 
+  color,
+  size = 12,
 }: { 
   cx: number; 
   cy: number; 
   color: string; 
   size?: number;
-  isToday?: boolean;
 }) => {
-  const budScale = isToday ? 1.15 : 1;
-  const adjustedSize = size * budScale;
-  
-  // Simple, elegant lotus bud shape
-  const budPath = `
-    M ${cx} ${cy - adjustedSize * 0.6}
-    C ${cx - adjustedSize * 0.25} ${cy - adjustedSize * 0.3}
-      ${cx - adjustedSize * 0.25} ${cy + adjustedSize * 0.2}
-      ${cx} ${cy + adjustedSize * 0.5}
-    C ${cx + adjustedSize * 0.25} ${cy + adjustedSize * 0.2}
-      ${cx + adjustedSize * 0.25} ${cy - adjustedSize * 0.3}
-      ${cx} ${cy - adjustedSize * 0.6}
-    Z
-  `;
-  
-  // Inner petal detail
-  const innerPath = `
-    M ${cx} ${cy - adjustedSize * 0.35}
-    C ${cx - adjustedSize * 0.1} ${cy - adjustedSize * 0.15}
-      ${cx - adjustedSize * 0.1} ${cy + adjustedSize * 0.1}
-      ${cx} ${cy + adjustedSize * 0.3}
-    C ${cx + adjustedSize * 0.1} ${cy + adjustedSize * 0.1}
-      ${cx + adjustedSize * 0.1} ${cy - adjustedSize * 0.15}
-      ${cx} ${cy - adjustedSize * 0.35}
-    Z
-  `;
-
   return (
     <G>
-      {/* Soft glow for today */}
-      {isToday ? (
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={adjustedSize * 1.2}
-          fill={`${color}30`}
-        />
-      ) : null}
-      {/* Main bud shape */}
-      <Path
-        d={budPath}
-        fill={color}
-        stroke={COLORS.text}
-        strokeWidth={0.8}
+      {/* Glow effect */}
+      <Circle
+        cx={cx}
+        cy={cy}
+        r={size * 1.5}
+        fill={`${color}40`}
       />
-      {/* Inner petal detail */}
-      <Path
-        d={innerPath}
-        fill={`${color}60`}
-        stroke={COLORS.text}
-        strokeWidth={0.4}
+      {/* Main dot */}
+      <Circle
+        cx={cx}
+        cy={cy}
+        r={size}
+        fill={color}
+        stroke={COLORS.white}
+        strokeWidth={3}
       />
     </G>
-  );
-};
-
-// ============================================================================
-// CENTER LOTUS ICON
-// Minimal line-art lotus that subtly changes per phase
-// ============================================================================
-const CenterLotus = ({ 
-  phase, 
-  size = 50 
-}: { 
-  phase: CyclePhase; 
-  size?: number 
-}) => {
-  const color = PHASE_CONFIG[phase].color;
-  const cx = size / 2;
-  const cy = size / 2;
-  
-  // Number of petals varies by phase
-  const petalCounts = {
-    menstrual: 3,    // Closed, resting
-    follicular: 5,   // Opening
-    ovulation: 7,    // Full bloom
-    luteal: 5,       // Softening
-  };
-  
-  const petalCount = petalCounts[phase];
-  const petalLength = size * 0.35;
-  const baseOffset = size * 0.08;
-  
-  const petals = [];
-  for (let i = 0; i < petalCount; i++) {
-    const angle = (i * 360 / petalCount) - 90;
-    const rad = (angle * Math.PI) / 180;
-    
-    const tipX = cx + Math.cos(rad) * petalLength;
-    const tipY = cy + Math.sin(rad) * petalLength;
-    
-    // Create curved petal
-    const leftRad = ((angle - 90) * Math.PI) / 180;
-    const rightRad = ((angle + 90) * Math.PI) / 180;
-    
-    const leftX = cx + Math.cos(leftRad) * baseOffset;
-    const leftY = cy + Math.sin(leftRad) * baseOffset;
-    const rightX = cx + Math.cos(rightRad) * baseOffset;
-    const rightY = cy + Math.sin(rightRad) * baseOffset;
-    
-    const midDist = petalLength * 0.6;
-    const ctrlLeftX = cx + Math.cos(rad) * midDist + Math.cos(leftRad) * (size * 0.08);
-    const ctrlLeftY = cy + Math.sin(rad) * midDist + Math.sin(leftRad) * (size * 0.08);
-    const ctrlRightX = cx + Math.cos(rad) * midDist + Math.cos(rightRad) * (size * 0.08);
-    const ctrlRightY = cy + Math.sin(rad) * midDist + Math.sin(rightRad) * (size * 0.08);
-    
-    const path = `M ${leftX} ${leftY} Q ${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q ${ctrlRightX} ${ctrlRightY} ${rightX} ${rightY} Z`;
-    
-    petals.push(
-      <Path
-        key={i}
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.2}
-        opacity={0.8}
-      />
-    );
-  }
-  
-  return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {petals}
-      <Circle cx={cx} cy={cy} r={size * 0.06} fill={color} opacity={0.6} />
-    </Svg>
   );
 };
 
@@ -303,10 +284,10 @@ export function LotusCycleWheel({
   
   // Layout calculations
   const center = size / 2;
-  const outerRadius = size / 2 - 24;
-  const arcRadius = outerRadius - 14;
-  const innerRadius = outerRadius - 40;
-  const arcStrokeWidth = 22;
+  const outerRadius = size / 2 - 20;
+  const arcRadius = outerRadius - 12;
+  const innerRadius = outerRadius - 36;
+  const arcStrokeWidth = 20;
   
   // Animation values for rotation interaction
   const rotation = useSharedValue(0);
@@ -407,7 +388,7 @@ export function LotusCycleWheel({
 
   // ============================================================================
   // RENDER PHASE ARCS
-  // Each phase is rendered as a subtle arc with opacity based on active state
+  // Each phase is a colored segment on the ring
   // ============================================================================
   const renderPhaseArcs = () => {
     const phases: CyclePhase[] = ["menstrual", "follicular", "ovulation", "luteal"];
@@ -426,7 +407,6 @@ export function LotusCycleWheel({
         arcRadius,
         boundaries.start,
         boundaries.end,
-        arcStrokeWidth
       );
       
       return (
@@ -439,7 +419,7 @@ export function LotusCycleWheel({
               stroke={config.color}
               strokeWidth={arcStrokeWidth + 8}
               strokeLinecap="round"
-              opacity={0.25}
+              opacity={0.3}
             />
           ) : null}
           {/* Main arc */}
@@ -449,7 +429,7 @@ export function LotusCycleWheel({
             stroke={config.color}
             strokeWidth={arcStrokeWidth}
             strokeLinecap="round"
-            opacity={isActive ? 1 : 0.35}
+            opacity={isActive ? 1 : 0.6}
           />
         </G>
       );
@@ -457,54 +437,37 @@ export function LotusCycleWheel({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       {/* Wheel with gesture handling */}
       <GestureDetector gesture={composedGesture}>
         <Animated.View style={[styles.wheelContainer, { width: size, height: size }]}>
           <Animated.View style={animatedWheelStyle}>
             <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              <Defs>
-                <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-                  <Stop offset="0%" stopColor={phaseConfig.color} stopOpacity={0.15} />
-                  <Stop offset="100%" stopColor={phaseConfig.color} stopOpacity={0} />
-                </RadialGradient>
-              </Defs>
-              
-              {/* Subtle background ring */}
+              {/* Background ring track */}
               <Circle
                 cx={center}
                 cy={center}
                 r={arcRadius}
                 fill="none"
-                stroke={COLORS.ringLight}
-                strokeWidth={arcStrokeWidth + 2}
-                opacity={0.5}
+                stroke={COLORS.ringTrack}
+                strokeWidth={arcStrokeWidth + 4}
               />
               
               {/* Phase arcs */}
               {renderPhaseArcs()}
               
-              {/* Inner circle with gradient glow */}
-              <Circle
-                cx={center}
-                cy={center}
-                r={innerRadius}
-                fill="url(#centerGlow)"
-              />
-              
-              {/* Lotus bud marker for current day */}
-              <LotusBudMarker
+              {/* Day marker on the ring */}
+              <DayMarker
                 cx={markerX}
                 cy={markerY}
                 color={phaseConfig.color}
-                size={20}
-                isToday={true}
+                size={10}
               />
             </Svg>
           </Animated.View>
           
           {/* Center content - fixed position, doesn't rotate */}
-          <View style={[styles.centerContent, { width: innerRadius * 1.6, height: innerRadius * 1.6 }]}>
+          <View style={[styles.centerContent, { width: innerRadius * 1.8, height: innerRadius * 1.8 }]}>
             {/* Phase name - small, uppercase */}
             <ThemedText style={[styles.phaseName, { color: phaseConfig.color }]}>
               {phaseConfig.name}
@@ -520,9 +483,9 @@ export function LotusCycleWheel({
               {phaseConfig.cue}
             </ThemedText>
             
-            {/* Line-art lotus icon */}
-            <View style={styles.lotusIcon}>
-              <CenterLotus phase={phase} size={42} />
+            {/* White filled lotus flower - grows with phase */}
+            <View style={styles.lotusContainer}>
+              <FilledLotusFlower phase={phase} size={70} />
             </View>
           </View>
         </Animated.View>
@@ -542,11 +505,12 @@ export function LotusCycleWheel({
 
 // ============================================================================
 // STYLES
-// Clean, minimal styling with careful spacing
 // ============================================================================
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: 24,
   },
   wheelContainer: {
     position: "relative",
@@ -557,34 +521,33 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 8,
+    paddingTop: 4,
   },
   phaseName: {
     fontFamily: "DMSans_500Medium",
     fontSize: 11,
     letterSpacing: 2.5,
     textTransform: "uppercase",
-    marginBottom: 2,
+    marginBottom: 0,
   },
   dayNumber: {
     fontFamily: "DMSans_700Bold",
-    fontSize: 52,
-    lineHeight: 56,
+    fontSize: 48,
+    lineHeight: 52,
     letterSpacing: -1,
   },
   emotionalCue: {
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
     fontStyle: "italic",
-    marginTop: 2,
-    marginBottom: 8,
+    marginTop: 0,
+    marginBottom: 4,
   },
-  lotusIcon: {
+  lotusContainer: {
     marginTop: 4,
-    opacity: 0.9,
   },
   infoContainer: {
-    marginTop: Spacing.md,
+    marginTop: Spacing.sm,
     alignItems: "center",
   },
   cycleInfo: {
