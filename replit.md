@@ -93,7 +93,7 @@ server/
   - White category cards with 20px rounded corners and subtle shadows
   - Updated category icons to use primary pink color
 - **Onboarding Flow Redesign (January 2026)**: Complete overhaul of user onboarding experience
-  - Step 1: Gradient Spill Intro (8 seconds) - Gradient expands/spills across white screen, then OLANNA HEALTH logo fades in
+  - Step 1: Full-screen splash with "OLANNA HEALTH" branded image - Gradient background stretched to cover screen with elegant fade-in animation (4 seconds)
   - Step 2: "Girl, hi! My name is Olanna." (5 seconds) - Blobbing text animation with scale and fade
   - Step 3: "What shall I call you?" - Name and date of birth inputs with glass-style UI
   - Step 4: "And to what do I owe this pleasure?" (5 seconds) - Intro text before health goals

@@ -100,12 +100,12 @@ function AnimatedBlobbingText({
 }
 
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
-  const logoOpacity = useSharedValue(0);
-  const logoScale = useSharedValue(0.85);
+  const contentOpacity = useSharedValue(0);
+  const contentScale = useSharedValue(0.95);
 
   useEffect(() => {
-    logoOpacity.value = withDelay(500, withTiming(1, { duration: 1200 }));
-    logoScale.value = withDelay(500, withSpring(1, { damping: 12, stiffness: 100 }));
+    contentOpacity.value = withDelay(200, withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }));
+    contentScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 80 }));
 
     const timer = setTimeout(() => {
       runOnJS(onComplete)();
@@ -114,25 +114,19 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const logoStyle = useAnimatedStyle(() => ({
-    opacity: logoOpacity.value,
-    transform: [{ scale: logoScale.value }],
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+    transform: [{ scale: contentScale.value }],
   }));
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/gradient-background.jpg")}
-      style={styles.spillContainer}
-      resizeMode="cover"
-    >
-      <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <Image
-          source={require("@/assets/images/olanna-logo.png")}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-      </Animated.View>
-    </ImageBackground>
+    <Animated.View style={[styles.splashFullScreen, contentStyle]}>
+      <Image
+        source={require("@/assets/images/onboarding-splash.png")}
+        style={styles.splashImage}
+        resizeMode="cover"
+      />
+    </Animated.View>
   );
 }
 
@@ -641,6 +635,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+  },
+  splashFullScreen: {
+    flex: 1,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  },
+  splashImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   spillBackground: {
     ...StyleSheet.absoluteFillObject,
