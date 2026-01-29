@@ -16,6 +16,14 @@ import {
   DMSans_300Light_Italic,
   DMSans_400Regular_Italic,
 } from "@expo-google-fonts/dm-sans";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+  Poppins_900Black,
+} from "@expo-google-fonts/poppins";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -34,6 +42,12 @@ export default function App() {
     DMSans_700Bold,
     DMSans_300Light_Italic,
     DMSans_400Regular_Italic,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    Poppins_800ExtraBold,
+    Poppins_900Black,
   });
 
   useEffect(() => {

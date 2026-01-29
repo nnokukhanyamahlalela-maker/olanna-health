@@ -7,6 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Rect } from "react-native-svg";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -99,6 +100,46 @@ function AnimatedBlobbingText({
   );
 }
 
+function PillO({ 
+  width, 
+  height, 
+  color = "#FFFFFF" 
+}: { 
+  width: number; 
+  height: number; 
+  color?: string;
+}) {
+  const borderRadius = width / 2;
+  const holeWidth = width * 0.4;
+  const holeHeight = height * 0.48;
+  const holeBorderRadius = holeWidth / 2;
+  const holeX = (width - holeWidth) / 2;
+  const holeY = (height - holeHeight) / 2;
+
+  return (
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <Rect
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        rx={borderRadius}
+        ry={borderRadius}
+        fill={color}
+      />
+      <Rect
+        x={holeX}
+        y={holeY}
+        width={holeWidth}
+        height={holeHeight}
+        rx={holeBorderRadius}
+        ry={holeBorderRadius}
+        fill="transparent"
+      />
+    </Svg>
+  );
+}
+
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   const gradientScale = useSharedValue(0);
   const gradientOpacity = useSharedValue(0);
@@ -144,7 +185,10 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
         style={[styles.spillGradient, gradientStyle]}
       />
       <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <ThemedText style={styles.logoOlanna}>OLANNA</ThemedText>
+        <View style={styles.logoOlannaRow}>
+          <PillO width={40} height={52} />
+          <ThemedText style={styles.logoOlanna}>LANNA</ThemedText>
+        </View>
         <ThemedText style={styles.logoHealth}>HEALTH</ThemedText>
       </Animated.View>
     </View>
@@ -674,14 +718,19 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
   },
+  logoOlannaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   logoOlanna: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: "Poppins_900Black",
     fontSize: 48,
     color: "#FFFFFF",
-    letterSpacing: 2,
+    letterSpacing: -1,
+    marginLeft: -2,
   },
   logoHealth: {
-    fontFamily: "DMSans_400Regular",
+    fontFamily: "Poppins_400Regular",
     fontSize: 18,
     color: "#FFFFFF",
     letterSpacing: 12,
