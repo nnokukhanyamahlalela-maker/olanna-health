@@ -1,27 +1,74 @@
-import React from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
-import Svg, { Circle, Path, G, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
-import { LinearGradient } from "expo-linear-gradient";
+import React, { useCallback } from "react";
+import { View, StyleSheet, Dimensions, Pressable } from "react-native";
+import Svg, { Circle, Path, G, Defs, RadialGradient, Stop } from "react-native-svg";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
+  withTiming,
   runOnJS,
+  Easing,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "./ThemedText";
-import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_GRADIENTS, PHASE_BG_COLORS } from "./Lotus";
+import { CyclePhase, PHASE_INFO } from "./Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
-const PINK_PRIMARY = "#F6BFD3";
-const PINK_SOFT = "#FBE3EC";
-const BG_MAIN = "#FFF7FA";
-const CHARCOAL = "#3A2F35";
+// ============================================================================
+// DESIGN TOKENS
+// Premium, feminine color palette with soft, muted tones
+// ============================================================================
+const COLORS = {
+  // Phase colors - soft and elegant
+  menstrual: "#D4A5A5",      // Dusty rose - gentle, nurturing
+  follicular: "#B5C4B1",     // Soft sage - growth, renewal  
+  ovulation: "#E8D5B7",      // Warm champagne - radiance, peak
+  luteal: "#C4B7D6",         // Muted lavender - calm, reflection
+  
+  // UI colors
+  background: "#FFFBFC",     // Very light blush white
+  text: "#3A2F35",           // Warm charcoal
+  textMuted: "#7A6A73",      // Warm gray
+  ring: "#F6BFD3",           // Soft pink ring
+  ringLight: "#FBE3EC",      // Lighter pink
+};
+
+// Phase arc definitions with emotional cues
+const PHASE_CONFIG = {
+  menstrual: {
+    color: COLORS.menstrual,
+    name: "MENSTRUAL",
+    cue: "Rest & Release",
+    startPercent: 0,
+  },
+  follicular: {
+    color: COLORS.follicular,
+    name: "FOLLICULAR", 
+    cue: "Rising Energy",
+    startPercent: 0,
+  },
+  ovulation: {
+    color: COLORS.ovulation,
+    name: "OVULATORY",
+    cue: "Full Radiance",
+    startPercent: 0,
+  },
+  luteal: {
+    color: COLORS.luteal,
+    name: "LUTEAL",
+    cue: "Inner Reflection",
+    startPercent: 0,
+  },
+};
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+// ============================================================================
+// TYPES
+// ============================================================================
 interface LotusCycleWheelProps {
   currentDay: number;
   cycleLength: number;
@@ -33,10 +80,9 @@ interface LotusCycleWheelProps {
   showInfo?: boolean;
 }
 
-const getPhaseColor = (phase: CyclePhase): string => {
-  return PHASE_COLORS[phase];
-};
-
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 const getPhaseForDay = (
   day: number,
   cycleLength: number,
@@ -49,6 +95,195 @@ const getPhaseForDay = (
   return "luteal";
 };
 
+// Calculate phase boundaries as percentages of cycle
+const calculatePhaseBoundaries = (
+  cycleLength: number,
+  ovulationDay: number,
+  periodLength: number
+) => {
+  const menstrualEnd = periodLength / cycleLength;
+  const follicularEnd = (ovulationDay - 3) / cycleLength;
+  const ovulationEnd = (ovulationDay + 1) / cycleLength;
+  
+  return {
+    menstrual: { start: 0, end: menstrualEnd },
+    follicular: { start: menstrualEnd, end: follicularEnd },
+    ovulation: { start: follicularEnd, end: ovulationEnd },
+    luteal: { start: ovulationEnd, end: 1 },
+  };
+};
+
+// Create arc path for SVG
+const createArcPath = (
+  cx: number,
+  cy: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  strokeWidth: number
+): string => {
+  // Convert angles from percentage to radians (starting from top, -90 degrees)
+  const startRad = (startAngle * 2 * Math.PI) - (Math.PI / 2);
+  const endRad = (endAngle * 2 * Math.PI) - (Math.PI / 2);
+  
+  const x1 = cx + radius * Math.cos(startRad);
+  const y1 = cy + radius * Math.sin(startRad);
+  const x2 = cx + radius * Math.cos(endRad);
+  const y2 = cy + radius * Math.sin(endRad);
+  
+  const largeArcFlag = (endAngle - startAngle) > 0.5 ? 1 : 0;
+  
+  return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+};
+
+// ============================================================================
+// LOTUS BUD MARKER COMPONENT
+// Minimalist lotus bud that indicates current day position
+// ============================================================================
+const LotusBudMarker = ({ 
+  cx, 
+  cy, 
+  color, 
+  size = 18,
+  isToday = true 
+}: { 
+  cx: number; 
+  cy: number; 
+  color: string; 
+  size?: number;
+  isToday?: boolean;
+}) => {
+  const budScale = isToday ? 1.15 : 1;
+  const adjustedSize = size * budScale;
+  
+  // Simple, elegant lotus bud shape
+  const budPath = `
+    M ${cx} ${cy - adjustedSize * 0.6}
+    C ${cx - adjustedSize * 0.25} ${cy - adjustedSize * 0.3}
+      ${cx - adjustedSize * 0.25} ${cy + adjustedSize * 0.2}
+      ${cx} ${cy + adjustedSize * 0.5}
+    C ${cx + adjustedSize * 0.25} ${cy + adjustedSize * 0.2}
+      ${cx + adjustedSize * 0.25} ${cy - adjustedSize * 0.3}
+      ${cx} ${cy - adjustedSize * 0.6}
+    Z
+  `;
+  
+  // Inner petal detail
+  const innerPath = `
+    M ${cx} ${cy - adjustedSize * 0.35}
+    C ${cx - adjustedSize * 0.1} ${cy - adjustedSize * 0.15}
+      ${cx - adjustedSize * 0.1} ${cy + adjustedSize * 0.1}
+      ${cx} ${cy + adjustedSize * 0.3}
+    C ${cx + adjustedSize * 0.1} ${cy + adjustedSize * 0.1}
+      ${cx + adjustedSize * 0.1} ${cy - adjustedSize * 0.15}
+      ${cx} ${cy - adjustedSize * 0.35}
+    Z
+  `;
+
+  return (
+    <G>
+      {/* Soft glow for today */}
+      {isToday ? (
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={adjustedSize * 1.2}
+          fill={`${color}30`}
+        />
+      ) : null}
+      {/* Main bud shape */}
+      <Path
+        d={budPath}
+        fill={color}
+        stroke={COLORS.text}
+        strokeWidth={0.8}
+      />
+      {/* Inner petal detail */}
+      <Path
+        d={innerPath}
+        fill={`${color}60`}
+        stroke={COLORS.text}
+        strokeWidth={0.4}
+      />
+    </G>
+  );
+};
+
+// ============================================================================
+// CENTER LOTUS ICON
+// Minimal line-art lotus that subtly changes per phase
+// ============================================================================
+const CenterLotus = ({ 
+  phase, 
+  size = 50 
+}: { 
+  phase: CyclePhase; 
+  size?: number 
+}) => {
+  const color = PHASE_CONFIG[phase].color;
+  const cx = size / 2;
+  const cy = size / 2;
+  
+  // Number of petals varies by phase
+  const petalCounts = {
+    menstrual: 3,    // Closed, resting
+    follicular: 5,   // Opening
+    ovulation: 7,    // Full bloom
+    luteal: 5,       // Softening
+  };
+  
+  const petalCount = petalCounts[phase];
+  const petalLength = size * 0.35;
+  const baseOffset = size * 0.08;
+  
+  const petals = [];
+  for (let i = 0; i < petalCount; i++) {
+    const angle = (i * 360 / petalCount) - 90;
+    const rad = (angle * Math.PI) / 180;
+    
+    const tipX = cx + Math.cos(rad) * petalLength;
+    const tipY = cy + Math.sin(rad) * petalLength;
+    
+    // Create curved petal
+    const leftRad = ((angle - 90) * Math.PI) / 180;
+    const rightRad = ((angle + 90) * Math.PI) / 180;
+    
+    const leftX = cx + Math.cos(leftRad) * baseOffset;
+    const leftY = cy + Math.sin(leftRad) * baseOffset;
+    const rightX = cx + Math.cos(rightRad) * baseOffset;
+    const rightY = cy + Math.sin(rightRad) * baseOffset;
+    
+    const midDist = petalLength * 0.6;
+    const ctrlLeftX = cx + Math.cos(rad) * midDist + Math.cos(leftRad) * (size * 0.08);
+    const ctrlLeftY = cy + Math.sin(rad) * midDist + Math.sin(leftRad) * (size * 0.08);
+    const ctrlRightX = cx + Math.cos(rad) * midDist + Math.cos(rightRad) * (size * 0.08);
+    const ctrlRightY = cy + Math.sin(rad) * midDist + Math.sin(rightRad) * (size * 0.08);
+    
+    const path = `M ${leftX} ${leftY} Q ${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q ${ctrlRightX} ${ctrlRightY} ${rightX} ${rightY} Z`;
+    
+    petals.push(
+      <Path
+        key={i}
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.2}
+        opacity={0.8}
+      />
+    );
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {petals}
+      <Circle cx={cx} cy={cy} r={size * 0.06} fill={color} opacity={0.6} />
+    </Svg>
+  );
+};
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 export function LotusCycleWheel({
   currentDay,
   cycleLength,
@@ -57,43 +292,60 @@ export function LotusCycleWheel({
   periodLength = 5,
   size = 280,
   onDayChange,
-  showInfo = false,
+  showInfo = true,
 }: LotusCycleWheelProps) {
   const { theme } = useTheme();
-  const phaseInfo = PHASE_INFO[phase];
-  const phaseColor = getPhaseColor(phase);
   
+  // Layout calculations
+  const center = size / 2;
+  const outerRadius = size / 2 - 24;
+  const arcRadius = outerRadius - 14;
+  const innerRadius = outerRadius - 40;
+  const arcStrokeWidth = 22;
+  
+  // Animation values for rotation interaction
   const rotation = useSharedValue(0);
   const savedRotation = useSharedValue(0);
+  const markerScale = useSharedValue(1);
   
-  const center = size / 2;
-  const outerRadius = size / 2 - 20;
-  const innerRadius = outerRadius - 35;
-  const lotusSize = innerRadius * 1.4;
+  // Calculate phase boundaries
+  const phaseBoundaries = calculatePhaseBoundaries(cycleLength, ovulationDay, periodLength);
   
-  const anglePerDay = 360 / cycleLength;
-
-  const handleRotationEnd = (totalRotation: number) => {
+  // Calculate current day position on the wheel
+  const dayAngle = ((currentDay - 1) / cycleLength) * 2 * Math.PI - Math.PI / 2;
+  const markerRadius = arcRadius;
+  const markerX = center + Math.cos(dayAngle) * markerRadius;
+  const markerY = center + Math.sin(dayAngle) * markerRadius;
+  
+  // Get current phase config
+  const phaseConfig = PHASE_CONFIG[phase];
+  
+  // Handle day change from rotation
+  const handleRotationEnd = useCallback((totalRotation: number) => {
     if (onDayChange) {
+      const anglePerDay = 360 / cycleLength;
       const normalizedRotation = ((totalRotation % 360) + 360) % 360;
       const dayOffset = Math.round(normalizedRotation / anglePerDay);
       let newDay = currentDay - dayOffset;
       while (newDay < 1) newDay += cycleLength;
       while (newDay > cycleLength) newDay -= cycleLength;
-      onDayChange(newDay);
+      
+      if (newDay !== currentDay) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onDayChange(newDay);
+      }
     }
-  };
+    
+    // Reset rotation
+    rotation.value = withTiming(0, { duration: 200 });
+    savedRotation.value = 0;
+  }, [currentDay, cycleLength, onDayChange, rotation, savedRotation]);
 
-  const rotateGesture = Gesture.Rotation()
-    .onUpdate((event) => {
-      rotation.value = savedRotation.value + (event.rotation * 180) / Math.PI;
-    })
-    .onEnd(() => {
-      savedRotation.value = rotation.value;
-      runOnJS(handleRotationEnd)(rotation.value);
-    });
-
+  // Pan gesture for dragging the wheel
   const panGesture = Gesture.Pan()
+    .onStart(() => {
+      markerScale.value = withSpring(1.2);
+    })
     .onUpdate((event) => {
       const centerX = size / 2;
       const centerY = size / 2;
@@ -110,176 +362,172 @@ export function LotusCycleWheel({
     })
     .onEnd(() => {
       savedRotation.value = rotation.value;
+      markerScale.value = withSpring(1);
       runOnJS(handleRotationEnd)(rotation.value);
     });
 
-  const composedGesture = Gesture.Simultaneous(rotateGesture, panGesture);
+  // Tap gesture for quick day selection
+  const tapGesture = Gesture.Tap()
+    .onEnd((event) => {
+      if (onDayChange) {
+        const dx = event.x - center;
+        const dy = event.y - center;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Only respond to taps on the arc ring area
+        if (distance > innerRadius && distance < outerRadius + 10) {
+          const angle = Math.atan2(dy, dx);
+          const normalizedAngle = (angle + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
+          const newDay = Math.round((normalizedAngle / (2 * Math.PI)) * cycleLength) + 1;
+          const clampedDay = Math.min(Math.max(newDay, 1), cycleLength);
+          
+          if (clampedDay !== currentDay) {
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            runOnJS(onDayChange)(clampedDay);
+          }
+        }
+      }
+    });
 
-  const animatedWheelStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotate: `${rotation.value}deg` }],
-    };
-  });
+  const composedGesture = Gesture.Simultaneous(panGesture, tapGesture);
 
-  const createPetalPath = (
-    cx: number,
-    cy: number,
-    day: number,
-    dayPhase: CyclePhase,
-    isCurrentDay: boolean
-  ): string => {
-    const anglePerDayRad = (2 * Math.PI) / cycleLength;
-    const angle = anglePerDayRad * (day - 1) - Math.PI / 2;
-    
-    const baseRadius = innerRadius + 5;
-    let petalLength = 22;
-    let petalWidth = 6;
-    
-    if (dayPhase === "ovulation") {
-      petalLength = 30;
-      petalWidth = 10;
-    } else if (dayPhase === "menstrual") {
-      petalLength = 18;
-      petalWidth = 5;
-    } else if (dayPhase === "follicular") {
-      petalLength = 24;
-      petalWidth = 7;
-    } else {
-      petalLength = 20;
-      petalWidth = 6;
-    }
-    
-    if (isCurrentDay) {
-      petalLength += 6;
-      petalWidth += 2;
-    }
+  // Animated styles
+  const animatedWheelStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
 
-    const baseX = cx + Math.cos(angle) * baseRadius;
-    const baseY = cy + Math.sin(angle) * baseRadius;
-    const tipX = cx + Math.cos(angle) * (baseRadius + petalLength);
-    const tipY = cy + Math.sin(angle) * (baseRadius + petalLength);
-    
-    const perpAngle = angle + Math.PI / 2;
-    const leftX = baseX + Math.cos(perpAngle) * petalWidth / 2;
-    const leftY = baseY + Math.sin(perpAngle) * petalWidth / 2;
-    const rightX = baseX - Math.cos(perpAngle) * petalWidth / 2;
-    const rightY = baseY - Math.sin(perpAngle) * petalWidth / 2;
-    
-    const midRadius = baseRadius + petalLength * 0.6;
-    const ctrlLeftX = cx + Math.cos(angle) * midRadius + Math.cos(perpAngle) * petalWidth * 0.8;
-    const ctrlLeftY = cy + Math.sin(angle) * midRadius + Math.sin(perpAngle) * petalWidth * 0.8;
-    const ctrlRightX = cx + Math.cos(angle) * midRadius - Math.cos(perpAngle) * petalWidth * 0.8;
-    const ctrlRightY = cy + Math.sin(angle) * midRadius - Math.sin(perpAngle) * petalWidth * 0.8;
+  const animatedMarkerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: markerScale.value }],
+  }));
 
-    return `M${leftX} ${leftY} Q${ctrlLeftX} ${ctrlLeftY} ${tipX} ${tipY} Q${ctrlRightX} ${ctrlRightY} ${rightX} ${rightY} Z`;
-  };
-
-  const renderDayPetals = () => {
-    const petals = [];
+  // ============================================================================
+  // RENDER PHASE ARCS
+  // Each phase is rendered as a subtle arc with opacity based on active state
+  // ============================================================================
+  const renderPhaseArcs = () => {
+    const phases: CyclePhase[] = ["menstrual", "follicular", "ovulation", "luteal"];
     
-    for (let day = 1; day <= cycleLength; day++) {
-      const dayPhase = getPhaseForDay(day, cycleLength, ovulationDay, periodLength);
-      const isCurrentDay = day === currentDay;
-      const color = getPhaseColor(dayPhase);
+    return phases.map((phaseKey) => {
+      const boundaries = phaseBoundaries[phaseKey];
+      const config = PHASE_CONFIG[phaseKey];
+      const isActive = phaseKey === phase;
       
-      const path = createPetalPath(center, center, day, dayPhase, isCurrentDay);
+      // Skip if phase has no duration
+      if (boundaries.end <= boundaries.start) return null;
       
-      petals.push(
-        <Path
-          key={`petal-${day}`}
-          d={path}
-          fill={isCurrentDay ? color : `${color}70`}
-          stroke={isCurrentDay ? CHARCOAL : color}
-          strokeWidth={isCurrentDay ? 1.5 : 0.5}
-        />
+      const arcPath = createArcPath(
+        center,
+        center,
+        arcRadius,
+        boundaries.start,
+        boundaries.end,
+        arcStrokeWidth
       );
-    }
-    
-    return <G>{petals}</G>;
+      
+      return (
+        <G key={phaseKey}>
+          {/* Glow effect for active phase */}
+          {isActive ? (
+            <Path
+              d={arcPath}
+              fill="none"
+              stroke={config.color}
+              strokeWidth={arcStrokeWidth + 8}
+              strokeLinecap="round"
+              opacity={0.25}
+            />
+          ) : null}
+          {/* Main arc */}
+          <Path
+            d={arcPath}
+            fill="none"
+            stroke={config.color}
+            strokeWidth={arcStrokeWidth}
+            strokeLinecap="round"
+            opacity={isActive ? 1 : 0.35}
+          />
+        </G>
+      );
+    });
   };
-
-  const phaseName = phase === "ovulation" ? "Ovulatory Phase" : `${phase.charAt(0).toUpperCase() + phase.slice(1)} Phase`;
 
   return (
     <View style={styles.container}>
+      {/* Wheel with gesture handling */}
       <GestureDetector gesture={composedGesture}>
-        <Animated.View style={[styles.wheelContainer, animatedWheelStyle]}>
-          <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            <Defs>
-              <SvgLinearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <Stop offset="0%" stopColor={PINK_SOFT} />
-                <Stop offset="100%" stopColor={BG_MAIN} />
-              </SvgLinearGradient>
-            </Defs>
-            
-            <Circle
-              cx={center}
-              cy={center}
-              r={outerRadius}
-              fill="url(#bgGradient)"
-              stroke={PINK_PRIMARY}
-              strokeWidth={1}
-              opacity={0.5}
-            />
-            
-            <Circle
-              cx={center}
-              cy={center}
-              r={innerRadius}
-              fill={BG_MAIN}
-              stroke={`${PINK_PRIMARY}40`}
-              strokeWidth={1}
-            />
-            
-            {renderDayPetals()}
-          </Svg>
+        <Animated.View style={[styles.wheelContainer, { width: size, height: size }]}>
+          <Animated.View style={animatedWheelStyle}>
+            <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+              <Defs>
+                <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+                  <Stop offset="0%" stopColor={phaseConfig.color} stopOpacity={0.15} />
+                  <Stop offset="100%" stopColor={phaseConfig.color} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              
+              {/* Subtle background ring */}
+              <Circle
+                cx={center}
+                cy={center}
+                r={arcRadius}
+                fill="none"
+                stroke={COLORS.ringLight}
+                strokeWidth={arcStrokeWidth + 2}
+                opacity={0.5}
+              />
+              
+              {/* Phase arcs */}
+              {renderPhaseArcs()}
+              
+              {/* Inner circle with gradient glow */}
+              <Circle
+                cx={center}
+                cy={center}
+                r={innerRadius}
+                fill="url(#centerGlow)"
+              />
+              
+              {/* Lotus bud marker for current day */}
+              <LotusBudMarker
+                cx={markerX}
+                cy={markerY}
+                color={phaseConfig.color}
+                size={20}
+                isToday={true}
+              />
+            </Svg>
+          </Animated.View>
           
-          <View style={styles.lotusContainer}>
-            <LinearGradient 
-              colors={PHASE_GRADIENTS[phase] as [string, string]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={[
-                styles.lotusBg, 
-                { 
-                  width: lotusSize * 0.75,
-                  height: lotusSize * 0.75,
-                  borderRadius: lotusSize * 0.375,
-                }
-              ]} 
-            />
-            <Lotus 
-              phase={phase} 
-              size={lotusSize} 
-              strokeColor={CHARCOAL}
-              strokeWidth={1}
-            />
+          {/* Center content - fixed position, doesn't rotate */}
+          <View style={[styles.centerContent, { width: innerRadius * 1.6, height: innerRadius * 1.6 }]}>
+            {/* Phase name - small, uppercase */}
+            <ThemedText style={[styles.phaseName, { color: phaseConfig.color }]}>
+              {phaseConfig.name}
+            </ThemedText>
+            
+            {/* Large day number */}
+            <ThemedText style={[styles.dayNumber, { color: COLORS.text }]}>
+              {currentDay}
+            </ThemedText>
+            
+            {/* Emotional cue */}
+            <ThemedText style={[styles.emotionalCue, { color: COLORS.textMuted }]}>
+              {phaseConfig.cue}
+            </ThemedText>
+            
+            {/* Line-art lotus icon */}
+            <View style={styles.lotusIcon}>
+              <CenterLotus phase={phase} size={42} />
+            </View>
           </View>
         </Animated.View>
       </GestureDetector>
       
+      {/* Info section below wheel */}
       {showInfo ? (
         <View style={styles.infoContainer}>
-          <View style={styles.dayBadge}>
-            <ThemedText style={[styles.dayLabel, { color: theme.textSecondary }]}>
-              DAY
-            </ThemedText>
-            <ThemedText style={[styles.dayNumber, { color: phaseColor }]}>
-              {currentDay}
-            </ThemedText>
-            <ThemedText style={[styles.cycleLength, { color: theme.textSecondary }]}>
-              of {cycleLength}
-            </ThemedText>
-          </View>
-          
-          <ThemedText style={[styles.phaseName, { color: theme.text }]}>
-            {phaseName}
-          </ThemedText>
-          <ThemedText style={[styles.phaseTitle, { color: phaseColor }]}>
-            {phaseInfo.title}
-          </ThemedText>
-          <ThemedText style={[styles.phaseSubtitle, { color: theme.textSecondary }]}>
-            {phaseInfo.subtitle}
+          <ThemedText style={[styles.cycleInfo, { color: COLORS.textMuted }]}>
+            Day {currentDay} of {cycleLength}
           </ThemedText>
         </View>
       ) : null}
@@ -287,6 +535,10 @@ export function LotusCycleWheel({
   );
 }
 
+// ============================================================================
+// STYLES
+// Clean, minimal styling with careful spacing
+// ============================================================================
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
@@ -296,54 +548,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  lotusContainer: {
+  centerContent: {
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-  },
-  lotusBg: {
-    position: "absolute",
-  },
-  infoContainer: {
-    alignItems: "center",
-    marginTop: Spacing.lg,
-    gap: 4,
-  },
-  dayBadge: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 4,
-    marginBottom: Spacing.sm,
-  },
-  dayLabel: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 11,
-    letterSpacing: 2,
-  },
-  dayNumber: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 28,
-    lineHeight: 32,
-  },
-  cycleLength: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 14,
+    paddingTop: 8,
   },
   phaseName: {
     fontFamily: "DMSans_500Medium",
-    fontSize: 16,
-    letterSpacing: 0.5,
-  },
-  phaseTitle: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 1.5,
+    fontSize: 11,
+    letterSpacing: 2.5,
     textTransform: "uppercase",
+    marginBottom: 2,
   },
-  phaseSubtitle: {
-    fontFamily: "DMSans_300Light_Italic",
+  dayNumber: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 52,
+    lineHeight: 56,
+    letterSpacing: -1,
+  },
+  emotionalCue: {
+    fontFamily: "DMSans_400Regular",
     fontSize: 13,
     fontStyle: "italic",
     marginTop: 2,
+    marginBottom: 8,
+  },
+  lotusIcon: {
+    marginTop: 4,
+    opacity: 0.9,
+  },
+  infoContainer: {
+    marginTop: Spacing.md,
+    alignItems: "center",
+  },
+  cycleInfo: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
 });
