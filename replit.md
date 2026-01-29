@@ -95,6 +95,17 @@ server/
   - Gradient background: #F7A37A → #E85A9C → #D070A0
   - Bold white "OLANNA" text (48px) + spaced "HEALTH" text (18px)
   - Animated letter-by-letter reveal with spring effect
+- **Lotus Cycle Wheel Redesign (January 2026)**: New minimalist cycle visualization
+  - White filled lotus flower in center (no background circle)
+  - Outer ring with 4 gradient-colored phase segments:
+    - Orange (#F7A37A) - Menstrual
+    - Hot Pink (#E85A9C) - Follicular
+    - Soft Pink (#D070A0) - Ovulatory
+    - Purple (#B088C8) - Luteal
+  - Growing lotus animation: 3 petals (menstrual) → 5 petals (follicular) → 7 petals (ovulation) → 5 petals (luteal)
+  - Off-white pink background (#FFF7FA)
+  - Day marker dot on ring showing current position
+  - Interactive: tap or drag to change day
 - **App Revamp with New Branding (January 2026)**: Complete visual refresh with new brand identity
   - New gradient color scheme: Sunset Orange (#F7A37A) → Hot Pink (#E85A9C) → Soft Pink (#D070A0)
   - GradientBackground component with variants: sunset, soft, card, glass
