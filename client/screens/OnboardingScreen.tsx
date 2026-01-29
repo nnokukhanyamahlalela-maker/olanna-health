@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, TextInput, Platform, Pressable, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -6,24 +6,43 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withDelay,
+  withSequence,
+  Easing,
+  runOnJS,
+} from "react-native-reanimated";
 import Svg, { Path, Circle } from "react-native-svg";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { SymptomChip } from "@/components/SymptomChip";
-import { AfricanPattern } from "@/components/AfricanPattern";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile, generateId } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const PINK_PRIMARY = "#F6BFD3";
-const PINK_SOFT = "#FBE3EC";
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// New brand gradient colors (matching the logo)
+const GRADIENT_COLORS = {
+  topLeft: "#FF7E5F",      // Warm orange-coral
+  topRight: "#E85A9C",     // Hot pink
+  center: "#E869A5",       // Pink
+  bottomLeft: "#F4A76C",   // Peachy orange  
+  bottomRight: "#D8A5E0",  // Soft lavender-pink
+};
+
 const CHARCOAL = "#3A2F35";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const healthGoals = [
   { id: "track_period", label: "Track my period" },
@@ -69,12 +88,169 @@ function MiniLotus({ color, size = 80 }: { color: string; size?: number }) {
   );
 }
 
+// ============================================================================
+// ANIMATED INTRO COMPONENT
+// Starts white, fades in gradient and logo over 5 seconds
+// ============================================================================
+function AnimatedIntro({ onComplete }: { onComplete: () => void }) {
+  const insets = useSafeAreaInsets();
+  
+  // Animation values
+  const whiteOverlayOpacity = useSharedValue(1);
+  const gradientOpacity = useSharedValue(0);
+  const logoOpacity = useSharedValue(0);
+  const logoScale = useSharedValue(0.8);
+  const textOpacity = useSharedValue(0);
+  const subtitleOpacity = useSharedValue(0);
+  const buttonOpacity = useSharedValue(0);
+  const buttonTranslateY = useSharedValue(30);
+
+  useEffect(() => {
+    // Animation sequence (total ~5 seconds)
+    
+    // 1. Fade out white overlay, reveal gradient (0-1.5s)
+    whiteOverlayOpacity.value = withTiming(0, { 
+      duration: 1500, 
+      easing: Easing.out(Easing.cubic) 
+    });
+    gradientOpacity.value = withTiming(1, { 
+      duration: 1500, 
+      easing: Easing.out(Easing.cubic) 
+    });
+    
+    // 2. Fade in logo with scale (0.8-2.3s)
+    logoOpacity.value = withDelay(800, withTiming(1, { 
+      duration: 1200, 
+      easing: Easing.out(Easing.cubic) 
+    }));
+    logoScale.value = withDelay(800, withTiming(1, { 
+      duration: 1200, 
+      easing: Easing.out(Easing.back(1.2)) 
+    }));
+    
+    // 3. Fade in "OLANNA" text (1.5-2.8s)
+    textOpacity.value = withDelay(1500, withTiming(1, { 
+      duration: 1000, 
+      easing: Easing.out(Easing.cubic) 
+    }));
+    
+    // 4. Fade in "HEALTH" subtitle (2.2-3.5s)
+    subtitleOpacity.value = withDelay(2200, withTiming(1, { 
+      duration: 800, 
+      easing: Easing.out(Easing.cubic) 
+    }));
+    
+    // 5. Fade in button with slide up (3.5-4.5s)
+    buttonOpacity.value = withDelay(3500, withTiming(1, { 
+      duration: 800, 
+      easing: Easing.out(Easing.cubic) 
+    }));
+    buttonTranslateY.value = withDelay(3500, withTiming(0, { 
+      duration: 800, 
+      easing: Easing.out(Easing.back(1.1)) 
+    }));
+  }, []);
+
+  // Animated styles
+  const whiteOverlayStyle = useAnimatedStyle(() => ({
+    opacity: whiteOverlayOpacity.value,
+  }));
+
+  const gradientStyle = useAnimatedStyle(() => ({
+    opacity: gradientOpacity.value,
+  }));
+
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }],
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  const subtitleStyle = useAnimatedStyle(() => ({
+    opacity: subtitleOpacity.value,
+  }));
+
+  const buttonStyle = useAnimatedStyle(() => ({
+    opacity: buttonOpacity.value,
+    transform: [{ translateY: buttonTranslateY.value }],
+  }));
+
+  const handleGetStarted = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onComplete();
+  };
+
+  return (
+    <View style={styles.introContainer}>
+      {/* Gradient background */}
+      <AnimatedLinearGradient
+        colors={[
+          GRADIENT_COLORS.topLeft,
+          GRADIENT_COLORS.topRight,
+          GRADIENT_COLORS.center,
+          GRADIENT_COLORS.bottomRight,
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.introGradient, gradientStyle]}
+      />
+      
+      {/* White overlay that fades out */}
+      <Animated.View style={[styles.whiteOverlay, whiteOverlayStyle]} />
+      
+      {/* Content */}
+      <View style={[styles.introContent, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        {/* Logo "O" icon */}
+        <Animated.View style={[styles.logoIconContainer, logoStyle]}>
+          <View style={styles.logoOuter}>
+            <View style={styles.logoInner} />
+          </View>
+        </Animated.View>
+        
+        {/* "OLANNA" text */}
+        <Animated.View style={textStyle}>
+          <ThemedText style={styles.olannaText}>OLANNA</ThemedText>
+        </Animated.View>
+        
+        {/* "HEALTH" subtitle */}
+        <Animated.View style={subtitleStyle}>
+          <ThemedText style={styles.healthText}>HEALTH</ThemedText>
+        </Animated.View>
+        
+        {/* Tagline */}
+        <Animated.View style={[styles.taglineContainer, subtitleStyle]}>
+          <ThemedText style={styles.taglineText}>
+            Keep track of{'\n'}your period
+          </ThemedText>
+          <ThemedText style={styles.taglineSubtext}>
+            Easily and accurately track each{'\n'}phase of your menstrual cycle
+          </ThemedText>
+        </Animated.View>
+        
+        {/* Get Started button */}
+        <Animated.View style={[styles.introButtonContainer, buttonStyle]}>
+          <Pressable style={styles.getStartedBtn} onPress={handleGetStarted}>
+            <ThemedText style={styles.getStartedBtnText}>Get started</ThemedText>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
+// ============================================================================
+// MAIN ONBOARDING SCREEN
+// ============================================================================
 export default function OnboardingScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
-  const [step, setStep] = useState(1);
+  // Start with animated intro (step 0), then proceed to form steps
+  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -90,6 +266,10 @@ export default function OnboardingScreen() {
     setSelectedGoals((prev) =>
       prev.includes(goalId) ? prev.filter((id) => id !== goalId) : [...prev, goalId]
     );
+  };
+
+  const handleIntroComplete = () => {
+    setStep(1);
   };
 
   const handleNext = () => {
@@ -144,27 +324,12 @@ export default function OnboardingScreen() {
     });
   };
 
-  const renderStep1 = () => (
-    <View style={styles.stepContent}>
-      <View style={styles.welcomeContainer}>
-        <Image
-          source={require("../assets/images/olanna-logo.png")}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-      </View>
-      
-      <ThemedText style={[styles.welcomeSubtitle, { color: theme.textSecondary }]}>
-        Your personal wellness companion{'\n'}for African women
-      </ThemedText>
-      
-      <Button onPress={handleNext} style={styles.getStartedButton}>
-        GET STARTED
-      </Button>
-    </View>
-  );
+  // Show animated intro for step 0
+  if (step === 0) {
+    return <AnimatedIntro onComplete={handleIntroComplete} />;
+  }
 
-  const renderStep2 = () => (
+  const renderStep1 = () => (
     <View style={styles.stepContent}>
       <ThemedText type="h2" style={styles.stepTitle}>
         What should we call you?
@@ -212,7 +377,7 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderStep3 = () => (
+  const renderStep2 = () => (
     <View style={styles.stepContent}>
       <ThemedText type="h2" style={styles.stepTitle}>
         Tell us about your cycle
@@ -278,7 +443,7 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderStep4 = () => (
+  const renderStep3 = () => (
     <View style={styles.stepContent}>
       <ThemedText type="h2" style={styles.stepTitle}>
         What are your health goals?
@@ -306,7 +471,7 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderStep5 = () => (
+  const renderStep4 = () => (
     <View style={styles.stepContent}>
       <ThemedText type="h2" style={styles.stepTitle}>
         Choose Your View
@@ -330,7 +495,7 @@ export default function OnboardingScreen() {
           <MiniLotus color={theme.primary} size={60} />
           <ThemedText type="h4">Lotus View</ThemedText>
           <ThemedText type="caption" style={styles.viewDescription}>
-            A blooming lotus represents your cycle phases—symbolizing resilience and renewal
+            A blooming lotus represents your cycle phases
           </ThemedText>
           {useLotusView ? (
             <View style={[styles.selectedBadge, { backgroundColor: theme.primary }]}>
@@ -355,7 +520,7 @@ export default function OnboardingScreen() {
           </View>
           <ThemedText type="h4">Cycle Wheel</ThemedText>
           <ThemedText type="caption" style={styles.viewDescription}>
-            A traditional circular view showing your cycle progression
+            A traditional circular view
           </ThemedText>
           {!useLotusView ? (
             <View style={[styles.selectedBadge, { backgroundColor: theme.primary }]}>
@@ -363,13 +528,6 @@ export default function OnboardingScreen() {
             </View>
           ) : null}
         </Pressable>
-      </View>
-
-      <View style={[styles.lotusExplainer, { backgroundColor: theme.primary + "10" }]}>
-        <Feather name="info" size={16} color={theme.primary} />
-        <ThemedText type="small" style={{ flex: 1, color: theme.primary }}>
-          The lotus flower rises from muddy water to bloom beautifully—a powerful symbol of resilience and rebirth found across African and Eastern cultures.
-        </ThemedText>
       </View>
 
       <Button
@@ -384,17 +542,12 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-      <AfricanPattern opacity={0.02} variant="waves" />
       <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        {step > 1 ? (
-          <Pressable onPress={handleBack} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color={theme.text} />
-          </Pressable>
-        ) : (
-          <View style={styles.backButton} />
-        )}
+        <Pressable onPress={handleBack} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color={theme.text} />
+        </Pressable>
         <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <View
               key={s}
               style={[
@@ -420,7 +573,6 @@ export default function OnboardingScreen() {
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}
         {step === 4 && renderStep4()}
-        {step === 5 && renderStep5()}
       </KeyboardAwareScrollViewCompat>
     </View>
   );
@@ -430,6 +582,108 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  
+  // Animated Intro styles
+  introContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  introGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  whiteOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#FFFFFF",
+  },
+  introContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xl,
+  },
+  logoIconContainer: {
+    marginBottom: Spacing.xl,
+  },
+  logoOuter: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 30,
+    elevation: 10,
+  },
+  logoInner: {
+    width: 40,
+    height: 28,
+    borderRadius: 20,
+    backgroundColor: "#E869A5",
+  },
+  olannaText: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 48,
+    color: "#FFFFFF",
+    letterSpacing: 2,
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.1)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  healthText: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 22,
+    color: "#FFFFFF",
+    letterSpacing: 12,
+    textAlign: "center",
+    marginTop: 4,
+    opacity: 0.95,
+  },
+  taglineContainer: {
+    marginTop: SCREEN_HEIGHT * 0.08,
+    alignItems: "center",
+  },
+  taglineText: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 28,
+    color: "#FFFFFF",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  taglineSubtext: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    color: "#FFFFFF",
+    textAlign: "center",
+    opacity: 0.85,
+    marginTop: Spacing.md,
+    lineHeight: 22,
+  },
+  introButtonContainer: {
+    position: "absolute",
+    bottom: 60,
+    left: Spacing.xl,
+    right: Spacing.xl,
+  },
+  getStartedBtn: {
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 30,
+    paddingVertical: 18,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+  },
+  getStartedBtnText: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
+  },
+  
+  // Form step styles
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -460,36 +714,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: Spacing.lg,
   },
-  welcomeContainer: {
-    alignItems: "center",
-  },
-  logoImage: {
-    width: SCREEN_WIDTH * 0.75,
-    height: SCREEN_WIDTH * 0.75,
-  },
-  welcomeSubtitle: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 16,
-    lineHeight: 26,
-    textAlign: "center",
-    marginTop: Spacing.xl,
-  },
-  getStartedButton: {
-    marginTop: Spacing["2xl"],
-    backgroundColor: PINK_PRIMARY,
-  },
-  logoContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    marginBottom: Spacing.lg,
-  },
-  title: {
-    textAlign: "center",
-  },
   stepTitle: {
     textAlign: "center",
     marginBottom: Spacing.sm,
@@ -497,16 +721,6 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     opacity: 0.7,
-  },
-  valueCard: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.md,
-  },
-  valueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
   },
   fieldLabel: {
     marginTop: Spacing.md,
@@ -568,13 +782,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-  },
-  lotusExplainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
   },
   button: {
     marginTop: Spacing.xl,

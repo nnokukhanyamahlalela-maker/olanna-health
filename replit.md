@@ -81,6 +81,13 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
+- **App Revamp with New Branding (January 2026)**: Complete visual refresh with new brand identity
+  - New gradient color scheme: Orange-coral (#FF7E5F) → Hot pink (#E85A9C) → Lavender-pink (#D8A5E0)
+  - New "O" logo icon: White circle with pink inner oval on gradient background
+  - Animated onboarding intro: White screen fades to gradient with logo text (5 second animation)
+  - Logo text: "OLANNA" (bold white) + "HEALTH" (spaced white lettering)
+  - HomeScreen redesigned with: Week strip calendar, gradient hero card, timeline events, mood card
+  - Updated app icon and splash screen with new branding
 - **Logo Pink Theme Update (January 2026)**: Updated primary color scheme
   - Logo Pink (#FEC8EE) now used as primary accent color throughout the app
   - Tab bar selection uses logo pink instead of dusty rose
