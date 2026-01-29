@@ -81,6 +81,10 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
+- **AI Health Assistant Fix (January 2026)**: Fixed multilingual chat support
+  - Upgraded AI model from gpt-5-mini to gpt-5.2 for better multilingual responses
+  - All 6 South African languages now working: English, isiZulu, Afrikaans, Sesotho, isiXhosa, siSwati
+  - Improved error handling and logging for chat API
 - **Check-in Screen Styling Update (January 2026)**: Refined symptom tracking UI
   - Soft pink background (#FFF7FA) consistent with app theme
   - White symptom chips with pink icons and subtle pink borders

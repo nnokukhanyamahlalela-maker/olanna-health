@@ -86,16 +86,22 @@ RESPONSE FORMAT:
       ];
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5-mini",
+        model: "gpt-5.2",
         messages: chatMessages,
-        max_completion_tokens: 1024,
+        max_completion_tokens: 2048,
       });
 
       const assistantMessage = response.choices[0]?.message?.content || "";
 
+      if (!assistantMessage) {
+        console.error("Empty response from AI");
+        return res.status(500).json({ error: "Empty response from AI" });
+      }
+
       res.json({ content: assistantMessage });
-    } catch (error) {
-      console.error("Chat API error:", error);
+    } catch (error: any) {
+      console.error("Chat API error:", error?.message || error);
+      console.error("Full error:", JSON.stringify(error, null, 2));
       res.status(500).json({ error: "Failed to get AI response" });
     }
   });
