@@ -81,13 +81,25 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
+- **Onboarding Flow Redesign (January 2026)**: Complete overhaul of user onboarding experience
+  - Step 1: Gradient Spill Intro (8 seconds) - Gradient expands/spills across white screen, then OLANNA HEALTH logo fades in
+  - Step 2: "Girl, hi! My name is Olanna." (5 seconds) - Blobbing text animation with scale and fade
+  - Step 3: "What shall I call you?" - Name and date of birth inputs with glass-style UI
+  - Step 4: "And to what do I owe this pleasure?" (5 seconds) - Intro text before health goals
+  - Step 5: Health Goals Selection - Multiple choice with glass chips
+  - Step 6: Cycle Information - Cycle length, period length, last period
+  - All screens use gradient background (Sunset Orange → Hot Pink → Soft Pink)
+  - Glass-style inputs with transparent backgrounds and white borders
+  - White text throughout on gradient backgrounds
+- **Splash Screen Update (January 2026)**: Matches new gradient branding
+  - Gradient background: #F7A37A → #E85A9C → #D070A0
+  - Bold white "OLANNA" text (48px) + spaced "HEALTH" text (18px)
+  - Animated letter-by-letter reveal with spring effect
 - **App Revamp with New Branding (January 2026)**: Complete visual refresh with new brand identity
-  - New gradient color scheme: Orange-coral (#FF7E5F) → Hot pink (#E85A9C) → Lavender-pink (#D8A5E0)
-  - New "O" logo icon: White circle with pink inner oval on gradient background
-  - Animated onboarding intro: White screen fades to gradient with logo text (5 second animation)
-  - Logo text: "OLANNA" (bold white) + "HEALTH" (spaced white lettering)
-  - HomeScreen redesigned with: Week strip calendar, gradient hero card, timeline events, mood card
-  - Updated app icon and splash screen with new branding
+  - New gradient color scheme: Sunset Orange (#F7A37A) → Hot Pink (#E85A9C) → Soft Pink (#D070A0)
+  - GradientBackground component with variants: sunset, soft, card, glass
+  - GlassCard component for glassmorphism UI effects
+  - BRAND_COLORS exported for consistent theming
 - **Logo Pink Theme Update (January 2026)**: Updated primary color scheme
   - Logo Pink (#FEC8EE) now used as primary accent color throughout the app
   - Tab bar selection uses logo pink instead of dusty rose
