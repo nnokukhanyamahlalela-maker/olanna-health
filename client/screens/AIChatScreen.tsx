@@ -5,7 +5,7 @@ import {
   FlatList,
   TextInput,
   Pressable,
-  Platform,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -13,20 +13,21 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from "@react-native-picker/picker";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 import {
-  detectLanguage,
-  languageLabel,
-  getSafetyMessage,
-  containsSymptomKeywords,
+  SUPPORTED_LANGUAGES,
   getWelcomeMessage,
-  type LanguageMode,
-  type DetectedLanguage,
+  getSafetyMessage,
+  getThinkingMessage,
+  getPlaceholder,
+  getErrorMessage,
+  getDisclaimer,
+  containsSymptomKeywords,
+  type SupportedLanguage,
 } from "@/lib/languageDetection";
 
 interface Message {
@@ -36,7 +37,7 @@ interface Message {
   timestamp: Date;
 }
 
-const LANGUAGE_MODE_KEY = "olanna_language_mode";
+const LANGUAGE_KEY = "olanna_selected_language";
 
 export default function AIChatScreen() {
   const { theme } = useTheme();
@@ -47,40 +48,49 @@ export default function AIChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [languageMode, setLanguageMode] = useState<LanguageMode>("auto");
-  const [lastDetectedLang, setLastDetectedLang] = useState<DetectedLanguage>("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>("en");
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const loadStoredMode = async () => {
+    const loadStoredLanguage = async () => {
       try {
-        const v = await AsyncStorage.getItem(LANGUAGE_MODE_KEY);
-        if (v === "en" || v === "zu" || v === "auto") {
-          setLanguageMode(v);
+        const stored = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) {
+          setSelectedLanguage(stored as SupportedLanguage);
         }
       } catch (e) {}
       setIsInitialized(true);
     };
-    loadStoredMode();
+    loadStoredLanguage();
   }, []);
 
   useEffect(() => {
     if (isInitialized) {
-      AsyncStorage.setItem(LANGUAGE_MODE_KEY, languageMode).catch(() => {});
+      AsyncStorage.setItem(LANGUAGE_KEY, selectedLanguage).catch(() => {});
     }
-  }, [languageMode, isInitialized]);
+  }, [selectedLanguage, isInitialized]);
 
   useEffect(() => {
-    if (messages.length === 0) {
-      const lang = languageMode === "auto" ? lastDetectedLang : languageMode === "zu" ? "zu" : "en";
+    if (isInitialized && messages.length === 0) {
       setMessages([{
         id: "welcome",
         role: "assistant",
-        content: getWelcomeMessage(lang),
+        content: getWelcomeMessage(selectedLanguage),
         timestamp: new Date(),
       }]);
     }
-  }, [languageMode]);
+  }, [isInitialized, selectedLanguage]);
+
+  const handleLanguageChange = (langCode: SupportedLanguage) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedLanguage(langCode);
+    setMessages([{
+      id: "welcome-" + Date.now(),
+      role: "assistant",
+      content: getWelcomeMessage(langCode),
+      timestamp: new Date(),
+    }]);
+  };
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -88,8 +98,6 @@ export default function AIChatScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const userText = inputText.trim();
-    const detected = detectLanguage(userText, lastDetectedLang);
-    setLastDetectedLang(detected);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -114,8 +122,7 @@ export default function AIChatScreen() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: chatHistory,
-          languageMode,
-          detectedLanguage: detected,
+          selectedLanguage,
         }),
       });
 
@@ -126,9 +133,8 @@ export default function AIChatScreen() {
       const data = await response.json();
       let assistantContent = data.content;
 
-      const replyLang = languageMode === "auto" ? detected : languageMode === "zu" ? "zu" : "en";
-      if (containsSymptomKeywords(userText, replyLang)) {
-        assistantContent += "\n\n" + getSafetyMessage(replyLang);
+      if (containsSymptomKeywords(userText)) {
+        assistantContent += "\n\n" + getSafetyMessage(selectedLanguage);
       }
 
       const assistantMessage: Message = {
@@ -144,9 +150,7 @@ export default function AIChatScreen() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: languageMode === "zu" || (languageMode === "auto" && detected === "zu")
-          ? "Ngiyaxolisa, kunenkinga. Sicela uzame futhi."
-          : "I'm sorry, there was an issue. Please try again.",
+        content: getErrorMessage(selectedLanguage),
         timestamp: new Date(),
       };
       setMessages((prev) => [errorMessage, ...prev]);
@@ -198,15 +202,15 @@ export default function AIChatScreen() {
         <Feather name="message-circle" size={32} color={theme.primary} />
       </View>
       <ThemedText type="h3" style={styles.emptyTitle}>
-        {languageMode === "zu" ? "Buza Noma Yini" : "Ask Me Anything"}
+        {selectedLanguage === "en" ? "Ask Me Anything" : SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage)?.greeting || "Hello"}
       </ThemedText>
       <ThemedText type="body" style={styles.emptyDescription}>
-        {languageMode === "zu"
-          ? "Lapha ukusiza ngemibuzo mayelana nempilo yabesifazane, ukuzala, PCOS, endometriosis, nokunye."
-          : "I'm here to help with questions about menstrual health, fertility, PCOS, endometriosis, and more."}
+        {getWelcomeMessage(selectedLanguage).split("\n")[0]}
       </ThemedText>
     </View>
   );
+
+  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage);
 
   return (
     <KeyboardAvoidingView
@@ -218,37 +222,52 @@ export default function AIChatScreen() {
         <View style={styles.disclaimerRow}>
           <Feather name="info" size={14} color={theme.textSecondary} />
           <ThemedText type="caption" style={styles.disclaimerText}>
-            {languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
-              ? "Lo msizi we-AI unikeza ulwazi olujwayelekile kuphela."
-              : "This AI provides general health information only."}
+            {getDisclaimer(selectedLanguage)}
           </ThemedText>
         </View>
-        
-        <View style={styles.languageSelector}>
-          <ThemedText type="caption" style={[styles.languageLabelText, { color: theme.textSecondary }]}>
-            Language:
-          </ThemedText>
-          <View style={[styles.pickerContainer, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}>
-            <Picker
-              selectedValue={languageMode}
-              onValueChange={(value: LanguageMode) => {
-                setLanguageMode(value);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-              style={[styles.picker, { color: theme.text }]}
-              dropdownIconColor={theme.primary}
+      </View>
+
+      <View style={styles.languageSection}>
+        <ThemedText type="caption" style={[styles.languageLabel, { color: theme.textSecondary }]}>
+          Select Language:
+        </ThemedText>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.languageScroll}
+        >
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <Pressable
+              key={lang.code}
+              onPress={() => handleLanguageChange(lang.code)}
+              style={[
+                styles.languageChip,
+                {
+                  backgroundColor: selectedLanguage === lang.code 
+                    ? theme.primary 
+                    : theme.backgroundDefault,
+                  borderColor: selectedLanguage === lang.code 
+                    ? theme.primary 
+                    : theme.border,
+                },
+              ]}
             >
-              <Picker.Item label="Auto" value="auto" />
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="isiZulu" value="zu" />
-            </Picker>
-          </View>
-          {languageMode === "auto" ? (
-            <ThemedText type="caption" style={[styles.detectedHint, { color: theme.textSecondary }]}>
-              (detected: {lastDetectedLang === "zu" ? "isiZulu" : "English"})
-            </ThemedText>
-          ) : null}
-        </View>
+              <ThemedText
+                type="small"
+                style={[
+                  styles.languageChipText,
+                  {
+                    color: selectedLanguage === lang.code 
+                      ? theme.buttonText 
+                      : theme.text,
+                  },
+                ]}
+              >
+                {lang.nativeName}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
@@ -269,9 +288,7 @@ export default function AIChatScreen() {
         <View style={styles.loadingContainer}>
           <View style={[styles.loadingBubble, { backgroundColor: theme.backgroundDefault }]}>
             <ThemedText type="small" style={styles.loadingText}>
-              {languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
-                ? "Ngicabanga..."
-                : "Thinking..."}
+              {getThinkingMessage(selectedLanguage)}
             </ThemedText>
           </View>
         </View>
@@ -294,11 +311,7 @@ export default function AIChatScreen() {
         >
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder={
-              languageMode === "zu" || (languageMode === "auto" && lastDetectedLang === "zu")
-                ? "Buza umbuzo wezempilo..."
-                : "Ask a health question..."
-            }
+            placeholder={getPlaceholder(selectedLanguage)}
             placeholderTextColor={theme.textSecondary}
             value={inputText}
             onChangeText={setInputText}
@@ -335,10 +348,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.sm,
-    gap: Spacing.sm,
+    paddingBottom: Spacing.xs,
   },
   disclaimerRow: {
     flexDirection: "row",
@@ -350,28 +361,27 @@ const styles = StyleSheet.create({
     flex: 1,
     opacity: 0.7,
   },
-  languageSelector: {
-    flexDirection: "row",
-    alignItems: "center",
+  languageSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
     gap: Spacing.xs,
-    flexWrap: "wrap",
   },
-  languageLabelText: {
+  languageLabel: {
     fontSize: 12,
+    marginBottom: Spacing.xs,
   },
-  pickerContainer: {
-    borderRadius: BorderRadius.md,
+  languageScroll: {
+    gap: Spacing.sm,
+    paddingRight: Spacing.lg,
+  },
+  languageChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
     borderWidth: 1,
-    overflow: "hidden",
-    minWidth: 100,
   },
-  picker: {
-    height: 32,
-    fontSize: 12,
-  },
-  detectedHint: {
-    fontSize: 11,
-    opacity: 0.7,
+  languageChipText: {
+    fontWeight: "500",
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,
