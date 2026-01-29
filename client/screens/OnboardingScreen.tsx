@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView } from "react-native";
+import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -7,7 +7,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import Svg, { Rect } from "react-native-svg";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -100,51 +99,11 @@ function AnimatedBlobbingText({
   );
 }
 
-function PillO({ 
-  width, 
-  height, 
-  color = "#FFFFFF" 
-}: { 
-  width: number; 
-  height: number; 
-  color?: string;
-}) {
-  const borderRadius = width / 2;
-  const holeWidth = width * 0.4;
-  const holeHeight = height * 0.48;
-  const holeBorderRadius = holeWidth / 2;
-  const holeX = (width - holeWidth) / 2;
-  const holeY = (height - holeHeight) / 2;
-
-  return (
-    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Rect
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        rx={borderRadius}
-        ry={borderRadius}
-        fill={color}
-      />
-      <Rect
-        x={holeX}
-        y={holeY}
-        width={holeWidth}
-        height={holeHeight}
-        rx={holeBorderRadius}
-        ry={holeBorderRadius}
-        fill="transparent"
-      />
-    </Svg>
-  );
-}
-
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   const gradientScale = useSharedValue(0);
   const gradientOpacity = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
-  const logoScale = useSharedValue(0.8);
+  const logoScale = useSharedValue(0.85);
 
   useEffect(() => {
     gradientOpacity.value = withTiming(1, { duration: 500 });
@@ -153,12 +112,12 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
       easing: Easing.out(Easing.cubic) 
     });
 
-    logoOpacity.value = withDelay(4000, withTiming(1, { duration: 1500 }));
-    logoScale.value = withDelay(4000, withSpring(1, { damping: 10, stiffness: 100 }));
+    logoOpacity.value = withDelay(3500, withTiming(1, { duration: 1200 }));
+    logoScale.value = withDelay(3500, withSpring(1, { damping: 12, stiffness: 100 }));
 
     const timer = setTimeout(() => {
       runOnJS(onComplete)();
-    }, 8000);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -185,11 +144,11 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
         style={[styles.spillGradient, gradientStyle]}
       />
       <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <View style={styles.logoOlannaRow}>
-          <PillO width={40} height={52} />
-          <ThemedText style={styles.logoOlanna}>LANNA</ThemedText>
-        </View>
-        <ThemedText style={styles.logoHealth}>HEALTH</ThemedText>
+        <Image
+          source={require("@/assets/images/olanna-logo.png")}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       </Animated.View>
     </View>
   );
@@ -717,24 +676,11 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
+    justifyContent: "center",
   },
-  logoOlannaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  logoOlanna: {
-    fontFamily: "Poppins_900Black",
-    fontSize: 48,
-    color: "#FFFFFF",
-    letterSpacing: -1,
-    marginLeft: -2,
-  },
-  logoHealth: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 18,
-    color: "#FFFFFF",
-    letterSpacing: 12,
-    marginTop: 8,
+  logoImage: {
+    width: SCREEN_WIDTH * 0.7,
+    height: SCREEN_WIDTH * 0.7,
   },
   
   introMessageContainer: {
