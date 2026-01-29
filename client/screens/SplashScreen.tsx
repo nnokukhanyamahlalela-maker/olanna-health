@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions, ImageBackground } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,30 +8,25 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
-import Svg, { Ellipse } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { storage } from "@/lib/storage";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-const PINK_PRIMARY = "#F6BFD3";
-const BG_MAIN = "#FFF7FA";
 
 interface AnimatedLetterProps {
   letter: string;
   delay: number;
   style?: object;
-  isO?: boolean;
 }
 
-function AnimatedLetter({ letter, delay, style, isO }: AnimatedLetterProps) {
+function AnimatedLetter({ letter, delay, style }: AnimatedLetterProps) {
   const translateY = useSharedValue(30);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.5);
@@ -65,17 +60,6 @@ function AnimatedLetter({ letter, delay, style, isO }: AnimatedLetterProps) {
       { scale: scale.value },
     ],
   }));
-
-  if (isO) {
-    return (
-      <Animated.View style={[styles.oContainer, animatedStyle]}>
-        <Svg width={52} height={52} viewBox="0 0 52 52">
-          <Ellipse cx={26} cy={26} rx={24} ry={24} fill={PINK_PRIMARY} />
-          <Ellipse cx={26} cy={26} rx={8} ry={8} fill={BG_MAIN} />
-        </Svg>
-      </Animated.View>
-    );
-  }
 
   return (
     <Animated.View style={animatedStyle}>
@@ -130,7 +114,6 @@ function AnimatedHealthLetter({ letter, delay }: { letter: string; delay: number
 }
 
 export default function SplashScreen() {
-  const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
   const containerOpacity = useSharedValue(1);
@@ -171,7 +154,12 @@ export default function SplashScreen() {
   }));
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <LinearGradient
+      colors={["#F7A37A", "#E85A9C", "#D070A0"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <Animated.View style={[styles.logoContainer, containerAnimatedStyle]}>
         <View style={styles.olannaRow}>
           {olannaLetters.map((letter, index) => (
@@ -179,7 +167,6 @@ export default function SplashScreen() {
               key={`olanna-${index}`}
               letter={letter}
               delay={baseDelay + index * letterDelay}
-              isO={index === 0}
             />
           ))}
         </View>
@@ -194,7 +181,7 @@ export default function SplashScreen() {
           ))}
         </View>
       </Animated.View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -212,25 +199,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  oContainer: {
-    marginRight: -4,
-  },
   olannaLetter: {
     fontFamily: "DMSans_700Bold",
-    fontSize: 44,
-    color: PINK_PRIMARY,
-    letterSpacing: 1,
-    lineHeight: 52,
+    fontSize: 48,
+    color: "#FFFFFF",
+    letterSpacing: 2,
+    lineHeight: 56,
   },
   healthRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 4,
+    marginTop: 8,
   },
   healthLetter: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 16,
-    color: PINK_PRIMARY,
-    letterSpacing: 10,
+    fontSize: 18,
+    color: "#FFFFFF",
+    letterSpacing: 12,
   },
 });
