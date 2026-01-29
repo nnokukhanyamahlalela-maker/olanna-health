@@ -51,6 +51,16 @@ import {
   CustomSymptom,
 } from '@/lib/symptomStorage';
 
+const THEME_COLORS = {
+  background: "#FFF7FA",
+  cardBackground: "#FFFFFF",
+  primary: "#E85A9C",
+  primaryLight: "#FBE3EC",
+  text: "#3A2F35",
+  textSecondary: "#7A6A73",
+  border: "#F5E8ED",
+};
+
 type ViewMode = 'categories' | 'bodymap' | 'patterns';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -270,21 +280,21 @@ export default function CheckInScreen() {
     <Animated.View
       key={category.id}
       entering={FadeInDown.delay(index * 50).duration(300)}
-      style={[styles.categorySection, { backgroundColor: theme.cardBackground }]}
+      style={[styles.categorySection, { backgroundColor: THEME_COLORS.cardBackground }]}
     >
       <View style={styles.categoryHeader}>
-        <View style={[styles.categoryIcon, { backgroundColor: `${category.color}20` }]}>
-          <Feather name={category.icon as any} size={18} color={category.color} />
+        <View style={[styles.categoryIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
+          <Feather name={category.icon as any} size={18} color={THEME_COLORS.primary} />
         </View>
-        <ThemedText type="h4" style={{ flex: 1 }}>{category.name}</ThemedText>
+        <ThemedText type="h4" style={{ flex: 1, color: THEME_COLORS.text }}>{category.name}</ThemedText>
         {category.isPCOS ? (
-          <View style={[styles.badge, { backgroundColor: `${theme.primary}20` }]}>
-            <ThemedText type="caption" style={{ color: theme.primary }}>PCOS</ThemedText>
+          <View style={[styles.badge, { backgroundColor: THEME_COLORS.primaryLight }]}>
+            <ThemedText type="caption" style={{ color: THEME_COLORS.primary }}>PCOS</ThemedText>
           </View>
         ) : null}
         {category.isEndometriosis ? (
-          <View style={[styles.badge, { backgroundColor: `${theme.accent}20` }]}>
-            <ThemedText type="caption" style={{ color: theme.accent }}>Endo</ThemedText>
+          <View style={[styles.badge, { backgroundColor: THEME_COLORS.primaryLight }]}>
+            <ThemedText type="caption" style={{ color: THEME_COLORS.primary }}>Endo</ThemedText>
           </View>
         ) : null}
       </View>
@@ -300,7 +310,7 @@ export default function CheckInScreen() {
               icon={symptom.icon as any}
               selected={isSelected}
               severity={log?.severity}
-              color={category.color}
+              color={THEME_COLORS.primary}
               isFavorite={favorites.includes(symptom.id)}
               onPress={() => handleSymptomPress(category, symptom)}
               onLongPress={() => handleSymptomLongPress(symptom)}
@@ -312,13 +322,11 @@ export default function CheckInScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
-      <AfricanPattern variant="dots" opacity={0.02} />
-
+    <View style={[styles.container, { backgroundColor: THEME_COLORS.background }]}>
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
         <View>
-          <ThemedText type="h2">Daily Check-in</ThemedText>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
+          <ThemedText type="h2" style={{ color: THEME_COLORS.text }}>Daily Check-in</ThemedText>
+          <ThemedText type="small" style={{ color: THEME_COLORS.textSecondary }}>
             {new Date().toLocaleDateString('en-ZA', {
               weekday: 'long',
               day: 'numeric',
@@ -327,18 +335,18 @@ export default function CheckInScreen() {
           </ThemedText>
         </View>
         <View style={styles.headerRight}>
-          <View style={[styles.progressBadge, { backgroundColor: `${theme.primary}15` }]}>
-            <Feather name="check-circle" size={16} color={theme.primary} />
-            <ThemedText type="small" style={{ color: theme.primary, fontWeight: '600' }}>
+          <View style={[styles.progressBadge, { backgroundColor: THEME_COLORS.primaryLight }]}>
+            <Feather name="check-circle" size={16} color={THEME_COLORS.primary} />
+            <ThemedText type="small" style={{ color: THEME_COLORS.primary, fontWeight: '600' }}>
               {loggedCount} logged
             </ThemedText>
           </View>
           <Pressable
             onPress={() => setShowCustomizeModal(true)}
-            style={[styles.settingsButton, { backgroundColor: `${theme.textSecondary}15` }]}
+            style={[styles.settingsButton, { backgroundColor: THEME_COLORS.cardBackground }]}
             testID="customize-symptoms"
           >
-            <Feather name="sliders" size={18} color={theme.textSecondary} />
+            <Feather name="sliders" size={18} color={THEME_COLORS.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -349,8 +357,8 @@ export default function CheckInScreen() {
           style={[
             styles.viewTab,
             {
-              backgroundColor: viewMode === 'categories' ? "#F6BFD3" : 'transparent',
-              borderColor: "#F6BFD3",
+              backgroundColor: viewMode === 'categories' ? THEME_COLORS.primaryLight : THEME_COLORS.cardBackground,
+              borderColor: viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.border,
             },
           ]}
           testID="tab-categories"
@@ -358,11 +366,11 @@ export default function CheckInScreen() {
           <Feather
             name="grid"
             size={16}
-            color={viewMode === 'categories' ? "#3A2F35" : "#F6BFD3"}
+            color={viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.textSecondary}
           />
           <ThemedText
             type="small"
-            style={{ color: viewMode === 'categories' ? "#3A2F35" : "#F6BFD3" }}
+            style={{ color: viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.textSecondary }}
           >
             Symptoms
           </ThemedText>
@@ -372,8 +380,8 @@ export default function CheckInScreen() {
           style={[
             styles.viewTab,
             {
-              backgroundColor: viewMode === 'bodymap' ? "#F6BFD3" : 'transparent',
-              borderColor: "#F6BFD3",
+              backgroundColor: viewMode === 'bodymap' ? THEME_COLORS.primaryLight : THEME_COLORS.cardBackground,
+              borderColor: viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.border,
             },
           ]}
           testID="tab-bodymap"
@@ -381,11 +389,11 @@ export default function CheckInScreen() {
           <Feather
             name="user"
             size={16}
-            color={viewMode === 'bodymap' ? "#3A2F35" : "#F6BFD3"}
+            color={viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.textSecondary}
           />
           <ThemedText
             type="small"
-            style={{ color: viewMode === 'bodymap' ? "#3A2F35" : "#F6BFD3" }}
+            style={{ color: viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.textSecondary }}
           >
             Body Map
           </ThemedText>
@@ -455,9 +463,13 @@ export default function CheckInScreen() {
       </ScrollView>
 
       <View style={[styles.saveButtonContainer, { bottom: tabBarHeight + Spacing.lg }]}>
-        <Button onPress={handleSaveCheckIn} testID="save-checkin">
-          Save Today's Check-in
-        </Button>
+        <Pressable 
+          onPress={handleSaveCheckIn} 
+          testID="save-checkin"
+          style={styles.saveButton}
+        >
+          <ThemedText style={styles.saveButtonText}>SAVE TODAY'S CHECK-IN</ThemedText>
+        </Pressable>
       </View>
 
       <Modal
@@ -719,7 +731,7 @@ export default function CheckInScreen() {
           </ThemedView>
         </View>
       </Modal>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -773,8 +785,13 @@ const styles = StyleSheet.create({
   },
   categorySection: {
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 20,
     marginBottom: Spacing.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
   },
   categoryHeader: {
     flexDirection: 'row',
@@ -813,6 +830,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.xl,
     right: Spacing.xl,
+  },
+  saveButton: {
+    backgroundColor: THEME_COLORS.primaryLight,
+    paddingVertical: Spacing.lg,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonText: {
+    color: THEME_COLORS.primary,
+    fontWeight: '600',
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,

@@ -81,6 +81,13 @@ server/
 - African-centered design with subtle cultural patterns
 
 ## Recent Changes
+- **Check-in Screen Styling Update (January 2026)**: Refined symptom tracking UI
+  - Soft pink background (#FFF7FA) consistent with app theme
+  - White symptom chips with pink icons and subtle pink borders
+  - Light pink (#FBE3EC) background when chip is selected
+  - Pink "SAVE TODAY'S CHECK-IN" button with rounded pill shape (30px radius)
+  - White category cards with 20px rounded corners and subtle shadows
+  - Updated category icons to use primary pink color
 - **Onboarding Flow Redesign (January 2026)**: Complete overhaul of user onboarding experience
   - Step 1: Gradient Spill Intro (8 seconds) - Gradient expands/spills across white screen, then OLANNA HEALTH logo fades in
   - Step 2: "Girl, hi! My name is Olanna." (5 seconds) - Blobbing text animation with scale and fade

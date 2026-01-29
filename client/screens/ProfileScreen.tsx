@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
@@ -15,6 +16,16 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+const THEME_COLORS = {
+  background: "#FFF7FA",
+  cardBackground: "#FFFFFF",
+  primary: "#E85A9C",
+  primaryLight: "#FBE3EC",
+  text: "#3A2F35",
+  textSecondary: "#7A6A73",
+  border: "#F5E8ED",
+};
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -27,24 +38,24 @@ interface MenuItemProps {
 }
 
 function MenuItem({ icon, label, onPress, color, showChevron = true }: MenuItemProps) {
-  const { theme } = useTheme();
+  const iconColor = color || THEME_COLORS.primary;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.menuItem,
-        { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.8 : 1 },
+        { opacity: pressed ? 0.8 : 1 },
       ]}
     >
-      <View style={[styles.menuIcon, { backgroundColor: (color || theme.primary) + "20" }]}>
-        <Feather name={icon} size={20} color={color || theme.primary} />
+      <View style={[styles.menuIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
+        <Feather name={icon} size={18} color={iconColor} />
       </View>
-      <ThemedText type="body" style={[styles.menuLabel, color ? { color } : null]}>
+      <ThemedText type="body" style={[styles.menuLabel, { color: color || THEME_COLORS.textSecondary }]}>
         {label}
       </ThemedText>
       {showChevron ? (
-        <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+        <Feather name="chevron-right" size={18} color={THEME_COLORS.textSecondary} />
       ) : null}
     </Pressable>
   );
@@ -95,7 +106,7 @@ export default function ProfileScreen() {
 
   return (
     <KeyboardAwareScrollViewCompat
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
+      style={[styles.container, { backgroundColor: THEME_COLORS.background }]}
       contentContainerStyle={{
         paddingTop: headerHeight + Spacing.lg,
         paddingBottom: insets.bottom + Spacing["2xl"],
@@ -104,16 +115,21 @@ export default function ProfileScreen() {
       scrollIndicatorInsets={{ bottom: insets.bottom }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={[styles.profileCard, { backgroundColor: theme.backgroundDefault }]}>
-        <View style={[styles.avatarContainer, { backgroundColor: theme.primary + "20" }]}>
-          <Image
-            source={require("../../assets/images/icon.png")}
-            style={styles.avatar}
-            contentFit="cover"
-          />
+      <View style={styles.profileCard}>
+        <View style={styles.avatarContainer}>
+          <LinearGradient
+            colors={["#F7A37A", "#E85A9C", "#D070A0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.avatarGradient}
+          >
+            <View style={styles.avatarInner}>
+              <View style={styles.avatarO} />
+            </View>
+          </LinearGradient>
         </View>
         <View style={styles.profileInfo}>
-          <ThemedText type="h3">{profile?.name || "Guest User"}</ThemedText>
+          <ThemedText type="h3" style={{ color: THEME_COLORS.text }}>{profile?.name || "Guest User"}</ThemedText>
           <ThemedText type="small" style={styles.profileSubtext}>
             {profile ? `Tracking for ${profile.cycleLength} day cycle` : "Set up your profile to get started"}
           </ThemedText>
@@ -123,10 +139,10 @@ export default function ProfileScreen() {
             onPress={() => navigation.navigate("EditProfile")}
             style={({ pressed }) => [
               styles.editButton,
-              { backgroundColor: theme.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
+              { opacity: pressed ? 0.7 : 1 },
             ]}
           >
-            <Feather name="edit-2" size={16} color={theme.text} />
+            <Feather name="edit-2" size={16} color={THEME_COLORS.textSecondary} />
           </Pressable>
         ) : null}
       </View>
@@ -238,36 +254,56 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     marginBottom: Spacing.xl,
     gap: Spacing.md,
+    backgroundColor: THEME_COLORS.cardBackground,
     ...Shadows.sm,
   },
   avatarContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
-  avatar: {
-    width: 48,
-    height: 48,
+  avatarGradient: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+  },
+  avatarInner: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: THEME_COLORS.cardBackground,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarO: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 4,
+    borderColor: THEME_COLORS.primary,
   },
   profileInfo: {
     flex: 1,
     gap: Spacing.xs,
   },
   profileSubtext: {
-    opacity: 0.7,
+    color: THEME_COLORS.textSecondary,
   },
   editButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: THEME_COLORS.background,
   },
   getStartedButton: {
     marginBottom: Spacing.xl,
@@ -277,22 +313,26 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: Spacing.md,
+    color: THEME_COLORS.text,
   },
   menuGroup: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     overflow: "hidden",
-    gap: 1,
+    backgroundColor: THEME_COLORS.cardBackground,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
     gap: Spacing.md,
+    backgroundColor: THEME_COLORS.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME_COLORS.border,
   },
   menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.sm,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -301,10 +341,13 @@ const styles = StyleSheet.create({
   },
   logoutSection: {
     marginBottom: Spacing.xl,
+    backgroundColor: THEME_COLORS.cardBackground,
+    borderRadius: BorderRadius.xl,
+    overflow: "hidden",
   },
   version: {
     textAlign: "center",
-    opacity: 0.5,
+    color: THEME_COLORS.textSecondary,
     marginTop: Spacing.lg,
   },
 });

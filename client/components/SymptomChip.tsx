@@ -12,6 +12,16 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
+const CHIP_THEME = {
+  background: '#FFFFFF',
+  backgroundSelected: '#FBE3EC',
+  border: '#F5E8ED',
+  borderSelected: '#E85A9C',
+  text: '#3A2F35',
+  textSelected: '#E85A9C',
+  icon: '#E85A9C',
+};
+
 interface SymptomChipProps {
   label: string;
   icon?: keyof typeof Feather.glyphMap;
@@ -122,8 +132,8 @@ export function SymptomChip({
       style={[
         styles.container,
         {
-          backgroundColor: selected ? chipColor : theme.backgroundSecondary,
-          borderColor: selected ? chipColor : theme.border,
+          backgroundColor: selected ? CHIP_THEME.backgroundSelected : CHIP_THEME.background,
+          borderColor: selected ? CHIP_THEME.borderSelected : CHIP_THEME.border,
         },
         animatedStyle,
       ]}
@@ -133,20 +143,20 @@ export function SymptomChip({
         <Feather
           name={icon}
           size={16}
-          color={selected ? theme.buttonText : theme.text}
+          color={selected ? CHIP_THEME.textSelected : CHIP_THEME.icon}
         />
       ) : null}
       <ThemedText
         type="small"
         style={[
           styles.label,
-          { color: selected ? theme.buttonText : theme.text },
+          { color: selected ? CHIP_THEME.textSelected : CHIP_THEME.text },
         ]}
       >
         {label}
       </ThemedText>
       {isFavorite ? (
-        <Feather name="star" size={10} color={selected ? theme.buttonText : theme.tertiary} />
+        <Feather name="star" size={10} color={selected ? CHIP_THEME.textSelected : theme.tertiary} />
       ) : null}
     </AnimatedPressable>
   );
