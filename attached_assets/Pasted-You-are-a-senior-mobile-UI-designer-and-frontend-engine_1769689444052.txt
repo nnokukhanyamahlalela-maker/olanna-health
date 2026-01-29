@@ -1,0 +1,85 @@
+You are a senior mobile UI designer and frontend engineer.
+Build a pixel-clean, modern women’s health app UI called Olanna Health that matches the exact aesthetic of this reference: soft pink–orange–lavender gradient + glassmorphism cards + rounded iOS layout (like the UI mockup with the 3 smartphones).
+
+Brand / Visual Style
+	•	Background: soft “sunset” gradient (pink → orange → lavender) with a gentle blur bloom
+	•	Glassmorphism: frosted translucent cards with subtle blur, soft borders, and light shadows
+	•	Typography: clean modern sans (SF Pro / Inter equivalent), large airy headings, lots of whitespace
+	•	Buttons: rounded pill buttons, minimal outlines, subtle elevation
+	•	Overall: premium, calm, feminine, minimal, iOS-like
+
+Exact Gradient Colors (use these hex codes)
+	•	Hot pink: #FF4FB8
+	•	Sunset orange: #F7A37A
+	•	Soft lavender: #C9B8E8
+	•	Light blush background fade: #FDF1F6
+
+Use the gradient across screens in a smooth way (no banding). Add a very subtle noise texture overlay (2–4% opacity) if possible.
+
+⸻
+
+Screens to build (match the smartphone UI concept)
+
+1) Onboarding screen
+	•	Full gradient background
+	•	Title: “Keep track of your period”
+	•	Subtitle: “Easily and accurately track each phase of your menstrual cycle.”
+	•	CTA button: “Get started” (pill, white fill, soft shadow)
+	•	Layout should match the reference vibe: centered text, airy spacing, minimal UI chrome
+
+2) Home / Overview screen
+	•	Top: mini calendar strip with selected day in a pink circle
+	•	Main card: gradient card with “Period: day 2” and “Next ovulation: in 5 days”
+	•	Timelines section: stacked rounded cards (Period / Fertility window / PMS / Period)
+	•	Glassmorphism card styling for all timeline blocks
+
+3) Calendar screen
+	•	Month grid
+	•	Highlight period days with soft lavender/pink circles
+	•	Filter chips: Period, Fertility, PMS, All (rounded pills, minimal)
+	•	“About your cycle” cards with cycle length and period length (glassmorphism)
+
+⸻
+
+Lotus Icon Requirement (CRITICAL)
+
+Keep the “lotus cycle” concept, but redesign the lotus to fit the new interface:
+	•	The lotus must be pure white (#FFFFFF)
+	•	Minimal, shape-focused, no interior lines, no petal veins, no detailed illustration
+	•	Use 5 petals maximum, rounded and softly overlapping
+	•	The lotus should feel like a modern symbol (closer to an abstract mark than a drawing)
+	•	Provide the lotus as a reusable SVG component (single path preferred)
+	•	Also provide 3 variants:
+	1.	Full lotus (default)
+	2.	Bud lotus (menstrual/day 1)
+	3.	Mini lotus mark (small UI accent)
+
+The lotus must visually match the bold, minimal brand direction of the new favicon/logo (abstract and confident).
+
+⸻
+
+Component: Cycle Wheel (New Version)
+
+Create a minimalist cycle wheel component that matches the new UI style:
+	•	A circular ring divided into 4 subtle phase arcs (Menstrual, Follicular, Ovulatory, Luteal)
+	•	Inactive arcs: low opacity
+	•	Active phase arc: full opacity + soft glow
+	•	A single “day marker” dot that moves around the ring
+	•	Center content:
+	•	Phase name (small caps)
+	•	Day number (large)
+	•	Emotional cue text (e.g., “Rest & Release”)
+	•	The white minimalist lotus centered
+	•	Smooth animation when changing day
+
+⸻
+
+Implementation Requirements
+	•	Use React Native (Expo) OR Flutter (choose one and stick to it).
+	•	Create reusable components: GradientBackground, GlassCard, PillButton, CycleWheel, LotusIcon.
+	•	Provide clean, readable code with comments.
+	•	Include mock data for cycle length (28 days) and period length (5–6 days).
+	•	Ensure spacing, padding, and typography match the premium minimal iOS feel.
+	•	Output the full code needed to run the UI.
+
+Make the result look like a polished App Store-quality prototype.
