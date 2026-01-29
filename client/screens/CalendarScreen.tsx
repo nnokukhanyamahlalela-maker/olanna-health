@@ -287,12 +287,12 @@ export default function CalendarScreen() {
     const showHighlight = shouldShowDay(day);
 
     if (day.isToday && !isSelected) {
-      baseStyle.backgroundColor = "rgba(246, 191, 211, 0.15)";
+      baseStyle.backgroundColor = "rgba(255, 79, 184, 0.1)";
     }
 
     if (isSelected) {
-      baseStyle.backgroundColor = "#F6BFD3";
-      baseStyle.shadowColor = "#F6BFD3";
+      baseStyle.backgroundColor = "#FF4FB8";
+      baseStyle.shadowColor = "#FF4FB8";
       baseStyle.shadowOffset = { width: 0, height: 4 };
       baseStyle.shadowOpacity = 0.4;
       baseStyle.shadowRadius = 8;

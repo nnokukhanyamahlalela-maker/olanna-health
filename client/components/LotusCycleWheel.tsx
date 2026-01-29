@@ -18,22 +18,27 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
 // ============================================================================
-// DESIGN TOKENS
-// Premium, feminine color palette with soft, muted tones
+// DESIGN TOKENS - Exact brand colors from spec
 // ============================================================================
 const COLORS = {
-  // Phase colors - soft and elegant
-  menstrual: "#D4A5A5",      // Dusty rose - gentle, nurturing
-  follicular: "#B5C4B1",     // Soft sage - growth, renewal  
-  ovulation: "#E8D5B7",      // Warm champagne - radiance, peak
-  luteal: "#C4B7D6",         // Muted lavender - calm, reflection
+  // Brand gradient colors
+  hotPink: "#FF4FB8",
+  sunsetOrange: "#F7A37A",
+  softLavender: "#C9B8E8",
+  lightBlush: "#FDF1F6",
+  
+  // Phase colors - using brand palette
+  menstrual: "#FF4FB8",      // Hot pink - period
+  follicular: "#F7A37A",     // Sunset orange - growth
+  ovulation: "#FFB88C",      // Warm coral - peak
+  luteal: "#C9B8E8",         // Soft lavender - reflection
   
   // UI colors
-  background: "#FFFBFC",     // Very light blush white
-  text: "#3A2F35",           // Warm charcoal
-  textMuted: "#7A6A73",      // Warm gray
-  ring: "#F6BFD3",           // Soft pink ring
-  ringLight: "#FBE3EC",      // Lighter pink
+  background: "#FDF1F6",     // Light blush
+  text: "#2D2A32",           // Near black
+  textMuted: "#7A7580",      // Muted gray
+  ring: "#FF4FB8",           // Hot pink ring
+  ringLight: "#FDF1F6",      // Light blush
 };
 
 // Phase arc definitions with emotional cues
