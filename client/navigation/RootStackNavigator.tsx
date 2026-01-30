@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigatorScreenParams } from "@react-navigation/native";
 
 import MainTabNavigator, { MainTabParamList } from "@/navigation/MainTabNavigator";
+import IntroLogo from "@/screens/IntroLogo";
 import SplashScreen from "@/screens/SplashScreen";
 import OnboardingScreen from "@/screens/OnboardingScreen";
 import AIChatScreen from "@/screens/AIChatScreen";
@@ -22,6 +23,7 @@ import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
 export type RootStackParamList = {
+  IntroLogo: undefined;
   Splash: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Onboarding: undefined;
@@ -46,7 +48,12 @@ export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions} initialRouteName="Splash">
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName="IntroLogo">
+      <Stack.Screen
+        name="IntroLogo"
+        component={IntroLogo}
+        options={{ headerShown: false, animation: "fade" }}
+      />
       <Stack.Screen
         name="Splash"
         component={SplashScreen}
