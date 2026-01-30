@@ -1,102 +1,71 @@
 import React from "react";
-import { StyleSheet, View, ViewStyle, Platform } from "react-native";
+import { View, StyleSheet, ViewStyle, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { BorderRadius, Spacing } from "@/constants/theme";
+import { DS } from "@/constants/designSystem";
 
-interface GlassCardProps {
+type Props = {
   children: React.ReactNode;
   style?: ViewStyle;
-  intensity?: "light" | "medium" | "heavy";
+  intensity?: number;
   gradient?: boolean;
-}
+};
 
-export function GlassCard({ 
-  children, 
+export function GlassCard({
+  children,
   style,
-  intensity = "medium",
+  intensity = 22,
   gradient = false,
-}: GlassCardProps) {
-  const getIntensity = () => {
-    switch (intensity) {
-      case "light": return 20;
-      case "medium": return 40;
-      case "heavy": return 60;
-      default: return 40;
-    }
-  };
-
-  const cardContent = (
-    <View style={[styles.content, style]}>
-      {children}
-    </View>
-  );
-
+}: Props) {
   if (Platform.OS === "web") {
     return (
-      <View style={[styles.fallbackCard, style]}>
+      <View style={[styles.outer, DS.shadow.card, styles.fallback, style]}>
         {gradient ? (
           <LinearGradient
-            colors={["rgba(255,255,255,0.6)", "rgba(255,255,255,0.3)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            start={{ x: 0.1, y: 0 }}
+            end={{ x: 0.9, y: 1 }}
+            colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]}
             style={StyleSheet.absoluteFill}
           />
         ) : null}
-        {children}
+        <View style={styles.inner}>{children}</View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <BlurView 
-        intensity={getIntensity()} 
-        tint="light"
-        style={[styles.blurContainer, style]}
-      >
-        {gradient ? (
-          <LinearGradient
-            colors={["rgba(255,255,255,0.5)", "rgba(255,255,255,0.2)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        ) : null}
-        <View style={styles.overlay} />
-        {children}
+    <View style={[styles.outer, DS.shadow.card, style]}>
+      {gradient ? (
+        <LinearGradient
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 0.9, y: 1 }}
+          colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+
+      <BlurView intensity={intensity} tint="light" style={styles.blur}>
+        <View style={styles.inner}>{children}</View>
       </BlurView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: BorderRadius.xl,
+  outer: {
+    borderRadius: DS.radii.card,
     overflow: "hidden",
-  },
-  blurContainer: {
-    borderRadius: BorderRadius.xl,
-    overflow: "hidden",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    borderRadius: BorderRadius.xl,
-  },
-  content: {
-    padding: Spacing.lg,
-  },
-  fallbackCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
-    padding: Spacing.lg,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 4,
+    borderColor: "rgba(255,255,255,0.45)",
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  blur: {
+    borderRadius: DS.radii.card,
+  },
+  inner: {
+    padding: DS.spacing.lg,
+  },
+  fallback: {
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
 });
