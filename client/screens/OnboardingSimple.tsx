@@ -1,0 +1,89 @@
+import React, { useRef, useState } from "react";
+import { View, Text, StyleSheet, FlatList, Dimensions, Pressable } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+const { width, height } = Dimensions.get("window");
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const SLIDES = [
+  { id: "1", text: "Girl, hi!\n\nMy name is\nOlanna." },
+  { id: "2", text: "What\nshall I\ncall you?" },
+  { id: "3", text: "And to\nwhat do I\nowe this\npleasure?" },
+];
+
+export default function OnboardingSimple() {
+  const navigation = useNavigation<NavigationProp>();
+  const listRef = useRef<FlatList>(null);
+  const [index, setIndex] = useState(0);
+
+  const goNext = () => {
+    if (index < SLIDES.length - 1) {
+      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
+    } else {
+      navigation.replace("Main", { screen: "HomeTab" });
+    }
+  };
+
+  return (
+    <LinearGradient colors={["#FFB28C", "#FF4FA3", "#F7B6C8"]} style={styles.gradient}>
+      <FlatList
+        ref={listRef}
+        data={SLIDES}
+        keyExtractor={(item) => item.id}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+          setIndex(newIndex);
+        }}
+        renderItem={({ item }) => (
+          <View style={[styles.slide, { width, height }]}>
+            <Text style={styles.bigText}>{item.text}</Text>
+
+            <Pressable onPress={goNext} style={styles.nextArea}>
+              <Text style={styles.nextText}>
+                {index === SLIDES.length - 1 ? "Continue" : "Next"}
+              </Text>
+            </Pressable>
+          </View>
+        )}
+      />
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
+  slide: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+  },
+  bigText: {
+    color: "#FFFFFF",
+    fontSize: 44,
+    lineHeight: 52,
+    textAlign: "center",
+    fontWeight: "800",
+    letterSpacing: 0.2,
+  },
+  nextArea: {
+    position: "absolute",
+    bottom: 70,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  nextText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+});
