@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, {
@@ -9,35 +10,32 @@ import Animated, {
   withDelay,
   withSpring,
   Easing,
-  runOnJS,
 } from "react-native-reanimated";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function IntroLogo() {
   const navigation = useNavigation<NavigationProp>();
   const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.9);
+  const scale = useSharedValue(0.85);
 
   useEffect(() => {
     opacity.value = withDelay(
-      200,
-      withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) })
+      100,
+      withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) })
     );
     scale.value = withDelay(
-      200,
-      withSpring(1, { damping: 15, stiffness: 80 })
+      100,
+      withSpring(1, { damping: 12, stiffness: 100 })
     );
 
     const timer = setTimeout(() => {
-      navigation.replace("Splash");
-    }, 3500);
+      navigation.replace("Onboarding");
+    }, 1200);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigation]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -45,27 +43,30 @@ export default function IntroLogo() {
   }));
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.imageContainer, animatedStyle]}>
+    <LinearGradient
+      colors={["#FFB28C", "#FF4FA3", "#F7B6C8"]}
+      style={styles.container}
+    >
+      <Animated.View style={[styles.logoWrap, animatedStyle]}>
         <Image
           source={require("@/assets/images/olanna-brand-logo.png")}
           style={styles.logo}
-          resizeMode="cover"
+          resizeMode="contain"
         />
       </Animated.View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF6F8",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  imageContainer: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
+  logoWrap: {
+    width: 240,
+    height: 240,
   },
   logo: {
     width: "100%",
