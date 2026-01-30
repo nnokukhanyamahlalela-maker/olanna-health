@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "bot_name": "Olanna",
+    "languages": {
+      "en": "English",
+      "af": "Afrikaans",
+      "zu": "isiZulu",
+      "xh": "isiXhosa",
+      "st": "Sesotho",
+      "ss": "SiSwati"
+    },
+    "disclaimer": {
+      "en": "I’m not a doctor. I share health education only. For diagnosis or treatment, please see a qualified health-care professional. If you have severe symptoms, heavy bleeding, severe pain, or thoughts of self-harm, get urgent help.",
+      "af": "Ek is nie ’n dokter nie. Ek deel slegs gesondheidsopvoeding. Vir ’n diagnose of behandeling, gaan asseblief na ’n gekwalifiseerde gesondheidsorgpraktisyn. As jy ernstige simptome, swaar bloeding, erge pyn, of gedagtes van selfbesering het, kry dringend hulp.",
+      "zu": "Angiyona udokotela. Ngabelana ngolwazi lokufundisa ngezempilo kuphela. Ukuze uthole ukuxilongwa noma ukwelashwa, sicela ubone uchwepheshe wezempilo. Uma unezimpawu ezinzima, ukopha kakhulu, ubuhlungu obukhulu, noma imicabango yokuzilimaza, thola usizo oluphuthumayo.",
+      "xh": "Andingogqirha. Ndabelana ngolwazi lokufundisa ngezempilo kuphela. Ukuze ufumane uxilongo okanye unyango, nceda ubonane nengcali yezempilo. Ukuba uneempawu ezinzima, ukopha kakhulu, iintlungu ezibuhlungu, okanye iingcinga zokuzilimaza, fumana uncedo olungxamisekileyo.",
+      "st": "Ha ke ngaka. Ke arolelana ka thuto ya bophelo feela. Bakeng sa tlhahlobo kapa kalafo, ka kopo bona setsebi sa tlhokomelo ya bophelo se tšoanelehang. Haeba o na le matshwao a matla, ho tsoa madi haholo, bohloko bo matla, kapa menahano ya ho ikgobatsa, fumana thuso ka potlako.",
+      "ss": "Angisi dokotela. Ngabelana ngelwati lwekufundzisa ngebulongo kuphela. Ngetulu kwekuxilongwa noma kwelashwa, ngicela ubone umelaphi lochwepheshe. Uma unezimpawu letimatima, kuphuma kwegazi kakhulu, buhlungu lobukhulu, noma imicabango yekutilimaza, cela lusito loluphutfumayo."
+    },
+    "ui": {
+      "welcome": {
+        "en": "Choose your language, then choose a topic and a question.",
+        "af": "Kies jou taal, kies dan ’n onderwerp en ’n vraag.",
+        "zu": "Khetha ulimi, bese ukhetha isihloko nombuzo.",
+        "xh": "Khetha ulwimi, uze ukhethe isihloko nombuzo.",
+        "st": "Khetha puo, ebe o khetha sehlooho le potso.",
+        "ss": "Khetsa lulwimi, bese ukhetsa sihloko nemibuto."
+      }
+    }
+  },
+  "categories": [
+    {
+      "id": "cycle",
+      "label": {
+        "en": "Menstrual cycle",
+        "af": "Menstruele siklus",
+        "zu": "Umjikelezo wokuya esikhathini",
+        "xh": "Umjikelo wokuya exesheni",
+        "st": "Potoloho ya ho ilela khoeli",
+        "ss": "Umjikelezo wekufika esikhatsini"
+      }
+    },
+    {
+      "id": "contraception",
+      "label": {
+        "en": "Birth control",
+        "af": "Voorbehoeding",
+        "zu": "Ukuvimbela inzalo",
+        "xh": "Ulawulo lokukhulelwa",
+        "st": "Thibelo ya bokhachane",
+        "ss": "Kuvimbela kukhulelwa"
+      }
+    },
+    {
+      "id": "stis",
+      "label": {
+        "en": "STIs",
+        "af": "SOI's",
+        "zu": "Izifo ezithathelwana ngocansi",
+        "xh": "Izifo ezosulelayo ngokwabelana ngesondo",
+        "st": "Dikokoana-hloko tse fetisetswang ka thobalano",
+        "ss": "Tifo letidluliselwa ngocansi"
+      }
+    }
+  ],
+  "faqs": [
+    {
+      "id": "cycle_what",
+      "category_id": "cycle",
+      "question": {
+        "en": "What is the menstrual cycle?",
+        "af": "Wat is die menstruele siklus?",
+        "zu": "Uyini umjikelezo wokuya esikhathini?",
+        "xh": "Yintoni umjikelo wokuya exesheni?",
+        "st": "Potoloho ya ho ilela khoeli ke eng?",
+        "ss": "Uyini umjikelezo wekufika esikhatsini?"
+      },
+      "answer": {
+        "en": "The menstrual cycle is the monthly process where hormones prepare the body for pregnancy. Day 1 is the first day of bleeding. Many cycles are about 28 days, but 24–38 days can be normal. Ovulation (releasing an egg) often happens around the middle of the cycle.",
+        "af": "Die menstruele siklus is die maandelikse proses waar hormone die liggaam vir swangerskap voorberei. Dag 1 is die eerste dag van bloeding. Baie siklusse is ongeveer 28 dae, maar 24–38 dae kan normaal wees. Ovulasie (’n eier wat vrygestel word) gebeur dikwels rondom die middel van die siklus.",
+        "zu": "Umjikelezo wokuya esikhathini wuhlelo lwanyanga zonke lapho ama-hormone elungiselela umzimba ukukhulelwa. Usuku 1 luwusuku lokuqala lokopha. Imijikelezo eminingi icishe ibe yizinsuku ezingama-28, kodwa 24–38 ingaba evamile. Ukuvuthwa kweqanda (ovulation) kuvame ukwenzeka maphakathi nomjikelezo.",
+        "xh": "Umjikelo wokuya exesheni yinkqubo yenyanga apho ii-hormone zilungiselela umzimba ukukhulelwa. Usuku 1 lusuku lokuqala lokopha. Imijikelo emininzi imalunga neentsuku ezingama-28, kodwa 24–38 ingaba yinto eqhelekileyo. Ukuvuthwa kweqanda (ovulation) kuhlala kusenzeka embindini womjikelo.",
+        "st": "Potoloho ya ho ilela khoeli ke tshebetso ya kgwedi le kgwedi moo di-hormone di lokisetsang mmele bokhachane. Letsatsi la 1 ke letsatsi la pele la ho tsoa madi. Dipotoloho tse ngata di ka ba matsatsi a 28, empa 24–38 e ka ba tlwaelo. Ovulation (ho lokolla lehe) hangata e etsahala bohareng ba potoloho.",
+        "ss": "Umjikelezo wekufika esikhatsini yinkhombandlela yenyanga lapho ema-hormone alungiselela umtimba kukhulelwa. Lilanga 1 lilanga lokucala lekuphuma kwegazi. Imijikelezo leminengi icishe ibe ngema-28, kodvwa 24–38 ingaba yivamile. Ovulation (kuphuma leqanda) kuvame kwenteka emkhatsini wemjikelezo."
+      }
+    },
+    {
+      "id": "bc_condoms",
+      "category_id": "contraception",
+      "question": {
+        "en": "Do condoms prevent STIs?",
+        "af": "Voorkom kondome SOI's?",
+        "zu": "Ingabe amakhondomu ayavikela izifo ezithathelwana ngocansi?",
+        "xh": "Ngaba iikhondom ziyazithintela ii-STI?",
+        "st": "Na dikondomo di thibela dikokoana-hloko tsa thobalano?",
+        "ss": "Ingabe makhondomu avikela tifo letidluliselwa ngocansi?"
+      },
+      "answer": {
+        "en": "Yes—when used correctly and every time, condoms reduce the risk of many STIs. Other birth control methods prevent pregnancy but do not protect against STIs.",
+        "af": "Ja—as dit korrek en elke keer gebruik word, verminder kondome die risiko van baie SOI's. Ander voorbehoedmetodes voorkom swangerskap, maar beskerm nie teen SOI's nie.",
+        "zu": "Yebo—uma asetshenziswa kahle futhi njalo, amakhondomu anciphisa ingozi yezifo eziningi ezithathelwana ngocansi. Ezinye izindlela zokuvimbela inzalo zivimbela ukukhulelwa kodwa azivikeli kuma-STI.",
+        "xh": "Ewe—xa zisetyenziswa ngokuchanekileyo kwaye ngalo lonke ixesha, iikhondom zinciphisa umngcipheko wezinye ii-STI. Ezinye iindlela zolawulo lokukhulelwa zithintela ukukhulelwa kodwa azikhuseli kwi-STI.",
+        "st": "Ee—ha di sebediswa ka nepo le kamehla, dikondomo di fokotsa kotsi ya dikokoana-hloko tse ngata. Mekhoa e meng ya thibelo e thibela bokhachane empa ha e sireletse kgahlanong le STI.",
+        "ss": "Yebo—uma asetjentiswa kahle futsi njalo, makhondomu anciphisa ingozi yetifo letinyenti letidluliselwa ngocansi. Letinye tindlela tekuvimbela kukhulelwa tivimbela kukhulelwa kodvwa ativikeli kuma-STI."
+      }
+    }
+  ]
+}

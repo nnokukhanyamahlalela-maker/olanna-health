@@ -13,6 +13,7 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -29,6 +30,13 @@ import {
   containsSymptomKeywords,
   type SupportedLanguage,
 } from "@/lib/languageDetection";
+import {
+  getCategoriesForLanguage,
+  getFAQsForCategory,
+  getAnswer,
+  getUIText,
+  type LanguageCode,
+} from "@/lib/faqData";
 
 interface Message {
   id: string;
@@ -39,17 +47,32 @@ interface Message {
 
 const LANGUAGE_KEY = "olanna_selected_language";
 
+const THEME_COLORS = {
+  background: '#FFF7FA',
+  primary: '#E85A9C',
+  primaryLight: '#FBE3EC',
+  text: '#3A2F35',
+  textSecondary: '#7A6A73',
+  border: '#F5E8ED',
+  cardBackground: '#FFFFFF',
+};
+
 export default function AIChatScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const flatListRef = useRef<FlatList>(null);
 
+  const [mode, setMode] = useState<"faq" | "chat">("faq");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>("en");
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedFAQ, setSelectedFAQ] = useState<string | null>(null);
+  const [faqAnswer, setFaqAnswer] = useState<{ answer: string; disclaimer: string } | null>(null);
 
   useEffect(() => {
     const loadStoredLanguage = async () => {
@@ -84,12 +107,42 @@ export default function AIChatScreen() {
   const handleLanguageChange = (langCode: SupportedLanguage) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedLanguage(langCode);
+    setSelectedCategory(null);
+    setSelectedFAQ(null);
+    setFaqAnswer(null);
     setMessages([{
       id: "welcome-" + Date.now(),
       role: "assistant",
       content: getWelcomeMessage(langCode),
       timestamp: new Date(),
     }]);
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedCategory(categoryId);
+    setSelectedFAQ(null);
+    setFaqAnswer(null);
+  };
+
+  const handleFAQSelect = (faqId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedFAQ(faqId);
+    const result = getAnswer(faqId, selectedLanguage as LanguageCode);
+    setFaqAnswer(result);
+  };
+
+  const handleBackToCategories = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedCategory(null);
+    setSelectedFAQ(null);
+    setFaqAnswer(null);
+  };
+
+  const handleBackToQuestions = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedFAQ(null);
+    setFaqAnswer(null);
   };
 
   const handleSend = async () => {
@@ -170,25 +223,19 @@ export default function AIChatScreen() {
         ]}
       >
         {!isUser ? (
-          <View style={[styles.avatar, { backgroundColor: theme.primary + "20" }]}>
-            <Feather name="heart" size={16} color={theme.primary} />
+          <View style={[styles.avatar, { backgroundColor: THEME_COLORS.primaryLight }]}>
+            <Feather name="heart" size={16} color={THEME_COLORS.primary} />
           </View>
         ) : null}
         <View
           style={[
             styles.messageBubble,
             {
-              backgroundColor: isUser ? theme.primary : theme.backgroundDefault,
+              backgroundColor: isUser ? THEME_COLORS.primaryLight : THEME_COLORS.cardBackground,
             },
           ]}
         >
-          <ThemedText
-            type="body"
-            style={[
-              styles.messageText,
-              { color: isUser ? theme.buttonText : theme.text },
-            ]}
-          >
+          <ThemedText type="body" style={[styles.messageText, { color: THEME_COLORS.text }]}>
             {item.content}
           </ThemedText>
         </View>
@@ -198,37 +245,149 @@ export default function AIChatScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <View style={[styles.emptyIcon, { backgroundColor: theme.primary + "20" }]}>
-        <Feather name="message-circle" size={32} color={theme.primary} />
+      <View style={[styles.emptyIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
+        <Feather name="message-circle" size={32} color={THEME_COLORS.primary} />
       </View>
-      <ThemedText type="h3" style={styles.emptyTitle}>
+      <ThemedText type="h3" style={[styles.emptyTitle, { color: THEME_COLORS.text }]}>
         {selectedLanguage === "en" ? "Ask Me Anything" : SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage)?.greeting || "Hello"}
       </ThemedText>
-      <ThemedText type="body" style={styles.emptyDescription}>
+      <ThemedText type="body" style={[styles.emptyDescription, { color: THEME_COLORS.textSecondary }]}>
         {getWelcomeMessage(selectedLanguage).split("\n")[0]}
       </ThemedText>
     </View>
   );
 
-  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage);
+  const categories = getCategoriesForLanguage(selectedLanguage as LanguageCode);
+  const faqs = selectedCategory ? getFAQsForCategory(selectedCategory, selectedLanguage as LanguageCode) : [];
+
+  const renderFAQMode = () => {
+    if (faqAnswer) {
+      return (
+        <ScrollView 
+          style={styles.faqScrollView}
+          contentContainerStyle={styles.faqContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View entering={FadeIn.duration(300)}>
+            <Pressable onPress={handleBackToQuestions} style={styles.backButton}>
+              <Feather name="arrow-left" size={20} color={THEME_COLORS.primary} />
+              <ThemedText style={[styles.backText, { color: THEME_COLORS.primary }]}>
+                {selectedLanguage === "en" ? "Back to questions" : "←"}
+              </ThemedText>
+            </Pressable>
+            
+            <View style={[styles.answerCard, { backgroundColor: THEME_COLORS.cardBackground }]}>
+              <View style={[styles.answerAvatar, { backgroundColor: THEME_COLORS.primaryLight }]}>
+                <Feather name="heart" size={24} color={THEME_COLORS.primary} />
+              </View>
+              <ThemedText style={[styles.answerText, { color: THEME_COLORS.text }]}>
+                {faqAnswer.answer}
+              </ThemedText>
+              <View style={styles.disclaimerBox}>
+                <Feather name="alert-circle" size={14} color={THEME_COLORS.textSecondary} />
+                <ThemedText style={[styles.disclaimerBoxText, { color: THEME_COLORS.textSecondary }]}>
+                  {faqAnswer.disclaimer}
+                </ThemedText>
+              </View>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      );
+    }
+
+    if (selectedCategory) {
+      return (
+        <ScrollView 
+          style={styles.faqScrollView}
+          contentContainerStyle={styles.faqContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Pressable onPress={handleBackToCategories} style={styles.backButton}>
+            <Feather name="arrow-left" size={20} color={THEME_COLORS.primary} />
+            <ThemedText style={[styles.backText, { color: THEME_COLORS.primary }]}>
+              {selectedLanguage === "en" ? "Back to topics" : "←"}
+            </ThemedText>
+          </Pressable>
+          
+          <ThemedText style={[styles.sectionTitle, { color: THEME_COLORS.text }]}>
+            {getUIText("selectQuestion", selectedLanguage as LanguageCode) || "Select a question"}
+          </ThemedText>
+          
+          {faqs.map((faq, index) => (
+            <Animated.View key={faq.id} entering={FadeInDown.delay(index * 50).duration(300)}>
+              <Pressable
+                style={[styles.questionCard, { backgroundColor: THEME_COLORS.cardBackground, borderColor: THEME_COLORS.border }]}
+                onPress={() => handleFAQSelect(faq.id)}
+              >
+                <ThemedText style={[styles.questionText, { color: THEME_COLORS.text }]}>
+                  {faq.question}
+                </ThemedText>
+                <Feather name="chevron-right" size={20} color={THEME_COLORS.primary} />
+              </Pressable>
+            </Animated.View>
+          ))}
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView 
+        style={styles.faqScrollView}
+        contentContainerStyle={styles.faqContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedText style={[styles.sectionTitle, { color: THEME_COLORS.text }]}>
+          {getUIText("selectTopic", selectedLanguage as LanguageCode) || "Select a topic"}
+        </ThemedText>
+        
+        <View style={styles.categoriesGrid}>
+          {categories.map((category, index) => (
+            <Animated.View key={category.id} entering={FadeInDown.delay(index * 50).duration(300)}>
+              <Pressable
+                style={[styles.categoryCard, { backgroundColor: THEME_COLORS.cardBackground, borderColor: THEME_COLORS.border }]}
+                onPress={() => handleCategorySelect(category.id)}
+              >
+                <View style={[styles.categoryIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
+                  <Feather name={category.icon as any} size={24} color={THEME_COLORS.primary} />
+                </View>
+                <ThemedText style={[styles.categoryLabel, { color: THEME_COLORS.text }]}>
+                  {category.label}
+                </ThemedText>
+              </Pressable>
+            </Animated.View>
+          ))}
+        </View>
+        
+        <Pressable
+          style={[styles.chatPromptButton, { backgroundColor: THEME_COLORS.primaryLight, borderColor: THEME_COLORS.primary }]}
+          onPress={() => setMode("chat")}
+        >
+          <Feather name="message-circle" size={20} color={THEME_COLORS.primary} />
+          <ThemedText style={[styles.chatPromptText, { color: THEME_COLORS.primary }]}>
+            {getUIText("askCustom", selectedLanguage as LanguageCode) || "Ask a custom question"}
+          </ThemedText>
+        </Pressable>
+      </ScrollView>
+    );
+  };
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
+      style={[styles.container, { backgroundColor: THEME_COLORS.background }]}
       behavior="padding"
       keyboardVerticalOffset={0}
     >
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.sm }]}>
         <View style={styles.disclaimerRow}>
-          <Feather name="info" size={14} color={theme.textSecondary} />
-          <ThemedText type="caption" style={styles.disclaimerText}>
+          <Feather name="info" size={14} color={THEME_COLORS.textSecondary} />
+          <ThemedText type="caption" style={[styles.disclaimerText, { color: THEME_COLORS.textSecondary }]}>
             {getDisclaimer(selectedLanguage)}
           </ThemedText>
         </View>
       </View>
 
       <View style={styles.languageSection}>
-        <ThemedText type="caption" style={[styles.languageLabel, { color: theme.textSecondary }]}>
+        <ThemedText type="caption" style={[styles.languageLabel, { color: THEME_COLORS.textSecondary }]}>
           Select Language:
         </ThemedText>
         <ScrollView 
@@ -244,11 +403,11 @@ export default function AIChatScreen() {
                 styles.languageChip,
                 {
                   backgroundColor: selectedLanguage === lang.code 
-                    ? theme.primary 
-                    : theme.backgroundDefault,
+                    ? THEME_COLORS.primary 
+                    : THEME_COLORS.cardBackground,
                   borderColor: selectedLanguage === lang.code 
-                    ? theme.primary 
-                    : theme.border,
+                    ? THEME_COLORS.primary 
+                    : THEME_COLORS.border,
                 },
               ]}
             >
@@ -258,8 +417,8 @@ export default function AIChatScreen() {
                   styles.languageChipText,
                   {
                     color: selectedLanguage === lang.code 
-                      ? theme.buttonText 
-                      : theme.text,
+                      ? "#FFFFFF"
+                      : THEME_COLORS.text,
                   },
                 ]}
               >
@@ -270,73 +429,112 @@ export default function AIChatScreen() {
         </ScrollView>
       </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        inverted={messages.length > 0}
-        ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={[
-          styles.messagesList,
-          messages.length === 0 && styles.emptyList,
-        ]}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <View style={[styles.loadingBubble, { backgroundColor: theme.backgroundDefault }]}>
-            <ThemedText type="small" style={styles.loadingText}>
-              {getThinkingMessage(selectedLanguage)}
-            </ThemedText>
-          </View>
-        </View>
-      ) : null}
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: theme.backgroundRoot,
-            paddingBottom: insets.bottom + Spacing.sm,
-          },
-        ]}
-      >
-        <View
+      <View style={styles.modeToggle}>
+        <Pressable
           style={[
-            styles.inputWrapper,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+            styles.modeButton,
+            { 
+              backgroundColor: mode === "faq" ? THEME_COLORS.primary : "transparent",
+              borderColor: THEME_COLORS.primary,
+            }
           ]}
+          onPress={() => setMode("faq")}
         >
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder={getPlaceholder(selectedLanguage)}
-            placeholderTextColor={theme.textSecondary}
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-            maxLength={500}
+          <Feather name="list" size={16} color={mode === "faq" ? "#FFFFFF" : THEME_COLORS.primary} />
+          <ThemedText style={[styles.modeButtonText, { color: mode === "faq" ? "#FFFFFF" : THEME_COLORS.primary }]}>
+            FAQ
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.modeButton,
+            { 
+              backgroundColor: mode === "chat" ? THEME_COLORS.primary : "transparent",
+              borderColor: THEME_COLORS.primary,
+            }
+          ]}
+          onPress={() => setMode("chat")}
+        >
+          <Feather name="message-circle" size={16} color={mode === "chat" ? "#FFFFFF" : THEME_COLORS.primary} />
+          <ThemedText style={[styles.modeButtonText, { color: mode === "chat" ? "#FFFFFF" : THEME_COLORS.primary }]}>
+            Chat
+          </ThemedText>
+        </Pressable>
+      </View>
+
+      {mode === "faq" ? (
+        renderFAQMode()
+      ) : (
+        <>
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={renderMessage}
+            inverted={messages.length > 0}
+            ListEmptyComponent={renderEmptyState}
+            contentContainerStyle={[
+              styles.messagesList,
+              messages.length === 0 && styles.emptyList,
+            ]}
+            showsVerticalScrollIndicator={false}
           />
-          <Pressable
-            onPress={handleSend}
-            disabled={!inputText.trim() || isLoading}
-            style={({ pressed }) => [
-              styles.sendButton,
+
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <View style={[styles.loadingBubble, { backgroundColor: THEME_COLORS.cardBackground }]}>
+                <ThemedText type="small" style={[styles.loadingText, { color: THEME_COLORS.textSecondary }]}>
+                  {getThinkingMessage(selectedLanguage)}
+                </ThemedText>
+              </View>
+            </View>
+          ) : null}
+
+          <View
+            style={[
+              styles.inputContainer,
               {
-                backgroundColor: inputText.trim() ? theme.primary : theme.backgroundSecondary,
-                opacity: pressed ? 0.8 : 1,
+                backgroundColor: THEME_COLORS.background,
+                paddingBottom: insets.bottom + Spacing.sm,
               },
             ]}
           >
-            <Feather
-              name="send"
-              size={18}
-              color={inputText.trim() ? theme.buttonText : theme.textSecondary}
-            />
-          </Pressable>
-        </View>
-      </View>
+            <View
+              style={[
+                styles.inputWrapper,
+                { backgroundColor: THEME_COLORS.cardBackground, borderColor: THEME_COLORS.border },
+              ]}
+            >
+              <TextInput
+                style={[styles.input, { color: THEME_COLORS.text }]}
+                placeholder={getPlaceholder(selectedLanguage)}
+                placeholderTextColor={THEME_COLORS.textSecondary}
+                value={inputText}
+                onChangeText={setInputText}
+                multiline
+                maxLength={500}
+              />
+              <Pressable
+                onPress={handleSend}
+                disabled={!inputText.trim() || isLoading}
+                style={({ pressed }) => [
+                  styles.sendButton,
+                  {
+                    backgroundColor: inputText.trim() ? THEME_COLORS.primary : THEME_COLORS.primaryLight,
+                    opacity: pressed ? 0.8 : 1,
+                  },
+                ]}
+              >
+                <Feather
+                  name="send"
+                  size={18}
+                  color={inputText.trim() ? "#FFFFFF" : THEME_COLORS.textSecondary}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -382,6 +580,132 @@ const styles = StyleSheet.create({
   },
   languageChipText: {
     fontWeight: "500",
+  },
+  modeToggle: {
+    flexDirection: "row",
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  modeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    gap: Spacing.xs,
+  },
+  modeButtonText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  faqScrollView: {
+    flex: 1,
+  },
+  faqContent: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing["2xl"],
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: Spacing.lg,
+  },
+  categoriesGrid: {
+    gap: Spacing.md,
+  },
+  categoryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: Spacing.md,
+    ...Shadows.sm,
+  },
+  categoryIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoryLabel: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    marginBottom: Spacing.lg,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  questionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
+    ...Shadows.sm,
+  },
+  questionText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  answerCard: {
+    padding: Spacing.xl,
+    borderRadius: 20,
+    ...Shadows.md,
+  },
+  answerAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: Spacing.lg,
+  },
+  answerText: {
+    fontSize: 16,
+    lineHeight: 26,
+    marginBottom: Spacing.lg,
+  },
+  disclaimerBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    backgroundColor: "rgba(0,0,0,0.03)",
+    borderRadius: 12,
+  },
+  disclaimerBoxText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  chatPromptButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.lg,
+    borderRadius: 30,
+    borderWidth: 1,
+    marginTop: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  chatPromptText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,
