@@ -122,7 +122,7 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   return (
     <Animated.View style={[styles.splashFullScreen, contentStyle]}>
       <Image
-        source={require("@/assets/images/onboarding-splash.png")}
+        source={require("@/assets/images/olanna-brand-logo.png")}
         style={styles.splashImage}
         resizeMode="cover"
       />
