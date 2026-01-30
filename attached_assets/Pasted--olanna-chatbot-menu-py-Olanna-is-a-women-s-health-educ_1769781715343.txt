@@ -1,0 +1,161 @@
+"""olanna_chatbot_menu.py
+
+Olanna is a women's health *education* chatbot designed for consistent,
+menu-driven answers across 6 languages:
+
+  - English (en)
+  - Afrikaans (af)
+  - isiZulu (zu)
+  - isiXhosa (xh)
+  - Sesotho (st)
+  - SiSwati (ss)
+
+Flo Health-style UX: users pick a Topic and a Question from a list.
+This avoids "free-form" translation drift and keeps answers consistent.
+
+Run (Replit)
+------------
+pip install gradio
+python olanna_chatbot_menu.py
+"""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Tuple
+
+
+DATASET_PATH = Path(__file__).parent / "olanna_dataset_menu.json"
+
+
+@dataclass
+class FAQ:
+    id: str
+    category_id: str
+    question: Dict[str, str]
+    answer: Dict[str, str]
+
+
+class OlannaKnowledgeBase:
+    def __init__(self, dataset_path: Path):
+        raw = json.loads(dataset_path.read_text(encoding="utf-8"))
+        self.meta = raw["meta"]
+        self.languages: Dict[str, str] = self.meta["languages"]
+        self.disclaimer: Dict[str, str] = self.meta["disclaimer"]
+        self.ui = self.meta.get("ui", {})
+
+        self.categories = raw["categories"]
+        self.faqs: List[FAQ] = [
+            FAQ(
+                id=f["id"],
+                category_id=f["category_id"],
+                question=f["question"],
+                answer=f["answer"],
+            )
+            for f in raw["faqs"]
+        ]
+
+    def lang_label(self, lang: str) -> str:
+        return self.languages.get(lang, "English")
+
+    def t(self, obj: Dict[str, str], lang: str) -> str:
+        return obj.get(lang) or obj.get("en") or ""
+
+    def category_choices(self, lang: str) -> List[Tuple[str, str]]:
+        """Return list of (label, id) for UI dropdowns."""
+        return [(self.t(c["label"], lang), c["id"]) for c in self.categories]
+
+    def faq_choices(self, category_id: str, lang: str) -> List[Tuple[str, str]]:
+        return [
+            (self.t(f.question, lang), f.id)
+            for f in self.faqs
+            if f.category_id == category_id
+        ]
+
+    def answer_for(self, faq_id: str, lang: str) -> str:
+        for f in self.faqs:
+            if f.id == faq_id:
+                ans = self.t(f.answer, lang)
+                disc = self.t(self.disclaimer, lang)
+                return f"{ans}\n\n—\n{disc}"
+        disc = self.t(self.disclaimer, lang)
+        return f"I couldn't find that answer.\n\n—\n{disc}"
+
+
+def build_app():
+    import gradio as gr
+
+    kb = OlannaKnowledgeBase(DATASET_PATH)
+    default_lang = "en"
+
+    def on_lang_change(lang: str):
+        cat_choices = kb.category_choices(lang)
+        first_cat_id = cat_choices[0][1] if cat_choices else ""
+        faq_choices = kb.faq_choices(first_cat_id, lang) if first_cat_id else []
+        first_faq_id = faq_choices[0][1] if faq_choices else ""
+        welcome = kb.t(kb.ui.get("welcome", {}), lang) or "Choose your language, then choose a topic and a question."
+        return (
+            gr.Dropdown(choices=[(kb.lang_label(k), k) for k in kb.languages.keys()], value=lang),
+            gr.Dropdown(choices=cat_choices, value=first_cat_id),
+            gr.Dropdown(choices=faq_choices, value=first_faq_id),
+            welcome,
+            kb.answer_for(first_faq_id, lang) if first_faq_id else "",
+        )
+
+    def on_category_change(lang: str, category_id: str):
+        faq_choices = kb.faq_choices(category_id, lang) if category_id else []
+        first_faq_id = faq_choices[0][1] if faq_choices else ""
+        return (
+            gr.Dropdown(choices=faq_choices, value=first_faq_id),
+            kb.answer_for(first_faq_id, lang) if first_faq_id else "",
+        )
+
+    def on_faq_change(lang: str, faq_id: str):
+        return kb.answer_for(faq_id, lang) if faq_id else ""
+
+    with gr.Blocks(title=f"{kb.meta.get('bot_name','Olanna')} | Women's Health") as demo:
+        gr.Markdown(
+            f"# {kb.meta.get('bot_name','Olanna')}\n\n"
+            f"{kb.t(kb.ui.get('welcome', {}), default_lang) or 'Choose your language, then choose a topic and a question.'}"
+        )
+
+        with gr.Row():
+            lang_dd = gr.Dropdown(
+                label="Language / Taal / Ulimi / Ulwimi / Puo / Lulwimi",
+                choices=[(kb.lang_label(k), k) for k in kb.languages.keys()],
+                value=default_lang,
+                interactive=True,
+            )
+            cat_dd = gr.Dropdown(
+                label="Topic",
+                choices=kb.category_choices(default_lang),
+                value=kb.category_choices(default_lang)[0][1],
+                interactive=True,
+            )
+            faq_dd = gr.Dropdown(
+                label="Question",
+                choices=kb.faq_choices(kb.category_choices(default_lang)[0][1], default_lang),
+                value=kb.faq_choices(kb.category_choices(default_lang)[0][1], default_lang)[0][1],
+                interactive=True,
+            )
+
+        welcome_md = gr.Markdown(kb.t(kb.ui.get("welcome", {}), default_lang) or "")
+        answer_box = gr.Markdown(
+            kb.answer_for(
+                kb.faq_choices(kb.category_choices(default_lang)[0][1], default_lang)[0][1],
+                default_lang,
+            )
+        )
+
+        lang_dd.change(on_lang_change, inputs=[lang_dd], outputs=[lang_dd, cat_dd, faq_dd, welcome_md, answer_box])
+        cat_dd.change(on_category_change, inputs=[lang_dd, cat_dd], outputs=[faq_dd, answer_box])
+        faq_dd.change(on_faq_change, inputs=[lang_dd, faq_dd], outputs=[answer_box])
+
+    return demo
+
+
+if __name__ == "__main__":
+    app = build_app()
+    app.launch()
