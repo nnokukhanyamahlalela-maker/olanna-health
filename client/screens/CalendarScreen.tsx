@@ -15,11 +15,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
+import { Spacing, ScreenPadding, CardSpacing } from "@/constants/spacing";
+import { BorderRadius, Fonts } from "@/constants/theme";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 
 const { width: screenWidth } = Dimensions.get("window");
-const DAY_SIZE = Math.floor((screenWidth - Spacing.lg * 2 - 6) / 7);
+const DAY_SIZE = Math.floor((screenWidth - ScreenPadding.horizontal * 2 - 6) / 7);
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS = [
@@ -355,8 +356,8 @@ export default function CalendarScreen() {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: insets.top + Spacing.lg,
-          paddingBottom: tabBarHeight + Spacing.xl,
-          paddingHorizontal: Spacing.lg,
+          paddingBottom: tabBarHeight + ScreenPadding.bottomScroll,
+          paddingHorizontal: ScreenPadding.horizontal,
         }}
         showsVerticalScrollIndicator={false}
       >

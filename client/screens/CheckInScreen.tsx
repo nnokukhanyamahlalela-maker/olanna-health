@@ -28,7 +28,8 @@ import { TagSelector } from '@/components/TagSelector';
 import { BodyMap } from '@/components/BodyMap';
 import { AfricanPattern } from '@/components/AfricanPattern';
 import { useTheme } from '@/hooks/useTheme';
-import { Spacing, BorderRadius } from '@/constants/theme';
+import { Spacing, ScreenPadding, CardSpacing, PillSpacing, ButtonSpacing } from '@/constants/spacing';
+import { BorderRadius } from '@/constants/theme';
 import {
   SYMPTOM_CATEGORIES,
   SymptomCategory,
@@ -764,13 +765,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.full,
+    height: PillSpacing.height,
+    paddingHorizontal: PillSpacing.paddingHorizontal,
+    borderRadius: PillSpacing.radius,
     borderWidth: 1,
   },
   scrollContent: {
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: ScreenPadding.horizontal,
   },
   favoritesSection: {
     padding: Spacing.md,
@@ -784,9 +785,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   categorySection: {
-    padding: Spacing.lg,
-    borderRadius: 20,
-    marginBottom: Spacing.md,
+    padding: CardSpacing.padding,
+    borderRadius: CardSpacing.radius,
+    marginBottom: CardSpacing.gap,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
@@ -814,7 +815,7 @@ const styles = StyleSheet.create({
   symptomsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
+    gap: PillSpacing.gap,
   },
   bodyMapContainer: {
     alignItems: 'center',
@@ -828,13 +829,13 @@ const styles = StyleSheet.create({
   },
   saveButtonContainer: {
     position: 'absolute',
-    left: Spacing.xl,
-    right: Spacing.xl,
+    left: ScreenPadding.horizontal,
+    right: ScreenPadding.horizontal,
   },
   saveButton: {
     backgroundColor: THEME_COLORS.primaryLight,
-    paddingVertical: Spacing.lg,
-    borderRadius: 30,
+    height: ButtonSpacing.height,
+    borderRadius: ButtonSpacing.radius,
     alignItems: 'center',
     justifyContent: 'center',
   },

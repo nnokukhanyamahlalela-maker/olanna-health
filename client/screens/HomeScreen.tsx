@@ -13,8 +13,7 @@ import { PhaseGuidanceCard } from "@/components/PhaseGuidanceCard";
 import { AppGradient } from "@/components/AppGradient";
 import { HeroText } from "@/components/HeroText";
 import { CyclePhase } from "@/components/Lotus";
-import { Spacing } from "@/constants/theme";
-import { DS } from "@/constants/designSystem";
+import { Spacing, ScreenPadding, CardSpacing, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -112,6 +111,8 @@ export default function HomeScreen() {
     );
   }
 
+  const TAP_TARGET_SIZE = PillSpacing.minTapTarget;
+
   const phasePhrase = PHASE_PHRASES[cycleData.phase];
   const phaseGuidance = PHASE_GUIDANCE[cycleData.phase];
 
@@ -122,15 +123,15 @@ export default function HomeScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingTop: insets.top + 20,
-            paddingBottom: tabBarHeight + 40,
+            paddingTop: insets.top + Spacing.lg,
+            paddingBottom: tabBarHeight + ScreenPadding.bottomScroll,
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
         <Pressable
           onPress={() => navigation.navigate("Profile")}
-          style={[styles.profileButton, { top: insets.top + 16 }]}
+          style={[styles.profileButton, { top: insets.top + Spacing.md }]}
           testID="profile-button"
           accessibilityRole="button"
           accessibilityLabel="Open profile"
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: ScreenPadding.horizontal,
   },
   loadingContainer: {
     flex: 1,
@@ -200,13 +201,13 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: ScreenPadding.horizontal,
   },
   profileButton: {
     position: "absolute",
-    right: 24,
-    width: DS.touchTarget.minWidth,
-    height: DS.touchTarget.minHeight,
+    right: ScreenPadding.horizontal,
+    width: PillSpacing.minTapTarget,
+    height: PillSpacing.minTapTarget,
     borderRadius: 22,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
@@ -217,16 +218,16 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: "center",
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: Spacing["3xl"],
+    paddingBottom: Spacing["2xl"],
   },
   phasePhrase: {
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: Spacing.lg,
   },
   dayIndicator: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: Spacing.xl,
   },
   dayLabel: {
     fontFamily: "DMSans_400Regular",
@@ -249,9 +250,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   guidanceSection: {
-    paddingTop: 20,
+    paddingTop: Spacing.lg,
+    gap: CardSpacing.gap,
   },
   guidanceTitle: {
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
 });

@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, ViewStyle, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { DS } from "@/constants/designSystem";
+import { CardSpacing } from "@/constants/spacing";
 import { useTheme, ThemeProvider } from "@/components/ThemeProvider";
 
 export { ThemeProvider };
@@ -99,7 +99,7 @@ export function useGlassTextColors() {
 
 const styles = StyleSheet.create({
   blurOuter: {
-    borderRadius: DS.radii.card,
+    borderRadius: CardSpacing.radius,
     overflow: "hidden",
     borderWidth: 1,
     shadowColor: "#000",
@@ -109,14 +109,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   blur: {
-    borderRadius: DS.radii.card,
+    borderRadius: CardSpacing.radius,
   },
   blurInner: {},
   inner: {
-    padding: DS.spacing.lg,
+    padding: CardSpacing.padding,
   },
   solidCard: {
-    borderRadius: DS.radii.card,
+    borderRadius: CardSpacing.radius,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
