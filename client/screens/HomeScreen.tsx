@@ -16,6 +16,8 @@ import { CyclePhase } from "@/components/Lotus";
 import { Spacing, ScreenPadding, CardSpacing, PillSpacing, TabBarSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
+import { getModuleOrder, CycleModuleId, MODULE_INFO } from "@/utils/personalization";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -59,11 +61,18 @@ export default function HomeScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userGoals, setUserGoals] = useState<GoalId[]>([]);
+  const [moduleOrder, setModuleOrder] = useState<CycleModuleId[]>([]);
 
   const loadData = async () => {
     try {
-      const userProfile = await storage.getUserProfile();
+      const [userProfile, goals] = await Promise.all([
+        storage.getUserProfile(),
+        getUserGoals(),
+      ]);
       setProfile(userProfile);
+      setUserGoals(goals);
+      setModuleOrder(getModuleOrder(goals));
       if (userProfile) {
         const cycle = calculateCycleData(userProfile);
         setCycleData(cycle);
@@ -172,6 +181,31 @@ export default function HomeScreen() {
             />
           ))}
         </View>
+
+        <View style={styles.modulesSection}>
+          <HeroText size="small" style={styles.modulesTitle}>
+            Your insights
+          </HeroText>
+          {moduleOrder.slice(0, 4).map((moduleId) => {
+            const info = MODULE_INFO[moduleId];
+            return (
+              <Pressable
+                key={moduleId}
+                style={styles.moduleCard}
+                testID={`module-${moduleId}`}
+              >
+                <View style={styles.moduleIconContainer}>
+                  <Feather name={info.icon as any} size={20} color="rgba(255,255,255,0.9)" />
+                </View>
+                <View style={styles.moduleContent}>
+                  <ThemedText style={styles.moduleTitle}>{info.title}</ThemedText>
+                  <ThemedText style={styles.moduleDescription}>{info.description}</ThemedText>
+                </View>
+                <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.5)" />
+              </Pressable>
+            );
+          })}
+        </View>
       </ScrollView>
     </AppGradient>
   );
@@ -255,5 +289,44 @@ const styles = StyleSheet.create({
   },
   guidanceTitle: {
     marginBottom: Spacing.md,
+  },
+  modulesSection: {
+    paddingTop: Spacing["2xl"],
+    gap: CardSpacing.gap,
+  },
+  modulesTitle: {
+    marginBottom: Spacing.md,
+  },
+  moduleCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 16,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+  moduleIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: Spacing.md,
+  },
+  moduleContent: {
+    flex: 1,
+  },
+  moduleTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+    color: "rgba(255,255,255,0.95)",
+    marginBottom: 2,
+  },
+  moduleDescription: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
   },
 });

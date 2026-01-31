@@ -1,10 +1,11 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   View,
   Pressable,
   StyleSheet,
   Platform,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +24,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Spacing } from "@/constants/spacing";
+import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
+import {
+  getDefaultCheckInCategories,
+  CheckInCategoryId,
+  CHECK_IN_CATEGORY_INFO,
+} from "@/utils/personalization";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -77,6 +84,16 @@ export default function CheckInSheet() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const glassStyle = isDark ? DARK_GLASS : LIGHT_GLASS;
+  const [preselectedCategories, setPreselectedCategories] = useState<CheckInCategoryId[]>([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const goals = await getUserGoals();
+      const categories = getDefaultCheckInCategories(goals);
+      setPreselectedCategories(categories);
+    };
+    loadCategories();
+  }, []);
 
   const handleDismiss = useCallback(() => {
     navigation.goBack();
@@ -124,32 +141,53 @@ export default function CheckInSheet() {
         Track how you're feeling today
       </ThemedText>
 
-      <View style={styles.quickActions}>
-        <QuickAction
-          icon="activity"
-          label="Log Symptoms"
-          onPress={() => handleQuickAction("symptoms")}
-          theme={theme}
-        />
-        <QuickAction
-          icon="smile"
-          label="Log Mood"
-          onPress={() => handleQuickAction("mood")}
-          theme={theme}
-        />
-        <QuickAction
-          icon="droplet"
-          label="Log Flow"
-          onPress={() => handleQuickAction("flow")}
-          theme={theme}
-        />
-        <QuickAction
-          icon="edit-3"
-          label="Add Note"
-          onPress={() => handleQuickAction("note")}
-          theme={theme}
-        />
-      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.quickActions}
+      >
+        {preselectedCategories.length > 0 ? (
+          preselectedCategories.map((categoryId) => {
+            const info = CHECK_IN_CATEGORY_INFO[categoryId];
+            return (
+              <QuickAction
+                key={categoryId}
+                icon={info.icon as keyof typeof Feather.glyphMap}
+                label={info.title}
+                onPress={() => handleQuickAction(categoryId)}
+                theme={theme}
+              />
+            );
+          })
+        ) : (
+          <>
+            <QuickAction
+              icon="activity"
+              label="Log Symptoms"
+              onPress={() => handleQuickAction("symptoms")}
+              theme={theme}
+            />
+            <QuickAction
+              icon="smile"
+              label="Log Mood"
+              onPress={() => handleQuickAction("mood")}
+              theme={theme}
+            />
+            <QuickAction
+              icon="droplet"
+              label="Log Flow"
+              onPress={() => handleQuickAction("flow")}
+              theme={theme}
+            />
+            <QuickAction
+              icon="edit-3"
+              label="Add Note"
+              onPress={() => handleQuickAction("note")}
+              theme={theme}
+            />
+          </>
+        )}
+      </ScrollView>
 
       <Pressable
         onPress={handleStartCheckIn}

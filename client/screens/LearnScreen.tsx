@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, FlatList, StyleSheet, TextInput, Pressable, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -11,6 +11,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding, TabBarSpacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
+import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
+import { getLearnTopicOrder, LearnTopicId, LEARN_TOPIC_INFO } from "@/utils/personalization";
 
 interface Article {
   id: string;
@@ -98,8 +100,37 @@ export default function LearnScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [userGoals, setUserGoals] = useState<GoalId[]>([]);
+  const [topicOrder, setTopicOrder] = useState<LearnTopicId[]>([]);
 
-  const filteredArticles = articles.filter((article) => {
+  useEffect(() => {
+    const loadGoals = async () => {
+      const goals = await getUserGoals();
+      setUserGoals(goals);
+      setTopicOrder(getLearnTopicOrder(goals));
+    };
+    loadGoals();
+  }, []);
+
+  const sortedArticles = useMemo(() => {
+    if (topicOrder.length === 0) return articles;
+
+    const categoryPriority: Record<string, number> = {};
+    topicOrder.forEach((topicId, index) => {
+      const info = LEARN_TOPIC_INFO[topicId];
+      if (info && !categoryPriority[info.category]) {
+        categoryPriority[info.category] = index;
+      }
+    });
+
+    return [...articles].sort((a, b) => {
+      const priorityA = categoryPriority[a.category] ?? 999;
+      const priorityB = categoryPriority[b.category] ?? 999;
+      return priorityA - priorityB;
+    });
+  }, [topicOrder]);
+
+  const filteredArticles = sortedArticles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.summary.toLowerCase().includes(searchQuery.toLowerCase());
