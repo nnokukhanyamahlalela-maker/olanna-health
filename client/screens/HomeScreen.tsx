@@ -8,7 +8,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { EmptyState } from "@/components/EmptyState";
-import { CycleHeroWheel } from "@/components/CycleHeroWheel";
+import { CycleHero } from "@/components/CycleHero";
 import { PhaseGuidanceCard } from "@/components/PhaseGuidanceCard";
 import { AppGradient } from "@/components/AppGradient";
 import { HeroText } from "@/components/HeroText";
@@ -149,22 +149,17 @@ export default function HomeScreen() {
         </Pressable>
 
         <View style={styles.heroSection}>
-          <HeroText size="medium" style={styles.phasePhrase}>
-            {phasePhrase}
-          </HeroText>
+          <CycleHero
+            phase={cycleData.phase}
+            currentDay={cycleData.currentDay}
+            cycleLength={cycleData.cycleLength}
+            phasePhrase={phasePhrase}
+          />
 
           <View style={styles.dayIndicator}>
             <ThemedText style={styles.dayLabel}>Day</ThemedText>
             <HeroText style={styles.dayNumber}>{cycleData.currentDay}</HeroText>
             <ThemedText style={styles.cycleInfo}>of {cycleData.cycleLength}</ThemedText>
-          </View>
-
-          <View style={styles.wheelContainer}>
-            <CycleHeroWheel
-              phase={cycleData.phase}
-              currentDay={cycleData.currentDay}
-              cycleLength={cycleData.cycleLength}
-            />
           </View>
         </View>
 
