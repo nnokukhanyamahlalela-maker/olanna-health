@@ -21,6 +21,7 @@ import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
 import AppearanceScreen from "@/screens/AppearanceScreen";
 import AIChatScreen from "@/screens/AIChatScreen";
+import CheckInSheet from "@/screens/CheckInSheet";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -43,6 +44,7 @@ export type RootStackParamList = {
   DailyDecode: { decode: DailyDecodeOutput };
   Appearance: undefined;
   AIChat: undefined;
+  CheckInSheet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -168,6 +170,17 @@ export default function RootStackNavigator() {
         component={AIChatScreen}
         options={{
           headerTitle: "Health Assistant",
+        }}
+      />
+      <Stack.Screen
+        name="CheckInSheet"
+        component={CheckInSheet}
+        options={{
+          headerShown: false,
+          presentation: "transparentModal",
+          animation: "fade",
+          gestureEnabled: true,
+          contentStyle: { backgroundColor: "transparent" },
         }}
       />
     </Stack.Navigator>

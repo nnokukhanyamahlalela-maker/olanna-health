@@ -8,6 +8,9 @@ import {
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useNavigation, CommonActions } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -146,6 +149,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const glassStyle = isDark ? DARK_GLASS : LIGHT_GLASS;
+  const rootNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const visibleRoutes = state.routes.filter(
     (route) => route.name !== "CheckInTab"
@@ -155,8 +159,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const rightRoutes = visibleRoutes.slice(2);
 
   const handleCenterPress = useCallback(() => {
-    navigation.navigate("CheckInTab");
-  }, [navigation]);
+    rootNavigation.navigate("CheckInSheet");
+  }, [rootNavigation]);
 
   const renderTabItem = (route: typeof state.routes[0], index: number) => {
     const { options } = descriptors[route.key];
