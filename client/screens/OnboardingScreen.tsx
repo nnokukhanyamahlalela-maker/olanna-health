@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView, Image, ImageBackground } from "react-native";
+import { View, StyleSheet, TextInput, Platform, Pressable, Dimensions, ScrollView, Image, ImageBackground, AccessibilityInfo } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -62,34 +62,45 @@ function AnimatedBlobbingText({
   style?: object;
   onComplete?: () => void;
 }) {
+  const [reduceMotion, setReduceMotion] = useState(false);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.85);
   const blur = useSharedValue(10);
 
   useEffect(() => {
-    opacity.value = withDelay(
-      delay,
-      withTiming(1, { duration: 1200, easing: Easing.out(Easing.cubic) })
-    );
-    scale.value = withDelay(
-      delay,
-      withSequence(
-        withTiming(1.05, { duration: 800, easing: Easing.out(Easing.cubic) }),
-        withTiming(1, { duration: 400, easing: Easing.inOut(Easing.cubic) })
-      )
-    );
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+  }, []);
+
+  useEffect(() => {
+    // QA: Reduce Motion support - use fade only, no scale/translate
+    if (reduceMotion) {
+      opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+      scale.value = 1;
+    } else {
+      opacity.value = withDelay(
+        delay,
+        withTiming(1, { duration: 1200, easing: Easing.out(Easing.cubic) })
+      );
+      scale.value = withDelay(
+        delay,
+        withSequence(
+          withTiming(1.05, { duration: 800, easing: Easing.out(Easing.cubic) }),
+          withTiming(1, { duration: 400, easing: Easing.inOut(Easing.cubic) })
+        )
+      );
+    }
 
     if (onComplete) {
       const timer = setTimeout(() => {
         runOnJS(onComplete)();
-      }, delay + 1500);
+      }, reduceMotion ? delay + 400 : delay + 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    transform: reduceMotion ? [] : [{ scale: scale.value }],
   }));
 
   return (
@@ -100,23 +111,34 @@ function AnimatedBlobbingText({
 }
 
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
+  const [reduceMotion, setReduceMotion] = useState(false);
   const contentOpacity = useSharedValue(0);
   const contentScale = useSharedValue(0.95);
 
   useEffect(() => {
-    contentOpacity.value = withDelay(200, withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }));
-    contentScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 80 }));
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+  }, []);
+
+  useEffect(() => {
+    // QA: Reduce Motion support - use fade only, no scale
+    if (reduceMotion) {
+      contentOpacity.value = withTiming(1, { duration: 300 });
+      contentScale.value = 1;
+    } else {
+      contentOpacity.value = withDelay(200, withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }));
+      contentScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 80 }));
+    }
 
     const timer = setTimeout(() => {
       runOnJS(onComplete)();
-    }, 4000);
+    }, reduceMotion ? 1500 : 4000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [reduceMotion]);
 
   const contentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
-    transform: [{ scale: contentScale.value }],
+    transform: reduceMotion ? [] : [{ scale: contentScale.value }],
   }));
 
   return (
