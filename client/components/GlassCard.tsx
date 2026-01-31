@@ -1,56 +1,18 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { View, StyleSheet, ViewStyle, Platform, AccessibilityInfo } from "react-native";
+import React from "react";
+import { View, StyleSheet, ViewStyle, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { DS } from "@/constants/designSystem";
+import { useTheme, ThemeProvider } from "@/components/ThemeProvider";
 
-interface ReduceTransparencyContextType {
-  reduceTransparency: boolean;
-  setReduceTransparency: (value: boolean) => void;
-}
-
-const ReduceTransparencyContext = createContext<ReduceTransparencyContextType>({
-  reduceTransparency: false,
-  setReduceTransparency: () => {},
-});
-
-export function ReduceTransparencyProvider({ children }: { children: React.ReactNode }) {
-  const [reduceTransparency, setReduceTransparency] = useState(false);
-
-  useEffect(() => {
-    const checkReduceTransparency = async () => {
-      try {
-        const isEnabled = await AccessibilityInfo.isReduceTransparencyEnabled();
-        setReduceTransparency(isEnabled);
-      } catch {
-        setReduceTransparency(false);
-      }
-    };
-    checkReduceTransparency();
-
-    const subscription = AccessibilityInfo.addEventListener(
-      "reduceTransparencyChanged",
-      (isEnabled) => setReduceTransparency(isEnabled)
-    );
-
-    return () => subscription.remove();
-  }, []);
-
-  return (
-    <ReduceTransparencyContext.Provider value={{ reduceTransparency, setReduceTransparency }}>
-      {children}
-    </ReduceTransparencyContext.Provider>
-  );
-}
+export { ThemeProvider };
 
 export function useReduceTransparency() {
-  return useContext(ReduceTransparencyContext);
+  const { reduceTransparency } = useTheme();
+  return { reduceTransparency };
 }
 
-export const GLASS_TEXT_COLORS = {
-  primary: "#2B2B2B",
-  secondary: "#6F6F6F",
-};
+export const ReduceTransparencyProvider = ThemeProvider;
 
 type Props = {
   children: React.ReactNode;
@@ -65,17 +27,30 @@ export function GlassCard({
   intensity = 60,
   gradient = false,
 }: Props) {
-  const { reduceTransparency } = useReduceTransparency();
+  const { theme, isDark, reduceTransparency } = useTheme();
   const useSolid = reduceTransparency || Platform.OS === "web";
+
+  const glassColors = theme.glass;
+  const blurTint = isDark ? "dark" : "light";
 
   if (useSolid) {
     return (
-      <View style={[styles.solidCard, style]}>
+      <View style={[
+        styles.solidCard, 
+        { 
+          backgroundColor: glassColors.solidFallback as string,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+        },
+        style
+      ]}>
         {gradient ? (
           <LinearGradient
             start={{ x: 0.1, y: 0 }}
             end={{ x: 0.9, y: 1 }}
-            colors={["rgba(255,255,255,0.95)", "rgba(255,255,255,0.85)"]}
+            colors={isDark 
+              ? ["rgba(42,23,48,0.95)", "rgba(42,23,48,0.85)"]
+              : ["rgba(255,255,255,0.95)", "rgba(255,255,255,0.85)"]
+            }
             style={StyleSheet.absoluteFill}
           />
         ) : null}
@@ -85,20 +60,41 @@ export function GlassCard({
   }
 
   return (
-    <View style={[styles.blurOuter, style]}>
+    <View style={[
+      styles.blurOuter, 
+      { borderColor: glassColors.border as string },
+      style
+    ]}>
       {gradient ? (
         <LinearGradient
           start={{ x: 0.1, y: 0 }}
           end={{ x: 0.9, y: 1 }}
-          colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]}
+          colors={isDark
+            ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.05)"]
+            : ["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]
+          }
           style={StyleSheet.absoluteFill}
         />
       ) : null}
-      <BlurView intensity={intensity} tint="light" style={styles.blur}>
-        <View style={[styles.inner, styles.blurInner]}>{children}</View>
+      <BlurView intensity={intensity} tint={blurTint} style={styles.blur}>
+        <View style={[
+          styles.inner, 
+          styles.blurInner, 
+          { backgroundColor: glassColors.fill as string }
+        ]}>
+          {children}
+        </View>
       </BlurView>
     </View>
   );
+}
+
+export function useGlassTextColors() {
+  const { isDark } = useTheme();
+  return {
+    primary: isDark ? "#F5EEF2" : "#2B2B2B",
+    secondary: isDark ? "#BCA8B5" : "#6F6F6F",
+  };
 }
 
 const styles = StyleSheet.create({
@@ -106,7 +102,6 @@ const styles = StyleSheet.create({
     borderRadius: DS.radii.card,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.55)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -116,17 +111,13 @@ const styles = StyleSheet.create({
   blur: {
     borderRadius: DS.radii.card,
   },
-  blurInner: {
-    backgroundColor: "rgba(255,255,255,0.72)",
-  },
+  blurInner: {},
   inner: {
     padding: DS.spacing.lg,
   },
   solidCard: {
     borderRadius: DS.radii.card,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.08)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,

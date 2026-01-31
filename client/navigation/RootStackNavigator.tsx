@@ -19,6 +19,8 @@ import CheckInScreen from "@/screens/CheckInScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
+import AppearanceScreen from "@/screens/AppearanceScreen";
+import AIChatScreen from "@/screens/AIChatScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -39,6 +41,8 @@ export type RootStackParamList = {
   Profile: undefined;
   CycleCalculator: undefined;
   DailyDecode: { decode: DailyDecodeOutput };
+  Appearance: undefined;
+  AIChat: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -150,6 +154,20 @@ export default function RootStackNavigator() {
         component={DailyDecodeScreen}
         options={{
           headerTitle: "Your Daily Decode",
+        }}
+      />
+      <Stack.Screen
+        name="Appearance"
+        component={AppearanceScreen}
+        options={{
+          headerTitle: "Appearance",
+        }}
+      />
+      <Stack.Screen
+        name="AIChat"
+        component={AIChatScreen}
+        options={{
+          headerTitle: "Health Assistant",
         }}
       />
     </Stack.Navigator>
