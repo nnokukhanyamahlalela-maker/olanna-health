@@ -274,10 +274,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255,255,255,0.7)",
   },
-  wheelContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
   guidanceSection: {
     paddingTop: Spacing.lg,
     gap: CardSpacing.gap,
