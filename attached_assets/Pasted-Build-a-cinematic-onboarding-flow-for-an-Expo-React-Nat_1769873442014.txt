@@ -1,0 +1,41 @@
+Build a cinematic onboarding flow for an Expo React Native app (iOS-first) called Olanna Health. Implement a single IntroFlow screen that runs a timed sequence of scenes and then transitions into the main app tabs.
+
+Scenes (A–F):
+Scene A (Logo): Full-screen brand gradient background. Center the logo PNG and animate: fade-in 400ms + subtle scale 0.985→1.0 over 600ms, hold for 7000ms, fade out 500ms.
+Scene B (Text): Fade in/out the display text: Girl, hi.\n\nMy name is\nOlanna. (fade in 450ms, hold 1600ms, fade out 450ms).
+Scene C (Text): Fade in/out the display text: What\nshall I\ncall you? (fade in 450ms, hold 1300ms, fade out 350ms).
+Scene D (Name input): Show a glass card with a TextInput for name and a primary CTA button “Continue”. When pressed, store userName in AsyncStorage and proceed.
+Scene E (Text): Fade in/out the display text: So what brings you here? (fade in 450ms, hold 1500ms, fade out 450ms).
+Scene F (Health goals): Show a goals selection screen on the same gradient background with goals presented as glass pill cards (multi-select). Include options:
+	•	Track my period
+	•	Trying to conceive
+	•	Understand my symptoms
+	•	Manage PCOS
+	•	Manage Endometriosis
+	•	Improve cycle regularity
+	•	Learn about my hormones
+Add helper text: “You can choose more than one.” Add a primary CTA “Let’s begin” that saves selected goals to AsyncStorage (userGoals) and completes onboarding.
+
+Design requirements (must match Olanna theme):
+	•	The background must ALWAYS be a full-screen gradient (no top/bottom bars) using stops: #FF9A6B, #FF3F9E, #F7B0C8, #E7C2E8 with start={{x:0.15,y:0}} and end={{x:0.85,y:1}}. Add a subtle white comfort overlay: rgba(255,255,255,0.06) above the gradient.
+	•	Use glassmorphism for content-heavy scenes: implement GlassCard using expo-blur with light mode fill rgba(255,255,255,0.72) and border rgba(255,255,255,0.55) and rounded corners 24.
+	•	Implement display typography for text scenes: fontSize 44, lineHeight 52, fontWeight 800 (fallback 700), color white, and required text shadow: rgba(0,0,0,0.22) offset {0,2} radius 6.
+	•	Buttons and goal pills must meet iOS tap target minimum 44x44, primary button height 52 with pill radius 999.
+
+Accessibility requirements:
+	•	Detect iOS Reduce Motion (AccessibilityInfo.isReduceMotionEnabled()). If enabled, disable scale/translate animations and use fades only.
+	•	Ensure TextInput and buttons are keyboard-safe and don’t clip on small phones (use SafeAreaView + KeyboardAvoidingView).
+
+Navigation requirements:
+	•	Update root navigation so IntroFlow runs only on first launch. Use AsyncStorage flag hasSeenIntro. If hasSeenIntro=true, skip directly to MainTabs.
+	•	After Scene F completion, set hasSeenIntro=true and navigate/replace to MainTabs.
+
+Output files:
+	•	screens/IntroFlow.tsx implementing scenes A–F
+	•	components/AppGradient.tsx (gradient + white overlay)
+	•	components/GlassCard.tsx
+	•	components/AppText.tsx with the display variant
+	•	utils/onboardingStorage.ts for AsyncStorage getters/setters
+	•	Updated root navigator to handle IntroFlow vs MainTabs
+
+Note: Use the existing logo PNG filename exactly as stored in the project when requiring it.
