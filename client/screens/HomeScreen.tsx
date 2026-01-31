@@ -13,7 +13,7 @@ import { PhaseGuidanceCard } from "@/components/PhaseGuidanceCard";
 import { AppGradient } from "@/components/AppGradient";
 import { HeroText } from "@/components/HeroText";
 import { CyclePhase } from "@/components/Lotus";
-import { Spacing, ScreenPadding, CardSpacing, PillSpacing } from "@/constants/spacing";
+import { Spacing, ScreenPadding, CardSpacing, PillSpacing, TabBarSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -124,7 +124,7 @@ export default function HomeScreen() {
           styles.scrollContent,
           {
             paddingTop: insets.top + Spacing.lg,
-            paddingBottom: tabBarHeight + ScreenPadding.bottomScroll,
+            paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
           },
         ]}
         showsVerticalScrollIndicator={false}

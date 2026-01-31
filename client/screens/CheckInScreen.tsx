@@ -28,7 +28,7 @@ import { TagSelector } from '@/components/TagSelector';
 import { BodyMap } from '@/components/BodyMap';
 import { AfricanPattern } from '@/components/AfricanPattern';
 import { useTheme } from '@/hooks/useTheme';
-import { Spacing, ScreenPadding, CardSpacing, PillSpacing, ButtonSpacing } from '@/constants/spacing';
+import { Spacing, ScreenPadding, CardSpacing, PillSpacing, ButtonSpacing, TabBarSpacing } from '@/constants/spacing';
 import { BorderRadius } from '@/constants/theme';
 import {
   SYMPTOM_CATEGORIES,
@@ -404,7 +404,7 @@ export default function CheckInScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: tabBarHeight + Spacing.xl + 80 },
+          { paddingBottom: insets.bottom + TabBarSpacing.totalHeight + 80 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -463,7 +463,7 @@ export default function CheckInScreen() {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.saveButtonContainer, { bottom: tabBarHeight + Spacing.lg }]}>
+      <View style={[styles.saveButtonContainer, { bottom: insets.bottom + TabBarSpacing.totalHeight + Spacing.md }]}>
         <Pressable 
           onPress={handleSaveCheckIn} 
           testID="save-checkin"

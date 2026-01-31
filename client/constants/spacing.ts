@@ -9,9 +9,21 @@ export const Spacing = {
   "3xl": 48,
 } as const;
 
+export const TabBarSpacing = {
+  height: 82,
+  totalHeight: 110,
+  paddingTop: 10,
+  paddingBottom: 18,
+  paddingHorizontal: 22,
+  borderRadius: 28,
+  centerButtonSize: 58,
+  centerButtonOffset: -10,
+} as const;
+
 export const ScreenPadding = {
   horizontal: 20,
   bottomScroll: 36,
+  bottomWithGlassTabBar: 110,
 } as const;
 
 export const CardSpacing = {
@@ -40,6 +52,7 @@ export const Layout = {
   card: CardSpacing,
   pill: PillSpacing,
   button: ButtonSpacing,
+  tabBar: TabBarSpacing,
 } as const;
 
 export type SpacingKey = keyof typeof Spacing;

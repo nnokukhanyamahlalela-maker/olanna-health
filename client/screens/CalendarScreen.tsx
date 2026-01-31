@@ -15,7 +15,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding, CardSpacing } from "@/constants/spacing";
+import { Spacing, ScreenPadding, CardSpacing, TabBarSpacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 
@@ -356,7 +356,7 @@ export default function CalendarScreen() {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: insets.top + Spacing.lg,
-          paddingBottom: tabBarHeight + ScreenPadding.bottomScroll,
+          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         showsVerticalScrollIndicator={false}

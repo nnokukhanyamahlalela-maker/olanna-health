@@ -13,7 +13,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding, CardSpacing } from "@/constants/spacing";
+import { Spacing, ScreenPadding, CardSpacing, TabBarSpacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
 import { storage, UserProfile, Screening } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -103,7 +103,7 @@ export default function HealthScreen() {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: tabBarHeight + ScreenPadding.bottomScroll,
+          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}

@@ -2,9 +2,8 @@ import React from "react";
 import { View, ScrollView, StyleSheet, ViewStyle, ScrollViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@/components/ThemeProvider";
-import { ScreenPadding, Spacing } from "@/constants/spacing";
+import { ScreenPadding, Spacing, TabBarSpacing } from "@/constants/spacing";
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -15,6 +14,11 @@ interface ScreenProps {
   edges?: ("top" | "bottom" | "left" | "right")[];
   useHeaderPadding?: boolean;
   useTabBarPadding?: boolean;
+  useGlassTabBar?: boolean;
+}
+
+export function getGlassTabBarBottomPadding(insetsBottom: number): number {
+  return insetsBottom + TabBarSpacing.totalHeight;
 }
 
 export function Screen({
@@ -26,17 +30,11 @@ export function Screen({
   edges = ["top", "bottom"],
   useHeaderPadding = true,
   useTabBarPadding = true,
+  useGlassTabBar = true,
 }: ScreenProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
-  
-  let tabBarHeight = 0;
-  try {
-    tabBarHeight = useBottomTabBarHeight();
-  } catch {
-    tabBarHeight = 0;
-  }
 
   const paddingTop = edges.includes("top")
     ? useHeaderPadding && headerHeight > 0
@@ -45,8 +43,10 @@ export function Screen({
     : 0;
 
   const paddingBottom = edges.includes("bottom")
-    ? useTabBarPadding && tabBarHeight > 0
-      ? tabBarHeight + ScreenPadding.bottomScroll
+    ? useTabBarPadding
+      ? useGlassTabBar
+        ? insets.bottom + TabBarSpacing.totalHeight
+        : insets.bottom + ScreenPadding.bottomScroll
       : insets.bottom + ScreenPadding.bottomScroll
     : 0;
 

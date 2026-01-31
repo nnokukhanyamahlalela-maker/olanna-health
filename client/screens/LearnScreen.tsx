@@ -9,7 +9,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ArticleCard } from "@/components/ArticleCard";
 import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, ScreenPadding, TabBarSpacing } from "@/constants/spacing";
+import { BorderRadius } from "@/constants/theme";
 
 interface Article {
   id: string;
@@ -222,8 +223,8 @@ export default function LearnScreen() {
         ListEmptyComponent={filteredArticles.length === 0 ? renderEmptyState : null}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: tabBarHeight + Spacing["2xl"],
-          paddingHorizontal: Spacing.lg,
+          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
+          paddingHorizontal: ScreenPadding.horizontal,
           flexGrow: 1,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
