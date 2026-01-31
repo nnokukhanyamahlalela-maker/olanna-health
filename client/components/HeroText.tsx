@@ -1,5 +1,10 @@
 import React from "react";
-import { Text, StyleSheet, TextStyle, StyleProp } from "react-native";
+import { Text, StyleSheet, TextStyle, StyleProp, Dimensions } from "react-native";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// QA: Small screen responsiveness - adapt font sizes for devices < 380px width
+const isSmallScreen = SCREEN_WIDTH < 380;
 
 interface HeroTextProps {
   children: React.ReactNode;
@@ -9,9 +14,9 @@ interface HeroTextProps {
 
 export function HeroText({ children, style, size = "large" }: HeroTextProps) {
   const sizeStyle = size === "large" 
-    ? styles.large 
+    ? (isSmallScreen ? styles.largeSmallScreen : styles.large)
     : size === "medium" 
-    ? styles.medium 
+    ? (isSmallScreen ? styles.mediumSmallScreen : styles.medium)
     : styles.small;
 
   return (
@@ -34,9 +39,17 @@ const styles = StyleSheet.create({
     fontSize: 44,
     lineHeight: 52,
   },
+  largeSmallScreen: {
+    fontSize: 36,
+    lineHeight: 44,
+  },
   medium: {
     fontSize: 28,
     lineHeight: 36,
+  },
+  mediumSmallScreen: {
+    fontSize: 24,
+    lineHeight: 32,
   },
   small: {
     fontSize: 20,
