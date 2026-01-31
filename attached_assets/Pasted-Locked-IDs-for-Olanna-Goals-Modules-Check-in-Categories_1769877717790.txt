@@ -1,0 +1,217 @@
+Locked IDs for Olanna (Goals, Modules, Check-in Categories, Learn Topics)
+
+1) Goals (already locked)
+
+These are stored in userGoals:
+	•	period_tracking
+	•	ttc
+	•	symptoms
+	•	pcos
+	•	endometriosis
+	•	regularity
+	•	learn_hormones
+
+⸻
+
+2) Cycle screen modules (below the wheel)
+
+Use these IDs in getModuleOrder() and in your Cycle screen renderer:
+
+Cycle module IDs (locked)
+	•	cycle_where_you_are
+	•	cycle_suggested_for_you
+	•	cycle_symptom_trends
+	•	cycle_cycle_regularity
+	•	cycle_fertility_window
+	•	cycle_education
+
+Notes
+	•	Keep naming consistent: prefix with cycle_
+	•	These can be GlassCards initially (placeholders) and become real modules later
+
+⸻
+
+3) Check-in categories (preselect defaults based on goals)
+
+These are used by getDefaultCheckInCategories().
+
+Check-in category IDs (locked)
+	•	feelings
+	•	cravings
+	•	symptoms
+	•	cervical_mucus
+	•	gut_health
+	•	sex_and_sex_drive
+	•	flow
+	•	activities
+	•	altered_states
+	•	cycle_disruptions
+	•	birth_control
+	•	tests
+	•	medications
+	•	supplements
+	•	endometriosis
+	•	pcos
+	•	sleep
+	•	energy
+	•	stress
+	•	pain_map (optional if you have body map)
+
+Why these work: they align with the structure you already listed earlier, and they’re stable.
+
+⸻
+
+4) Learn topics (for ordering + featured content)
+
+Used by getLearnTopicOrder().
+
+Learn topic IDs (locked)
+	•	learn_cycle_basics
+	•	learn_pcos_basics
+	•	learn_endo_basics
+	•	learn_ovulation_fertility
+	•	learn_irregular_cycles
+	•	learn_symptom_management
+	•	learn_hormones_101
+	•	learn_lifestyle_sleep_stress
+	•	learn_tracking_habits
+
+⸻
+
+✅ Default personalization mappings (exact IDs)
+
+A) Cycle module ordering by goal
+
+Use these as base rules (scoring will resolve multi-goal users):
+
+If pcos
+	1.	cycle_cycle_regularity
+	2.	cycle_symptom_trends
+	3.	cycle_suggested_for_you
+	4.	cycle_education
+	5.	cycle_where_you_are
+	6.	cycle_fertility_window
+
+If endometriosis
+	1.	cycle_symptom_trends
+	2.	cycle_suggested_for_you
+	3.	cycle_education
+	4.	cycle_where_you_are
+	5.	cycle_cycle_regularity
+	6.	cycle_fertility_window
+
+If ttc
+	1.	cycle_fertility_window
+	2.	cycle_suggested_for_you
+	3.	cycle_where_you_are
+	4.	cycle_education
+	5.	cycle_symptom_trends
+	6.	cycle_cycle_regularity
+
+If period_tracking only
+	1.	cycle_where_you_are
+	2.	cycle_suggested_for_you
+	3.	cycle_symptom_trends
+	4.	cycle_education
+	5.	cycle_cycle_regularity
+	6.	cycle_fertility_window
+
+If learn_hormones
+	1.	cycle_education
+	2.	cycle_where_you_are
+	3.	cycle_suggested_for_you
+	4.	cycle_symptom_trends
+	5.	cycle_cycle_regularity
+	6.	cycle_fertility_window
+
+⸻
+
+B) Default check-in categories by goal (preselect)
+
+If pcos
+	•	pcos
+	•	cravings
+	•	feelings
+	•	energy
+	•	sleep
+	•	cycle_disruptions
+
+If endometriosis
+	•	endometriosis
+	•	symptoms
+	•	pain_map
+	•	gut_health
+	•	sleep
+	•	energy
+
+If ttc
+	•	cervical_mucus
+	•	sex_and_sex_drive
+	•	tests
+	•	feelings
+	•	activities
+
+If period_tracking
+	•	flow
+	•	symptoms
+	•	feelings
+	•	energy
+
+If regularity
+	•	cycle_disruptions
+	•	sleep
+	•	stress
+	•	activities
+	•	flow
+
+If learn_hormones
+	•	feelings
+	•	symptoms
+	•	cycle_disruptions
+	•	sleep
+
+Rule: cap preselected categories to max 5 so it doesn’t feel overwhelming.
+
+⸻
+
+C) Learn topic ordering by goal
+
+If pcos
+	1.	learn_pcos_basics
+	2.	learn_irregular_cycles
+	3.	learn_symptom_management
+	4.	learn_lifestyle_sleep_stress
+	5.	learn_tracking_habits
+	6.	learn_hormones_101
+	7.	learn_cycle_basics
+	8.	learn_ovulation_fertility
+	9.	learn_endo_basics
+
+If endometriosis
+	1.	learn_endo_basics
+	2.	learn_symptom_management
+	3.	learn_lifestyle_sleep_stress
+	4.	learn_cycle_basics
+	5.	learn_tracking_habits
+	6.	learn_hormones_101
+	7.	learn_pcos_basics
+	8.	learn_irregular_cycles
+	9.	learn_ovulation_fertility
+
+If ttc
+	1.	learn_ovulation_fertility
+	2.	learn_tracking_habits
+	3.	learn_hormones_101
+	4.	learn_cycle_basics
+	5.	learn_lifestyle_sleep_stress
+	6.	learn_symptom_management
+	7.	learn_irregular_cycles
+	8.	learn_pcos_basics
+	9.	learn_endo_basics
+
+If period_tracking
+	1.	learn_cycle_basics
+	2.	learn_tracking_habits
+	3.	learn_symptom_management
+	4.	learn_hormones_101
+	5.	learn_lifestyle_sleep_stress

@@ -104,7 +104,7 @@ export default function CheckInSheet() {
   const renderSheetContent = () => (
     <View style={styles.sheetContent}>
       <View style={styles.handleContainer}>
-        <View style={[styles.handle, { backgroundColor: theme.border }]} />
+        <View style={[styles.handle, { backgroundColor: isDark ? "rgba(245,242,244,0.25)" : "rgba(255,255,255,0.45)" }]} />
       </View>
 
       <View style={styles.header}>
@@ -246,9 +246,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
   },
   header: {
     flexDirection: "row",
