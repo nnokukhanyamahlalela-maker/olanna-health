@@ -9,6 +9,7 @@ import Animated, {
 import { BlurView } from "expo-blur";
 
 import { ThemedText } from "@/components/ThemedText";
+import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
 interface CardProps {
@@ -36,6 +37,7 @@ export function Card({
   onPress,
   style,
 }: CardProps) {
+  const { isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -50,14 +52,27 @@ export function Card({
     scale.value = withSpring(1, springConfig);
   };
 
+  // QA: Dark mode readability - adjust glass fill and border
+  const cardBackground = isDark 
+    ? "rgba(45, 45, 55, 0.85)" 
+    : "rgba(255, 255, 255, 0.7)";
+  const cardBorder = isDark
+    ? "rgba(255, 255, 255, 0.12)"
+    : "rgba(255, 255, 255, 0.4)";
+
   return (
     <AnimatedPressable
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.card, animatedStyle, style]}
+      style={[
+        styles.card, 
+        { backgroundColor: cardBackground, borderColor: cardBorder, borderWidth: 1 },
+        animatedStyle, 
+        style
+      ]}
     >
-      <BlurView intensity={16} tint="light" style={styles.blurContainer}>
+      <BlurView intensity={isDark ? 24 : 16} tint={isDark ? "dark" : "light"} style={styles.blurContainer}>
         <View style={styles.cardContent}>
           {title ? (
             <ThemedText type="h4" style={styles.cardTitle}>

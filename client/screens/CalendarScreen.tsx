@@ -356,7 +356,7 @@ export default function CalendarScreen() {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: insets.top + Spacing.lg,
-          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
+          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         showsVerticalScrollIndicator={false}

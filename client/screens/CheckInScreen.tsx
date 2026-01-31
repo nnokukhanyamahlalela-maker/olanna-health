@@ -405,7 +405,7 @@ export default function CheckInScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + TabBarSpacing.totalHeight + 80 },
+          { paddingBottom: insets.bottom + 110 }, // QA: Consistent bottom padding for glass tab bar
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -848,13 +848,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.55)', // QA: Subtle dim backdrop
     justifyContent: 'flex-end',
   },
   modalContent: {
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
+    borderTopLeftRadius: 28, // QA: Rounded top corners for modal sheet
+    borderTopRightRadius: 28,
     padding: Spacing.xl,
+    paddingBottom: Spacing["3xl"], // QA: Extra bottom padding for home indicator
   },
   modalHeader: {
     flexDirection: 'row',
@@ -881,8 +882,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   settingsButton: {
-    width: 36,
-    height: 36,
+    width: 44, // QA: Minimum 44x44 tap target
+    height: 44,
     borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
