@@ -9,7 +9,8 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { BorderRadius, Spacing } from "@/constants/theme";
+import { BorderRadius } from "@/constants/theme";
+import { ButtonSpacing } from "@/constants/spacing";
 
 interface ButtonProps {
   onPress?: () => void;
@@ -84,15 +85,17 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.lg,
+    height: ButtonSpacing.height, // QA: Primary button height 52px per iOS guidelines
+    borderRadius: ButtonSpacing.radius,
+    paddingHorizontal: ButtonSpacing.paddingHorizontal,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 44, // QA: Minimum tap target
   },
   buttonText: {
-    fontWeight: "500",
+    fontWeight: "600",
     letterSpacing: 0.5,
     textTransform: "uppercase",
-    fontSize: 13,
+    fontSize: 14,
   },
 });

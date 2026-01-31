@@ -133,7 +133,7 @@ export default function HomeScreen() {
           styles.scrollContent,
           {
             paddingTop: insets.top + Spacing.lg,
-            paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
+            paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
           },
         ]}
         showsVerticalScrollIndicator={false}

@@ -104,7 +104,7 @@ export default function HealthScreen() {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
+          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}

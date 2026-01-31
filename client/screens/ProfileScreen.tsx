@@ -110,7 +110,7 @@ export default function ProfileScreen() {
       <KeyboardAwareScrollViewCompat
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + Spacing["2xl"],
+          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
           paddingHorizontal: Spacing.lg,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}

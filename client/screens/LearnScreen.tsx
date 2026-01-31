@@ -255,7 +255,7 @@ export default function LearnScreen() {
         ListEmptyComponent={filteredArticles.length === 0 ? renderEmptyState : null}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + TabBarSpacing.totalHeight,
+          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
           paddingHorizontal: ScreenPadding.horizontal,
           flexGrow: 1,
         }}
