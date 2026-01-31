@@ -5,14 +5,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { EmptyState } from "@/components/EmptyState";
 import { CycleHeroWheel } from "@/components/CycleHeroWheel";
 import { PhaseGuidanceCard } from "@/components/PhaseGuidanceCard";
+import { AppGradient } from "@/components/AppGradient";
+import { HeroText } from "@/components/HeroText";
 import { CyclePhase } from "@/components/Lotus";
 import { Spacing } from "@/constants/theme";
+import { DS } from "@/constants/designSystem";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -86,31 +88,17 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <LinearGradient
-        colors={["#FF9A6B", "#FF3F9E", "#F7B0C8", "#E7C2E8"]}
-        locations={[0, 0.35, 0.7, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.fullScreen}
-      >
-        <View style={styles.whiteWash} />
+      <AppGradient style={styles.fullScreen}>
         <View style={styles.loadingContainer}>
           <ThemedText style={styles.loadingText}>Loading...</ThemedText>
         </View>
-      </LinearGradient>
+      </AppGradient>
     );
   }
 
   if (!profile || !cycleData) {
     return (
-      <LinearGradient
-        colors={["#FF9A6B", "#FF3F9E", "#F7B0C8", "#E7C2E8"]}
-        locations={[0, 0.35, 0.7, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.fullScreen}
-      >
-        <View style={styles.whiteWash} />
+      <AppGradient style={styles.fullScreen}>
         <View style={[styles.emptyContainer, { paddingTop: insets.top + Spacing.xl }]}>
           <EmptyState
             image={require("../../assets/images/empty-cycle.png")}
@@ -120,7 +108,7 @@ export default function HomeScreen() {
             onAction={() => navigation.navigate("Onboarding")}
           />
         </View>
-      </LinearGradient>
+      </AppGradient>
     );
   }
 
@@ -128,15 +116,7 @@ export default function HomeScreen() {
   const phaseGuidance = PHASE_GUIDANCE[cycleData.phase];
 
   return (
-    <LinearGradient
-      colors={["#FF9A6B", "#FF3F9E", "#F7B0C8", "#E7C2E8"]}
-      locations={[0, 0.35, 0.7, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.fullScreen}
-    >
-      <View style={styles.whiteWash} />
-
+    <AppGradient style={styles.fullScreen}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -152,16 +132,20 @@ export default function HomeScreen() {
           onPress={() => navigation.navigate("Profile")}
           style={[styles.profileButton, { top: insets.top + 16 }]}
           testID="profile-button"
+          accessibilityRole="button"
+          accessibilityLabel="Open profile"
         >
           <Feather name="user" size={20} color="rgba(255,255,255,0.9)" />
         </Pressable>
 
         <View style={styles.heroSection}>
-          <ThemedText style={styles.phasePhrase}>{phasePhrase}</ThemedText>
+          <HeroText size="medium" style={styles.phasePhrase}>
+            {phasePhrase}
+          </HeroText>
 
           <View style={styles.dayIndicator}>
             <ThemedText style={styles.dayLabel}>Day</ThemedText>
-            <ThemedText style={styles.dayNumber}>{cycleData.currentDay}</ThemedText>
+            <HeroText style={styles.dayNumber}>{cycleData.currentDay}</HeroText>
             <ThemedText style={styles.cycleInfo}>of {cycleData.cycleLength}</ThemedText>
           </View>
 
@@ -175,7 +159,9 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.guidanceSection}>
-          <ThemedText style={styles.guidanceTitle}>For you today</ThemedText>
+          <HeroText size="small" style={styles.guidanceTitle}>
+            For you today
+          </HeroText>
           {phaseGuidance.map((item, index) => (
             <PhaseGuidanceCard
               key={index}
@@ -186,7 +172,7 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
-    </LinearGradient>
+    </AppGradient>
   );
 }
 
@@ -195,10 +181,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-  },
-  whiteWash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.12)",
   },
   scrollView: {
     flex: 1,
@@ -223,8 +205,8 @@ const styles = StyleSheet.create({
   profileButton: {
     position: "absolute",
     right: 24,
-    width: 44,
-    height: 44,
+    width: DS.touchTarget.minWidth,
+    height: DS.touchTarget.minHeight,
     borderRadius: 22,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
@@ -239,11 +221,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   phasePhrase: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 26,
-    color: "#FFFFFF",
     textAlign: "center",
-    letterSpacing: 0.5,
     marginBottom: 24,
   },
   dayIndicator: {
@@ -258,9 +236,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   dayNumber: {
-    fontFamily: "DMSans_700Bold",
     fontSize: 72,
-    color: "#FFFFFF",
     lineHeight: 80,
   },
   cycleInfo: {
@@ -276,9 +252,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   guidanceTitle: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 18,
-    color: "#FFFFFF",
     marginBottom: 16,
   },
 });

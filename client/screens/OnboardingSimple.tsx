@@ -1,9 +1,11 @@
-import React, { useRef, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Dimensions, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import React, { useRef, useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, Dimensions, Pressable, AccessibilityInfo } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AppGradient } from "@/components/AppGradient";
+import { HeroText } from "@/components/HeroText";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { DS } from "@/constants/designSystem";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,17 +21,25 @@ export default function OnboardingSimple() {
   const navigation = useNavigation<NavigationProp>();
   const listRef = useRef<FlatList>(null);
   const [index, setIndex] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+  }, []);
 
   const goNext = () => {
     if (index < SLIDES.length - 1) {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
+      listRef.current?.scrollToIndex({ 
+        index: index + 1, 
+        animated: !reduceMotion 
+      });
     } else {
       navigation.replace("Main", { screen: "HomeTab" });
     }
   };
 
   return (
-    <LinearGradient colors={["#FFB28C", "#FF4FA3", "#F7B6C8"]} style={styles.gradient}>
+    <AppGradient>
       <FlatList
         ref={listRef}
         data={SLIDES}
@@ -37,53 +47,87 @@ export default function OnboardingSimple() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        scrollEnabled={!reduceMotion}
         onMomentumScrollEnd={(e) => {
           const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
           setIndex(newIndex);
         }}
         renderItem={({ item }) => (
           <View style={[styles.slide, { width, height }]}>
-            <Text style={styles.bigText}>{item.text}</Text>
+            <HeroText style={styles.bigText}>{item.text}</HeroText>
 
-            <Pressable onPress={goNext} style={styles.nextArea}>
-              <Text style={styles.nextText}>
+            <Pressable 
+              onPress={goNext} 
+              style={styles.nextArea}
+              accessibilityRole="button"
+              accessibilityLabel={index === SLIDES.length - 1 ? "Continue to app" : "Go to next slide"}
+              accessibilityHint="Double tap to advance"
+            >
+              <HeroText size="small" style={styles.nextText}>
                 {index === SLIDES.length - 1 ? "Continue" : "Next"}
-              </Text>
+              </HeroText>
             </Pressable>
           </View>
         )}
       />
-    </LinearGradient>
+
+      <View style={styles.dotsContainer}>
+        {SLIDES.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              i === index ? styles.dotActive : styles.dotInactive,
+            ]}
+            accessibilityLabel={`Slide ${i + 1} of ${SLIDES.length}${i === index ? ", current" : ""}`}
+          />
+        ))}
+      </View>
+    </AppGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
   slide: {
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 28,
   },
   bigText: {
-    color: "#FFFFFF",
-    fontSize: 44,
-    lineHeight: 52,
     textAlign: "center",
-    fontWeight: "800",
-    letterSpacing: 0.2,
   },
   nextArea: {
     position: "absolute",
-    bottom: 70,
+    bottom: 100,
     paddingVertical: 14,
     paddingHorizontal: 22,
-    borderRadius: 999,
+    borderRadius: DS.radii.pill,
     backgroundColor: "rgba(255,255,255,0.22)",
+    minWidth: DS.touchTarget.minWidth,
+    minHeight: DS.touchTarget.minHeight,
+    alignItems: "center",
+    justifyContent: "center",
   },
   nextText: {
-    color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "700",
+  },
+  dotsContainer: {
+    position: "absolute",
+    bottom: 60,
+    flexDirection: "row",
+    alignSelf: "center",
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotActive: {
+    backgroundColor: "#FFFFFF",
+  },
+  dotInactive: {
+    backgroundColor: "rgba(255,255,255,0.4)",
   },
 });
