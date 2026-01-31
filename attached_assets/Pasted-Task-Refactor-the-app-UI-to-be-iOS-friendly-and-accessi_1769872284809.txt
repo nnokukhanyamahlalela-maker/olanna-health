@@ -1,0 +1,56 @@
+Task: Refactor the app UI to be iOS-friendly and accessibility-first (WCAG AA).
+Stack: React Native (Expo).
+
+Goal: Ensure all text remains readable over gradients and glass surfaces, and support iOS “Reduce Motion” and “Reduce Transparency” equivalents in-app.
+
+Implementation requirements:
+	1.	Global Gradient Background
+
+	•	Create a reusable AppGradient component that fills the entire screen using the brand gradient stops: #FF9A6B, #FF3F9E, #F7B0C8, #E7C2E8 with start={{x:0.15,y:0}} and end={{x:0.85,y:1}}.
+	•	Add a subtle white comfort overlay on top of the gradient: rgba(255,255,255,0.06) across all gradient screens to reduce eye strain and improve contrast consistency.
+
+	2.	No body text directly on gradients
+
+	•	Enforce a rule: body text and UI labels must sit on GlassCard or solid surfaces (not directly on the gradient).
+	•	Only allow large hero text directly on the gradient if it uses the hero text style below.
+
+	3.	Hero Text Style (phase phrases / onboarding text)
+
+	•	Create a shared HeroText component with these locked styles:
+	•	color: #FFFFFF
+	•	fontWeight: 800 (or 700 if the font doesn’t support 800)
+	•	textShadowColor: rgba(0,0,0,0.22)
+	•	textShadowOffset: {width:0,height:2}
+	•	textShadowRadius: 6
+	•	Use this component for onboarding phrases and the cycle phase phrase to keep readability on gradients.
+
+	4.	Glass surfaces for readable content
+
+	•	Create a reusable GlassCard component using expo-blur with:
+	•	backgroundColor: rgba(255,255,255,0.72)
+	•	borderColor: rgba(255,255,255,0.55)
+	•	borderWidth: 1
+	•	rounded corners: 24
+	•	soft shadow (low opacity)
+	•	Standardize text on glass:
+	•	primary text: #2B2B2B
+	•	secondary text: #6F6F6F
+
+	5.	Accessibility toggles + system support
+
+	•	Implement reduceMotion support using React Native AccessibilityInfo (detect “Reduce Motion”) and disable any animated scale/rotation when enabled.
+	•	Add an in-app setting reduceTransparency that swaps blur cards for solid cards (same layout) when enabled.
+
+	6.	QA acceptance
+
+	•	Verify hero text remains readable across all gradient areas.
+	•	Verify no small text sits directly on gradient.
+	•	Verify reduce motion disables animations.
+	•	Verify buttons and pills meet 44x44 touch targets.
+
+Output:
+	•	components/AppGradient.tsx
+	•	components/HeroText.tsx
+	•	components/GlassCard.tsx (with reduceTransparency fallback)
+	•	designSystem.ts tokens for colors/typography/shadows
+	•	Update at least Splash/Intro, Cycle, and Calendar screens to use these components consistently.
