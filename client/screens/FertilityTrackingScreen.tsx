@@ -18,6 +18,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { SeveritySlider } from "@/components/SeveritySlider";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -421,7 +422,7 @@ export default function FertilityTrackingScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <AppGradient style={styles.container}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
@@ -588,7 +589,7 @@ export default function FertilityTrackingScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </AppGradient>
   );
 }
 

@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
+import { AppGradient } from "@/components/AppGradient";
 import { ThemeMode } from "@/constants/themeColors";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
@@ -26,14 +27,14 @@ export default function AppearanceScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background as string }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+      >
       <AppText variant="h2" style={styles.title}>Appearance</AppText>
       <AppText variant="caption" color={theme.textSecondary as string} style={styles.subtitle}>
         Choose how Olanna Health looks on your device
@@ -99,7 +100,8 @@ export default function AppearanceScreen() {
           {isDark ? "Dark mode is active" : "Light mode is active"}
         </AppText>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

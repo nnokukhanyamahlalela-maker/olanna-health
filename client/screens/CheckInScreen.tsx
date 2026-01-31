@@ -27,6 +27,7 @@ import { SeveritySlider } from '@/components/SeveritySlider';
 import { TagSelector } from '@/components/TagSelector';
 import { BodyMap } from '@/components/BodyMap';
 import { AfricanPattern } from '@/components/AfricanPattern';
+import { AppGradient } from '@/components/AppGradient';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, ScreenPadding, CardSpacing, PillSpacing, ButtonSpacing, TabBarSpacing } from '@/constants/spacing';
 import { BorderRadius } from '@/constants/theme';
@@ -323,7 +324,7 @@ export default function CheckInScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: THEME_COLORS.background }]}>
+    <AppGradient style={styles.container}>
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
         <View>
           <ThemedText type="h2" style={{ color: THEME_COLORS.text }}>Daily Check-in</ThemedText>
@@ -732,7 +733,7 @@ export default function CheckInScreen() {
           </ThemedView>
         </View>
       </Modal>
-    </View>
+    </AppGradient>
   );
 }
 

@@ -7,6 +7,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
 import { SymptomChip } from "@/components/SymptomChip";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -65,7 +66,7 @@ export default function PCOSModuleScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <AppGradient style={styles.container}>
       <View style={[styles.tabBar, { paddingTop: headerHeight + Spacing.sm }]}>
         {(["symptoms", "lifestyle", "insights"] as const).map((tab) => (
           <Pressable
@@ -183,7 +184,7 @@ export default function PCOSModuleScreen() {
           </View>
         ) : null}
       </ScrollView>
-    </View>
+    </AppGradient>
   );
 }
 

@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -38,15 +39,15 @@ export default function SexualHealthModuleScreen() {
   const headerHeight = useHeaderHeight();
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingHorizontal: Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingHorizontal: Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={[styles.guidelineCard, { backgroundColor: theme.info + "15" }]}>
         <Feather name="book-open" size={24} color={theme.info} />
         <View style={styles.guidelineContent}>
@@ -167,7 +168,8 @@ export default function SexualHealthModuleScreen() {
           Find Testing Centers Near You
         </ThemedText>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

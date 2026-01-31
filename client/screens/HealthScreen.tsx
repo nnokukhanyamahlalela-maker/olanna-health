@@ -12,6 +12,7 @@ import { InsightCard } from "@/components/InsightCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AfricanPattern } from "@/components/AfricanPattern";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding, CardSpacing, TabBarSpacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
@@ -72,17 +73,17 @@ export default function HealthScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+      <AppGradient style={styles.container}>
         <View style={styles.loadingContainer}>
           <ThemedText type="body">Loading...</ThemedText>
         </View>
-      </View>
+      </AppGradient>
     );
   }
 
   if (!profile) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+      <AppGradient style={styles.container}>
         <View style={[styles.emptyContainer, { paddingTop: headerHeight }]}>
           <EmptyState
             image={require("../../assets/images/empty-health.png")}
@@ -92,12 +93,12 @@ export default function HealthScreen() {
             onAction={() => navigation.navigate("Onboarding")}
           />
         </View>
-      </View>
+      </AppGradient>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <AppGradient style={styles.container}>
       <AfricanPattern opacity={0.02} variant="triangles" />
       <ScrollView
         style={styles.scrollView}
@@ -245,7 +246,7 @@ export default function HealthScreen() {
 
       <PrivacyBadge message="Your health data is encrypted and stored locally on your device" />
       </ScrollView>
-    </View>
+    </AppGradient>
   );
 }
 

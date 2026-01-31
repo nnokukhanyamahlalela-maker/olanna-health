@@ -9,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Button } from '@/components/Button';
+import { AppGradient } from '@/components/AppGradient';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, BorderRadius } from '@/constants/theme';
 import { RootStackParamList } from '@/navigation/RootStackNavigator';
@@ -39,7 +40,7 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <AppGradient style={styles.container}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
@@ -134,7 +135,7 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
           </Pressable>
         </Animated.View>
       </ScrollView>
-    </ThemedView>
+    </AppGradient>
   );
 }
 

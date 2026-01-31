@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -47,15 +48,15 @@ export default function EndometriosisModuleScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingHorizontal: Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingHorizontal: Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={[styles.supportCard, { backgroundColor: theme.primary + "10" }]}>
         <Feather name="heart" size={24} color={theme.primary} />
         <ThemedText type="body" style={[styles.supportText, { color: theme.primary }]}>
@@ -201,7 +202,8 @@ export default function EndometriosisModuleScreen() {
         </View>
         <Feather name="chevron-right" size={20} color={theme.textSecondary} />
       </View>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

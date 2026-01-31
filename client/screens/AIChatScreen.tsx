@@ -5,6 +5,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
+import { AppGradient } from "@/components/AppGradient";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface Message {
@@ -72,11 +73,12 @@ export default function AIChatScreen() {
   }, [theme]);
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.background as string }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={headerHeight}
-    >
+    <AppGradient style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.chatContainer}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={headerHeight}
+      >
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -126,12 +128,16 @@ export default function AIChatScreen() {
           <Feather name="send" size={20} color="#FFFFFF" />
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </AppGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  chatContainer: {
     flex: 1,
   },
   listContent: {

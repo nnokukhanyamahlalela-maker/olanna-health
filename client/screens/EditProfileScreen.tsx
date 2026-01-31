@@ -11,6 +11,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { SymptomChip } from "@/components/SymptomChip";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
@@ -100,15 +101,15 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <KeyboardAwareScrollViewCompat
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingHorizontal: Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <KeyboardAwareScrollViewCompat
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingHorizontal: Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.section}>
         <ThemedText type="h4" style={styles.label}>
           Name
@@ -237,7 +238,8 @@ export default function EditProfileScreen() {
       <Button onPress={handleSave} disabled={isSaving || !name.trim()} style={styles.saveButton}>
         {isSaving ? "Saving..." : "Save Changes"}
       </Button>
-    </KeyboardAwareScrollViewCompat>
+      </KeyboardAwareScrollViewCompat>
+    </AppGradient>
   );
 }
 

@@ -12,7 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { AppGradient } from "@/components/AppGradient";
 import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding, CardSpacing, TabBarSpacing } from "@/constants/spacing";
@@ -351,7 +351,7 @@ export default function CalendarScreen() {
   ];
 
   return (
-    <ThemedView style={styles.container}>
+    <AppGradient style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
@@ -594,7 +594,7 @@ export default function CalendarScreen() {
           </View>
         ) : null}
       </ScrollView>
-    </ThemedView>
+    </AppGradient>
   );
 }
 

@@ -16,6 +16,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { Lotus } from "@/components/Lotus";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { storage } from "@/lib/storage";
@@ -106,7 +107,7 @@ export default function CycleCalculatorScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <AppGradient style={styles.container}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
@@ -271,7 +272,7 @@ export default function CycleCalculatorScreen() {
           </View>
         ) : null}
       </ScrollView>
-    </ThemedView>
+    </AppGradient>
   );
 }
 

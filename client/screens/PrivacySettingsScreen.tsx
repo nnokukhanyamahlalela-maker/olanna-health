@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { privacyStorage, PrivacySettings } from "@/lib/privacyStorage";
@@ -210,15 +211,15 @@ export default function PrivacySettingsScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <Animated.View entering={FadeInDown.duration(300)}>
         <View style={[styles.infoCard, { backgroundColor: theme.accent + "20" }]}>
           <Feather name="shield" size={24} color={theme.accent} />
@@ -341,7 +342,8 @@ export default function PrivacySettingsScreen() {
           </ThemedText>
         </View>
       </Animated.View>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

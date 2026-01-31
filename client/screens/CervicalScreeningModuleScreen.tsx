@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, Screening, generateId } from "@/lib/storage";
@@ -79,15 +80,15 @@ export default function CervicalScreeningModuleScreen() {
   const isDue = nextDue && nextDue <= new Date();
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingHorizontal: Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingHorizontal: Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={[styles.guidelineCard, { backgroundColor: theme.secondary + "15" }]}>
         <Feather name="book-open" size={24} color={theme.secondary} />
         <View style={styles.guidelineContent}>
@@ -281,7 +282,8 @@ export default function CervicalScreeningModuleScreen() {
           </View>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

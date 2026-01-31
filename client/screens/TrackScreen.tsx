@@ -12,6 +12,7 @@ import { Button } from "@/components/Button";
 import { FlowSelector } from "@/components/FlowSelector";
 import { MoodSelector } from "@/components/MoodSelector";
 import { SymptomChip } from "@/components/SymptomChip";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, DailyLog, generateId } from "@/lib/storage";
@@ -134,7 +135,7 @@ export default function TrackScreen() {
   const isToday = formatDate(selectedDate) === formatDate(new Date());
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <AppGradient style={styles.container}>
       <View style={[styles.dateSelector, { paddingTop: headerHeight + Spacing.md }]}>
         <Pressable
           onPress={() => handleDateChange(-1)}
@@ -273,7 +274,7 @@ export default function TrackScreen() {
           {isSaving ? "Saving..." : "Save Log"}
         </Button>
       </KeyboardAwareScrollViewCompat>
-    </View>
+    </AppGradient>
   );
 }
 

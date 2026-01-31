@@ -14,6 +14,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { 
@@ -314,18 +315,18 @@ export default function InsightsScreen() {
   );
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.primary} />
-      }
-    >
+    <AppGradient style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.primary} />
+        }
+      >
       <View style={[styles.header, { backgroundColor: theme.primary + "15" }]}>
         <Feather name="bar-chart-2" size={24} color={theme.primary} />
         <View style={styles.headerContent}>
@@ -353,7 +354,8 @@ export default function InsightsScreen() {
           Consult a healthcare provider for any health concerns.
         </ThemedText>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </AppGradient>
   );
 }
 

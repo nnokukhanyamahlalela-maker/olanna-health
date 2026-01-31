@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
@@ -105,16 +106,16 @@ export default function ProfileScreen() {
   };
 
   return (
-    <KeyboardAwareScrollViewCompat
-      style={[styles.container, { backgroundColor: THEME_COLORS.background }]}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
-        paddingBottom: insets.bottom + Spacing["2xl"],
-        paddingHorizontal: Spacing.lg,
-      }}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppGradient style={styles.container}>
+      <KeyboardAwareScrollViewCompat
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: insets.bottom + Spacing["2xl"],
+          paddingHorizontal: Spacing.lg,
+        }}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.profileCard}>
         <View style={styles.avatarContainer}>
           <LinearGradient
@@ -247,7 +248,8 @@ export default function ProfileScreen() {
       <ThemedText type="caption" style={styles.version}>
         Version 1.0.0
       </ThemedText>
-    </KeyboardAwareScrollViewCompat>
+      </KeyboardAwareScrollViewCompat>
+    </AppGradient>
   );
 }
 

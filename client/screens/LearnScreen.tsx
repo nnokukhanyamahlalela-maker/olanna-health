@@ -8,6 +8,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ArticleCard } from "@/components/ArticleCard";
 import { EmptyState } from "@/components/EmptyState";
+import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding, TabBarSpacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
@@ -238,7 +239,7 @@ export default function LearnScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <AppGradient style={styles.container}>
       <FlatList
         data={remainingArticles}
         keyExtractor={(item) => item.id}
@@ -262,7 +263,7 @@ export default function LearnScreen() {
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={renderSeparator}
       />
-    </View>
+    </AppGradient>
   );
 }
 
