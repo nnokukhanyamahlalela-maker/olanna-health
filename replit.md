@@ -25,6 +25,7 @@ The application includes:
 - **Theming**: Comprehensive theme system supporting Light, Dark, and System modes, persisted via AsyncStorage. Theme-aware components adapt styling based on selected theme, including gradients and text colors. WCAG AA compliant contrast is maintained.
 - **Symptom Tracking**: A comprehensive system with 15 categories and 200+ symptoms, including a SeveritySlider, BodyMap with SVG silhouette, TagSelector, and customizable check-in screen with favorites.
 - **Onboarding**: A multi-step onboarding flow with branded splash screens, animated text, glass-style UI elements, and health goal selection.
+- **Goals-Based Personalization**: User-selected health goals from onboarding (stored in AsyncStorage) drive personalized content ordering across the app. The system uses a scoring-based approach to reorder modules, check-in categories, and educational topics based on user goals (period_tracking, ttc, symptoms, pcos, endometriosis, regularity, learn_hormones). Key utilities in `utils/onboardingStorage.ts` and `utils/personalization.ts`.
 
 ## External Dependencies
 - **React Native**: Frontend framework.
