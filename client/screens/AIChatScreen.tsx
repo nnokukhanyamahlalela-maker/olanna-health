@@ -5,7 +5,6 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
-import { GlassCard } from "@/components/GlassCard";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface Message {
@@ -57,9 +56,9 @@ export default function AIChatScreen() {
     const isUser = item.role === "user";
     return (
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
-        <GlassCard style={[
+        <View style={[
           styles.messageBubble,
-          isUser ? { backgroundColor: theme.accent as string } : {}
+          { backgroundColor: isUser ? (theme.accent as string) : (theme.surface as string) },
         ]}>
           <AppText 
             variant="body" 
@@ -67,7 +66,7 @@ export default function AIChatScreen() {
           >
             {item.content}
           </AppText>
-        </GlassCard>
+        </View>
       </View>
     );
   }, [theme]);

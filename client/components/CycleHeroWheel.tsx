@@ -10,6 +10,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { CyclePhase } from "@/components/Lotus";
+import { useTheme } from "@/components/ThemeProvider";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const WHEEL_SIZE = Math.min(SCREEN_WIDTH * 0.75, 300);
@@ -23,7 +24,9 @@ interface CycleHeroWheelProps {
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 export function CycleHeroWheel({ phase, currentDay, cycleLength }: CycleHeroWheelProps) {
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const { theme, reduceMotion: themeReduceMotion } = useTheme();
+  const [reduceMotion, setReduceMotion] = useState(themeReduceMotion);
+  const wheelColors = theme.cycleWheel;
   
   const breatheScale = useSharedValue(1);
   const rotation = useSharedValue(0);
@@ -86,9 +89,9 @@ export function CycleHeroWheel({ phase, currentDay, cycleLength }: CycleHeroWhee
         <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
           <Defs>
             <RadialGradient id="haloGlow" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor="rgba(255,255,255,0)" />
-              <Stop offset="85%" stopColor="rgba(255,255,255,0.08)" />
-              <Stop offset="100%" stopColor="rgba(255,255,255,0.15)" />
+              <Stop offset="0%" stopColor="transparent" />
+              <Stop offset="85%" stopColor={wheelColors.inactive as string} />
+              <Stop offset="100%" stopColor={wheelColors.baseHalo as string} />
             </RadialGradient>
           </Defs>
 
@@ -97,7 +100,7 @@ export function CycleHeroWheel({ phase, currentDay, cycleLength }: CycleHeroWhee
             cy={WHEEL_SIZE / 2}
             r={WHEEL_SIZE / 2 - 12}
             fill="url(#haloGlow)"
-            stroke="rgba(255,255,255,0.25)"
+            stroke={wheelColors.baseHalo as string}
             strokeWidth={1.5}
           />
 
@@ -112,14 +115,14 @@ export function CycleHeroWheel({ phase, currentDay, cycleLength }: CycleHeroWhee
             cx={markerX}
             cy={markerY}
             r={6}
-            fill="rgba(255,255,255,0.9)"
+            fill={wheelColors.active as string}
           />
           <Circle
             cx={markerX}
             cy={markerY}
             r={10}
             fill="none"
-            stroke="rgba(255,255,255,0.4)"
+            stroke={wheelColors.glow as string}
             strokeWidth={1}
           />
         </Svg>

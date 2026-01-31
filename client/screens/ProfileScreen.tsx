@@ -182,6 +182,11 @@ export default function ProfileScreen() {
         </ThemedText>
         <View style={styles.menuGroup}>
           <MenuItem
+            icon="sun"
+            label="Appearance"
+            onPress={() => navigation.navigate("Appearance")}
+          />
+          <MenuItem
             icon="bell"
             label="Notifications"
             onPress={() => {}}
