@@ -7,7 +7,6 @@ import IntroLogo from "@/screens/IntroLogo";
 import SplashScreen from "@/screens/SplashScreen";
 import OnboardingScreen from "@/screens/OnboardingScreen";
 import OnboardingSimple from "@/screens/OnboardingSimple";
-import AIChatScreen from "@/screens/AIChatScreen";
 import PCOSModuleScreen from "@/screens/PCOSModuleScreen";
 import EndometriosisModuleScreen from "@/screens/EndometriosisModuleScreen";
 import SexualHealthModuleScreen from "@/screens/SexualHealthModuleScreen";
@@ -28,7 +27,6 @@ export type RootStackParamList = {
   Splash: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Onboarding: undefined;
-  AIChat: undefined;
   PCOSModule: undefined;
   EndometriosisModule: undefined;
   SexualHealthModule: undefined;
@@ -69,14 +67,6 @@ export default function RootStackNavigator() {
         name="Onboarding"
         component={OnboardingSimple}
         options={{ headerShown: false, animation: "fade" }}
-      />
-      <Stack.Screen
-        name="AIChat"
-        component={AIChatScreen}
-        options={{
-          headerTitle: "Health Assistant",
-          presentation: "modal",
-        }}
       />
       <Stack.Screen
         name="PCOSModule"
