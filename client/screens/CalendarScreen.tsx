@@ -15,7 +15,7 @@ import { AppGradient } from "@/components/AppGradient";
 import { GlassCard } from "@/components/GlassCard";
 import { Lotus, CyclePhase, PHASE_INFO, PHASE_COLORS, PHASE_BG_COLORS } from "@/components/Lotus";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding } from "@/constants/spacing";
+import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 
@@ -244,9 +244,9 @@ export default function CalendarScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
-          paddingTop: insets.top + Spacing.lg,
+          paddingTop: insets.top + 12,
           paddingBottom: insets.bottom + 110,
-          paddingHorizontal: ScreenPadding.horizontal,
+          paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
       >
