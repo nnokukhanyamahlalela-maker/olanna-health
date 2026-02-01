@@ -672,10 +672,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   calendarCard: {
-    padding: Spacing.md,
+    padding: 16,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
-    minHeight: 320,
+    minHeight: 360,
   },
   statsCard: {
     padding: Spacing.lg,
