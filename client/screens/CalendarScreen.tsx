@@ -99,8 +99,6 @@ export default function CalendarScreen() {
   );
 
   useEffect(() => {
-    if (!profile) return;
-
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const today = new Date();
@@ -109,9 +107,10 @@ export default function CalendarScreen() {
     const firstDay = getFirstDayOfMonth(year, month);
     const daysInPrevMonth = getDaysInMonth(year, month - 1);
 
-    const lastPeriodStart = new Date(profile.lastPeriodStart);
-    const cycleLength = profile.cycleLength;
-    const periodLength = profile.periodLength;
+    // Use profile data if available, otherwise use defaults
+    const lastPeriodStart = profile ? new Date(profile.lastPeriodStart) : null;
+    const cycleLength = profile?.cycleLength || 28;
+    const periodLength = profile?.periodLength || 5;
 
     const logMap = new Map<string, DailyLog>();
     dailyLogs.forEach((log) => {
@@ -119,6 +118,7 @@ export default function CalendarScreen() {
     });
 
     const getDayInCycle = (date: Date): number => {
+      if (!lastPeriodStart) return -1;
       const diffTime = date.getTime() - lastPeriodStart.getTime();
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       if (diffDays < 0) return -1;
@@ -126,12 +126,14 @@ export default function CalendarScreen() {
     };
 
     const isPeriodDay = (date: Date): boolean => {
+      if (!lastPeriodStart) return false;
       const dayInCycle = getDayInCycle(date);
       if (dayInCycle < 0) return false;
       return dayInCycle <= periodLength;
     };
 
     const isFertileDay = (date: Date): boolean => {
+      if (!lastPeriodStart) return false;
       const dayInCycle = getDayInCycle(date);
       if (dayInCycle < 0) return false;
       const ovulationDay = cycleLength - 14;
@@ -139,6 +141,7 @@ export default function CalendarScreen() {
     };
 
     const isOvulationDay = (date: Date): boolean => {
+      if (!lastPeriodStart) return false;
       const dayInCycle = getDayInCycle(date);
       if (dayInCycle < 0) return false;
       const ovulationDay = cycleLength - 14;
@@ -146,6 +149,7 @@ export default function CalendarScreen() {
     };
 
     const isPMSDay = (date: Date): boolean => {
+      if (!lastPeriodStart) return false;
       const dayInCycle = getDayInCycle(date);
       if (dayInCycle < 0) return false;
       return dayInCycle > cycleLength - 7 && dayInCycle <= cycleLength;
@@ -205,52 +209,57 @@ export default function CalendarScreen() {
     setCalendarDays(days);
 
     const events: TimelineEvent[] = [];
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    // Only calculate timeline if profile exists
+    if (lastPeriodStart) {
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    let currentPeriodStart = new Date(lastPeriodStart);
-    while (currentPeriodStart < new Date()) {
-      if (currentPeriodStart >= threeMonthsAgo) {
-        const periodEnd = new Date(currentPeriodStart);
-        periodEnd.setDate(periodEnd.getDate() + periodLength - 1);
-        events.push({
-          date: new Date(currentPeriodStart),
-          endDate: periodEnd,
-          type: "period",
-          label: "Period",
-          sublabel: `${periodLength} days`,
-        });
-
-        const ovulationDate = new Date(currentPeriodStart);
-        ovulationDate.setDate(ovulationDate.getDate() + cycleLength - 14);
-        if (ovulationDate >= threeMonthsAgo && ovulationDate < new Date()) {
-          const fertileStart = new Date(ovulationDate);
-          fertileStart.setDate(fertileStart.getDate() - 5);
+      let currentPeriodStart = new Date(lastPeriodStart);
+      while (currentPeriodStart < new Date()) {
+        if (currentPeriodStart >= threeMonthsAgo) {
+          const periodEnd = new Date(currentPeriodStart);
+          periodEnd.setDate(periodEnd.getDate() + periodLength - 1);
           events.push({
-            date: fertileStart,
-            endDate: ovulationDate,
-            type: "fertile",
-            label: "Fertility window",
-            sublabel: `Ovulation ${ovulationDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+            date: new Date(currentPeriodStart),
+            endDate: periodEnd,
+            type: "period",
+            label: "Period",
+            sublabel: `${periodLength} days`,
           });
+
+          const ovulationDate = new Date(currentPeriodStart);
+          ovulationDate.setDate(ovulationDate.getDate() + cycleLength - 14);
+          if (ovulationDate >= threeMonthsAgo && ovulationDate < new Date()) {
+            const fertileStart = new Date(ovulationDate);
+            fertileStart.setDate(fertileStart.getDate() - 5);
+            events.push({
+              date: fertileStart,
+              endDate: ovulationDate,
+              type: "fertile",
+              label: "Fertility window",
+              sublabel: `Ovulation ${ovulationDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+            });
+          }
+
+          const pmsStart = new Date(currentPeriodStart);
+          pmsStart.setDate(pmsStart.getDate() + cycleLength - 7);
+          if (pmsStart >= threeMonthsAgo && pmsStart < new Date()) {
+            events.push({
+              date: pmsStart,
+              type: "pms",
+              label: "PMS",
+              sublabel: pmsStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            });
+          }
         }
 
-        const pmsStart = new Date(currentPeriodStart);
-        pmsStart.setDate(pmsStart.getDate() + cycleLength - 7);
-        if (pmsStart >= threeMonthsAgo && pmsStart < new Date()) {
-          events.push({
-            date: pmsStart,
-            type: "pms",
-            label: "PMS",
-            sublabel: pmsStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          });
-        }
+        currentPeriodStart.setDate(currentPeriodStart.getDate() + cycleLength);
       }
 
-      currentPeriodStart.setDate(currentPeriodStart.getDate() + cycleLength);
+      events.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
-
-    events.sort((a, b) => b.date.getTime() - a.date.getTime());
+    
     setTimeline(events.slice(0, 6));
   }, [currentDate, profile, dailyLogs]);
 
@@ -375,36 +384,7 @@ export default function CalendarScreen() {
           </View>
         </View>
 
-        <View style={styles.weekdaysRow}>
-          {WEEKDAYS.map((day) => (
-            <View key={day} style={styles.weekdayCell}>
-              <ThemedText type="caption" style={[styles.weekdayText, { color: theme.textSecondary }]}>
-                {day}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.calendarGrid}>
-          {calendarDays.map((day, index) => (
-            <Pressable
-              key={index}
-              style={getDayStyle(day)}
-              onPress={() => setSelectedDate(day.date)}
-            >
-              <ThemedText
-                style={[
-                  styles.dayText,
-                  { color: getDayTextColor(day) },
-                  !day.isCurrentMonth && styles.otherMonthDay,
-                ]}
-              >
-                {day.date.getDate()}
-              </ThemedText>
-            </Pressable>
-          ))}
-        </View>
-
+        {/* Filter chips - placed ABOVE the calendar card */}
         <View style={styles.filterRow}>
           {filterChips.map((chip) => (
             <Pressable
@@ -429,6 +409,39 @@ export default function CalendarScreen() {
               </ThemedText>
             </Pressable>
           ))}
+        </View>
+
+        {/* Calendar card with GlassCard-style container and minHeight */}
+        <View style={[styles.calendarCard, { backgroundColor: theme.cardBackground }]}>
+          <View style={styles.weekdaysRow}>
+            {WEEKDAYS.map((day) => (
+              <View key={day} style={styles.weekdayCell}>
+                <ThemedText type="caption" style={[styles.weekdayText, { color: theme.textSecondary }]}>
+                  {day}
+                </ThemedText>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.calendarGrid}>
+            {calendarDays.map((day, index) => (
+              <Pressable
+                key={index}
+                style={getDayStyle(day)}
+                onPress={() => setSelectedDate(day.date)}
+              >
+                <ThemedText
+                  style={[
+                    styles.dayText,
+                    { color: getDayTextColor(day) },
+                    !day.isCurrentMonth && styles.otherMonthDay,
+                  ]}
+                >
+                  {day.date.getDate()}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
         <View style={[styles.statsCard, { backgroundColor: theme.cardBackground }]}>
@@ -648,7 +661,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: Spacing.sm,
-    marginTop: Spacing.xl,
     marginBottom: Spacing.lg,
   },
   filterChip: {
@@ -656,6 +668,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
     borderWidth: 1.5,
+    minHeight: 44,
+    justifyContent: "center",
+  },
+  calendarCard: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+    minHeight: 320,
   },
   statsCard: {
     padding: Spacing.lg,
