@@ -236,8 +236,7 @@ export default function CalendarScreen() {
     dotColor: "#FF3F9E",
     selectedDotColor: "#FFFFFF",
     arrowColor: "#FF3F9E",
-    textDayHeaderFontSize: 12,
-    textDayHeaderFontWeight: "500" as const,
+    separatorColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(43,43,43,0.08)",
   };
 
   return (
@@ -251,6 +250,12 @@ export default function CalendarScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
+        {/* 1. Title: Calendar */}
+        <ThemedText type="h2" style={styles.screenTitle}>
+          Calendar
+        </ThemedText>
+
+        {/* 2. Filter chips */}
         <View style={styles.filterRow}>
           {filterChips.map((chip) => (
             <Pressable
@@ -277,6 +282,7 @@ export default function CalendarScreen() {
           ))}
         </View>
 
+        {/* 3. Calendar GlassCard (month grid) */}
         <GlassCard style={styles.calendarCard}>
           <Calendar
             current={currentMonth}
@@ -291,6 +297,7 @@ export default function CalendarScreen() {
           />
         </GlassCard>
 
+        {/* 4. About your cycle card */}
         <View style={[styles.statsCard, { backgroundColor: theme.cardBackground }]}>
           <ThemedText type="h4" style={styles.sectionTitle}>
             About your cycle
@@ -322,6 +329,7 @@ export default function CalendarScreen() {
           </View>
         </View>
 
+        {/* 5. The Lotus Cycle card */}
         <View style={[styles.phaseLegend, { backgroundColor: theme.cardBackground }]}>
           <ThemedText type="h4" style={styles.sectionTitle}>
             The Lotus Cycle
@@ -464,6 +472,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  screenTitle: {
+    textAlign: "center",
+    marginBottom: Spacing.lg,
   },
   filterRow: {
     flexDirection: "row",
