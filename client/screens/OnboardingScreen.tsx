@@ -7,6 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { useVideoPlayer, VideoView } from "expo-video";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -110,10 +111,18 @@ function AnimatedBlobbingText({
   );
 }
 
+const introVideoSource = require("@/assets/videos/olanna-intro.mov");
+
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   const [reduceMotion, setReduceMotion] = useState(false);
   const contentOpacity = useSharedValue(0);
   const contentScale = useSharedValue(0.95);
+
+  const player = useVideoPlayer(introVideoSource, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.play();
+  });
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
@@ -143,10 +152,11 @@ function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
 
   return (
     <Animated.View style={[styles.splashFullScreen, contentStyle]}>
-      <Image
-        source={require("@/assets/images/olanna-brand-logo.png")}
-        style={styles.splashImage}
-        resizeMode="cover"
+      <VideoView
+        player={player}
+        style={styles.splashVideo}
+        contentFit="cover"
+        nativeControls={false}
       />
     </Animated.View>
   );
@@ -664,6 +674,11 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT,
   },
   splashImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  splashVideo: {
     flex: 1,
     width: "100%",
     height: "100%",
