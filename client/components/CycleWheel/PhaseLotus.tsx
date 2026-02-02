@@ -1,19 +1,19 @@
 /**
  * PhaseLotus Component
  * 
- * Renders the correct lotus SVG variant based on the current phase.
- * Includes subtle fade/scale animation when phase changes.
+ * Renders a beautiful lotus flower SVG that changes based on cycle phase.
+ * Features soft gradients and gentle animations on phase changes.
  * 
  * Lotus Variants:
- * - bud: Closed lotus (menstrual) - fewest petals, tight
- * - rising: Half-open lotus (follicular) - more petals, opening
- * - bloom: Fully open lotus (ovulation) - most petals, wide open
+ * - bud: Closed lotus (menstrual) - tight closed bud
+ * - rising: Half-open lotus (follicular) - petals starting to open
+ * - bloom: Fully open lotus (ovulation) - fully bloomed with many petals
  * - closing: Gently closing lotus (luteal) - petals curving inward
  */
 
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
-import Svg, { Path, G } from "react-native-svg";
+import Svg, { Path, Defs, LinearGradient, Stop, G } from "react-native-svg";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -25,258 +25,257 @@ import { Phase, phaseConfig } from "@/constants/phaseConfig";
 interface PhaseLotusProps {
   phase: Phase;
   size?: number;
-  color?: string;
 }
 
-/**
- * Lotus Bud - Menstrual Phase
- * Closed, minimal petals representing rest
- */
-function LotusBud({ size, color }: { size: number; color: string }) {
+function LotusBud({ size }: { size: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id="lotusBudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+          <Stop offset="100%" stopColor="rgba(240,220,230,0.9)" />
+        </LinearGradient>
+      </Defs>
       <G>
-        {/* Stem */}
-        <Path d="M50 85 L50 65" stroke={color} strokeWidth={1.5} strokeLinecap="round" fill="none" />
         {/* Center petal */}
         <Path
-          d="M50 65 Q50 45 50 30 Q45 40 44 52 Q44 60 50 65 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-          strokeLinejoin="round"
+          d="M50 70 Q50 50 50 35 Q45 45 44 55 Q44 65 50 70 Z"
+          fill="url(#lotusBudGrad)"
+          stroke="rgba(200,180,200,0.3)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M50 65 Q50 45 50 30 Q55 40 56 52 Q56 60 50 65 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-          strokeLinejoin="round"
+          d="M50 70 Q50 50 50 35 Q55 45 56 55 Q56 65 50 70 Z"
+          fill="url(#lotusBudGrad)"
+          stroke="rgba(200,180,200,0.3)"
+          strokeWidth={0.5}
         />
-        {/* Small side petals */}
+        {/* Side petals */}
         <Path
-          d="M46 66 Q40 55 38 45 Q34 55 40 63 Q44 67 46 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M46 70 Q38 55 36 42 Q32 55 40 66 Q44 70 46 70"
+          fill="url(#lotusBudGrad)"
+          stroke="rgba(200,180,200,0.3)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M54 66 Q60 55 62 45 Q66 55 60 63 Q56 67 54 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M54 70 Q62 55 64 42 Q68 55 60 66 Q56 70 54 70"
+          fill="url(#lotusBudGrad)"
+          stroke="rgba(200,180,200,0.3)"
+          strokeWidth={0.5}
         />
       </G>
     </Svg>
   );
 }
 
-/**
- * Lotus Rising - Follicular Phase
- * Half-open with more visible petals
- */
-function LotusRising({ size, color }: { size: number; color: string }) {
+function LotusRising({ size }: { size: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id="lotusRisingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+          <Stop offset="100%" stopColor="rgba(248,200,180,0.85)" />
+        </LinearGradient>
+      </Defs>
       <G>
-        <Path d="M50 85 L50 62" stroke={color} strokeWidth={1.5} strokeLinecap="round" fill="none" />
         {/* Center petals */}
         <Path
-          d="M50 62 Q50 42 50 25 Q43 38 42 50 Q42 58 50 62 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M50 72 Q50 50 50 30 Q44 42 43 55 Q43 68 50 72 Z"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M50 62 Q50 42 50 25 Q57 38 58 50 Q58 58 50 62 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Side petals - left */}
-        <Path
-          d="M44 64 Q34 48 30 35 Q24 50 32 60 Q40 66 44 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Side petals - right */}
-        <Path
-          d="M56 64 Q66 48 70 35 Q76 50 68 60 Q60 66 56 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Outer petals */}
-        <Path
-          d="M38 66 Q26 55 22 42 Q16 58 26 66 Q34 70 38 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path
-          d="M62 66 Q74 55 78 42 Q84 58 74 66 Q66 70 62 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-      </G>
-    </Svg>
-  );
-}
-
-/**
- * Lotus Bloom - Ovulation Phase
- * Fully open with maximum petals
- */
-function LotusBloom({ size, color }: { size: number; color: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      <G>
-        <Path d="M50 88 L50 60" stroke={color} strokeWidth={1.5} strokeLinecap="round" fill="none" />
-        {/* Center petals */}
-        <Path
-          d="M50 60 Q50 40 50 22 Q44 34 43 48 Q43 56 50 60 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path
-          d="M50 60 Q50 40 50 22 Q56 34 57 48 Q57 56 50 60 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M50 72 Q50 50 50 30 Q56 42 57 55 Q57 68 50 72 Z"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
         {/* Inner side petals */}
         <Path
-          d="M45 62 Q35 46 32 32 Q26 48 34 58 Q42 64 45 62"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M45 72 Q36 52 32 35 Q26 52 36 66 Q42 73 45 72"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M55 62 Q65 46 68 32 Q74 48 66 58 Q58 64 55 62"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Middle petals */}
-        <Path
-          d="M40 64 Q28 52 22 38 Q14 54 24 64 Q34 70 40 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path
-          d="M60 64 Q72 52 78 38 Q86 54 76 64 Q66 70 60 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M55 72 Q64 52 68 35 Q74 52 64 66 Q58 73 55 72"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
         {/* Outer petals */}
         <Path
-          d="M34 68 Q18 60 12 45 Q6 62 18 70 Q30 74 34 68"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M40 74 Q28 56 24 40 Q18 58 28 70 Q36 76 40 74"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M66 68 Q82 60 88 45 Q94 62 82 70 Q70 74 66 68"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Outermost petals */}
-        <Path
-          d="M28 72 Q14 68 8 55 Q4 70 14 76 Q24 78 28 72"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path
-          d="M72 72 Q86 68 92 55 Q96 70 86 76 Q76 78 72 72"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M60 74 Q72 56 76 40 Q82 58 72 70 Q64 76 60 74"
+          fill="url(#lotusRisingGrad)"
+          stroke="rgba(240,180,160,0.3)"
+          strokeWidth={0.5}
         />
       </G>
     </Svg>
   );
 }
 
-/**
- * Lotus Closing - Luteal Phase
- * Petals gently curving inward
- */
-function LotusClosing({ size, color }: { size: number; color: string }) {
+function LotusBloom({ size }: { size: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id="lotusBloomGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="rgba(255,255,255,0.98)" />
+          <Stop offset="50%" stopColor="rgba(255,240,245,0.95)" />
+          <Stop offset="100%" stopColor="rgba(248,220,230,0.9)" />
+        </LinearGradient>
+      </Defs>
       <G>
-        <Path d="M50 85 L50 62" stroke={color} strokeWidth={1.5} strokeLinecap="round" fill="none" />
-        {/* Center petals - slightly closing */}
+        {/* Back petals (widest) */}
         <Path
-          d="M50 62 Q50 44 50 28 Q44 40 43 52 Q44 59 50 62 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M30 76 Q14 62 8 42 Q2 62 16 74 Q26 80 30 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M50 62 Q50 44 50 28 Q56 40 57 52 Q56 59 50 62 Z"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M70 76 Q86 62 92 42 Q98 62 84 74 Q74 80 70 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
-        {/* Side petals - curving inward */}
+        {/* Middle-outer petals */}
         <Path
-          d="M45 64 Q36 50 34 38 Q28 52 36 60 Q42 65 45 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path
-          d="M55 64 Q64 50 66 38 Q72 52 64 60 Q58 65 55 64"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
-        />
-        {/* Outer petals - more closed */}
-        <Path
-          d="M40 66 Q30 54 26 42 Q20 56 28 64 Q36 69 40 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M36 76 Q22 56 16 36 Q10 56 24 72 Q32 78 36 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M60 66 Q70 54 74 42 Q80 56 72 64 Q64 69 60 66"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M64 76 Q78 56 84 36 Q90 56 76 72 Q68 78 64 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
-        {/* Falling petals hint */}
+        {/* Inner-outer petals */}
         <Path
-          d="M34 70 Q26 62 22 52 Q18 64 26 70 Q32 73 34 70"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M42 76 Q30 52 26 32 Q20 52 34 70 Q40 77 42 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
         <Path
-          d="M66 70 Q74 62 78 52 Q82 64 74 70 Q68 73 66 70"
-          stroke={color}
-          strokeWidth={1}
-          fill="none"
+          d="M58 76 Q70 52 74 32 Q80 52 66 70 Q60 77 58 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
+        />
+        {/* Inner side petals */}
+        <Path
+          d="M46 76 Q38 50 36 28 Q30 50 40 70 Q44 76 46 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M54 76 Q62 50 64 28 Q70 50 60 70 Q56 76 54 76"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
+        />
+        {/* Center petals */}
+        <Path
+          d="M50 76 Q50 48 50 22 Q44 40 44 58 Q44 72 50 76 Z"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M50 76 Q50 48 50 22 Q56 40 56 58 Q56 72 50 76 Z"
+          fill="url(#lotusBloomGrad)"
+          stroke="rgba(240,200,210,0.4)"
+          strokeWidth={0.5}
         />
       </G>
     </Svg>
   );
 }
 
-export function PhaseLotus({ phase, size = 80, color = "rgba(255,255,255,0.85)" }: PhaseLotusProps) {
+function LotusClosing({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id="lotusClosingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+          <Stop offset="100%" stopColor="rgba(248,180,200,0.85)" />
+        </LinearGradient>
+      </Defs>
+      <G>
+        {/* Outer petals - curving inward */}
+        <Path
+          d="M34 74 Q24 58 22 42 Q18 58 28 70 Q32 75 34 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M66 74 Q76 58 78 42 Q82 58 72 70 Q68 75 66 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        {/* Middle petals */}
+        <Path
+          d="M40 74 Q32 54 30 38 Q26 54 36 68 Q38 74 40 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M60 74 Q68 54 70 38 Q74 54 64 68 Q62 74 60 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        {/* Inner petals */}
+        <Path
+          d="M45 74 Q40 52 38 36 Q34 52 42 68 Q44 74 45 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M55 74 Q60 52 62 36 Q66 52 58 68 Q56 74 55 74"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        {/* Center petals */}
+        <Path
+          d="M50 74 Q50 50 50 32 Q46 46 46 60 Q46 70 50 74 Z"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+        <Path
+          d="M50 74 Q50 50 50 32 Q54 46 54 60 Q54 70 50 74 Z"
+          fill="url(#lotusClosingGrad)"
+          stroke="rgba(240,160,180,0.3)"
+          strokeWidth={0.5}
+        />
+      </G>
+    </Svg>
+  );
+}
+
+export function PhaseLotus({ phase, size = 90 }: PhaseLotusProps) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
   useEffect(() => {
-    // Animate on phase change: fade out, scale down, then back
-    opacity.value = withTiming(0.6, { duration: 100, easing: Easing.out(Easing.ease) }, () => {
+    opacity.value = withTiming(0.7, { duration: 100, easing: Easing.out(Easing.ease) }, () => {
       opacity.value = withTiming(1, { duration: 150, easing: Easing.in(Easing.ease) });
     });
     scale.value = withTiming(0.95, { duration: 100, easing: Easing.out(Easing.ease) }, () => {
@@ -294,13 +293,13 @@ export function PhaseLotus({ phase, size = 80, color = "rgba(255,255,255,0.85)" 
   const renderLotus = () => {
     switch (config.lotusVariant) {
       case "bud":
-        return <LotusBud size={size} color={color} />;
+        return <LotusBud size={size} />;
       case "rising":
-        return <LotusRising size={size} color={color} />;
+        return <LotusRising size={size} />;
       case "bloom":
-        return <LotusBloom size={size} color={color} />;
+        return <LotusBloom size={size} />;
       case "closing":
-        return <LotusClosing size={size} color={color} />;
+        return <LotusClosing size={size} />;
     }
   };
 

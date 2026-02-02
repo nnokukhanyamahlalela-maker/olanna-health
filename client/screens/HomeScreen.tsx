@@ -224,30 +224,31 @@ export default function HomeScreen() {
 
         {/* Main Glass Card */}
         <View style={styles.mainCardWrapper}>
-          <BlurView intensity={40} tint="light" style={styles.mainCard}>
+          <BlurView intensity={50} tint="light" style={styles.mainCard}>
             <View style={styles.cardInner}>
-              {/* Cycle Wheel with Lotus */}
+              {/* Cycle Wheel with centered content */}
               <CycleWheel
                 phase={activePhase}
                 currentDay={currentDay}
                 cycleLength={cycleData.cycleLength}
               >
-                <PhaseLotus phase={activePhase} size={70} />
+                {/* Center content: Phase info + Lotus BELOW */}
+                <View style={styles.centerContent}>
+                  <ThemedText style={[styles.phaseTitle, { color: config.labelColor }]}>
+                    {config.label}
+                  </ThemedText>
+                  <ThemedText style={styles.dayNumber}>{currentDay}</ThemedText>
+                  <ThemedText style={styles.phaseSubtitle}>{config.subtitle}</ThemedText>
+                  <View style={styles.lotusContainer}>
+                    <PhaseLotus phase={activePhase} size={80} />
+                  </View>
+                </View>
               </CycleWheel>
 
-              {/* Phase Info */}
-              <View style={styles.phaseInfo}>
-                <ThemedText style={styles.phaseTitle}>{config.label}</ThemedText>
-                <ThemedText style={styles.dayNumber}>Day {currentDay}</ThemedText>
-                <ThemedText style={styles.phaseSubtitle}>{config.subtitle}</ThemedText>
-              </View>
-
-              {/* Day Counter */}
-              <View style={styles.dayCounter}>
-                <ThemedText style={styles.dayCounterText}>
-                  Day {currentDay} of {cycleData.cycleLength}
-                </ThemedText>
-              </View>
+              {/* Day Counter at bottom */}
+              <ThemedText style={styles.dayCounterText}>
+                Day {currentDay} of {cycleData.cycleLength}
+              </ThemedText>
             </View>
           </BlurView>
         </View>
@@ -407,10 +408,17 @@ const styles = StyleSheet.create({
   cardInner: {
     padding: Spacing.xl,
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.25)",
     borderRadius: 28,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  centerContent: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusContainer: {
+    marginTop: Spacing.sm,
   },
   phaseInfo: {
     alignItems: "center",
@@ -418,22 +426,21 @@ const styles = StyleSheet.create({
   },
   phaseTitle: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    color: "#FFFFFF",
+    fontSize: 12,
     letterSpacing: 2,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   dayNumber: {
     fontFamily: "Poppins_300Light",
-    fontSize: 48,
-    color: "#FFFFFF",
-    marginVertical: 4,
+    fontSize: 64,
+    color: "rgba(60,50,70,0.9)",
+    lineHeight: 72,
   },
   phaseSubtitle: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
-    fontStyle: "italic",
+    fontSize: 14,
+    color: "rgba(80,60,80,0.7)",
+    marginBottom: 4,
   },
   dayCounter: {
     marginTop: Spacing.lg,
@@ -443,10 +450,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   dayCounterText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
-    letterSpacing: 0.5,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+    color: "rgba(80,60,80,0.7)",
+    marginTop: Spacing.lg,
   },
   phaseSwitcher: {
     width: "100%",

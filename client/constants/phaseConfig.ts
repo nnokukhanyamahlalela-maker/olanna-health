@@ -2,6 +2,7 @@
  * Phase Configuration
  * Central configuration for all cycle phase properties including
  * labels, colors, gradients, and lotus variants.
+ * Based on reference design with curved labels on ring segments.
  */
 
 export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal";
@@ -15,84 +16,78 @@ export interface PhaseConfig {
   };
   lotusVariant: "bud" | "rising" | "bloom" | "closing";
   accentColor: string;
+  labelColor: string;
 }
 
 /**
  * Phase configuration object containing all display properties
  * for each phase of the menstrual cycle.
+ * Colors matched to reference design.
  */
 export const phaseConfig: Record<Phase, PhaseConfig> = {
   menstrual: {
     label: "MENSTRUAL",
     subtitle: "Rest & Release",
     ringGradient: {
-      start: "#C8A8D4",
-      end: "#E8C4D8",
+      start: "#B8A0D8",
+      end: "#D4B8E8",
     },
     lotusVariant: "bud",
-    accentColor: "#C8A8D4",
+    accentColor: "#B8A0D8",
+    labelColor: "#A090C0",
   },
   follicular: {
     label: "FOLLICULAR",
-    subtitle: "Growth & Renewal",
+    subtitle: "Rise & Energize",
     ringGradient: {
-      start: "#E8C4D8",
-      end: "#D4B8C0",
+      start: "#E8C8D8",
+      end: "#D8B8C8",
     },
     lotusVariant: "rising",
-    accentColor: "#D4B8C0",
+    accentColor: "#E8C8D8",
+    labelColor: "#C8A0B8",
   },
   ovulation: {
     label: "OVULATION",
-    subtitle: "Rise & Shine",
+    subtitle: "Bloom & Create",
     ringGradient: {
-      start: "#F4D0A8",
-      end: "#F8B888",
+      start: "#F8C8A0",
+      end: "#F8A878",
     },
     lotusVariant: "bloom",
-    accentColor: "#F8B888",
+    accentColor: "#F8A878",
+    labelColor: "#E89060",
   },
   luteal: {
     label: "LUTEAL",
-    subtitle: "Turn Inward",
+    subtitle: "Slow & Integrate",
     ringGradient: {
-      start: "#E888A8",
-      end: "#D868A0",
+      start: "#F898B0",
+      end: "#E878A0",
     },
     lotusVariant: "closing",
-    accentColor: "#E888A8",
+    accentColor: "#F898B0",
+    labelColor: "#E080A0",
   },
 };
 
 /**
  * Ring segment configuration for the cycle wheel.
- * Defines the percentage of the ring each phase occupies.
+ * Defines the start and end angles for each phase (in degrees).
+ * Starting from top (12 o'clock position).
  */
 export const ringSegments = {
-  menstrual: { start: 0, end: 18 },
-  follicular: { start: 18, end: 46 },
-  ovulation: { start: 46, end: 54 },
-  luteal: { start: 54, end: 100 },
+  follicular: { startAngle: -90, endAngle: -10, percentage: 0.22 },
+  ovulation: { startAngle: -10, endAngle: 50, percentage: 0.17 },
+  luteal: { startAngle: 50, endAngle: 180, percentage: 0.36 },
+  menstrual: { startAngle: 180, endAngle: 270, percentage: 0.25 },
 };
 
 /**
- * Get conic-gradient CSS string for the cycle wheel
+ * Calculate the angle for current day indicator
  */
-export function getCycleWheelGradient(): string {
-  const { menstrual, follicular, ovulation, luteal } = phaseConfig;
-  const segments = ringSegments;
-
-  return `conic-gradient(
-    from 0deg,
-    ${menstrual.ringGradient.start} ${segments.menstrual.start}%,
-    ${menstrual.ringGradient.end} ${segments.menstrual.end}%,
-    ${follicular.ringGradient.start} ${segments.follicular.start}%,
-    ${follicular.ringGradient.end} ${segments.follicular.end}%,
-    ${ovulation.ringGradient.start} ${segments.ovulation.start}%,
-    ${ovulation.ringGradient.end} ${segments.ovulation.end}%,
-    ${luteal.ringGradient.start} ${segments.luteal.start}%,
-    ${luteal.ringGradient.end} ${segments.luteal.end}%
-  )`;
+export function getDayAngle(currentDay: number, cycleLength: number): number {
+  return ((currentDay - 1) / cycleLength) * 360 - 90;
 }
 
 /**
