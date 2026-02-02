@@ -1,56 +1,38 @@
+/**
+ * HomeScreen
+ * 
+ * Main cycle tracking screen featuring:
+ * - Top header with month/year and profile button
+ * - Mini week calendar row with gradient date pills
+ * - Glass card with cycle wheel and lotus visualization
+ * - Phase switcher for demo purposes
+ * 
+ * Designed for iPhone sizes (390x844 style) with iOS glassmorphism.
+ */
+
 import React, { useState, useEffect, useMemo } from "react";
-import { View, StyleSheet, ScrollView, Dimensions, Pressable } from "react-native";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Stop, G } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { EmptyState } from "@/components/EmptyState";
 import { AppGradient } from "@/components/AppGradient";
-import { CyclePhase, Lotus } from "@/components/Lotus";
+import { CycleWheel } from "@/components/CycleWheel/CycleWheel";
+import { PhaseLotus } from "@/components/CycleWheel/PhaseLotus";
+import { Phase, phaseConfig } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-
-const PHASE_TITLES: Record<CyclePhase, string> = {
-  menstrual: "MENSTRUAL",
-  follicular: "FOLLICULAR",
-  ovulation: "OVULATION",
-  luteal: "LUTEAL",
-};
-
-const PHASE_SUBTITLES: Record<CyclePhase, string> = {
-  menstrual: "Rest & Release",
-  follicular: "Growth & Renewal",
-  ovulation: "Rise & Shine",
-  luteal: "Turn Inward",
-};
-
-const PHASE_GRADIENT_COLORS = {
-  menstrual: { start: "#C8A8D4", end: "#E8C4D8" },
-  follicular: { start: "#E8C4D8", end: "#D4B8C0" },
-  ovulation: { start: "#F4D0A8", end: "#F8B888" },
-  luteal: { start: "#E888A8", end: "#D868A0" },
-};
-
-function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
-  const angleRad = ((angleDeg - 90) * Math.PI) / 180;
-  return {
-    x: cx + r * Math.cos(angleRad),
-    y: cy + r * Math.sin(angleRad),
-  };
-}
+const PHASES: Phase[] = ["menstrual", "follicular", "ovulation", "luteal"];
 
 interface WeekCalendarProps {
   selectedDate: Date;
@@ -75,10 +57,6 @@ function WeekCalendar({ selectedDate, onSelectDate }: WeekCalendarProps) {
 
   const isSelected = (date: Date) => {
     return date.toDateString() === selectedDate.toDateString();
-  };
-
-  const isToday = (date: Date) => {
-    return date.toDateString() === new Date().toDateString();
   };
 
   return (
@@ -110,7 +88,7 @@ function WeekCalendar({ selectedDate, onSelectDate }: WeekCalendarProps) {
             >
               {selected ? (
                 <LinearGradient
-                  colors={["#F8A8C8", "#FF8858"]}
+                  colors={["#FF9EBC", "#FFAB7B"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.datePillGradient}
@@ -134,134 +112,13 @@ function WeekCalendar({ selectedDate, onSelectDate }: WeekCalendarProps) {
   );
 }
 
-interface CycleRingProps {
-  phase: CyclePhase;
-  currentDay: number;
-  cycleLength: number;
-}
-
-function CycleRing({ phase, currentDay, cycleLength }: CycleRingProps) {
-  const size = Math.min(SCREEN_WIDTH - 80, 280);
-  const strokeWidth = 16;
-  const radius = (size - strokeWidth) / 2;
-  const cx = size / 2;
-  const cy = size / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  const menstrualEnd = 0.18;
-  const follicularEnd = 0.46;
-  const ovulationEnd = 0.54;
-
-  const todayAngle = ((currentDay - 1) / cycleLength) * 360;
-  const todayPos = polarToCartesian(cx, cy, radius, todayAngle);
-
-  return (
-    <View style={[styles.cycleRingContainer, { width: size, height: size }]}>
-      <Svg width={size} height={size}>
-        <Defs>
-          <SvgLinearGradient id="menstrualGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#C8A8D4" />
-            <Stop offset="100%" stopColor="#E8C4D8" />
-          </SvgLinearGradient>
-          <SvgLinearGradient id="follicularGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#E8C4D8" />
-            <Stop offset="100%" stopColor="#D4B8C0" />
-          </SvgLinearGradient>
-          <SvgLinearGradient id="ovulationGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#F4D0A8" />
-            <Stop offset="100%" stopColor="#F8B888" />
-          </SvgLinearGradient>
-          <SvgLinearGradient id="lutealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#E888A8" />
-            <Stop offset="100%" stopColor="#D868A0" />
-          </SvgLinearGradient>
-        </Defs>
-
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          stroke="url(#menstrualGrad)"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={`${circumference * menstrualEnd} ${circumference}`}
-          strokeDashoffset={0}
-          transform={`rotate(-90 ${cx} ${cy})`}
-          strokeLinecap="round"
-        />
-
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          stroke="url(#follicularGrad)"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={`${circumference * (follicularEnd - menstrualEnd)} ${circumference}`}
-          strokeDashoffset={-circumference * menstrualEnd}
-          transform={`rotate(-90 ${cx} ${cy})`}
-          strokeLinecap="round"
-        />
-
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          stroke="url(#ovulationGrad)"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={`${circumference * (ovulationEnd - follicularEnd)} ${circumference}`}
-          strokeDashoffset={-circumference * follicularEnd}
-          transform={`rotate(-90 ${cx} ${cy})`}
-          strokeLinecap="round"
-        />
-
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={radius}
-          stroke="url(#lutealGrad)"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={`${circumference * (1 - ovulationEnd)} ${circumference}`}
-          strokeDashoffset={-circumference * ovulationEnd}
-          transform={`rotate(-90 ${cx} ${cy})`}
-          strokeLinecap="round"
-        />
-
-        <G>
-          <Circle
-            cx={todayPos.x}
-            cy={todayPos.y}
-            r={10}
-            fill="white"
-            stroke="rgba(0,0,0,0.1)"
-            strokeWidth={1}
-          />
-          <Circle
-            cx={todayPos.x}
-            cy={todayPos.y}
-            r={5}
-            fill="#E888A8"
-          />
-        </G>
-      </Svg>
-
-      <View style={styles.cycleCenter}>
-        <View style={styles.lotusWrapper}>
-          <Lotus
-            phase={phase}
-            size={80}
-            strokeColor="rgba(255,255,255,0.85)"
-            strokeWidth={1.2}
-          />
-        </View>
-        <ThemedText style={styles.phaseTitle}>{PHASE_TITLES[phase]}</ThemedText>
-        <ThemedText style={styles.dayNumber}>{currentDay}</ThemedText>
-        <ThemedText style={styles.phaseSubtitle}>{PHASE_SUBTITLES[phase]}</ThemedText>
-      </View>
-    </View>
-  );
+function getDayForPhase(phase: Phase, cycleLength: number): number {
+  switch (phase) {
+    case "menstrual": return 3;
+    case "follicular": return 10;
+    case "ovulation": return 14;
+    case "luteal": return 21;
+  }
 }
 
 export default function HomeScreen() {
@@ -272,6 +129,7 @@ export default function HomeScreen() {
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [demoPhase, setDemoPhase] = useState<Phase | null>(null);
 
   const currentMonth = useMemo(() => {
     return selectedDate.toLocaleString("default", { month: "long", year: "numeric" });
@@ -328,6 +186,12 @@ export default function HomeScreen() {
     );
   }
 
+  const activePhase = demoPhase || (cycleData.phase as Phase);
+  const currentDay = demoPhase 
+    ? getDayForPhase(demoPhase, cycleData.cycleLength)
+    : cycleData.currentDay;
+  const config = phaseConfig[activePhase];
+
   return (
     <AppGradient style={styles.fullScreen}>
       <ScrollView
@@ -341,6 +205,7 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.header}>
           <ThemedText style={styles.monthTitle}>{currentMonth}</ThemedText>
           <Pressable
@@ -354,32 +219,73 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
+        {/* Week Calendar */}
         <WeekCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
+        {/* Main Glass Card */}
         <View style={styles.mainCardWrapper}>
           <BlurView intensity={40} tint="light" style={styles.mainCard}>
             <View style={styles.cardInner}>
-              <CycleRing
-                phase={cycleData.phase}
-                currentDay={cycleData.currentDay}
+              {/* Cycle Wheel with Lotus */}
+              <CycleWheel
+                phase={activePhase}
+                currentDay={currentDay}
                 cycleLength={cycleData.cycleLength}
-              />
+              >
+                <PhaseLotus phase={activePhase} size={70} />
+              </CycleWheel>
 
+              {/* Phase Info */}
+              <View style={styles.phaseInfo}>
+                <ThemedText style={styles.phaseTitle}>{config.label}</ThemedText>
+                <ThemedText style={styles.dayNumber}>Day {currentDay}</ThemedText>
+                <ThemedText style={styles.phaseSubtitle}>{config.subtitle}</ThemedText>
+              </View>
+
+              {/* Day Counter */}
               <View style={styles.dayCounter}>
                 <ThemedText style={styles.dayCounterText}>
-                  Day {cycleData.currentDay} of {cycleData.cycleLength}
+                  Day {currentDay} of {cycleData.cycleLength}
                 </ThemedText>
               </View>
             </View>
           </BlurView>
         </View>
 
+        {/* Demo Phase Switcher */}
+        <View style={styles.phaseSwitcher}>
+          <ThemedText style={styles.switcherLabel}>SWITCH PHASE (DEMO)</ThemedText>
+          <View style={styles.switcherPills}>
+            {PHASES.map((phase) => {
+              const isActive = activePhase === phase;
+              return (
+                <Pressable
+                  key={phase}
+                  style={[
+                    styles.phasePill,
+                    isActive && styles.phasePillActive,
+                    { backgroundColor: phaseConfig[phase].accentColor + (isActive ? "FF" : "40") }
+                  ]}
+                  onPress={() => setDemoPhase(phase)}
+                  accessibilityLabel={`Switch to ${phase} phase`}
+                >
+                  <ThemedText
+                    style={[
+                      styles.phasePillText,
+                      isActive && styles.phasePillTextActive
+                    ]}
+                  >
+                    {phase.slice(0, 3).toUpperCase()}
+                  </ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Brand Footer */}
         <View style={styles.brandFooter}>
-          <ThemedText style={styles.brandName}>
-            <ThemedText style={styles.brandBold}>OLANNA</ThemedText>
-            {" "}
-            <ThemedText style={styles.brandLight}>HEALTH</ThemedText>
-          </ThemedText>
+          <ThemedText style={styles.brandName}>OLANNA HEALTH</ThemedText>
         </View>
       </ScrollView>
     </AppGradient>
@@ -395,6 +301,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: ScreenPadding.horizontal,
+    alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
@@ -414,11 +321,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
     marginBottom: Spacing.lg,
   },
   monthTitle: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 24,
+    fontSize: 22,
     color: "rgba(255,255,255,0.95)",
     letterSpacing: 0.5,
   },
@@ -433,6 +341,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
   },
   weekCalendar: {
+    width: "100%",
     marginBottom: Spacing.xl,
   },
   weekdayRow: {
@@ -451,7 +360,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   weekdayLabelSelected: {
-    color: "#F8A8C8",
+    color: "#FF9EBC",
   },
   datesRow: {
     flexDirection: "row",
@@ -486,6 +395,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   mainCardWrapper: {
+    width: "100%",
     borderRadius: 28,
     overflow: "hidden",
     marginBottom: Spacing.xl,
@@ -502,39 +412,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
-  cycleRingContainer: {
+  phaseInfo: {
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  cycleCenter: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  lotusWrapper: {
-    marginBottom: Spacing.sm,
-    opacity: 0.9,
+    marginTop: Spacing.lg,
   },
   phaseTitle: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    letterSpacing: 3,
-    textTransform: "uppercase",
+    fontSize: 14,
+    color: "#FFFFFF",
+    letterSpacing: 2,
     marginBottom: 4,
   },
   dayNumber: {
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "Poppins_300Light",
     fontSize: 48,
-    color: "rgba(255,255,255,0.95)",
-    lineHeight: 56,
+    color: "#FFFFFF",
+    marginVertical: 4,
   },
   phaseSubtitle: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-    color: "rgba(255,255,255,0.7)",
-    marginTop: 2,
+    fontSize: 16,
+    color: "rgba(255,255,255,0.8)",
+    fontStyle: "italic",
   },
   dayCounter: {
     marginTop: Spacing.lg,
@@ -549,24 +448,53 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     letterSpacing: 0.5,
   },
+  phaseSwitcher: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
+  switcherLabel: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.5)",
+    letterSpacing: 1.5,
+    marginBottom: 12,
+  },
+  switcherPills: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  phasePill: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    minWidth: 60,
+    alignItems: "center",
+  },
+  phasePillActive: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  phasePillText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+    letterSpacing: 0.5,
+  },
+  phasePillTextActive: {
+    color: "#FFFFFF",
+  },
   brandFooter: {
     alignItems: "center",
     paddingVertical: Spacing.xl,
   },
   brandName: {
-    fontSize: 14,
-    letterSpacing: 2,
-  },
-  brandBold: {
-    fontFamily: "Poppins_700Bold",
-    color: "rgba(255,255,255,0.95)",
-    fontSize: 14,
-    letterSpacing: 2,
-  },
-  brandLight: {
-    fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
-    letterSpacing: 2,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.5)",
+    letterSpacing: 3,
   },
 });
