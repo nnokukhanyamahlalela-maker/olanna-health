@@ -1,0 +1,190 @@
+2) Final Onboarding Script + UI Spec (screen-by-screen)
+
+Screen 0 — Splash (Auto)
+
+Center: OLANNA (bold) + HEALTH (small caps)
+	•	Animation: fade/scale in
+	•	Duration: 800–1000ms
+	•	No interactions
+
+⸻
+
+Screen 1 — Intro
+
+Headline:
+
+Go hi.
+My name is Olanna.
+
+CTA: Continue
+Optional tiny helper text: “I’ll help you understand your cycle and health.”
+
+⸻
+
+Screen 2 — Name
+
+Headline:
+
+And what shall I call you?
+
+Field: Your name
+CTA: Next (disabled until at least 2 characters)
+
+⸻
+
+Screen 3 — Profile Setup (Minimum viable + gentle)
+
+Headline:
+
+Nice to meet you, [Name]
+
+Helper:
+
+This helps me personalise your experience.
+
+Recommended fields (progressive, skippable):
+	•	Age range (quick select) OR Date of birth (choose one UX pattern; age range is lighter)
+	•	Cycle regularity: Regular / Irregular / Not sure
+	•	Last period start date (optional)
+	•	Average cycle length (optional; default 28)
+
+CTA: Continue
+Secondary: Skip for now
+
+⸻
+
+Screen 4 — Goals (Your screenshot)
+
+Headline:
+
+And to what do I owe this pleasure?
+
+Subtext:
+
+Select all that apply
+
+Pills: (multi-select)
+	•	Track my period
+	•	Manage PCOS
+	•	Manage Endometriosis
+	•	Track fertility
+	•	Sexual health
+	•	General wellness
+
+CTA: Continue (enabled once ≥1 selected)
+
+⸻
+
+Screen 5 — Confirmation (Auto)
+
+Headline:
+
+Perfect.
+Let’s get started.
+
+Auto-advance in 700–900ms
+
+⸻
+
+Screens 6–8 — The 3 onboarding feature screens (the ones you loved)
+
+6: Track your cycle
+7: Gain insights
+8: Take control (CTA becomes Get Started)
+
+⸻
+
+3) What Data Is Truly Required vs Optional
+
+Required (to create an account + basic predictions)
+	1.	Name (or nickname)
+	2.	At least one goal
+	3.	Cycle start anchor (choose one):
+	•	Last period start date OR
+	•	“I don’t know” → app uses default assumptions
+
+That’s it.
+
+Strongly recommended (better insights, still low friction)
+	•	Cycle regularity (Regular/Irregular/Not sure)
+	•	Average cycle length (if known)
+
+Optional (high sensitivity / avoid gatekeeping)
+	•	Date of birth (offer age range instead)
+	•	Sexual health goal details (only if they choose it)
+	•	Any diagnosis confirmation (PCOS/Endo) → never require proof; use supportive language
+
+Best practice: allow “Skip for now” on anything except Name + Goal.
+
+⸻
+
+4) Goal-Based Branching (what happens after Goals)
+
+Once they pick goals, you can tailor the next screens:
+	•	Track my period → show cycle wheel + reminders emphasis
+	•	Manage PCOS → add “symptom patterns + metabolic wellbeing” messaging
+	•	Manage Endometriosis → add “pain tracking + flare support” messaging (trauma-informed)
+	•	Track fertility → add ovulation window + temperature/OPK support later
+	•	Sexual health → add optional privacy-first modules (consent, symptoms, testing reminders)
+	•	General wellness → show daily check-in + insights
+
+Implementation: store goals; adjust the copy/icons on screens 6–8 based on top goal, while keeping the same layout.
+
+⸻
+
+5) Error States + Empty States (Premium iOS feel)
+
+Name screen
+	•	Error (only on Next press):
+	•	“Please enter a name so I know what to call you.”
+	•	Empty state: placeholder only
+
+Profile setup
+	•	If user enters cycle length outside 15–60:
+	•	“That doesn’t look right — most cycles fall between 15–60 days.”
+	•	If last period date is in the future:
+	•	“That date looks ahead — please choose a past date.”
+
+Goals screen
+	•	If none selected and they tap Continue:
+	•	“Select at least one so I can tailor your experience.”
+
+Network/account creation (later)
+	•	“We couldn’t connect right now. Try again in a moment.”
+	•	Button: Try again
+	•	Secondary: Continue offline (if you support it)
+
+Permissions (if you add later)
+	•	Notifications:
+	•	“Would you like gentle reminders?”
+	•	“You can change this anytime in Settings.”
+
+⸻
+
+6) Accessibility + Inclusive Language Pass
+
+Accessibility (must-haves)
+	•	Tap targets ≥ 44x44pt (especially pills)
+	•	Contrast:
+	•	White text on gradient must pass contrast → add subtle dark overlay behind text if needed
+	•	Dynamic Type friendly:
+	•	Allow headings to wrap
+	•	Avoid fixed heights on text blocks
+	•	VoiceOver:
+	•	Each pill announces “Selected/Not selected”
+	•	Buttons have clear labels (“Continue”, “Get started”)
+	•	Reduce Motion:
+	•	If user prefers reduced motion → switch transitions to simple fades only
+
+Inclusive language improvements (recommended copy tweaks)
+	•	“Go hi” is cute and distinctive — keep it.
+	•	“And what shall I call you?” ✅ warm and respectful
+	•	For sensitive fields:
+	•	Replace anything that sounds like interrogation (“Required for insights”) with:
+“Only if you’re comfortable — this helps me personalise your experience.”
+	•	For PCOS/Endo:
+	•	Don’t imply diagnosis; use:
+	•	“Support for PCOS”
+	•	“Support for Endometriosis”
+	•	Avoid gendered assumptions:
+	•	Don’t say “women’s bodies” in onboarding copy; keep it “your body / your cycle”.
