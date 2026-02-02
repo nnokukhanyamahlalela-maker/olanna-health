@@ -32,7 +32,19 @@ The application includes:
   - Calendar features soft glow dots for cycle phases and a pink halo for selected days.
 - **Theming**: Comprehensive theme system supporting Light, Dark, and System modes, persisted via AsyncStorage. Theme-aware components adapt styling based on selected theme, including gradients and text colors. WCAG AA compliant contrast is maintained.
 - **Symptom Tracking**: A comprehensive system with 15 categories and 200+ symptoms, including a SeveritySlider, BodyMap with SVG silhouette, TagSelector, and customizable check-in screen with favorites.
-- **Onboarding**: A multi-step onboarding flow with branded splash screens, animated text, glass-style UI elements, and health goal selection.
+- **Onboarding**: A conversational 8-step onboarding flow with:
+  - Step-based state machine: splash → intro → name → greeting → profile → goals → confirmation → carousel
+  - Splash screen with video background (auto-advances in 900ms)
+  - Intro screen: "Go hi. My name is Olanna." with Continue button
+  - Name screen: "And what shall I call you?" with glass input and progress dots (step 1/3)
+  - Greeting screen: "Nice to meet you, [Name]" (auto-advances in 2.5s)
+  - Profile screen: Cycle regularity, last period date, average cycle length (step 2/3)
+  - Goals screen: Multi-select pills for 6 health goals (Track period, PCOS, Endometriosis, Fertility, Sexual health, General wellness) (step 3/3)
+  - Confirmation screen: "Perfect. Let's get started." (auto-advances in 2.8s)
+  - Carousel: 3 slides (Track your cycle, Gain insights, Take control) with Get Started button
+  - Warm gradient palette (peach → pink → lilac), iOS-style glass cards, Poppins typography
+  - Reusable components: ProgressDots, OnboardingGlassCard, PrimaryButton, PillSelect, AnimatedHeading/Subtext
+  - Types defined in `client/constants/onboardingTokens.ts`
 - **Goals-Based Personalization**: User-selected health goals from onboarding (stored in AsyncStorage) drive personalized content ordering across the app. The system uses a scoring-based approach to reorder modules, check-in categories, and educational topics based on user goals (period_tracking, ttc, symptoms, pcos, endometriosis, regularity, learn_hormones). Key utilities in `utils/onboardingStorage.ts` and `utils/personalization.ts`.
 
 ## External Dependencies
