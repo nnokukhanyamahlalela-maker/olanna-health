@@ -21,7 +21,15 @@ The application includes:
 - **AI Health Assistant**: A multilingual chatbot supporting English and five other South African languages (isiZulu, Afrikaans, Sesotho, isiXhosa, siSwati).
 - **Navigation**: Uses React Navigation with a 5-tab bottom navigation (Cycle, Check-in, Calendar, Health, Learn) and stack navigators. The Profile screen is accessible via a header button.
 - **Design System**: Features a sophisticated design language with generous whitespace, thin dividers, uppercase section labels with letter-spacing, and pull quotes. Phase-aware coloring (Menstrual: Terracotta/Orange, Follicular: Sage/Hot Pink, Ovulatory: Gold/Soft Pink, Luteal: Lavender/Purple) is used throughout. All screens use the `AppGradient` component (`client/components/AppGradient.tsx`) as the root wrapper for consistent brand gradient backgrounds (#FF9A6B → #FF3F9E → #F7B0C8 → #E7C2E8 with subtle white overlay).
-- **Visualizations**: Lotus Cycle Wheel with dynamic petal generation (3, 5, 7 petals based on phase) and breathing animation. Calendar features soft glow dots for cycle phases and a pink halo for selected days.
+- **Visualizations**: iOS-style cycle screen with:
+  - Top header showing month/year with profile button
+  - Mini week calendar row with gradient date pills (pink → orange)
+  - Main glass card (BlurView) containing circular cycle wheel with 4-phase gradient segments (Menstrual: purple/lavender, Follicular: soft lilac, Ovulation: peach/orange, Luteal: pink/magenta)
+  - Phase-specific Lotus flower in center that changes based on cycle phase (closed bud for menstrual, half-open for follicular, fully open for ovulation, closing for luteal)
+  - Current day indicator dot on the wheel ring
+  - Center content with uppercase phase title, large day number, and subtitle
+  - "OLANNA HEALTH" brand footer
+  - Calendar features soft glow dots for cycle phases and a pink halo for selected days.
 - **Theming**: Comprehensive theme system supporting Light, Dark, and System modes, persisted via AsyncStorage. Theme-aware components adapt styling based on selected theme, including gradients and text colors. WCAG AA compliant contrast is maintained.
 - **Symptom Tracking**: A comprehensive system with 15 categories and 200+ symptoms, including a SeveritySlider, BodyMap with SVG silhouette, TagSelector, and customizable check-in screen with favorites.
 - **Onboarding**: A multi-step onboarding flow with branded splash screens, animated text, glass-style UI elements, and health goal selection.
