@@ -1,0 +1,39 @@
+Build an iOS-style period tracking cycle  Screen  using React + TypeScript (Vite) with CSS modules (no UI libraries). The UI should match Apple’s latest design trends: soft blur, large rounded cards, subtle gradients, airy spacing, SF Pro-like typography, minimal borders, and gentle shadows.
+
+Screen layout
+	1.	Top header
+	•	Left: “January 2026” (large, semibold)
+	•	Right: circular icon button with a user/profile glyph
+	•	Background: very light pink/lilac with subtle gradient.
+	2.	Mini week calendar row
+	•	Show weekday labels: SUN MON TUE WED THU FRI SAT
+	•	Below: dates 25–31 in a row
+	•	Highlight selected date 29 with a circular gradient pill (pink → orange) and white number text.
+	•	Make THU label slightly tinted pink (selected day).
+	3.	Main cycle card
+	•	Large rounded rectangle card (≈ 24–28px radius)
+	•	Soft glassy background with subtle blur and faint gradient
+	•	Inside card: a circular cycle wheel (donut ring)
+	•	Ring is segmented into 4 phases with smooth gradient blending:
+	•	Menstrual: purple/lavender
+	•	Follicular: soft lilac
+	•	Ovulation: peach/orange
+	•	Luteal: pink/magenta
+	•	A current-day indicator dot (small circle with white stroke) positioned on the ring at the top.
+	•	Phase labels curved around inner ring (optional but preferred): “Menstrual”, “Follicular”, “Ovulation”, “Luteal”
+	•	Center content:
+	•	Phase title (uppercase, spaced letters): e.g. “MENSTRUAL”
+	•	Big day number (e.g. “1”)
+	•	Subtitle line (e.g. “Rest & Release”)
+	•	Bottom of card: “Day 1 of 28”
+	4.	Bottom brand
+	•	Under the card, center “OLANNA HEALTH” in white, bold for OLANNA, smaller for HEALTH.
+
+Lotus flower that changes by phase (center of wheel)
+
+Use a minimal, abstract lotus icon (vector/SVG), white with very soft opacity.
+Change lotus per phase:
+	•	Menstrual: closed bud / smallest lotus (few petals)
+	•	Follicular: half-open lotus (more petals)
+	•	Ovulation: fully open lotus (largest, most petals)
+	•	Luteal: slightly falling petals or gently closing (clean and subtle, not messy)
