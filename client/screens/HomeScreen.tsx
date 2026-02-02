@@ -5,8 +5,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import Svg, { Circle, Defs, LinearGradient, Stop, G } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Stop, G } from "react-native-svg";
 import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { EmptyState } from "@/components/EmptyState";
@@ -107,13 +108,24 @@ function WeekCalendar({ selectedDate, onSelectDate }: WeekCalendarProps) {
               accessibilityRole="button"
               accessibilityLabel={`Select ${date.toDateString()}`}
             >
-              <View style={[styles.datePill, selected && styles.datePillSelected]}>
-                <ThemedText
-                  style={[styles.dateText, selected && styles.dateTextSelected]}
+              {selected ? (
+                <LinearGradient
+                  colors={["#F8A8C8", "#FF8858"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.datePillGradient}
                 >
-                  {date.getDate()}
-                </ThemedText>
-              </View>
+                  <ThemedText style={styles.dateTextSelected}>
+                    {date.getDate()}
+                  </ThemedText>
+                </LinearGradient>
+              ) : (
+                <View style={styles.datePill}>
+                  <ThemedText style={styles.dateText}>
+                    {date.getDate()}
+                  </ThemedText>
+                </View>
+              )}
             </Pressable>
           );
         })}
@@ -147,22 +159,22 @@ function CycleRing({ phase, currentDay, cycleLength }: CycleRingProps) {
     <View style={[styles.cycleRingContainer, { width: size, height: size }]}>
       <Svg width={size} height={size}>
         <Defs>
-          <LinearGradient id="menstrualGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <SvgLinearGradient id="menstrualGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <Stop offset="0%" stopColor="#C8A8D4" />
             <Stop offset="100%" stopColor="#E8C4D8" />
-          </LinearGradient>
-          <LinearGradient id="follicularGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          </SvgLinearGradient>
+          <SvgLinearGradient id="follicularGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <Stop offset="0%" stopColor="#E8C4D8" />
             <Stop offset="100%" stopColor="#D4B8C0" />
-          </LinearGradient>
-          <LinearGradient id="ovulationGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          </SvgLinearGradient>
+          <SvgLinearGradient id="ovulationGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <Stop offset="0%" stopColor="#F4D0A8" />
             <Stop offset="100%" stopColor="#F8B888" />
-          </LinearGradient>
-          <LinearGradient id="lutealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          </SvgLinearGradient>
+          <SvgLinearGradient id="lutealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <Stop offset="0%" stopColor="#E888A8" />
             <Stop offset="100%" stopColor="#D868A0" />
-          </LinearGradient>
+          </SvgLinearGradient>
         </Defs>
 
         <Circle
@@ -456,9 +468,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  datePillSelected: {
-    backgroundColor: "transparent",
-    overflow: "hidden",
+  datePillGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
   dateText: {
     fontFamily: "Poppins_500Medium",
@@ -468,6 +483,7 @@ const styles = StyleSheet.create({
   dateTextSelected: {
     color: "#fff",
     fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
   },
   mainCardWrapper: {
     borderRadius: 28,
