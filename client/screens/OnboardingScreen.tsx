@@ -111,7 +111,7 @@ function AnimatedBlobbingText({
   );
 }
 
-const introVideoSource = require("@/assets/videos/olanna-intro.mov");
+const introVideoSource = require("@/assets/videos/olanna-intro.mp4");
 
 function GradientSpillIntro({ onComplete }: { onComplete: () => void }) {
   const [reduceMotion, setReduceMotion] = useState(false);
