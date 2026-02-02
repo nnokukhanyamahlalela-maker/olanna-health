@@ -6,7 +6,6 @@ import MainTabNavigator, { MainTabParamList } from "@/navigation/MainTabNavigato
 import IntroLogo from "@/screens/IntroLogo";
 import SplashScreen from "@/screens/SplashScreen";
 import OnboardingScreen from "@/screens/OnboardingScreen";
-import OnboardingSimple from "@/screens/OnboardingSimple";
 import PCOSModuleScreen from "@/screens/PCOSModuleScreen";
 import EndometriosisModuleScreen from "@/screens/EndometriosisModuleScreen";
 import SexualHealthModuleScreen from "@/screens/SexualHealthModuleScreen";
@@ -71,7 +70,7 @@ export default function RootStackNavigator() {
       />
       <Stack.Screen
         name="Onboarding"
-        component={OnboardingSimple}
+        component={OnboardingScreen}
         options={{ headerShown: false, animation: "fade" }}
       />
       <Stack.Screen
