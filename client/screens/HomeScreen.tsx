@@ -24,7 +24,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { AppGradient } from "@/components/AppGradient";
 import { CycleWheel } from "@/components/CycleWheel/CycleWheel";
 import { PhaseLotus } from "@/components/CycleWheel/PhaseLotus";
-import { PhaseExplainer } from "@/components/PhaseExplainer";
+import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
