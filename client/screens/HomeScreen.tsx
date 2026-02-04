@@ -33,7 +33,6 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-const PHASES: Phase[] = ["menstrual", "follicular", "ovulation", "luteal"];
 
 interface WeekCalendarProps {
   selectedDate: Date;
@@ -122,6 +121,17 @@ function getDayForPhase(phase: Phase, cycleLength: number): number {
   }
 }
 
+function getPhaseForDay(day: number, cycleLength: number): Phase {
+  const menstrualEnd = Math.round(cycleLength * 0.18);
+  const follicularEnd = Math.round(cycleLength * 0.46);
+  const ovulationEnd = Math.round(cycleLength * 0.54);
+  
+  if (day <= menstrualEnd) return "menstrual";
+  if (day <= follicularEnd) return "follicular";
+  if (day <= ovulationEnd) return "ovulation";
+  return "luteal";
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
@@ -130,7 +140,7 @@ export default function HomeScreen() {
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [demoPhase, setDemoPhase] = useState<Phase | null>(null);
+  const [wheelDay, setWheelDay] = useState<number | null>(null);
 
   const currentMonth = useMemo(() => {
     return selectedDate.toLocaleString("default", { month: "long", year: "numeric" });
@@ -187,11 +197,15 @@ export default function HomeScreen() {
     );
   }
 
-  const activePhase = demoPhase || (cycleData.phase as Phase);
-  const currentDay = demoPhase 
-    ? getDayForPhase(demoPhase, cycleData.cycleLength)
-    : cycleData.currentDay;
+  const currentDay = wheelDay ?? cycleData.currentDay;
+  const activePhase = wheelDay 
+    ? getPhaseForDay(wheelDay, cycleData.cycleLength) 
+    : (cycleData.phase as Phase);
   const config = phaseConfig[activePhase];
+
+  const handleWheelDayChange = (day: number) => {
+    setWheelDay(day);
+  };
 
   return (
     <AppGradient style={styles.fullScreen}>
@@ -232,6 +246,8 @@ export default function HomeScreen() {
                 phase={activePhase}
                 currentDay={currentDay}
                 cycleLength={cycleData.cycleLength}
+                onDayChange={handleWheelDayChange}
+                interactive={true}
               >
                 {/* Center content: Phase info + Lotus BELOW */}
                 <View style={styles.centerContent}>
@@ -257,36 +273,17 @@ export default function HomeScreen() {
         {/* Phase Explainer */}
         <PhaseExplainerCard phaseId={activePhase === "ovulation" ? "ovulatory" : activePhase} />
 
-        {/* Demo Phase Switcher */}
-        <View style={styles.phaseSwitcher}>
-          <ThemedText style={styles.switcherLabel}>SWITCH PHASE (DEMO)</ThemedText>
-          <View style={styles.switcherPills}>
-            {PHASES.map((phase) => {
-              const isActive = activePhase === phase;
-              return (
-                <Pressable
-                  key={phase}
-                  style={[
-                    styles.phasePill,
-                    isActive && styles.phasePillActive,
-                    { backgroundColor: phaseConfig[phase].accentColor + (isActive ? "FF" : "40") }
-                  ]}
-                  onPress={() => setDemoPhase(phase)}
-                  accessibilityLabel={`Switch to ${phase} phase`}
-                >
-                  <ThemedText
-                    style={[
-                      styles.phasePillText,
-                      isActive && styles.phasePillTextActive
-                    ]}
-                  >
-                    {phase.slice(0, 3).toUpperCase()}
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+        {/* Reset to Today Button - shown when exploring different days */}
+        {wheelDay !== null && wheelDay !== cycleData.currentDay ? (
+          <Pressable
+            style={styles.resetButton}
+            onPress={() => setWheelDay(null)}
+            accessibilityLabel="Return to today"
+          >
+            <Feather name="refresh-cw" size={14} color="rgba(255,255,255,0.8)" />
+            <ThemedText style={styles.resetButtonText}>Return to Today</ThemedText>
+          </Pressable>
+        ) : null}
 
         {/* Brand Footer */}
         <View style={styles.brandFooter}>
@@ -459,44 +456,23 @@ const styles = StyleSheet.create({
     color: "rgba(80,60,80,0.7)",
     marginTop: Spacing.lg,
   },
-  phaseSwitcher: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: Spacing.md,
-  },
-  switcherLabel: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.5)",
-    letterSpacing: 1.5,
-    marginBottom: 12,
-  },
-  switcherPills: {
+  resetButton: {
     flexDirection: "row",
-    gap: 10,
-  },
-  phasePill: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    minWidth: 60,
     alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 24,
+    marginTop: Spacing.lg,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
   },
-  phasePillActive: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  phasePillText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    letterSpacing: 0.5,
-  },
-  phasePillTextActive: {
-    color: "#FFFFFF",
+  resetButtonText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
   },
   brandFooter: {
     alignItems: "center",
