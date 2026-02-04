@@ -255,7 +255,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Phase Explainer */}
-        <PhaseExplainer phase={activePhase} />
+        <PhaseExplainerCard phaseId={activePhase === "ovulation" ? "ovulatory" : activePhase} />
 
         {/* Demo Phase Switcher */}
         <View style={styles.phaseSwitcher}>
