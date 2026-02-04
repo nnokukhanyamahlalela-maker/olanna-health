@@ -3,10 +3,10 @@
  * 
  * A circular donut-style wheel showing the 4 menstrual cycle phases
  * with curved phase labels, gradient segments, and transition dots.
- * Matches the reference design with phase names curved along the ring.
+ * Supports interactive dragging to select different days.
  */
 
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import Svg, {
   Circle,
@@ -18,6 +18,14 @@ import Svg, {
   TextPath,
   Path,
 } from "react-native-svg";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { Phase, phaseConfig } from "@/constants/phaseConfig";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -28,6 +36,8 @@ interface CycleWheelProps {
   cycleLength: number;
   size?: number;
   children?: React.ReactNode;
+  onDayChange?: (day: number) => void;
+  interactive?: boolean;
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
@@ -45,12 +55,28 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
   return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
 }
 
+function cartesianToAngle(x: number, y: number, cx: number, cy: number): number {
+  const dx = x - cx;
+  const dy = y - cy;
+  let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  angle = angle + 90;
+  if (angle < 0) angle += 360;
+  return angle;
+}
+
+function angleToDayNumber(angle: number, cycleLength: number): number {
+  const day = Math.round((angle / 360) * cycleLength) + 1;
+  return Math.max(1, Math.min(cycleLength, day));
+}
+
 export function CycleWheel({
   phase,
   currentDay,
   cycleLength,
   size: propSize,
   children,
+  onDayChange,
+  interactive = true,
 }: CycleWheelProps) {
   const size = propSize || Math.min(SCREEN_WIDTH - 60, 300);
   const strokeWidth = 24;
@@ -74,7 +100,61 @@ export function CycleWheel({
     360,
   ];
 
-  return (
+  const lastDayRef = useRef(currentDay);
+  const scale = useSharedValue(1);
+  const isDragging = useSharedValue(false);
+
+  const triggerHaptic = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
+  const handleDayChange = useCallback((day: number) => {
+    if (day !== lastDayRef.current && onDayChange) {
+      lastDayRef.current = day;
+      triggerHaptic();
+      onDayChange(day);
+    }
+  }, [onDayChange, triggerHaptic]);
+
+  const panGesture = Gesture.Pan()
+    .onBegin((event) => {
+      isDragging.value = true;
+      scale.value = withSpring(1.02, { damping: 15, stiffness: 300 });
+      
+      const angle = cartesianToAngle(event.x, event.y, cx, cy);
+      const day = angleToDayNumber(angle, cycleLength);
+      runOnJS(handleDayChange)(day);
+    })
+    .onUpdate((event) => {
+      const angle = cartesianToAngle(event.x, event.y, cx, cy);
+      const day = angleToDayNumber(angle, cycleLength);
+      runOnJS(handleDayChange)(day);
+    })
+    .onEnd(() => {
+      isDragging.value = false;
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    })
+    .onFinalize(() => {
+      isDragging.value = false;
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    });
+
+  const tapGesture = Gesture.Tap()
+    .onEnd((event) => {
+      const angle = cartesianToAngle(event.x, event.y, cx, cy);
+      const day = angleToDayNumber(angle, cycleLength);
+      runOnJS(handleDayChange)(day);
+    });
+
+  const composedGesture = interactive 
+    ? Gesture.Simultaneous(panGesture, tapGesture)
+    : Gesture.Manual();
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const wheelContent = (
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size}>
         <Defs>
@@ -224,6 +304,18 @@ export function CycleWheel({
       {/* Center content (children slot) */}
       <View style={styles.centerContent}>{children}</View>
     </View>
+  );
+
+  if (!interactive) {
+    return wheelContent;
+  }
+
+  return (
+    <GestureDetector gesture={composedGesture}>
+      <Animated.View style={animatedStyle}>
+        {wheelContent}
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
