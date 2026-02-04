@@ -17,6 +17,7 @@ import {
   DMSans_400Regular_Italic,
 } from "@expo-google-fonts/dm-sans";
 import {
+  Poppins_300Light,
   Poppins_400Regular,
   Poppins_500Medium,
   Poppins_600SemiBold,
@@ -43,6 +44,7 @@ export default function App() {
     DMSans_700Bold,
     DMSans_300Light_Italic,
     DMSans_400Regular_Italic,
+    Poppins_300Light,
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
