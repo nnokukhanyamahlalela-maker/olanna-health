@@ -31,6 +31,11 @@ The application includes:
     - Ovulation: Layered opening bloom with multiple petals
     - Luteal: Full bloom with wide spread petals
   - Design: Pure white with subtle lavender gradients and soft shadows
+  - Phase Explainer card below the wheel with educational content:
+    - HORMONES section explaining hormonal changes
+    - YOUR BODY section describing physical changes
+    - ENERGY & MOOD section with mood/energy insights
+    - SELF-CARE TIPS with actionable advice
   - Current day indicator dot on the wheel ring
   - Center content with uppercase phase title, large day number, and subtitle
   - "OLANNA HEALTH" brand footer
