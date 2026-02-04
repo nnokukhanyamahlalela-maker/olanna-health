@@ -24,7 +24,8 @@ The application includes:
 - **Visualizations**: iOS-style cycle screen with:
   - Top header showing month/year with profile button
   - Mini week calendar row with gradient date pills (pink → orange)
-  - Main glass card (BlurView) containing circular cycle wheel with 4-phase gradient segments (Menstrual: purple/lavender, Follicular: soft lilac, Ovulation: peach/orange, Luteal: pink/magenta)
+  - Main glass card (BlurView) containing interactive circular cycle wheel with 4-phase gradient segments (Menstrual: purple/lavender, Follicular: soft lilac, Ovulation: peach/orange, Luteal: pink/magenta)
+  - Interactive wheel features: Users can drag or tap anywhere on the wheel to explore different days; haptic feedback on day changes; "Return to Today" button appears when viewing other days
   - Phase-specific abstract white Lotus flower in center that changes based on cycle phase:
     - Menstrual: Closed teardrop bud shape
     - Follicular: 3-petal partially opening bud
