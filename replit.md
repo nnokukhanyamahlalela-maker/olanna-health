@@ -25,7 +25,12 @@ The application includes:
   - Top header showing month/year with profile button
   - Mini week calendar row with gradient date pills (pink → orange)
   - Main glass card (BlurView) containing circular cycle wheel with 4-phase gradient segments (Menstrual: purple/lavender, Follicular: soft lilac, Ovulation: peach/orange, Luteal: pink/magenta)
-  - Phase-specific Lotus flower in center that changes based on cycle phase (closed bud for menstrual, half-open for follicular, fully open for ovulation, closing for luteal)
+  - Phase-specific abstract white Lotus flower in center that changes based on cycle phase:
+    - Menstrual: Closed teardrop bud shape
+    - Follicular: 3-petal partially opening bud
+    - Ovulation: Layered opening bloom with multiple petals
+    - Luteal: Full bloom with wide spread petals
+  - Design: Pure white with subtle lavender gradients and soft shadows
   - Current day indicator dot on the wheel ring
   - Center content with uppercase phase title, large day number, and subtitle
   - "OLANNA HEALTH" brand footer
