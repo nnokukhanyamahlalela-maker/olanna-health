@@ -147,22 +147,34 @@ export default function HomeScreen() {
   }, [selectedDate]);
 
   const loadData = async () => {
+    console.log("[HomeScreen] Starting loadData...");
     try {
       const userProfile = await storage.getUserProfile();
+      console.log("[HomeScreen] Got profile:", userProfile ? "yes" : "no");
       setProfile(userProfile);
       if (userProfile) {
         const cycle = calculateCycleData(userProfile);
+        console.log("[HomeScreen] Calculated cycle data");
         setCycleData(cycle);
       }
     } catch (error) {
-      console.error("Failed to load data:", error);
+      console.error("[HomeScreen] Failed to load data:", error);
     } finally {
+      console.log("[HomeScreen] Setting isLoading to false");
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
     loadData();
+    
+    // Safety timeout - ensure loading never stays stuck
+    const timeout = setTimeout(() => {
+      console.log("[HomeScreen] Safety timeout triggered");
+      setIsLoading(false);
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   useFocusEffect(
@@ -174,8 +186,11 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <AppGradient style={styles.fullScreen}>
-        <View style={styles.loadingContainer}>
-          <ThemedText style={styles.loadingText}>Loading...</ThemedText>
+        <View style={[styles.loadingContainer, { paddingTop: insets.top + Spacing.xl }]}>
+          <View style={styles.loadingContent}>
+            <ThemedText style={styles.loadingTitle}>Olanna Health</ThemedText>
+            <ThemedText style={styles.loadingText}>Preparing your cycle...</ThemedText>
+          </View>
         </View>
       </AppGradient>
     );
@@ -309,6 +324,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  loadingContent: {
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  loadingTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 24,
+    color: "#fff",
   },
   loadingText: {
     fontFamily: "Poppins_400Regular",
