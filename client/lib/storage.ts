@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { secureStorage } from "./secureStorage";
 
 const STORAGE_KEYS = {
   USER_PROFILE: "@olanna_user_profile",
@@ -66,49 +67,27 @@ export interface Screening {
 
 export const storage = {
   async getUserProfile(): Promise<UserProfile | null> {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_PROFILE);
-      return data ? JSON.parse(data) : null;
-    } catch {
-      return null;
-    }
+    return secureStorage.getUserProfile();
   },
 
   async setUserProfile(profile: UserProfile): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+    await secureStorage.setUserProfile(profile);
   },
 
   async getCycleData(): Promise<CycleData | null> {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEYS.CYCLE_DATA);
-      return data ? JSON.parse(data) : null;
-    } catch {
-      return null;
-    }
+    return secureStorage.getCycleData();
   },
 
   async setCycleData(cycleData: CycleData): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.CYCLE_DATA, JSON.stringify(cycleData));
+    await secureStorage.setCycleData(cycleData);
   },
 
   async getDailyLogs(): Promise<DailyLog[]> {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEYS.DAILY_LOGS);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    return secureStorage.getDailyLogs();
   },
 
   async addDailyLog(log: DailyLog): Promise<void> {
-    const logs = await this.getDailyLogs();
-    const existingIndex = logs.findIndex((l) => l.date === log.date);
-    if (existingIndex >= 0) {
-      logs[existingIndex] = log;
-    } else {
-      logs.push(log);
-    }
-    await AsyncStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(logs));
+    await secureStorage.addDailyLog(log);
   },
 
   async getScreenings(): Promise<Screening[]> {
@@ -138,6 +117,7 @@ export const storage = {
   },
 
   async clearAllData(): Promise<void> {
+    await secureStorage.clearAllSecureData();
     await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
   },
 

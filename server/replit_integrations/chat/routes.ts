@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 import { chatStorage } from "./storage";
+import { apiKeyAuth } from "../../middleware/apiAuth";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -22,7 +23,10 @@ export function registerChatRoutes(app: Express): void {
   // Get single conversation with messages
   app.get("/api/conversations/:id", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid conversation id: must be a positive integer" });
+      }
       const conversation = await chatStorage.getConversation(id);
       if (!conversation) {
         return res.status(404).json({ error: "Conversation not found" });
@@ -39,6 +43,9 @@ export function registerChatRoutes(app: Express): void {
   app.post("/api/conversations", async (req: Request, res: Response) => {
     try {
       const { title } = req.body;
+      if (title !== undefined && (typeof title !== "string" || title.length > 200)) {
+        return res.status(400).json({ error: "Invalid title: must be a string with max 200 characters" });
+      }
       const conversation = await chatStorage.createConversation(title || "New Chat");
       res.status(201).json(conversation);
     } catch (error) {
@@ -50,7 +57,10 @@ export function registerChatRoutes(app: Express): void {
   // Delete conversation
   app.delete("/api/conversations/:id", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid conversation id: must be a positive integer" });
+      }
       await chatStorage.deleteConversation(id);
       res.status(204).send();
     } catch (error) {
@@ -60,10 +70,19 @@ export function registerChatRoutes(app: Express): void {
   });
 
   // Send message and get AI response (streaming)
-  app.post("/api/conversations/:id/messages", async (req: Request, res: Response) => {
+  app.post("/api/conversations/:id/messages", apiKeyAuth, async (req: Request, res: Response) => {
     try {
-      const conversationId = parseInt(req.params.id);
+      const conversationId = parseInt(req.params.id as string);
+      if (isNaN(conversationId) || conversationId <= 0) {
+        return res.status(400).json({ error: "Invalid conversation id: must be a positive integer" });
+      }
       const { content } = req.body;
+      if (!content || typeof content !== "string" || content.trim().length === 0) {
+        return res.status(400).json({ error: "Invalid content: must be a non-empty string" });
+      }
+      if (content.length > 10000) {
+        return res.status(400).json({ error: "Invalid content: must not exceed 10000 characters" });
+      }
 
       // Save user message
       await chatStorage.createMessage(conversationId, "user", content);
