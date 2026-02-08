@@ -11,8 +11,16 @@ Olanna Health is a context-sensitive femtech mobile application for African wome
 - Lotus flower visualization with option to switch to cycle wheel
 - African-centered design with subtle cultural patterns
 
+## Security
+- **Encrypted Local Storage**: Sensitive health data (profile, cycle data, daily logs) is encrypted using `expo-secure-store` with automatic fallback to AsyncStorage on web. Implementation in `client/lib/secureStorage.ts` with chunking support for data exceeding 2KB SecureStore limit.
+- **API Rate Limiting**: General limit of 100 requests/15 min on all API routes; strict limit of 20 requests/15 min on the AI chat message endpoint. Implemented via `express-rate-limit`.
+- **API Key Authentication**: The AI chat message endpoint (`POST /api/conversations/:id/messages`) requires `x-api-key` header matching `SESSION_SECRET` in production. Skipped in development mode. Middleware in `server/middleware/apiAuth.ts`.
+- **Input Validation**: All API endpoints validate input (conversation title max 200 chars, message content required and max 10000 chars, IDs must be positive integers).
+- **HTTPS Enforcement**: All client API calls use HTTPS via `getApiUrl()` in `client/lib/query-client.ts`.
+- **Database**: PostgreSQL (Neon-backed) with Drizzle ORM for chat conversations and messages. Schema in `shared/schema.ts`, db module in `server/db.ts`.
+
 ## System Architecture
-Olanna Health is built with a React Native frontend (using Expo) and an Express.js backend with TypeScript. Local data persistence is managed via AsyncStorage. The UI/UX emphasizes an "Editorial Elegance meets African Wellness" brand philosophy, featuring a "soft, grounded, intelligent" aesthetic. Key design elements include a muted color palette with Pink Primary (#F6BFD3) and Warm White (#FFFFFF), Poppins font for all typography, and Feather icons.
+Olanna Health is built with a React Native frontend (using Expo) and an Express.js backend with TypeScript. Sensitive health data is encrypted via `expo-secure-store` (with AsyncStorage fallback on web). Non-sensitive preferences use AsyncStorage. The UI/UX emphasizes an "Editorial Elegance meets African Wellness" brand philosophy, featuring a "soft, grounded, intelligent" aesthetic. Key design elements include a muted color palette with Pink Primary (#F6BFD3) and Warm White (#FFFFFF), Poppins font for all typography, and Feather icons.
 
 The application includes:
 - **Core Tracking**: Menstrual and fertility tracking with user-selectable Lotus flower or traditional cycle wheel visualizations. Daily logging for flow, symptoms, mood, and energy.
