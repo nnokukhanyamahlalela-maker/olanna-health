@@ -6,13 +6,14 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
-import { ThemedText } from "@/components/ThemedText";
+import { AppText } from "@/components/AppText";
 import { ArticleCard } from "@/components/ArticleCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
+import { AppFontFamily } from "@/constants/typography";
 import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
 import { getLearnTopicOrder, LearnTopicId, LEARN_TOPIC_INFO } from "@/utils/personalization";
 import { articles as articlesData, TOPIC_CATEGORIES, Article } from "@/data/articles";
@@ -87,12 +88,12 @@ export default function LearnScreen() {
 
   const renderHeader = () => (
     <View style={styles.headerContent}>
-      <ThemedText style={[styles.pageTitle, { color: theme.text }]}>
+      <AppText variant="h1" color={theme.text}>
         Learn
-      </ThemedText>
-      <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
+      </AppText>
+      <AppText variant="caption" color={theme.textSecondary} style={styles.pageSubtitle}>
         Evidence-based health education
-      </ThemedText>
+      </AppText>
 
       <View style={styles.quickLinksRow}>
         <Pressable
@@ -103,19 +104,19 @@ export default function LearnScreen() {
           <View style={[styles.quickLinkIcon, { backgroundColor: theme.primary + "15" }]}>
             <Feather name="book" size={18} color={theme.primary} />
           </View>
-          <ThemedText style={[styles.quickLinkLabel, { color: theme.text }]}>
+          <AppText variant="label" color={theme.text}>
             Glossary
-          </ThemedText>
-          <ThemedText style={[styles.quickLinkDesc, { color: theme.textSecondary }]}>
+          </AppText>
+          <AppText variant="caption" color={theme.textSecondary}>
             Health terms explained
-          </ThemedText>
+          </AppText>
         </Pressable>
       </View>
 
       <View style={styles.topicCardsContainer}>
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+        <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
           BROWSE BY TOPIC
-        </ThemedText>
+        </AppText>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -133,12 +134,12 @@ export default function LearnScreen() {
               <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "30" }]}>
                 <Feather name={topic.icon} size={20} color={topic.color} />
               </View>
-              <ThemedText style={[styles.topicCardTitle, { color: theme.text }]}>
+              <AppText variant="label" color={theme.text} style={styles.topicCardTitle}>
                 {topic.label}
-              </ThemedText>
-              <ThemedText style={[styles.topicCardDesc, { color: theme.textSecondary }]} numberOfLines={2}>
+              </AppText>
+              <AppText variant="caption" color={theme.textSecondary} numberOfLines={2} style={styles.topicCardDesc}>
                 {topic.description}
-              </ThemedText>
+              </AppText>
             </Pressable>
           ))}
         </ScrollView>
@@ -183,16 +184,12 @@ export default function LearnScreen() {
               },
             ]}
           >
-            <ThemedText
-              style={[
-                styles.categoryText,
-                {
-                  color: selectedCategory === item ? "#FFFCFA" : theme.textSecondary,
-                },
-              ]}
+            <AppText
+              variant="caption"
+              color={selectedCategory === item ? "#FFFCFA" : theme.textSecondary}
             >
               {item}
-            </ThemedText>
+            </AppText>
           </Pressable>
         ))}
       </ScrollView>
@@ -200,9 +197,9 @@ export default function LearnScreen() {
       {featuredArticle ? (
         <>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
             FEATURED
-          </ThemedText>
+          </AppText>
           <ArticleCard
             title={featuredArticle.title}
             summary={featuredArticle.summary}
@@ -214,9 +211,9 @@ export default function LearnScreen() {
           {remainingArticles.length > 0 ? (
             <>
               <View style={[styles.divider, { backgroundColor: theme.border }]} />
-              <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+              <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
                 MORE ARTICLES
-              </ThemedText>
+              </AppText>
             </>
           ) : null}
         </>
@@ -273,14 +270,7 @@ const styles = StyleSheet.create({
   headerContent: {
     marginBottom: Spacing.md,
   },
-  pageTitle: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 28,
-    letterSpacing: -0.5,
-  },
   pageSubtitle: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 14,
     marginTop: 4,
     marginBottom: Spacing.xl,
   },
@@ -303,14 +293,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
-  },
-  quickLinkLabel: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 15,
-  },
-  quickLinkDesc: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 12,
   },
   topicCardsContainer: {
     marginBottom: Spacing.xl,
@@ -335,11 +317,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   topicCardTitle: {
-    fontFamily: "DMSans_500Medium",
     fontSize: 14,
   },
   topicCardDesc: {
-    fontFamily: "DMSans_300Light",
     fontSize: 11,
     lineHeight: 16,
   },
@@ -355,8 +335,9 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontFamily: "DMSans_400Regular",
+    fontFamily: AppFontFamily.regular,
     fontSize: 14,
+    fontWeight: "400",
     height: "100%",
   },
   categoriesList: {
@@ -369,17 +350,13 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
-  categoryText: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 13,
-  },
   divider: {
     height: 1,
     marginVertical: Spacing.xl,
   },
   sectionLabel: {
-    fontFamily: "DMSans_500Medium",
     fontSize: 11,
+    fontWeight: "500",
     letterSpacing: 2,
     marginBottom: Spacing.lg,
   },

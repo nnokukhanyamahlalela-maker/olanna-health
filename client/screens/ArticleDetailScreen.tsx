@@ -1,11 +1,11 @@
 import React from "react";
-import { View, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 
-import { ThemedText } from "@/components/ThemedText";
+import { AppText } from "@/components/AppText";
 import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
@@ -29,21 +29,21 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
   switch (section.type) {
     case "heading":
       return (
-        <ThemedText style={[styles.sectionHeading, { color: theme.text }]}>
+        <AppText variant="h2" color={theme.text} style={styles.sectionHeading}>
           {section.content}
-        </ThemedText>
+        </AppText>
       );
     case "subheading":
       return (
-        <ThemedText style={[styles.sectionSubheading, { color: theme.text }]}>
+        <AppText variant="label" color={theme.text} style={styles.sectionSubheading}>
           {section.content}
-        </ThemedText>
+        </AppText>
       );
     case "paragraph":
       return (
-        <ThemedText style={[styles.sectionParagraph, { color: theme.textSecondary }]}>
+        <AppText variant="body" color={theme.textSecondary} style={styles.sectionParagraph}>
           {section.content}
-        </ThemedText>
+        </AppText>
       );
     case "bullets":
       return (
@@ -51,9 +51,9 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
           {section.items?.map((item, i) => (
             <View key={i} style={styles.bulletItem}>
               <View style={[styles.bulletDot, { backgroundColor: theme.primary }]} />
-              <ThemedText style={[styles.bulletText, { color: theme.textSecondary }]}>
+              <AppText variant="body" color={theme.textSecondary} style={styles.bulletText}>
                 {item}
-              </ThemedText>
+              </AppText>
             </View>
           ))}
         </View>
@@ -61,18 +61,18 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
     case "quote":
       return (
         <View style={[styles.quoteContainer, { borderLeftColor: theme.primary }]}>
-          <ThemedText style={[styles.quoteText, { color: theme.text }]}>
+          <AppText variant="body" color={theme.text} style={styles.quoteText}>
             {section.content}
-          </ThemedText>
+          </AppText>
         </View>
       );
     case "disclaimer":
       return (
         <View style={[styles.disclaimerContainer, { backgroundColor: theme.backgroundSecondary }]}>
           <Feather name="alert-circle" size={16} color={theme.textSecondary} />
-          <ThemedText style={[styles.disclaimerText, { color: theme.textSecondary }]}>
+          <AppText variant="caption" color={theme.textSecondary} style={styles.disclaimerText}>
             {section.content}
-          </ThemedText>
+          </AppText>
         </View>
       );
     default:
@@ -94,9 +94,9 @@ export default function ArticleDetailScreen() {
       <AppGradient style={styles.container}>
         <View style={[styles.errorContainer, { paddingTop: headerHeight + Spacing.lg }]}>
           <Feather name="alert-circle" size={48} color={theme.textSecondary} />
-          <ThemedText style={[styles.errorText, { color: theme.textSecondary }]}>
+          <AppText variant="body" color={theme.textSecondary}>
             Article not found
-          </ThemedText>
+          </AppText>
         </View>
       </AppGradient>
     );
@@ -117,34 +117,34 @@ export default function ArticleDetailScreen() {
       >
         <View style={styles.metaRow}>
           <View style={[styles.categoryBadge, { backgroundColor: categoryColor + "20" }]}>
-            <ThemedText style={[styles.categoryLabel, { color: categoryColor }]}>
+            <AppText variant="caption" color={categoryColor} style={styles.categoryLabel}>
               {article.category.toUpperCase()}
-            </ThemedText>
+            </AppText>
           </View>
-          <ThemedText style={[styles.readTime, { color: theme.textSecondary }]}>
+          <AppText variant="caption" color={theme.textSecondary}>
             {article.readTime} read
-          </ThemedText>
+          </AppText>
         </View>
 
-        <ThemedText style={[styles.title, { color: theme.text }]}>
+        <AppText variant="editorialTitle" color={theme.text} style={styles.title}>
           {article.title}
-        </ThemedText>
+        </AppText>
 
-        <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
+        <AppText variant="body" color={theme.textSecondary} style={styles.subtitle}>
           {article.subtitle}
-        </ThemedText>
+        </AppText>
 
         <View style={[styles.authorRow, { borderTopColor: theme.border, borderBottomColor: theme.border }]}>
           <View style={[styles.authorAvatar, { backgroundColor: theme.primary + "20" }]}>
             <Feather name="edit-3" size={14} color={theme.primary} />
           </View>
           <View>
-            <ThemedText style={[styles.authorName, { color: theme.text }]}>
+            <AppText variant="label" color={theme.text} style={styles.authorName}>
               {article.author}
-            </ThemedText>
-            <ThemedText style={[styles.authorDate, { color: theme.textSecondary }]}>
+            </AppText>
+            <AppText variant="caption" color={theme.textSecondary}>
               {article.date}
-            </ThemedText>
+            </AppText>
           </View>
         </View>
 
@@ -156,13 +156,13 @@ export default function ArticleDetailScreen() {
 
         {article.references.length > 0 ? (
           <View style={[styles.referencesSection, { borderTopColor: theme.border }]}>
-            <ThemedText style={[styles.referencesTitle, { color: theme.textSecondary }]}>
+            <AppText variant="caption" color={theme.textSecondary} style={styles.referencesTitle}>
               REFERENCES
-            </ThemedText>
+            </AppText>
             {article.references.map((ref) => (
-              <ThemedText key={ref.number} style={[styles.referenceText, { color: theme.textSecondary }]}>
+              <AppText key={ref.number} variant="caption" color={theme.textSecondary} style={styles.referenceText}>
                 {ref.number}. {ref.text}
-              </ThemedText>
+              </AppText>
             ))}
           </View>
         ) : null}
@@ -184,10 +184,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: Spacing.md,
   },
-  errorText: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 16,
-  },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -200,23 +196,15 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   categoryLabel: {
-    fontFamily: "DMSans_500Medium",
     fontSize: 10,
+    fontWeight: "500",
     letterSpacing: 1.5,
   },
-  readTime: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 12,
-  },
   title: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 26,
-    lineHeight: 34,
-    letterSpacing: -0.5,
+    lineHeight: 32,
     marginBottom: Spacing.md,
   },
   subtitle: {
-    fontFamily: "DMSans_300Light",
     fontSize: 16,
     lineHeight: 24,
     fontStyle: "italic",
@@ -239,34 +227,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   authorName: {
-    fontFamily: "DMSans_500Medium",
     fontSize: 13,
-  },
-  authorDate: {
-    fontFamily: "DMSans_300Light",
-    fontSize: 12,
-    marginTop: 2,
   },
   bodyContent: {
     gap: Spacing.md,
   },
   sectionHeading: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 22,
     lineHeight: 30,
-    letterSpacing: -0.3,
     marginTop: Spacing.xl,
     marginBottom: Spacing.xs,
   },
   sectionSubheading: {
-    fontFamily: "DMSans_500Medium",
     fontSize: 17,
     lineHeight: 24,
     marginTop: Spacing.md,
-    marginBottom: Spacing.xxs,
+    marginBottom: Spacing.xs,
   },
   sectionParagraph: {
-    fontFamily: "DMSans_400Regular",
     fontSize: 15,
     lineHeight: 24,
   },
@@ -287,7 +264,6 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontFamily: "DMSans_400Regular",
     fontSize: 15,
     lineHeight: 24,
   },
@@ -298,7 +274,6 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.sm,
   },
   quoteText: {
-    fontFamily: "DMSans_400Regular",
     fontSize: 16,
     lineHeight: 26,
     fontStyle: "italic",
@@ -313,7 +288,6 @@ const styles = StyleSheet.create({
   },
   disclaimerText: {
     flex: 1,
-    fontFamily: "DMSans_300Light",
     fontSize: 12,
     lineHeight: 18,
   },
@@ -323,13 +297,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   referencesTitle: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 11,
+    fontWeight: "500",
     letterSpacing: 2,
     marginBottom: Spacing.md,
   },
   referenceText: {
-    fontFamily: "DMSans_300Light",
     fontSize: 11,
     lineHeight: 18,
     marginBottom: Spacing.xs,
