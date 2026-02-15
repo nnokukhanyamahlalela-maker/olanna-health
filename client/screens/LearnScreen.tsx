@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, FlatList, StyleSheet, TextInput, Pressable, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -10,77 +11,14 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding, TabBarSpacing } from "@/constants/spacing";
+import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
 import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
 import { getLearnTopicOrder, LearnTopicId, LEARN_TOPIC_INFO } from "@/utils/personalization";
+import { articles as articlesData, TOPIC_CATEGORIES, Article } from "@/data/articles";
+import { LearnStackParamList } from "@/navigation/LearnStackNavigator";
 
-interface Article {
-  id: string;
-  title: string;
-  summary: string;
-  category: string;
-  readTime: string;
-}
-
-const articles: Article[] = [
-  {
-    id: "1",
-    title: "Understanding Your Menstrual Cycle",
-    summary: "Learn about the four phases of your cycle and how they affect your body and mind.",
-    category: "Periods",
-    readTime: "5 min",
-  },
-  {
-    id: "2",
-    title: "PCOS: Symptoms, Diagnosis, and Management",
-    summary: "Everything you need to know about Polycystic Ovary Syndrome and how to manage it.",
-    category: "PCOS",
-    readTime: "8 min",
-  },
-  {
-    id: "3",
-    title: "Endometriosis: Living with Chronic Pain",
-    summary: "Strategies for managing endometriosis symptoms and improving quality of life.",
-    category: "Endometriosis",
-    readTime: "7 min",
-  },
-  {
-    id: "4",
-    title: "STI Prevention and Testing Guide",
-    summary: "A comprehensive guide to sexually transmitted infections and regular testing.",
-    category: "Sexual Health",
-    readTime: "6 min",
-  },
-  {
-    id: "5",
-    title: "Cervical Cancer Screening in South Africa",
-    summary: "Understanding the latest guidelines for Pap smears and HPV testing.",
-    category: "Screenings",
-    readTime: "4 min",
-  },
-  {
-    id: "6",
-    title: "Fertility Awareness Methods",
-    summary: "Natural family planning and understanding your fertile window.",
-    category: "Fertility",
-    readTime: "6 min",
-  },
-  {
-    id: "7",
-    title: "Nutrition for Hormonal Balance",
-    summary: "Foods that support your hormones throughout your menstrual cycle.",
-    category: "Wellness",
-    readTime: "5 min",
-  },
-  {
-    id: "8",
-    title: "Exercise and Your Cycle",
-    summary: "How to adapt your workout routine to each phase of your menstrual cycle.",
-    category: "Wellness",
-    readTime: "4 min",
-  },
-];
+type NavigationProp = NativeStackNavigationProp<LearnStackParamList>;
 
 const categories = [
   "All",
@@ -96,8 +34,8 @@ const categories = [
 export default function LearnScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
-  const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -114,7 +52,7 @@ export default function LearnScreen() {
   }, []);
 
   const sortedArticles = useMemo(() => {
-    if (topicOrder.length === 0) return articles;
+    if (topicOrder.length === 0) return articlesData;
 
     const categoryPriority: Record<string, number> = {};
     topicOrder.forEach((topicId, index) => {
@@ -124,7 +62,7 @@ export default function LearnScreen() {
       }
     });
 
-    return [...articles].sort((a, b) => {
+    return [...articlesData].sort((a, b) => {
       const priorityA = categoryPriority[a.category] ?? 999;
       const priorityB = categoryPriority[b.category] ?? 999;
       return priorityA - priorityB;
@@ -140,8 +78,12 @@ export default function LearnScreen() {
     return matchesSearch && matchesCategory;
   });
 
-  const featuredArticle = filteredArticles[0];
-  const remainingArticles = filteredArticles.slice(1);
+  const featuredArticle = filteredArticles.find((a) => a.featured) || filteredArticles[0];
+  const remainingArticles = filteredArticles.filter((a) => a !== featuredArticle);
+
+  const handleArticlePress = (article: Article) => {
+    navigation.navigate("ArticleDetail", { articleId: article.id });
+  };
 
   const renderHeader = () => (
     <View style={styles.headerContent}>
@@ -151,6 +93,56 @@ export default function LearnScreen() {
       <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
         Evidence-based health education
       </ThemedText>
+
+      <View style={styles.quickLinksRow}>
+        <Pressable
+          onPress={() => navigation.navigate("Glossary")}
+          style={[styles.quickLinkCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
+          testID="button-glossary"
+        >
+          <View style={[styles.quickLinkIcon, { backgroundColor: theme.primary + "15" }]}>
+            <Feather name="book" size={18} color={theme.primary} />
+          </View>
+          <ThemedText style={[styles.quickLinkLabel, { color: theme.text }]}>
+            Glossary
+          </ThemedText>
+          <ThemedText style={[styles.quickLinkDesc, { color: theme.textSecondary }]}>
+            Health terms explained
+          </ThemedText>
+        </Pressable>
+      </View>
+
+      <View style={styles.topicCardsContainer}>
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          BROWSE BY TOPIC
+        </ThemedText>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.topicCardsList}
+        >
+          {TOPIC_CATEGORIES.map((topic) => (
+            <Pressable
+              key={topic.id}
+              onPress={() => setSelectedCategory(topic.label === "Periods 101" ? "Periods" : topic.label)}
+              style={[
+                styles.topicCard,
+                { backgroundColor: topic.color + "20", borderColor: topic.color + "40" },
+              ]}
+            >
+              <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "30" }]}>
+                <Feather name={topic.icon} size={20} color={topic.color} />
+              </View>
+              <ThemedText style={[styles.topicCardTitle, { color: theme.text }]}>
+                {topic.label}
+              </ThemedText>
+              <ThemedText style={[styles.topicCardDesc, { color: theme.textSecondary }]} numberOfLines={2}>
+                {topic.description}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
 
       <View
         style={[
@@ -165,6 +157,7 @@ export default function LearnScreen() {
           placeholderTextColor={theme.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          testID="input-article-search"
         />
         {searchQuery.length > 0 ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -216,11 +209,16 @@ export default function LearnScreen() {
             category={featuredArticle.category}
             readTime={featuredArticle.readTime}
             featured
+            onPress={() => handleArticlePress(featuredArticle)}
           />
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            MORE ARTICLES
-          </ThemedText>
+          {remainingArticles.length > 0 ? (
+            <>
+              <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+                MORE ARTICLES
+              </ThemedText>
+            </>
+          ) : null}
         </>
       ) : null}
     </View>
@@ -249,13 +247,14 @@ export default function LearnScreen() {
             summary={item.summary}
             category={item.category}
             readTime={item.readTime}
+            onPress={() => handleArticlePress(item)}
           />
         )}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={filteredArticles.length === 0 ? renderEmptyState : null}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
+          paddingBottom: insets.bottom + 110,
           paddingHorizontal: ScreenPadding.horizontal,
           flexGrow: 1,
         }}
@@ -284,6 +283,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
     marginBottom: Spacing.xl,
+  },
+  quickLinksRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  quickLinkCard: {
+    flex: 1,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    gap: 6,
+  },
+  quickLinkIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  quickLinkLabel: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 15,
+  },
+  quickLinkDesc: {
+    fontFamily: "DMSans_300Light",
+    fontSize: 12,
+  },
+  topicCardsContainer: {
+    marginBottom: Spacing.xl,
+  },
+  topicCardsList: {
+    gap: Spacing.sm,
+    paddingTop: Spacing.sm,
+  },
+  topicCard: {
+    width: 160,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    gap: 6,
+  },
+  topicIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  topicCardTitle: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 14,
+  },
+  topicCardDesc: {
+    fontFamily: "DMSans_300Light",
+    fontSize: 11,
+    lineHeight: 16,
   },
   searchContainer: {
     flexDirection: "row",
