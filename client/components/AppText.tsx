@@ -1,35 +1,26 @@
 import React from "react";
 import { Text, TextProps, TextStyle } from "react-native";
 import {
-  type,
-  TypographyVariant,
-  heroTextShadow,
-  appTypography,
+  typography,
   defaultTextColor,
   AppTextVariant,
+} from "@/theme/typography";
+import {
+  type as legacyType,
+  TypographyVariant,
+  heroTextShadow,
 } from "@/constants/typography";
 import { useTheme } from "@/components/ThemeProvider";
 
+type Variant = AppTextVariant | TypographyVariant;
+
 interface AppTextProps extends TextProps {
-  variant?: TypographyVariant | AppTextVariant;
+  variant?: Variant;
   onGradient?: boolean;
   color?: string;
 }
 
-const appTextVariants = new Set<string>([
-  "h1",
-  "h2",
-  "body",
-  "label",
-  "caption",
-  "editorialTitle",
-]);
-
-const legacyOnlyVariants = new Set<string>([
-  "display",
-  "bodyStrong",
-  "micro",
-]);
+const legacyOnlyVariants = new Set<string>(["display", "bodyStrong", "micro"]);
 
 export function AppText({
   variant = "body",
@@ -41,11 +32,10 @@ export function AppText({
 }: AppTextProps) {
   const { theme } = useTheme();
 
-  const useLegacy = legacyOnlyVariants.has(variant);
-
-  if (useLegacy) {
-    const token = type[variant as TypographyVariant];
-    const textColor = color ?? (onGradient ? theme.textOnGradient : theme.textPrimary);
+  if (legacyOnlyVariants.has(variant)) {
+    const token = legacyType[variant as TypographyVariant];
+    const textColor =
+      color ?? (onGradient ? theme.textOnGradient : theme.textPrimary);
 
     const textStyle: TextStyle = {
       fontFamily: token.fontFamily,
@@ -69,8 +59,9 @@ export function AppText({
     );
   }
 
-  const variantStyle = appTypography[variant as AppTextVariant] ?? appTypography.body;
-  const textColor = color ?? (onGradient ? theme.textOnGradient : defaultTextColor);
+  const variantStyle = typography[variant as AppTextVariant] ?? typography.body;
+  const textColor =
+    color ?? (onGradient ? theme.textOnGradient : defaultTextColor);
 
   return (
     <Text
@@ -84,11 +75,19 @@ export function AppText({
   );
 }
 
-export function DisplayText({ style, ...props }: Omit<AppTextProps, "variant">) {
-  return <AppText variant="display" onGradient={true} style={style} {...props} />;
+export function DisplayText({
+  style,
+  ...props
+}: Omit<AppTextProps, "variant">) {
+  return (
+    <AppText variant="display" onGradient={true} style={style} {...props} />
+  );
 }
 
-export function HeadingText({ style, ...props }: Omit<AppTextProps, "variant">) {
+export function HeadingText({
+  style,
+  ...props
+}: Omit<AppTextProps, "variant">) {
   return <AppText variant="h1" style={style} {...props} />;
 }
 
@@ -96,6 +95,9 @@ export function BodyText({ style, ...props }: Omit<AppTextProps, "variant">) {
   return <AppText variant="body" style={style} {...props} />;
 }
 
-export function CaptionText({ style, ...props }: Omit<AppTextProps, "variant">) {
+export function CaptionText({
+  style,
+  ...props
+}: Omit<AppTextProps, "variant">) {
   return <AppText variant="caption" style={style} {...props} />;
 }

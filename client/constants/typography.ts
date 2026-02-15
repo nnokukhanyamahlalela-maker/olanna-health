@@ -1,80 +1,25 @@
 import { TextStyle, Platform } from "react-native";
 
-const CHARCOAL = "#1C1C1E";
+export {
+  typography as appTypography,
+  defaultTextColor,
+  serifFallbackFamily,
+} from "@/theme/typography";
+export type { AppTextVariant } from "@/theme/typography";
 
 const systemFont = Platform.select({
-  ios: "System",
+  ios: undefined,
   android: "Roboto",
-  default: "System",
-});
-
-const serifFont = Platform.select({
-  ios: "NewYorkMedium-Regular",
-  android: "Georgia",
-  default: "Georgia",
-});
-
-const serifMediumFont = Platform.select({
-  ios: "NewYorkMedium-Medium",
-  android: "Georgia",
-  default: "Georgia",
+  default: undefined,
 });
 
 export const AppFontFamily = {
   regular: systemFont as string,
   medium: systemFont as string,
   semibold: systemFont as string,
-  serif: serifFont as string,
-  serifMedium: serifMediumFont as string,
+  serif: Platform.select({ ios: "New York", android: "serif", default: "Georgia" }) as string,
+  serifMedium: Platform.select({ ios: "New York", android: "serif", default: "Georgia" }) as string,
 };
-
-export type AppTextVariant =
-  | "h1"
-  | "h2"
-  | "body"
-  | "label"
-  | "caption"
-  | "editorialTitle";
-
-export const appTypography: Record<AppTextVariant, TextStyle> = {
-  h1: {
-    fontFamily: AppFontFamily.semibold,
-    fontSize: 28,
-    fontWeight: "600",
-    letterSpacing: -0.2,
-  },
-  h2: {
-    fontFamily: AppFontFamily.medium,
-    fontSize: 22,
-    fontWeight: "500",
-    letterSpacing: -0.1,
-  },
-  body: {
-    fontFamily: AppFontFamily.regular,
-    fontSize: 17,
-    fontWeight: "400",
-    lineHeight: 24,
-  },
-  label: {
-    fontFamily: AppFontFamily.medium,
-    fontSize: 15,
-    fontWeight: "500",
-    letterSpacing: 0,
-  },
-  caption: {
-    fontFamily: AppFontFamily.regular,
-    fontSize: 13,
-    fontWeight: "400",
-    lineHeight: 18,
-  },
-  editorialTitle: {
-    fontFamily: AppFontFamily.serifMedium,
-    fontSize: 24,
-    fontWeight: "500",
-  },
-};
-
-export const defaultTextColor = CHARCOAL;
 
 export interface TypographyToken {
   fontSize: number;
