@@ -139,8 +139,8 @@ function IntroScreen({ onComplete }: { onComplete: () => void }) {
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.introContent}>
-          <AnimatedHeading text="Go hi." delay={200} />
-          <AnimatedHeading text="My name is Olanna." delay={600} />
+          <AnimatedHeading text="Hi." delay={200} />
+          <AnimatedHeading text="I'm Olanna." delay={600} />
         </View>
         <View style={styles.bottomActions}>
           <PrimaryButton 
