@@ -1,13 +1,35 @@
 import React from "react";
-import { Text, TextProps, TextStyle, StyleSheet } from "react-native";
-import { type, TypographyVariant, heroTextShadow } from "@/constants/typography";
+import { Text, TextProps, TextStyle } from "react-native";
+import {
+  type,
+  TypographyVariant,
+  heroTextShadow,
+  appTypography,
+  defaultTextColor,
+  AppTextVariant,
+} from "@/constants/typography";
 import { useTheme } from "@/components/ThemeProvider";
 
 interface AppTextProps extends TextProps {
-  variant?: TypographyVariant;
+  variant?: TypographyVariant | AppTextVariant;
   onGradient?: boolean;
   color?: string;
 }
+
+const appTextVariants = new Set<string>([
+  "h1",
+  "h2",
+  "body",
+  "label",
+  "caption",
+  "editorialTitle",
+]);
+
+const legacyOnlyVariants = new Set<string>([
+  "display",
+  "bodyStrong",
+  "micro",
+]);
 
 export function AppText({
   variant = "body",
@@ -18,23 +40,41 @@ export function AppText({
   ...props
 }: AppTextProps) {
   const { theme } = useTheme();
-  const token = type[variant];
 
-  const textColor = color ?? (onGradient ? theme.textOnGradient : theme.textPrimary);
+  const useLegacy = legacyOnlyVariants.has(variant);
 
-  const textStyle: TextStyle = {
-    fontFamily: token.fontFamily,
-    fontSize: token.fontSize,
-    lineHeight: token.lineHeight,
-    fontWeight: token.fontWeight,
-    letterSpacing: token.letterSpacing,
-    color: textColor as string,
-    ...(onGradient && variant === "display" ? heroTextShadow : {}),
-  };
+  if (useLegacy) {
+    const token = type[variant as TypographyVariant];
+    const textColor = color ?? (onGradient ? theme.textOnGradient : theme.textPrimary);
+
+    const textStyle: TextStyle = {
+      fontFamily: token.fontFamily,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      fontWeight: token.fontWeight,
+      letterSpacing: token.letterSpacing,
+      color: textColor as string,
+      ...(onGradient && variant === "display" ? heroTextShadow : {}),
+    };
+
+    return (
+      <Text
+        style={[textStyle, style]}
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        {...props}
+      >
+        {children}
+      </Text>
+    );
+  }
+
+  const variantStyle = appTypography[variant as AppTextVariant] ?? appTypography.body;
+  const textColor = color ?? (onGradient ? theme.textOnGradient : defaultTextColor);
 
   return (
     <Text
-      style={[textStyle, style]}
+      style={[{ color: textColor as string }, variantStyle, style]}
       allowFontScaling={true}
       maxFontSizeMultiplier={1.5}
       {...props}
