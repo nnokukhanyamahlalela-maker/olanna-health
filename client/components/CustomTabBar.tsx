@@ -174,6 +174,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       });
 
       if (!isFocused && !event.defaultPrevented) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         navigation.navigate(route.name);
       }
     };

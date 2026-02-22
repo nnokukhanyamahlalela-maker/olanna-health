@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { View, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platform, RefreshControl } from "react-native";
+import React, { useState, useMemo, useCallback } from "react";
+import { View, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platform, RefreshControl, Dimensions } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -9,8 +9,10 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  runOnJS,
 } from "react-native-reanimated";
-import { useQuery } from "@tanstack/react-query";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Sharing from "expo-sharing";
 import { File as ExpoFile, Paths } from "expo-file-system";
 
@@ -23,6 +25,8 @@ import { getApiUrl } from "@/lib/query-client";
 import { getDeviceId } from "@/lib/deviceId";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const DELETE_THRESHOLD = -80;
 
 type ProductLog = {
   id: number;
@@ -83,6 +87,108 @@ function computeInsights(logs: ProductLog[]) {
   };
 }
 
+function SwipeableLogRow({
+  log,
+  onDelete,
+  formatDate,
+}: {
+  log: ProductLog;
+  onDelete: (id: number) => void;
+  formatDate: (d: string) => string;
+}) {
+  const { theme } = useTheme();
+  const translateX = useSharedValue(0);
+  const rowHeight = useSharedValue<number | null>(null);
+  const isDeleting = useSharedValue(false);
+
+  const triggerDelete = useCallback(() => {
+    onDelete(log.id);
+  }, [log.id, onDelete]);
+
+  const triggerHaptic = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-5, 5])
+    .onUpdate((event) => {
+      if (event.translationX < 0) {
+        translateX.value = Math.max(event.translationX, -120);
+      }
+    })
+    .onEnd((event) => {
+      if (translateX.value < DELETE_THRESHOLD) {
+        isDeleting.value = true;
+        runOnJS(triggerHaptic)();
+        translateX.value = withTiming(-SCREEN_WIDTH, { duration: 250 }, () => {
+          runOnJS(triggerDelete)();
+        });
+      } else {
+        translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+      }
+    });
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const deleteStyle = useAnimatedStyle(() => {
+    const width = Math.abs(Math.min(translateX.value, 0));
+    return {
+      width,
+      opacity: width > 20 ? 1 : 0,
+    };
+  });
+
+  return (
+    <View style={styles.swipeContainer}>
+      <Animated.View
+        style={[styles.deleteAction, { backgroundColor: "#E74C3C" }, deleteStyle]}
+      >
+        <Feather name="trash-2" size={20} color="#FFFFFF" />
+      </Animated.View>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[
+            styles.logCard,
+            { backgroundColor: theme.backgroundDefault },
+            cardStyle,
+          ]}
+          accessibilityLabel={formatDate(log.date) + ", " + log.productType + (log.brand ? ", " + log.brand : "") + (log.scented ? ", scented" : "") + ". Swipe left to delete"}
+          accessibilityActions={[{ name: "delete", label: "Delete log" }]}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "delete") {
+              onDelete(log.id);
+            }
+          }}
+        >
+          <View style={styles.logHeader}>
+            <ThemedText style={[styles.logDate, { color: theme.text }]}>
+              {formatDate(log.date)}
+            </ThemedText>
+            <View style={styles.logBadges}>
+              {log.scented ? (
+                <View style={styles.scentedBadge}>
+                  <ThemedText style={styles.scentedBadgeText}>Scented</ThemedText>
+                </View>
+              ) : null}
+            </View>
+          </View>
+          <ThemedText style={[styles.logType, { color: theme.text }]}>
+            {log.productType}
+          </ThemedText>
+          {log.brand ? (
+            <ThemedText style={[styles.logBrand, { color: theme.textSecondary }]}>
+              {log.brand}
+            </ThemedText>
+          ) : null}
+        </Animated.View>
+      </GestureDetector>
+    </View>
+  );
+}
+
 export default function ProductInsightsScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
@@ -90,6 +196,7 @@ export default function ProductInsightsScreen() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   const toastOpacity = useSharedValue(0);
   const exportScale = useSharedValue(1);
@@ -126,6 +233,27 @@ export default function ProductInsightsScreen() {
     await refetch();
     setRefreshing(false);
   };
+
+  const handleDeleteLog = useCallback(async (logId: number) => {
+    try {
+      const deviceId = await getDeviceId();
+      const baseUrl = getApiUrl();
+      const url = new URL(`/api/product-logs/${logId}`, baseUrl);
+      const res = await fetch(url.href, {
+        method: "DELETE",
+        headers: { "x-device-id": deviceId },
+      });
+      if (res.ok) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        queryClient.invalidateQueries({ queryKey: ["/api/product-logs"] });
+        showToast("Log deleted");
+      } else {
+        showToast("Could not delete. Try again.");
+      }
+    } catch {
+      showToast("Could not delete. Try again.");
+    }
+  }, [queryClient]);
 
   const handleExport = async () => {
     if (exporting) return;
@@ -241,34 +369,18 @@ export default function ProductInsightsScreen() {
               RECENT LOGS
             </ThemedText>
 
+            <ThemedText style={[styles.swipeHint, { color: theme.textSecondary }]}>
+              Swipe left to delete
+            </ThemedText>
+
             <View style={styles.cardList}>
               {logs.map((log) => (
-                <View
+                <SwipeableLogRow
                   key={log.id}
-                  style={[styles.logCard, { backgroundColor: theme.backgroundDefault }]}
-                  accessibilityLabel={formatDate(log.date) + ", " + log.productType + (log.brand ? ", " + log.brand : "") + (log.scented ? ", scented" : "")}
-                >
-                  <View style={styles.logHeader}>
-                    <ThemedText style={[styles.logDate, { color: theme.text }]}>
-                      {formatDate(log.date)}
-                    </ThemedText>
-                    <View style={styles.logBadges}>
-                      {log.scented ? (
-                        <View style={styles.scentedBadge}>
-                          <ThemedText style={styles.scentedBadgeText}>Scented</ThemedText>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                  <ThemedText style={[styles.logType, { color: theme.text }]}>
-                    {log.productType}
-                  </ThemedText>
-                  {log.brand ? (
-                    <ThemedText style={[styles.logBrand, { color: theme.textSecondary }]}>
-                      {log.brand}
-                    </ThemedText>
-                  ) : null}
-                </View>
+                  log={log}
+                  onDelete={handleDeleteLog}
+                  formatDate={formatDate}
+                />
               ))}
             </View>
           </>
@@ -355,6 +467,12 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginBottom: Spacing.lg,
   },
+  swipeHint: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    marginBottom: Spacing.sm,
+    marginTop: -Spacing.sm,
+  },
   cardList: {
     gap: 12,
     marginBottom: Spacing.xl,
@@ -384,6 +502,21 @@ const styles = StyleSheet.create({
   insightValue: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 17,
+  },
+  swipeContainer: {
+    borderRadius: BorderRadius.lg,
+    overflow: "hidden",
+    position: "relative",
+  },
+  deleteAction: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopRightRadius: BorderRadius.lg,
+    borderBottomRightRadius: BorderRadius.lg,
   },
   logCard: {
     borderRadius: BorderRadius.lg,

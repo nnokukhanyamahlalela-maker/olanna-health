@@ -24,6 +24,7 @@ import CheckInSheet from "@/screens/CheckInSheet";
 import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
 import LogProductScreen from "@/screens/LogProductScreen";
 import ProductInsightsScreen from "@/screens/ProductInsightsScreen";
+import LearnMoreSheet from "@/screens/LearnMoreSheet";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -50,6 +51,7 @@ export type RootStackParamList = {
   ProductSafety: undefined;
   LogProduct: undefined;
   ProductInsights: undefined;
+  LearnMoreSheet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -196,6 +198,17 @@ export default function RootStackNavigator() {
         component={ProductInsightsScreen}
         options={{
           headerTitle: "My Product Insights",
+        }}
+      />
+      <Stack.Screen
+        name="LearnMoreSheet"
+        component={LearnMoreSheet}
+        options={{
+          headerShown: false,
+          presentation: "formSheet",
+          gestureEnabled: true,
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 20,
         }}
       />
       <Stack.Screen

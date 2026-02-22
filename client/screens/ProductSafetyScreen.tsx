@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,7 +10,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -20,22 +19,17 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 
-const LEARN_MORE_ITEMS = [
-  "2026 University of the Free State study tested 16 pad brands and 8 pantyliners.",
-  "All products tested contained at least two endocrine-disrupting chemicals.",
-  "Chemical groups: bisphenols, parabens, phthalates.",
-  "Choosing unscented products may reduce fragrance-related exposure.",
-];
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function ActionButton({
   label,
+  icon,
   variant,
   onPress,
   testID,
 }: {
   label: string;
+  icon?: keyof typeof Feather.glyphMap;
   variant: "primary" | "secondary";
   onPress: () => void;
   testID?: string;
@@ -71,6 +65,7 @@ function ActionButton({
         animatedStyle,
       ]}
     >
+      {icon ? <Feather name={icon} size={18} color={isPrimary ? "#3A2F35" : theme.text} style={{ marginRight: 8 }} /> : null}
       <ThemedText
         style={[
           styles.actionButtonText,
@@ -90,19 +85,6 @@ export default function ProductSafetyScreen() {
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
-  const [learnMoreOpen, setLearnMoreOpen] = useState(false);
-
-  const chevronRotation = useSharedValue(0);
-
-  const chevronStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${chevronRotation.value}deg` }],
-  }));
-
-  const toggleLearnMore = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setLearnMoreOpen(!learnMoreOpen);
-    chevronRotation.value = withTiming(learnMoreOpen ? 0 : 180, { duration: 250 });
-  };
 
   const handleLogProduct = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -112,6 +94,11 @@ export default function ProductSafetyScreen() {
   const handleViewInsights = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("ProductInsights");
+  };
+
+  const handleLearnMore = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("LearnMoreSheet");
   };
 
   return (
@@ -155,30 +142,23 @@ export default function ProductSafetyScreen() {
         <Pressable
           testID="button-learn-more"
           accessibilityRole="button"
-          accessibilityLabel="Toggle learn more section"
-          onPress={toggleLearnMore}
-          style={[styles.learnMoreHeader, { backgroundColor: theme.backgroundDefault }]}
+          accessibilityLabel="Learn more about this research"
+          onPress={handleLearnMore}
+          style={[styles.learnMoreButton, { backgroundColor: theme.backgroundDefault }]}
         >
-          <ThemedText style={[styles.learnMoreTitle, { color: theme.text }]}>
-            Learn More
-          </ThemedText>
-          <Animated.View style={chevronStyle}>
-            <Feather name="chevron-down" size={20} color={theme.textSecondary} />
-          </Animated.View>
-        </Pressable>
-
-        {learnMoreOpen ? (
-          <View style={[styles.learnMoreBody, { backgroundColor: theme.backgroundDefault }]}>
-            {LEARN_MORE_ITEMS.map((item, index) => (
-              <View key={index} style={styles.bulletRow}>
-                <View style={[styles.bulletDot, { backgroundColor: "#C4B5AD" }]} />
-                <ThemedText style={[styles.bulletText, { color: theme.text }]}>
-                  {item}
-                </ThemedText>
-              </View>
-            ))}
+          <View style={[styles.learnMoreIconWrap, { backgroundColor: "#C4B5AD18" }]}>
+            <Feather name="book-open" size={18} color="#C4B5AD" />
           </View>
-        ) : null}
+          <View style={styles.learnMoreContent}>
+            <ThemedText style={[styles.learnMoreTitle, { color: theme.text }]}>
+              Learn More
+            </ThemedText>
+            <ThemedText style={[styles.learnMoreSubtitle, { color: theme.textSecondary }]}>
+              About the research behind this feature
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+        </Pressable>
 
         <ThemedText style={[styles.disclaimer, { color: theme.textSecondary }]}>
           For educational purposes only. Not medical advice.
@@ -212,6 +192,7 @@ const styles = StyleSheet.create({
   actionButton: {
     height: 52,
     borderRadius: BorderRadius.full,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -220,41 +201,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 0.3,
   },
-  learnMoreHeader: {
+  learnMoreButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
-    marginBottom: 2,
+    gap: Spacing.md,
+  },
+  learnMoreIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  learnMoreContent: {
+    flex: 1,
+    gap: 2,
   },
   learnMoreTitle: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 15,
   },
-  learnMoreBody: {
-    padding: Spacing.lg,
-    paddingTop: Spacing.sm,
-    borderBottomLeftRadius: BorderRadius.lg,
-    borderBottomRightRadius: BorderRadius.lg,
-    gap: Spacing.md,
-  },
-  bulletRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: Spacing.sm,
-  },
-  bulletDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginTop: 7,
-  },
-  bulletText: {
+  learnMoreSubtitle: {
     fontFamily: Fonts.body,
-    fontSize: 13,
-    lineHeight: 20,
-    flex: 1,
+    fontSize: 12,
   },
   disclaimer: {
     fontFamily: Fonts.bodyLight,
