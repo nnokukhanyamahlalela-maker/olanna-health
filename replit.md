@@ -17,7 +17,8 @@ Olanna Health is a context-sensitive femtech mobile application for African wome
 - **API Key Authentication**: The AI chat message endpoint (`POST /api/conversations/:id/messages`) requires `x-api-key` header matching `SESSION_SECRET` in production. Skipped in development mode. Middleware in `server/middleware/apiAuth.ts`.
 - **Input Validation**: All API endpoints validate input (conversation title max 200 chars, message content required and max 10000 chars, IDs must be positive integers).
 - **HTTPS Enforcement**: All client API calls use HTTPS via `getApiUrl()` in `client/lib/query-client.ts`.
-- **Database**: PostgreSQL (Neon-backed) with Drizzle ORM for chat conversations and messages. Schema in `shared/schema.ts`, db module in `server/db.ts`.
+- **Database**: PostgreSQL (Neon-backed) with Drizzle ORM for chat conversations, messages, and product logs. Schema in `shared/schema.ts`, db module in `server/db.ts`.
+- **Device-Scoped Product Logs**: Product logs are scoped per device using a client-generated device ID stored in AsyncStorage (`client/lib/deviceId.ts`). The `x-device-id` header is sent with all product log API requests. Users can only access their own device's logs.
 
 ## System Architecture
 Olanna Health is built with a React Native frontend (using Expo) and an Express.js backend with TypeScript. Sensitive health data is encrypted via `expo-secure-store` (with AsyncStorage fallback on web). Non-sensitive preferences use AsyncStorage. The UI/UX emphasizes an "Editorial Elegance meets African Wellness" brand philosophy, featuring a "soft, grounded, intelligent" aesthetic. Key design elements include a muted color palette with Pink Primary (#F6BFD3) and Warm White (#FFFFFF), Poppins font for all typography, and Feather icons.
