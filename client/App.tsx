@@ -39,7 +39,7 @@ import type { AppTextVariant } from "@/theme/typography";
 
 SplashScreen.preventAutoHideAsync();
 
-const SHOW_TYPOGRAPHY_DEMO = true;
+const SHOW_TYPOGRAPHY_DEMO = false;
 
 const variantMeta: {
   variant: AppTextVariant;
