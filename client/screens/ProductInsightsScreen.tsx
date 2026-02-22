@@ -18,6 +18,7 @@ import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
+import { getApiUrl } from "@/lib/query-client";
 import { getDeviceId } from "@/lib/deviceId";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -37,8 +38,8 @@ function useProductLogs() {
     queryKey: ["/api/product-logs"],
     queryFn: async () => {
       const deviceId = await getDeviceId();
-      const { getApiUrl } = require("@/lib/query-client");
-      const url = new URL("/api/product-logs?days=30", getApiUrl());
+      const baseUrl = getApiUrl();
+      const url = new URL("/api/product-logs?days=30", baseUrl);
       const res = await fetch(url.href, {
         headers: { "x-device-id": deviceId },
       });
@@ -123,8 +124,8 @@ export default function ProductInsightsScreen() {
     setExporting(true);
     try {
       const deviceId = await getDeviceId();
-      const { getApiUrl } = require("@/lib/query-client");
-      const url = new URL("/api/product-logs/export?days=30", getApiUrl());
+      const baseUrl = getApiUrl();
+      const url = new URL("/api/product-logs/export?days=30", baseUrl);
       const res = await fetch(url.href, {
         headers: { "x-device-id": deviceId },
       });

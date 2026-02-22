@@ -25,6 +25,7 @@ import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
+import { getApiUrl } from "@/lib/query-client";
 import { getDeviceId } from "@/lib/deviceId";
 
 const PRODUCT_TYPES = [
@@ -76,9 +77,9 @@ export default function LogProductScreen() {
     mutationFn: async () => {
       const deviceId = await getDeviceId();
       const today = new Date().toISOString().split("T")[0];
-      const { getApiUrl } = require("@/lib/query-client");
+      const baseUrl = getApiUrl();
       const response = await fetch(
-        new URL("/api/product-logs", getApiUrl()).href,
+        new URL("/api/product-logs", baseUrl).href,
         {
           method: "POST",
           headers: {
