@@ -12,7 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useQuery } from "@tanstack/react-query";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
+import { File as ExpoFile, Paths } from "expo-file-system";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
@@ -150,8 +150,9 @@ export default function ProductInsightsScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         showToast("Export ready");
       } else {
-        const filePath = `${FileSystem.cacheDirectory}product-logs.csv`;
-        await FileSystem.writeAsStringAsync(filePath, csvText);
+        const file = new ExpoFile(Paths.cache, "product-logs.csv");
+        file.text = csvText;
+        const filePath = file.uri;
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {
           await Sharing.shareAsync(filePath, { mimeType: "text/csv" });

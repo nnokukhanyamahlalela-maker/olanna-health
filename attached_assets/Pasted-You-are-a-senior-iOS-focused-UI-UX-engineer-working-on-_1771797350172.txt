@@ -1,0 +1,115 @@
+You are a senior iOS-focused UI/UX engineer working on my existing Replit app “Olanna Health” (period-tracking app). I want the app UI to align with the latest iOS design language and interaction patterns.
+
+GOAL
+Make the app feel like a modern iOS app (iOS 16/17/18 style): system typography, spacing, navigation, sheets, haptics, accessibility, and native-feeling components.
+
+IMPORTANT
+- Detect the current stack (React Native/Expo vs web). If it’s React Native/Expo, implement iOS-native patterns using the appropriate libraries.
+- Do NOT rewrite the entire app. Upgrade UI patterns progressively and safely.
+- Keep Olanna’s brand: soft, feminine, minimal — but use iOS system components/styles wherever possible.
+
+------------------------------------------------------------
+1) NAVIGATION: iOS-STYLE
+------------------------------------------------------------
+- Use iOS native-stack navigation where possible.
+  If React Navigation: ensure @react-navigation/native-stack is used for iOS screens.
+- Enable iOS “Large Titles” on primary screens where appropriate (Health, Learn, etc.).
+- Use native iOS back behavior and correct header spacing.
+- Ensure tab bar follows iOS conventions: correct height, safe area padding, label + icon alignment.
+
+------------------------------------------------------------
+2) TYPOGRAPHY & LAYOUT: iOS SYSTEM RULES
+------------------------------------------------------------
+- Adopt Dynamic Type / scaling text so it respects user font settings.
+- Use iOS system fonts (SF Pro) by default (do not hardcode custom fonts unless already used).
+- Ensure consistent spacing/padding using iOS-friendly values (e.g., 16/20/24 grid).
+- Respect safe areas everywhere (especially tab screens and modals).
+
+------------------------------------------------------------
+3) COMPONENTS: NATIVE iOS FEEL
+------------------------------------------------------------
+Update UI components to match iOS look & behavior:
+
+A) Forms
+- Use iOS-style form sections for inputs (Log Product screen).
+- Use segmented controls, toggles, and date pickers that look native on iOS.
+
+B) Lists
+- Use iOS-style grouped lists (insets, separators, section headers).
+- Use swipe actions on list rows (e.g., delete/edit product logs) with iOS swipe gestures.
+
+C) Buttons
+- Prefer iOS primary/secondary button styles (pill radius, subtle elevation).
+- Use disabled/loading states that match iOS conventions.
+
+D) Modals / Sheets
+- Present secondary flows as iOS sheets (medium/large detents) where appropriate:
+  - “Learn more” can be a sheet
+  - “Export CSV” or “Share” should use native share sheet if available
+
+E) Materials / Blur
+- Use iOS-style blur/material backgrounds sparingly (e.g., headers, cards, sheet backgrounds) using a blur library if RN/Expo.
+- Keep it subtle, premium, and readable.
+
+------------------------------------------------------------
+4) INTERACTIONS: HAPTICS + MICRO-UX
+------------------------------------------------------------
+- Add light haptics on:
+  - primary button taps
+  - toggles
+  - successful save events
+  - tab changes (optional, subtle)
+If Expo: use expo-haptics.
+If not, use an equivalent safe library.
+
+- Add pull-to-refresh on relevant lists (Insights/log list) using native behavior.
+
+------------------------------------------------------------
+5) ACCESSIBILITY (REQUIRED)
+------------------------------------------------------------
+- Ensure:
+  - good contrast
+  - proper accessibility labels for icons/buttons
+  - touch targets >= 44x44
+  - Dynamic Type doesn’t break layouts
+- Support Dark Mode properly using system colors (don’t hardcode pure white/black).
+
+------------------------------------------------------------
+6) SF SYMBOLS / ICON CONSISTENCY
+------------------------------------------------------------
+- Use SF Symbols-style icons for iOS consistency.
+If React Native:
+  - Use a library that provides SF Symbols on iOS if available in the stack,
+  - Or map icons to the closest iOS-looking set and keep them consistent.
+
+------------------------------------------------------------
+7) APPLY TO THESE SCREENS FIRST (PRIORITY)
+------------------------------------------------------------
+Phase 1 (do now):
+- Health tab dashboard
+- Product Safety screen
+- Log a Product screen
+- My Product Insights screen
+- Tab bar + headers (Large Titles + safe area)
+
+Phase 2 (later):
+- Calendar + Cycle screens
+
+------------------------------------------------------------
+DELIVERABLES
+------------------------------------------------------------
+- The app visually and behaviorally feels iOS-native:
+  - Large titles
+  - iOS form styling
+  - native sheets for modals
+  - haptics
+  - dynamic type
+  - safe area correctness
+  - dark mode readiness
+- Do not break existing functionality.
+
+At the end:
+- List exactly what you changed (files + components)
+- Add a short “iOS UI checklist” in the README for future screens.
+
+Now implement these iOS-latest UI enhancements in the existing Olanna Health codebase, using the project’s existing patterns and libraries.
