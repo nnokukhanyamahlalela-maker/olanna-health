@@ -1,0 +1,151 @@
+You are a senior product designer and frontend engineer working inside my existing Replit app called “Olanna Health” (a feminine, minimalist period-tracking app).
+
+Your task: UPDATE THE HEALTH TAB UI AND UX FLOW ONLY.
+
+Do NOT modify database schema or backend logic yet.
+This is a structural and UI enhancement phase.
+
+-----------------------------------------
+OBJECTIVE
+-----------------------------------------
+
+1. Elevate the Health tab into a “Reproductive Health Dashboard”
+2. Add a new feature entry: “Menstrual Product Safety”
+3. Improve visual hierarchy and UX flow
+4. Maintain Olanna’s soft, elegant, minimal design system
+
+-----------------------------------------
+STEP 1 — HEALTH TAB RESTRUCTURE
+-----------------------------------------
+
+Redesign the Health tab layout with the following structure:
+
+TOP SECTION:
+Header:
+Title: “Reproductive Health”
+Subtitle (small, muted): “Your hormonal intelligence”
+
+Then a small summary card:
+- Current Phase (dynamic if available)
+- 1-line hormone insight placeholder (static text for now)
+
+-----------------------------------------
+SECTION 1 — TRACKERS GRID
+-----------------------------------------
+
+Create a clean 2-column card grid layout.
+
+Cards:
+
+• Symptoms
+• Supplements
+• Medications
+• Gut Health
+• Sexual Health
+• Menstrual Product Safety (NEW)
+
+Each card:
+- Soft rounded corners
+- Light neutral background
+- Minimal line icon
+- Title
+- One short subtitle
+
+For “Menstrual Product Safety” use:
+
+Title: Menstrual Product Safety
+Subtitle: Understand what your period products may contain.
+
+No fear-based wording.
+
+-----------------------------------------
+SECTION 2 — INSIGHTS (Placeholder UI)
+-----------------------------------------
+
+Add a section header:
+“Insights”
+
+Below it add 2 placeholder cards:
+- Hormone Patterns
+- PMS Trends
+
+Minimal design, no heavy colors.
+
+-----------------------------------------
+STEP 2 — NEW SCREEN: MENSTRUAL PRODUCT SAFETY
+-----------------------------------------
+
+Create a new route/screen component:
+
+Route name: /health/product-safety
+
+Screen Layout:
+
+Title: Product Safety
+
+Short intro paragraph:
+
+“A recent South African study found that some menstrual products may contain low levels of endocrine-disrupting chemicals. While research is ongoing, repeated exposure over time may matter.
+
+Olanna helps you track what you use — so you can make informed choices aligned with your body.”
+
+Buttons:
+
+Primary Button:
+“Log a Product”
+
+Secondary Button:
+“View My Insights”
+
+Below that:
+A “Learn More” collapsible section with bullet points:
+
+- 2026 University of the Free State study tested 16 pad brands and 8 pantyliners.
+- All products tested contained at least two endocrine-disrupting chemicals.
+- Chemical groups: bisphenols, parabens, phthalates.
+- Choosing unscented products may reduce fragrance-related exposure.
+
+Add disclaimer (small muted text at bottom):
+“For educational purposes only. Not medical advice.”
+
+-----------------------------------------
+STEP 3 — UX FLOW
+-----------------------------------------
+
+When user taps:
+Health → Menstrual Product Safety card
+→ Navigate to /health/product-safety
+
+Buttons should not error even if backend not connected.
+Use placeholder handlers for now.
+
+-----------------------------------------
+STEP 4 — DESIGN RULES
+-----------------------------------------
+
+Maintain Olanna aesthetic:
+- Soft pink gradients
+- Muted sage / mauve accents
+- No harsh reds
+- No warning icons
+- Elegant spacing
+- Feminine minimal typography
+
+Do NOT:
+- Add heavy drop shadows
+- Add warning triangles
+- Use alarmist UI language
+
+-----------------------------------------
+DELIVERABLE
+-----------------------------------------
+
+1. Updated Health tab layout
+2. New Product Safety screen
+3. Clean routing
+4. No backend changes
+5. Code comments explaining structure
+
+Detect the current frontend framework in the repo and implement accordingly (React, Next.js, etc.).
+
+Now implement the UI and UX changes cleanly within the existing Olanna Health codebase.

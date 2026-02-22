@@ -21,6 +21,7 @@ import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
 import AppearanceScreen from "@/screens/AppearanceScreen";
 import AIChatScreen from "@/screens/AIChatScreen";
 import CheckInSheet from "@/screens/CheckInSheet";
+import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -44,6 +45,7 @@ export type RootStackParamList = {
   Appearance: undefined;
   AIChat: undefined;
   CheckInSheet: undefined;
+  ProductSafety: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -169,6 +171,13 @@ export default function RootStackNavigator() {
         component={AIChatScreen}
         options={{
           headerTitle: "Health Assistant",
+        }}
+      />
+      <Stack.Screen
+        name="ProductSafety"
+        component={ProductSafetyScreen}
+        options={{
+          headerTitle: "Product Safety",
         }}
       />
       <Stack.Screen

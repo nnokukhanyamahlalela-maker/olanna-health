@@ -1,54 +1,142 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { HealthModuleCard } from "@/components/HealthModuleCard";
-import { InsightCard } from "@/components/InsightCard";
-import { EmptyState } from "@/components/EmptyState";
-import { AfricanPattern } from "@/components/AfricanPattern";
-import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { AppGradient } from "@/components/AppGradient";
+import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding, CardSpacing, TabBarSpacing } from "@/constants/spacing";
-import { BorderRadius } from "@/constants/theme";
-import { storage, UserProfile, Screening } from "@/lib/storage";
+import { Spacing, ScreenPadding } from "@/constants/spacing";
+import { BorderRadius, Fonts } from "@/constants/theme";
+import { storage, UserProfile } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-function getDaysUntil(dateString: string): number {
-  const date = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface TrackerCardData {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: keyof typeof Feather.glyphMap;
+  color: string;
+  route?: keyof RootStackParamList;
+}
+
+function TrackerCard({
+  item,
+  onPress,
+}: {
+  item: TrackerCardData;
+  onPress: () => void;
+}) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      testID={`tracker-card-${item.id}`}
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withSpring(0.96, { damping: 15, stiffness: 150 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+      }}
+      style={[
+        styles.trackerCard,
+        { backgroundColor: theme.backgroundDefault },
+        animatedStyle,
+      ]}
+    >
+      <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "18" }]}>
+        <Feather name={item.icon} size={22} color={item.color} />
+      </View>
+      <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
+        {item.title}
+      </ThemedText>
+      <ThemedText style={[styles.trackerSubtitle, { color: theme.textSecondary }]}>
+        {item.subtitle}
+      </ThemedText>
+    </AnimatedPressable>
+  );
+}
+
+function InsightPlaceholderCard({
+  title,
+  icon,
+  color,
+}: {
+  title: string;
+  icon: keyof typeof Feather.glyphMap;
+  color: string;
+}) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPressIn={() => {
+        scale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+      }}
+      style={[
+        styles.insightCard,
+        { backgroundColor: theme.backgroundDefault },
+        animatedStyle,
+      ]}
+    >
+      <View style={[styles.insightIconWrap, { backgroundColor: color + "18" }]}>
+        <Feather name={icon} size={20} color={color} />
+      </View>
+      <View style={styles.insightContent}>
+        <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
+          {title}
+        </ThemedText>
+        <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
+          Coming soon
+        </ThemedText>
+      </View>
+      <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+    </AnimatedPressable>
+  );
 }
 
 export default function HealthScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
-  const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [screenings, setScreenings] = useState<Screening[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
     try {
-      const [userProfile, userScreenings] = await Promise.all([
-        storage.getUserProfile(),
-        storage.getScreenings(),
-      ]);
+      const userProfile = await storage.getUserProfile();
       setProfile(userProfile);
-      setScreenings(userScreenings);
     } catch (error) {
       console.error("Failed to load data:", error);
     } finally {
@@ -66,10 +154,59 @@ export default function HealthScreen() {
     setRefreshing(false);
   };
 
-  const upcomingScreenings = screenings.filter((s) => {
-    const days = getDaysUntil(s.nextDueDate);
-    return days >= 0 && days <= 30;
-  });
+  const trackers: TrackerCardData[] = [
+    {
+      id: "symptoms",
+      title: "Symptoms",
+      subtitle: "Log and track daily symptoms",
+      icon: "thermometer",
+      color: "#E7B4B8",
+      route: "CheckIn",
+    },
+    {
+      id: "supplements",
+      title: "Supplements",
+      subtitle: "Track your daily supplements",
+      icon: "sun",
+      color: "#DDE5DC",
+    },
+    {
+      id: "medications",
+      title: "Medications",
+      subtitle: "Manage your medications",
+      icon: "package",
+      color: "#D6CEDD",
+    },
+    {
+      id: "gut-health",
+      title: "Gut Health",
+      subtitle: "Monitor digestive wellness",
+      icon: "heart",
+      color: "#E6D2A8",
+    },
+    {
+      id: "sexual-health",
+      title: "Sexual Health",
+      subtitle: "STI screening and resources",
+      icon: "shield",
+      color: "#F6BFD3",
+      route: "SexualHealthModule",
+    },
+    {
+      id: "product-safety",
+      title: "Menstrual Product Safety",
+      subtitle: "Understand what your period products may contain.",
+      icon: "info",
+      color: "#C4B5AD",
+      route: "ProductSafety",
+    },
+  ];
+
+  const handleTrackerPress = (item: TrackerCardData) => {
+    if (item.route) {
+      navigation.navigate(item.route as any);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -81,30 +218,13 @@ export default function HealthScreen() {
     );
   }
 
-  if (!profile) {
-    return (
-      <AppGradient style={styles.container}>
-        <View style={[styles.emptyContainer, { paddingTop: headerHeight }]}>
-          <EmptyState
-            image={require("../../assets/images/empty-health.png")}
-            title="Set Up Your Health Profile"
-            description="Complete your profile to get personalized health recommendations and screening reminders."
-            actionLabel="Get Started"
-            onAction={() => navigation.navigate("Onboarding")}
-          />
-        </View>
-      </AppGradient>
-    );
-  }
-
   return (
     <AppGradient style={styles.container}>
-      <AfricanPattern opacity={0.02} variant="triangles" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
+          paddingBottom: insets.bottom + 110,
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
@@ -114,137 +234,58 @@ export default function HealthScreen() {
         }
       >
         <ThemedText style={[styles.pageTitle, { color: theme.text }]}>
-          Health
+          Reproductive Health
         </ThemedText>
         <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
-          Your personalized wellness hub
+          Your hormonal intelligence
         </ThemedText>
 
-      {upcomingScreenings.length > 0 ? (
-        <View style={styles.alertSection}>
-          <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            UPCOMING SCREENINGS
+        <View style={[styles.phaseCard, { backgroundColor: theme.backgroundDefault }]}>
+          <View style={styles.phaseRow}>
+            <View style={[styles.phaseDot, { backgroundColor: "#F6BFD3" }]} />
+            <ThemedText style={[styles.phaseLabel, { color: theme.text }]}>
+              Current Phase
+            </ThemedText>
+          </View>
+          <ThemedText style={[styles.phaseInsight, { color: theme.textSecondary }]}>
+            Your hormones shift throughout each cycle, influencing mood, energy, and well-being.
           </ThemedText>
-          {upcomingScreenings.map((screening) => (
-            <View
-              key={screening.id}
-              style={[styles.alertCard, { backgroundColor: theme.warning + "15" }]}
-            >
-              <View style={[styles.alertDot, { backgroundColor: theme.warning }]} />
-              <View style={styles.alertContent}>
-                <ThemedText type="body" style={{ fontWeight: "600" }}>
-                  {screening.type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                </ThemedText>
-                <ThemedText type="small" style={styles.alertSubtext}>
-                  Due in {getDaysUntil(screening.nextDueDate)} days
-                </ThemedText>
-              </View>
-            </View>
+        </View>
+
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          TRACKERS
+        </ThemedText>
+
+        <View style={styles.trackerGrid}>
+          {trackers.map((item) => (
+            <TrackerCard
+              key={item.id}
+              item={item}
+              onPress={() => handleTrackerPress(item)}
+            />
           ))}
         </View>
-      ) : null}
 
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-      <View style={styles.section}>
         <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          TRACKING & INSIGHTS
+          INSIGHTS
         </ThemedText>
 
-        <View style={styles.modulesList}>
-          <HealthModuleCard
-            title="Cycle Calculator"
-            description="Predict your next period and ovulation based on your cycle length."
-            icon="calendar"
-            color={theme.primary}
-            onPress={() => navigation.navigate("CycleCalculator")}
+        <View style={styles.insightsList}>
+          <InsightPlaceholderCard
+            title="Hormone Patterns"
+            icon="trending-up"
+            color="#E6D2A8"
           />
-
-          <HealthModuleCard
-            title="Fertility Tracking"
-            description="Log BBT, cervical mucus, and LH tests for accurate ovulation prediction."
-            icon="thermometer"
-            color={theme.accent}
-            onPress={() => navigation.navigate("FertilityTracking")}
-          />
-
-          <HealthModuleCard
-            title="Your Insights"
-            description="View patterns, trends, and personalized wellness recommendations."
+          <InsightPlaceholderCard
+            title="PMS Trends"
             icon="bar-chart-2"
-            color={theme.secondary}
-            onPress={() => navigation.navigate("Insights")}
+            color="#D6CEDD"
           />
         </View>
-      </View>
 
-      <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-      <View style={styles.section}>
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          HEALTH MODULES
-        </ThemedText>
-
-        <View style={styles.modulesList}>
-          <HealthModuleCard
-            title="PCOS Management"
-            description="Track symptoms, lifestyle factors, and receive personalized insights for PCOS."
-            icon="activity"
-            color={theme.primary}
-            status={profile.hasPCOS ? "Active" : undefined}
-            onPress={() => navigation.navigate("PCOSModule")}
-          />
-
-          <HealthModuleCard
-            title="Endometriosis Care"
-            description="Log pain levels, track symptom patterns, and correlate with lifestyle factors."
-            icon="heart"
-            color={theme.secondary}
-            status={profile.hasEndometriosis ? "Active" : undefined}
-            onPress={() => navigation.navigate("EndometriosisModule")}
-          />
-
-          <HealthModuleCard
-            title="Sexual Health"
-            description="STI screening reminders, risk assessments, and educational resources."
-            icon="shield"
-            color={theme.tertiary}
-            onPress={() => navigation.navigate("SexualHealthModule")}
-          />
-
-          <HealthModuleCard
-            title="Cervical Screening"
-            description="Pap smear and HPV test scheduling based on South African guidelines."
-            icon="clipboard"
-            color={theme.info}
-            onPress={() => navigation.navigate("CervicalScreeningModule")}
-          />
-        </View>
-      </View>
-
-      <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-      <View style={styles.section}>
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          GENERAL HEALTH
-        </ThemedText>
-
-        <View style={styles.healthChecksList}>
-          <InsightCard
-            title="Annual Check-up"
-            description="Blood pressure, cholesterol, and general health screening"
-            icon="check-circle"
-            color={theme.success}
-          />
-          <InsightCard
-            title="Mental Wellness"
-            description="Self-care tips and mental health resources"
-            icon="smile"
-            color={theme.primary}
-          />
-        </View>
-      </View>
-
-      <PrivacyBadge message="Your health data is encrypted and stored locally on your device" />
+        <PrivacyBadge message="Your health data is encrypted and stored locally on your device" />
       </ScrollView>
     </AppGradient>
   );
@@ -262,60 +303,109 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyContainer: {
-    flex: 1,
-  },
   pageTitle: {
-    fontFamily: "DMSans_600SemiBold",
+    fontFamily: Fonts.heading,
     fontSize: 28,
     letterSpacing: -0.5,
   },
   pageSubtitle: {
-    fontFamily: "DMSans_300Light",
+    fontFamily: Fonts.bodyLight,
     fontSize: 14,
     marginTop: 4,
     marginBottom: Spacing.xl,
   },
-  divider: {
-    height: 1,
-    marginVertical: Spacing.lg,
+  phaseCard: {
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xl,
+    gap: Spacing.sm,
   },
-  sectionLabel: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 11,
-    letterSpacing: 2,
-    marginBottom: Spacing.lg,
-  },
-  alertSection: {
-    marginBottom: Spacing.lg,
-  },
-  alertCard: {
+  phaseRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    marginTop: Spacing.sm,
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
-  alertDot: {
+  phaseDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
   },
-  alertContent: {
+  phaseLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 15,
+  },
+  phaseInsight: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  sectionLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: Spacing.lg,
+  },
+  trackerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  trackerCard: {
+    width: "48%",
+    flexGrow: 1,
+    flexBasis: "46%",
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    gap: 6,
+  },
+  trackerIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  trackerTitle: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 14,
+  },
+  trackerSubtitle: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.xl,
+  },
+  insightsList: {
+    gap: 12,
+  },
+  insightCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    gap: Spacing.md,
+  },
+  insightIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  insightContent: {
     flex: 1,
     gap: 2,
   },
-  alertSubtext: {
-    opacity: 0.7,
+  insightTitle: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 15,
   },
-  section: {
-    marginBottom: Spacing.lg,
-  },
-  modulesList: {
-    gap: CardSpacing.gap,
-  },
-  healthChecksList: {
-    gap: CardSpacing.gap,
+  insightSub: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
   },
 });
