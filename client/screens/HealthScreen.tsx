@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -51,6 +52,8 @@ function TrackerCard({
   return (
     <AnimatedPressable
       testID={`tracker-card-${item.id}`}
+      accessibilityRole="button"
+      accessibilityLabel={item.title + ". " + item.subtitle}
       onPress={onPress}
       onPressIn={() => {
         scale.value = withSpring(0.96, { damping: 15, stiffness: 150 });
@@ -95,6 +98,8 @@ function InsightPlaceholderCard({
 
   return (
     <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={title + ". Coming soon"}
       onPressIn={() => {
         scale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
       }}
@@ -203,6 +208,7 @@ export default function HealthScreen() {
   ];
 
   const handleTrackerPress = (item: TrackerCardData) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (item.route) {
       navigation.navigate(item.route as any);
     }
@@ -230,12 +236,14 @@ export default function HealthScreen() {
         scrollIndicatorInsets={{ bottom: insets.bottom }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#F6BFD3"
+            accessibilityLabel="Pull to refresh health data"
+          />
         }
       >
-        <ThemedText style={[styles.pageTitle, { color: theme.text }]}>
-          Reproductive Health
-        </ThemedText>
         <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
           Your hormonal intelligence
         </ThemedText>
@@ -302,11 +310,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  pageTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: 28,
-    letterSpacing: -0.5,
   },
   pageSubtitle: {
     fontFamily: Fonts.bodyLight,
@@ -388,6 +391,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     gap: Spacing.md,
+    minHeight: 52,
   },
   insightIconWrap: {
     width: 40,

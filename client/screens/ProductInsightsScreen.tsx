@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { View, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platform } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platform, RefreshControl } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -88,6 +89,7 @@ export default function ProductInsightsScreen() {
   const insets = useSafeAreaInsets();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const toastOpacity = useSharedValue(0);
   const exportScale = useSharedValue(1);
@@ -100,7 +102,7 @@ export default function ProductInsightsScreen() {
     transform: [{ scale: exportScale.value }],
   }));
 
-  const { data: logs = [], isLoading } = useProductLogs();
+  const { data: logs = [], isLoading, refetch } = useProductLogs();
 
   const insights = useMemo(() => computeInsights(logs), [logs]);
 
@@ -117,6 +119,12 @@ export default function ProductInsightsScreen() {
       toastOpacity.value = withTiming(0, { duration: 300 });
       setTimeout(() => setToastMsg(null), 350);
     }, 2500);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
   const handleExport = async () => {
@@ -139,6 +147,7 @@ export default function ProductInsightsScreen() {
         link.href = URL.createObjectURL(blob);
         link.download = "product-logs.csv";
         link.click();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         showToast("Export ready");
       } else {
         const filePath = `${FileSystem.cacheDirectory}product-logs.csv`;
@@ -146,6 +155,7 @@ export default function ProductInsightsScreen() {
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {
           await Sharing.shareAsync(filePath, { mimeType: "text/csv" });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } else {
           showToast("Sharing not available on this device");
         }
@@ -172,13 +182,24 @@ export default function ProductInsightsScreen() {
           paddingHorizontal: ScreenPadding.horizontal,
         }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#F6BFD3"
+            accessibilityLabel="Pull to refresh product insights"
+          />
+        }
       >
         {isLoading ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator size="large" color="#F6BFD3" />
           </View>
         ) : logs.length === 0 ? (
-          <View style={[styles.emptyCard, { backgroundColor: theme.backgroundDefault }]}>
+          <View
+            style={[styles.emptyCard, { backgroundColor: theme.backgroundDefault }]}
+            accessibilityLabel="No product logs yet. Start by logging what you used."
+          >
             <Feather name="inbox" size={32} color={theme.textSecondary} style={{ marginBottom: 12 }} />
             <ThemedText style={[styles.emptyTitle, { color: theme.text }]}>
               No product logs yet
@@ -198,6 +219,7 @@ export default function ProductInsightsScreen() {
                 <View
                   key={item.label}
                   style={[styles.insightCard, { backgroundColor: theme.backgroundDefault }]}
+                  accessibilityLabel={item.label + ": " + item.value}
                 >
                   <View style={[styles.iconWrap, { backgroundColor: "#C4B5AD18" }]}>
                     <Feather name={item.icon} size={20} color="#C4B5AD" />
@@ -223,6 +245,7 @@ export default function ProductInsightsScreen() {
                 <View
                   key={log.id}
                   style={[styles.logCard, { backgroundColor: theme.backgroundDefault }]}
+                  accessibilityLabel={formatDate(log.date) + ", " + log.productType + (log.brand ? ", " + log.brand : "") + (log.scented ? ", scented" : "")}
                 >
                   <View style={styles.logHeader}>
                     <ThemedText style={[styles.logDate, { color: theme.text }]}>
@@ -252,6 +275,8 @@ export default function ProductInsightsScreen() {
 
         <AnimatedPressable
           testID="button-export-csv"
+          accessibilityRole="button"
+          accessibilityLabel="Export product logs as CSV"
           onPress={handleExport}
           disabled={exporting || logs.length === 0}
           onPressIn={() => {

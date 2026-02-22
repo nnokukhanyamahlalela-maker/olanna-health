@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HealthScreen from "@/screens/HealthScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
@@ -18,7 +19,12 @@ export default function HealthStackNavigator() {
         name="Health"
         component={HealthScreen}
         options={{
-          headerTitle: "Health Center",
+          headerTitle: "Health",
+          ...(Platform.OS === "ios" && {
+            headerLargeTitle: true,
+            headerLargeStyle: { backgroundColor: "transparent" },
+            headerTransparent: true,
+          }),
         }}
       />
     </Stack.Navigator>

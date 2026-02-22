@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -51,6 +52,8 @@ function ActionButton({
   return (
     <AnimatedPressable
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={onPress}
       onPressIn={() => {
         scale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
@@ -96,15 +99,18 @@ export default function ProductSafetyScreen() {
   }));
 
   const toggleLearnMore = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLearnMoreOpen(!learnMoreOpen);
     chevronRotation.value = withTiming(learnMoreOpen ? 0 : 180, { duration: 250 });
   };
 
   const handleLogProduct = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("LogProduct");
   };
 
   const handleViewInsights = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("ProductInsights");
   };
 
@@ -148,6 +154,8 @@ export default function ProductSafetyScreen() {
 
         <Pressable
           testID="button-learn-more"
+          accessibilityRole="button"
+          accessibilityLabel="Toggle learn more section"
           onPress={toggleLearnMore}
           style={[styles.learnMoreHeader, { backgroundColor: theme.backgroundDefault }]}
         >

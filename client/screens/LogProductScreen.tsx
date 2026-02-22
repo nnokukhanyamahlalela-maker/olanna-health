@@ -7,11 +7,13 @@ import {
   Pressable,
   Switch,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -102,6 +104,7 @@ export default function LogProductScreen() {
       return response.json();
     },
     onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       queryClient.invalidateQueries({ queryKey: ["/api/product-logs"] });
       showToast("Saved");
       setTimeout(() => navigation.goBack(), 800);
@@ -117,6 +120,11 @@ export default function LogProductScreen() {
       return;
     }
     saveMutation.mutate();
+  };
+
+  const handleScentedToggle = (value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setScented(value);
   };
 
   const todayStr = new Date().toLocaleDateString("en-ZA", {
@@ -151,12 +159,16 @@ export default function LogProductScreen() {
           </View>
         </View>
 
+        <View style={[styles.separator, { backgroundColor: theme.border }]} />
+
         <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             PRODUCT TYPE
           </ThemedText>
           <Pressable
             testID="dropdown-product-type"
+            accessibilityRole="button"
+            accessibilityLabel={productType ? "Product type: " + productType + ". Tap to change" : "Select a product type"}
             onPress={() => setDropdownOpen(!dropdownOpen)}
             style={[styles.dropdownTrigger, { borderColor: theme.border }]}
           >
@@ -180,6 +192,8 @@ export default function LogProductScreen() {
                 <Pressable
                   key={type}
                   testID={`option-${type.toLowerCase().replace(/\s+/g, "-")}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={type + (productType === type ? ", selected" : "")}
                   onPress={() => {
                     setProductType(type);
                     setDropdownOpen(false);
@@ -203,12 +217,15 @@ export default function LogProductScreen() {
           ) : null}
         </View>
 
+        <View style={[styles.separator, { backgroundColor: theme.border }]} />
+
         <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             BRAND
           </ThemedText>
           <TextInput
             testID="input-brand"
+            accessibilityLabel="Brand name"
             style={[
               styles.textInput,
               {
@@ -226,6 +243,8 @@ export default function LogProductScreen() {
           />
         </View>
 
+        <View style={[styles.separator, { backgroundColor: theme.border }]} />
+
         <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
           <View style={styles.toggleRow}>
             <View style={styles.toggleLabel}>
@@ -238,8 +257,9 @@ export default function LogProductScreen() {
             </View>
             <Switch
               testID="toggle-scented"
+              accessibilityLabel={scented ? "Scented, on" : "Scented, off"}
               value={scented}
-              onValueChange={setScented}
+              onValueChange={handleScentedToggle}
               trackColor={{ false: theme.border, true: "#F6BFD3" }}
               thumbColor="#FFFFFF"
               disabled={isSaving}
@@ -247,12 +267,15 @@ export default function LogProductScreen() {
           </View>
         </View>
 
+        <View style={[styles.separator, { backgroundColor: theme.border }]} />
+
         <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             NOTES
           </ThemedText>
           <TextInput
             testID="input-notes"
+            accessibilityLabel="Notes"
             style={[
               styles.textArea,
               {
@@ -275,6 +298,8 @@ export default function LogProductScreen() {
 
         <AnimatedPressable
           testID="button-save-product"
+          accessibilityRole="button"
+          accessibilityLabel="Save product log"
           onPress={handleSave}
           disabled={isSaving}
           onPressIn={() => {
@@ -316,9 +341,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fieldCard: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: 12,
     padding: Spacing.lg,
-    marginBottom: 12,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: Spacing.md,
+    marginVertical: 2,
   },
   fieldLabel: {
     fontFamily: Fonts.bodySemibold,
@@ -399,7 +428,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6BFD3",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Spacing.sm,
+    marginTop: Spacing.lg,
   },
   saveButtonText: {
     fontFamily: Fonts.bodySemibold,

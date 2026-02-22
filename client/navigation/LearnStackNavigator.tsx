@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LearnScreen from "@/screens/LearnScreen";
 import ArticleDetailScreen from "@/screens/ArticleDetailScreen";
@@ -22,7 +23,12 @@ export default function LearnStackNavigator() {
         name="Learn"
         component={LearnScreen}
         options={{
-          headerTitle: "Education",
+          headerTitle: "Learn",
+          ...(Platform.OS === "ios" && {
+            headerLargeTitle: true,
+            headerLargeStyle: { backgroundColor: "transparent" },
+            headerTransparent: true,
+          }),
         }}
       />
       <Stack.Screen
