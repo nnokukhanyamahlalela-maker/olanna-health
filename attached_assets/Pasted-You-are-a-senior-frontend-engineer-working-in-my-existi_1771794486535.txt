@@ -1,0 +1,64 @@
+You are a senior frontend engineer working in my existing Replit app “Olanna Health”.
+
+SCOPE:
+✅ Implement Step 3 (UX FLOW wiring) ONLY.
+❌ Do NOT build backend/database/models yet.
+❌ Do NOT implement product logging storage yet.
+
+------------------------------------------------------------
+STEP 3 — UX FLOW WIRING
+------------------------------------------------------------
+
+Goal:
+Make the new “Menstrual Product Safety” experience navigable and usable end-to-end (UI flow), even if actions are placeholders.
+
+A) Health Tab → Product Safety
+- Make the “Menstrual Product Safety” tracker card tappable/clickable.
+- On tap, navigate to the Product Safety screen route you created in Step 2.
+- Ensure navigation works on both iOS/Android (if React Native) or web routing (if web stack).
+
+B) Product Safety screen buttons
+Wire the two buttons with a clean UX:
+
+1) “Log a Product” button:
+- Navigate to a new placeholder screen (create it if it doesn’t exist):
+  Route: /health/product-safety/log
+  Screen title: “Log a Product”
+  Body text: “Coming next: log the product you used (brand, type, scented).”
+  Add a simple UI stub form (not saved yet):
+   - Date (default today)
+   - Product type dropdown (Pad / Pantyliner / Tampon / Cup / Period underwear / Other)
+   - Brand text input
+   - Scented? toggle
+   - Notes text area
+  Add a primary button: “Save” (on press: show toast/snackbar “Saving will be enabled in the next step.”)
+
+2) “View My Insights” button:
+- Navigate to a new placeholder screen:
+  Route: /health/product-safety/insights
+  Screen title: “My Product Insights”
+  Body text: “Coming next: see patterns from your product logs.”
+  Add placeholder cards:
+   - “Scented usage” → “—”
+   - “Most used product type” → “—”
+   - “Most used brand” → “—”
+  Add a secondary button: “Export CSV” (on press: toast “Export will be enabled in the next step.”)
+
+C) Navigation details
+- Add back navigation where appropriate (header back button or default stack back).
+- Ensure routes/screens are registered correctly in the app’s navigation setup.
+- Use existing UI components/styles (Card, Button, Input, Toggle, Select) wherever available.
+- Keep the aesthetic consistent: minimal, feminine, soft, no warning visuals.
+
+D) Quality checks
+- No crashes when navigating between screens.
+- Buttons always do something harmless (toast/console log).
+- Keep code clean and consistent with existing folder structure/patterns.
+
+DELIVERABLES:
+✅ Health card navigates to Product Safety screen
+✅ Two new placeholder screens exist and are reachable
+✅ Buttons wired with placeholder behavior
+❌ No database, APIs, or persistence yet
+
+Now implement Step 3 in the existing Olanna Health codebase.

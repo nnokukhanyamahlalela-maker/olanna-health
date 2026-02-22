@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Alert } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
@@ -13,6 +15,7 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 
@@ -77,10 +80,13 @@ function ActionButton({
   );
 }
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function ProductSafetyScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
 
   const chevronRotation = useSharedValue(0);
@@ -95,11 +101,11 @@ export default function ProductSafetyScreen() {
   };
 
   const handleLogProduct = () => {
-    // Placeholder — no backend wired yet
+    navigation.navigate("LogProduct");
   };
 
   const handleViewInsights = () => {
-    // Placeholder — no backend wired yet
+    navigation.navigate("ProductInsights");
   };
 
   return (

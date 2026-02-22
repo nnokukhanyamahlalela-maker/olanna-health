@@ -22,6 +22,8 @@ import AppearanceScreen from "@/screens/AppearanceScreen";
 import AIChatScreen from "@/screens/AIChatScreen";
 import CheckInSheet from "@/screens/CheckInSheet";
 import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
+import LogProductScreen from "@/screens/LogProductScreen";
+import ProductInsightsScreen from "@/screens/ProductInsightsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -46,6 +48,8 @@ export type RootStackParamList = {
   AIChat: undefined;
   CheckInSheet: undefined;
   ProductSafety: undefined;
+  LogProduct: undefined;
+  ProductInsights: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -178,6 +182,20 @@ export default function RootStackNavigator() {
         component={ProductSafetyScreen}
         options={{
           headerTitle: "Product Safety",
+        }}
+      />
+      <Stack.Screen
+        name="LogProduct"
+        component={LogProductScreen}
+        options={{
+          headerTitle: "Log a Product",
+        }}
+      />
+      <Stack.Screen
+        name="ProductInsights"
+        component={ProductInsightsScreen}
+        options={{
+          headerTitle: "My Product Insights",
         }}
       />
       <Stack.Screen
