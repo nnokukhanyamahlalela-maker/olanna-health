@@ -6,24 +6,26 @@ import {
   TextInput,
   Pressable,
   Switch,
-  Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
-  runOnJS,
 } from "react-native-reanimated";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
+import { getDeviceId } from "@/lib/deviceId";
 
 const PRODUCT_TYPES = [
   "Pad",
@@ -40,12 +42,14 @@ export default function LogProductScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const queryClient = useQueryClient();
 
   const [productType, setProductType] = useState<string | null>(null);
   const [brand, setBrand] = useState("");
   const [scented, setScented] = useState(false);
   const [notes, setNotes] = useState("");
-  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toastOpacity = useSharedValue(0);
@@ -59,13 +63,59 @@ export default function LogProductScreen() {
     transform: [{ scale: saveScale.value }],
   }));
 
-  const handleSave = () => {
-    setShowToast(true);
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
     toastOpacity.value = withTiming(1, { duration: 200 });
     setTimeout(() => {
       toastOpacity.value = withTiming(0, { duration: 300 });
-      setTimeout(() => setShowToast(false), 350);
+      setTimeout(() => setToastMsg(null), 350);
     }, 2500);
+  };
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const deviceId = await getDeviceId();
+      const today = new Date().toISOString().split("T")[0];
+      const { getApiUrl } = require("@/lib/query-client");
+      const response = await fetch(
+        new URL("/api/product-logs", getApiUrl()).href,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-device-id": deviceId,
+          },
+          body: JSON.stringify({
+            date: today,
+            productType,
+            brand: brand.trim() || null,
+            scented,
+            notes: notes.trim() || null,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(errBody || "Failed to save");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/product-logs"] });
+      showToast("Saved");
+      setTimeout(() => navigation.goBack(), 800);
+    },
+    onError: (err: Error) => {
+      showToast("Could not save. Please try again.");
+    },
+  });
+
+  const handleSave = () => {
+    if (!productType) {
+      showToast("Please select a product type.");
+      return;
+    }
+    saveMutation.mutate();
   };
 
   const todayStr = new Date().toLocaleDateString("en-ZA", {
@@ -73,6 +123,8 @@ export default function LogProductScreen() {
     month: "long",
     year: "numeric",
   });
+
+  const isSaving = saveMutation.isPending;
 
   return (
     <AppGradient style={styles.container}>
@@ -168,6 +220,8 @@ export default function LogProductScreen() {
             placeholderTextColor={theme.textSecondary}
             value={brand}
             onChangeText={setBrand}
+            maxLength={60}
+            editable={!isSaving}
           />
         </View>
 
@@ -187,6 +241,7 @@ export default function LogProductScreen() {
               onValueChange={setScented}
               trackColor={{ false: theme.border, true: "#F6BFD3" }}
               thumbColor="#FFFFFF"
+              disabled={isSaving}
             />
           </View>
         </View>
@@ -212,28 +267,39 @@ export default function LogProductScreen() {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            maxLength={500}
+            editable={!isSaving}
           />
         </View>
 
         <AnimatedPressable
           testID="button-save-product"
           onPress={handleSave}
+          disabled={isSaving}
           onPressIn={() => {
             saveScale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
           }}
           onPressOut={() => {
             saveScale.value = withSpring(1, { damping: 15, stiffness: 150 });
           }}
-          style={[styles.saveButton, saveAnimStyle]}
+          style={[styles.saveButton, isSaving ? { opacity: 0.6 } : null, saveAnimStyle]}
         >
-          <ThemedText style={styles.saveButtonText}>Save</ThemedText>
+          {isSaving ? (
+            <ActivityIndicator color="#3A2F35" size="small" />
+          ) : (
+            <ThemedText style={styles.saveButtonText}>Save</ThemedText>
+          )}
         </AnimatedPressable>
+
+        <ThemedText style={[styles.privacyNote, { color: theme.textSecondary }]}>
+          Your product logs are private to you. You can export or delete them anytime.
+        </ThemedText>
       </ScrollView>
 
-      {showToast ? (
+      {toastMsg ? (
         <Animated.View style={[styles.toast, toastStyle]}>
           <ThemedText style={styles.toastText}>
-            Saving will be enabled in the next update.
+            {toastMsg}
           </ThemedText>
         </Animated.View>
       ) : null}
@@ -339,6 +405,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#3A2F35",
     letterSpacing: 0.3,
+  },
+  privacyNote: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: Spacing.lg,
+    lineHeight: 18,
   },
   toast: {
     position: "absolute",
