@@ -1,0 +1,131 @@
+You are a senior full-stack engineer working in my existing Replit app “Olanna Health”.
+
+SCOPE: STEP 4 — PERSISTENCE + REAL INSIGHTS
+✅ Implement backend + database persistence for Menstrual Product Safety logs
+✅ Wire the existing “Log a Product” Save button to actually save
+✅ Wire “My Product Insights” to display real metrics from saved logs
+✅ Implement CSV export (nice-to-have, but try to complete)
+❌ Do NOT add premium gating yet
+❌ Do NOT change unrelated app features
+
+------------------------------------------------------------
+1) DATA MODEL / DATABASE
+------------------------------------------------------------
+
+Create a new database table/collection: ProductLog (or menstrual_product_logs)
+
+Fields:
+- id (primary key / uuid)
+- userId (foreign key / owner)
+- date (date the product was used; user-selectable)
+- productType (enum/string: Pad, Pantyliner, Tampon, Cup, Period underwear, Other)
+- brand (string; optional but encouraged)
+- scented (boolean; default false)
+- notes (string/text; optional)
+- createdAt (timestamp)
+- updatedAt (timestamp if supported)
+
+Rules:
+- All records must be scoped to the currently authenticated user (userId).
+- Users can only read/write their own logs.
+
+If the app uses:
+- Prisma: add schema + migration
+- Supabase/Postgres: add table + RLS policies if used
+- Mongo: add collection + model
+- SQLite: add migration/init script
+
+Follow the existing project conventions.
+
+------------------------------------------------------------
+2) API / SERVER ACTIONS
+------------------------------------------------------------
+
+Implement endpoints/server-actions consistent with the codebase:
+
+A) Create log
+- Input: date, productType, brand, scented, notes
+- Set userId from auth session (never trust client for userId)
+- Validate:
+  - date required
+  - productType required
+  - brand max length (e.g., 60)
+  - notes max length (e.g., 500)
+
+B) List logs
+- Default: last 30 days
+- Filter: by date range (optional)
+- Sort: newest first
+
+C) (Optional but recommended) Delete / Edit
+- Implement if easy:
+  - delete by id (only if owned by user)
+  - update fields (only if owned by user)
+
+D) Export CSV
+- Export the user’s logs as CSV (default last 30 days)
+- Include columns: date, productType, brand, scented, notes, createdAt
+- Return as downloadable file (web) or share/save flow (mobile) depending on stack.
+- If hard, implement endpoint that returns CSV string and wire the button to download/share.
+
+------------------------------------------------------------
+3) FRONTEND WIRING
+------------------------------------------------------------
+
+A) Log a Product screen
+- On “Save”:
+  - Call Create log endpoint/action
+  - Show success toast: “Saved”
+  - Navigate back to “My Product Insights” OR clear form (choose best UX)
+- Add basic loading state + disable Save while saving
+- Add error handling (toast with user-friendly message)
+
+B) My Product Insights screen (REAL DATA)
+- Fetch logs (last 30 days) for the current user
+- Display:
+  1) “Scented usage” → percentage scented = true
+  2) “Most used product type” → mode(productType)
+  3) “Most used brand” → mode(brand), ignore empty/null brands
+- Also show the list of logs (last 30 days) with:
+  - date
+  - productType
+  - brand
+  - scented badge (e.g., “Scented”)
+- If no logs:
+  - Show empty state: “No product logs yet. Start by logging what you used.”
+
+C) Export CSV button
+- On press:
+  - Trigger CSV export for current user
+  - Download/share/save depending on platform
+  - Toast: “Export ready” or show download UI
+
+------------------------------------------------------------
+4) PRIVACY + COPY REQUIREMENTS
+------------------------------------------------------------
+
+- Add a small note in Product Safety area (or settings if already present):
+  “Your product logs are private to you. You can export or delete them anytime.”
+- Ensure data is not publicly accessible.
+- If the app has a privacy policy screen/route, add one line about product logs there.
+
+------------------------------------------------------------
+5) ACCEPTANCE CRITERIA
+------------------------------------------------------------
+
+✅ I can log a product and it persists after refresh/reload.
+✅ “My Product Insights” shows real computed stats from last 30 days.
+✅ Logs are per-user (User A cannot see User B’s logs).
+✅ Export CSV works (or is implemented as a basic downloadable response if platform limits).
+✅ No crashes; errors are handled gracefully.
+
+------------------------------------------------------------
+6) DEV INSTRUCTIONS OUTPUT
+------------------------------------------------------------
+
+At the end, print clear instructions in the console/README:
+- how to run migrations (if any)
+- how to test the flow manually in the app
+- any environment variables needed
+
+Now implement Step 4 end-to-end in the existing Olanna Health codebase, following the project’s existing patterns and keeping UI consistent with Olanna’s minimalist aesthetic.
