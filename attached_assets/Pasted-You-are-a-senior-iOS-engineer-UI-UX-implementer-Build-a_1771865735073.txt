@@ -1,0 +1,75 @@
+You are a senior iOS engineer + UI/UX implementer. Build a SwiftUI screen for my menstrual cycle tracking app called “Olanna Health”. The goal is a lotus-flower inspired menstrual cycle wheel, similar in concept to Stardust’s wheel, but adapted to modern iOS design (clean, soft, pastel, Apple HIG).
+
+SCREEN: Cycle (main tab)
+
+VISUAL STYLE
+- Background: soft vertical gradient (very pale lilac/pink -> slightly deeper pink/lilac). Keep it subtle and airy.
+- Use iOS-friendly typography (SF Pro). Headings semibold, body regular.
+- Use rounded corners and “card” surfaces (iOS feel).
+
+LAYOUT (top to bottom)
+1) Top navigation bar
+- Title centered: “Cycle”
+- Left: back arrow button (or optional if this is a root tab screen; if root, just omit back arrow)
+- Right: plus button for “Log” (opens a sheet placeholder).
+
+2) “The Lotus Cycle” info card (like a simple iOS card)
+- Rounded rectangle card with white background and soft shadow.
+- Title: “The Lotus Cycle”
+- 2x2 grid of phase chips:
+  - Menstrual — “Rest & Release”
+  - Follicular — “Growth & Renewal”
+  - Ovulatory — “Radiance & Expression”
+  - Luteal — “Boundaries & Reflection”
+- Each chip shows:
+  - A circular pastel icon background (phase color)
+  - A minimal line icon (SVG-like using SwiftUI Shapes): droplet, sprout, bloom, bud
+  - Phase name + tagline
+- Make this card responsive and readable.
+
+3) Lotus Cycle Wheel (centerpiece)
+- A ring segmented into 28 days (default).
+- Phase ranges (example defaults; make data-driven):
+  - Menstrual: days 1–4 (soft rose)
+  - Follicular: days 5–13 (mint)
+  - Ovulatory: days 14–16 (warm gold)
+  - Luteal: days 17–28 (lavender)
+- Each day is a thin arc segment.
+- Past days = full opacity, future days = 25% opacity.
+- Current day segment has a stronger outline or glow to highlight it.
+- Behind the ring: subtle translucent lotus petals (8 petals) as a decorative layer (very low opacity).
+- Center hub inside ring (white circle):
+  - “Day {currentDay} of {cycleLength}”
+  - “{currentPhase} Phase”
+  - Tagline (based on current phase)
+- Beneath wheel: single line status text like “Period starts in 7 days” (placeholder computed from nextPeriodStartDay).
+
+INTERACTION
+- Tapping a day segment updates selectedDay and updates the center hub (day, phase, tagline) + status line.
+- Provide haptic feedback (light) on selection.
+- Provide smooth animation when selection changes.
+
+DATA MODEL (simple, local)
+- cycleLength: Int = 28
+- currentDay: Int = 22
+- selectedDay: Int (default currentDay)
+- phaseRanges: define as structs with name, startDay, endDay, color, tagline
+- A function getPhase(for day) -> Phase
+- compute “days until period” as (cycleLength - selectedDay) (placeholder; if selectedDay is near end show “Period soon”)
+
+IMPLEMENTATION DETAILS
+- Use SwiftUI only.
+- Implement the ring using Canvas or custom Shape that draws arcs for each day segment.
+- Ensure performance is fine (no heavy re-draw loops).
+- Provide clean, well-commented code.
+- Organize into:
+  - CycleView.swift
+  - LotusCycleWheel.swift (custom view)
+  - PhaseCard.swift (chips/card)
+  - Models.swift (Phase struct and helpers)
+- Include preview providers.
+
+DELIVERABLE
+- Provide complete SwiftUI code that compiles.
+- Use sensible constants for spacing, sizes, colors.
+- Make the design look modern and soft, matching iOS 17/18 style.
