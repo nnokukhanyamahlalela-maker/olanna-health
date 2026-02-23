@@ -85,7 +85,9 @@ export function LotusCycleWheel({
 
   const triggerHaptic = useCallback(() => {
     if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (_) {}
     }
   }, []);
 
@@ -100,17 +102,22 @@ export function LotusCycleWheel({
     [onDaySelect, triggerHaptic]
   );
 
+  const handleGestureEvent = useCallback(
+    (x: number, y: number) => {
+      const angle = cartesianToAngle(x, y, cx, cy);
+      const day = angleToDayNumber(angle, cycleLength);
+      handleDayChange(day);
+    },
+    [cx, cy, cycleLength, handleDayChange]
+  );
+
   const panGesture = Gesture.Pan()
     .onBegin((event) => {
       scale.value = withSpring(1.02, { damping: 15, stiffness: 300 });
-      const angle = cartesianToAngle(event.x, event.y, cx, cy);
-      const day = angleToDayNumber(angle, cycleLength);
-      runOnJS(handleDayChange)(day);
+      runOnJS(handleGestureEvent)(event.x, event.y);
     })
     .onUpdate((event) => {
-      const angle = cartesianToAngle(event.x, event.y, cx, cy);
-      const day = angleToDayNumber(angle, cycleLength);
-      runOnJS(handleDayChange)(day);
+      runOnJS(handleGestureEvent)(event.x, event.y);
     })
     .onEnd(() => {
       scale.value = withSpring(1, { damping: 15, stiffness: 300 });
@@ -120,9 +127,7 @@ export function LotusCycleWheel({
     });
 
   const tapGesture = Gesture.Tap().onEnd((event) => {
-    const angle = cartesianToAngle(event.x, event.y, cx, cy);
-    const day = angleToDayNumber(angle, cycleLength);
-    runOnJS(handleDayChange)(day);
+    runOnJS(handleGestureEvent)(event.x, event.y);
   });
 
   const composedGesture = Gesture.Simultaneous(panGesture, tapGesture);

@@ -62,7 +62,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     width: "100%",
-    boxShadow: "0px 2px 12px rgba(0,0,0,0.06)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
   },
   cardTitle: {
     fontFamily: Fonts.heading,
