@@ -19,6 +19,7 @@ import {
   phaseConfig,
 } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
+import { neutral } from "@/constants/colors";
 
 const CYCLE_LENGTH = 28;
 const CURRENT_DAY = 22;
@@ -33,7 +34,7 @@ export function CycleScreen() {
 
   return (
     <LinearGradient
-      colors={["#FDF0F5", "#FBE3EC", "#FFF7FA"]}
+      colors={[neutral.bgPrimary, neutral.bgSubtle, neutral.bgPrimary]}
       locations={[0, 0.5, 1]}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
@@ -50,7 +51,6 @@ export function CycleScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Navigation bar */}
         <View style={styles.navBar}>
           <View style={styles.navSpacer} />
           <Text style={styles.navTitle}>Cycle</Text>
@@ -60,14 +60,12 @@ export function CycleScreen() {
             accessibilityLabel="Log symptoms"
             testID="button-log"
           >
-            <Feather name="plus" size={20} color="#3A2F35" />
+            <Feather name="plus" size={20} color={neutral.textPrimary} />
           </Pressable>
         </View>
 
-        {/* The Lotus Cycle card */}
         <PhaseCard currentPhase={currentPhase} />
 
-        {/* Lotus Cycle Wheel */}
         <View style={styles.wheelSection}>
           <LotusCycleWheel
             cycleLength={CYCLE_LENGTH}
@@ -77,7 +75,6 @@ export function CycleScreen() {
           />
         </View>
 
-        {/* Status text */}
         <Text style={styles.statusText}>{statusText}</Text>
       </ScrollView>
     </LinearGradient>
@@ -109,7 +106,7 @@ const styles = StyleSheet.create({
   navTitle: {
     fontFamily: Fonts.heading,
     fontSize: 17,
-    color: "#3A2F35",
+    color: neutral.textPrimary,
     letterSpacing: 0.2,
   },
   navButton: {
@@ -127,7 +124,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontFamily: Fonts.body,
     fontSize: 14,
-    color: "#7A6A73",
+    color: neutral.textSecondary,
     textAlign: "center",
     letterSpacing: 0.2,
   },

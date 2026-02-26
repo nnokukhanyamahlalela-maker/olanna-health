@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import Svg, { Path, Circle, G } from "react-native-svg";
 import { phaseConfig, PHASE_ORDER, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
+import { neutral } from "@/constants/colors";
 
 function LotusIcon({ variant, size = 48, color }: { variant: string; size?: number; color: string }) {
   const cx = size / 2;
@@ -167,11 +168,11 @@ export function PhaseCard({ currentPhase }: PhaseCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: neutral.bgSecondary,
     borderRadius: 16,
     padding: 20,
     width: "100%",
-    shadowColor: "#000",
+    shadowColor: neutral.textPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: Fonts.heading,
     fontSize: 17,
-    color: "#3A2F35",
+    color: neutral.textPrimary,
     marginBottom: 20,
     letterSpacing: 0.2,
   },
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   phaseTagline: {
     fontFamily: Fonts.body,
     fontSize: 12,
-    color: "#7A6A73",
+    color: neutral.textTertiary,
     textAlign: "center",
   },
 });

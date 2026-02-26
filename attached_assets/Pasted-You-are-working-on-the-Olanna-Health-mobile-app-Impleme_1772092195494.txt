@@ -1,0 +1,112 @@
+You are working on the Olanna Health mobile app. Implement a design-token based colour system (brand + neutrals + cycle phases + semantic states) and refactor the UI to use these tokens.
+
+GOAL
+- Keep the app looking soft, feminine, and premium (minimal, not overly colorful).
+- Preserve the current “Lotus Cycle” vibe: Menstrual = pink, Follicular = cool grey/lilac, Ovulatory = warm peach, Luteal = lavender.
+- Use the brand gradient (coral → hot pink → orchid) for key CTAs, highlights, and the app icon feel.
+- Ensure readable text contrast on light backgrounds.
+
+TASKS
+1) Create a single source of truth colour file:
+   - Create `src/theme/colors.ts` exporting:
+     a) `brand` tokens
+     b) `neutral` tokens
+     c) `phase` tokens (each phase has solid + gradient start/mid/end + soft background)
+     d) `semantic` tokens (success/warning/danger/info: base/soft/border)
+
+2) Create `src/theme/theme.ts` exporting:
+   - `colors`
+   - `spacing`
+   - `radius`
+   - `shadow` (light iOS style)
+   - `typography` (just placeholders if needed)
+
+3) Replace hardcoded hex values in Cycle screens/components with tokens:
+   - The Lotus Cycle phase circles use `phase.<name>.solid`.
+   - The cycle wheel ring segments use `phase.<name>.gradient`.
+   - Background stays mostly neutral (`neutral.bgPrimary`) with subtle phase wash (`phase.<name>.softBg`) at low opacity.
+   - Primary CTA / floating heart button uses `brand.primary` or the brand gradient.
+
+4) Provide helper utilities:
+   - If using gradients, create `getPhaseGradient(phaseName)` returning `[start, mid, end]`.
+   - If using React Native, support Expo LinearGradient; otherwise provide CSS fallback.
+
+COLOUR TOKENS (use exactly these hex values)
+
+BRAND
+- brand.primary = #E83E8C
+- brand.primaryDeep = #D633A6
+- brand.primarySoft = #FDE8F1
+- brand.gradientStart = #FF6A4D
+- brand.gradientMid = #FF2F8E
+- brand.gradientEnd = #D633A6
+
+NEUTRALS (premium warm base)
+- neutral.bgPrimary = #F8F6F4
+- neutral.bgSecondary = #FFFFFF
+- neutral.bgSubtle = #F1ECE9
+- neutral.border = #E6DFDA
+- neutral.textPrimary = #2A1E1B
+- neutral.textSecondary = #5A4A47
+- neutral.textTertiary = #8A7F7B
+- neutral.textInverse = #FFFFFF
+
+CYCLE PHASES (match current UI feel + elevate)
+Menstrual (Rest & Release)
+- phase.menstrual.solid = #F2A2B8
+- phase.menstrual.softBg = #FDE8F1
+- phase.menstrual.gradientStart = #7A1F4F
+- phase.menstrual.gradientMid = #A8326E
+- phase.menstrual.gradientEnd = #D86A92
+
+Follicular (Growth & Renewal)
+- phase.follicular.solid = #CFCBD6
+- phase.follicular.softBg = #F1EFF6
+- phase.follicular.gradientStart = #BFC0D2
+- phase.follicular.gradientMid = #C9B6D9
+- phase.follicular.gradientEnd = #E7D7EF
+
+Ovulatory (Radiance & Expression)
+- phase.ovulatory.solid = #F2C9A2
+- phase.ovulatory.softBg = #F8EADB
+- phase.ovulatory.gradientStart = #F6C38A
+- phase.ovulatory.gradientMid = #F2C9A2
+- phase.ovulatory.gradientEnd = #F9E1C6
+
+Luteal (Boundaries & Reflection)
+- phase.luteal.solid = #D7B3E7
+- phase.luteal.softBg = #F4ECFA
+- phase.luteal.gradientStart = #C94F7C
+- phase.luteal.gradientMid = #9E3F6E
+- phase.luteal.gradientEnd = #6E3B63
+
+SEMANTIC (functional states)
+Success
+- semantic.success.base = #4C8C6D
+- semantic.success.soft = #E4F3EC
+- semantic.success.border = #B9D8C9
+
+Warning
+- semantic.warning.base = #C68B2C
+- semantic.warning.soft = #F6E8CF
+- semantic.warning.border = #E8D2A8
+
+Danger
+- semantic.danger.base = #A8324A
+- semantic.danger.soft = #F4D7DD
+- semantic.danger.border = #E2A9B5
+
+Info
+- semantic.info.base = #5C6F91
+- semantic.info.soft = #E4EAF4
+- semantic.info.border = #C7D2E3
+
+IMPLEMENTATION NOTES
+- Keep most surfaces neutral; phase colours should appear as accents.
+- Phase “wash” backgrounds should be applied at ~6–12% opacity only.
+- Ensure all headings/body text use neutral.textPrimary/Secondary for readability.
+
+OUTPUT REQUIREMENTS
+- Show `colors.ts` code.
+- Show any updated component snippets where phase colours and gradients are used.
+- Confirm there are no remaining hardcoded hex colours in Cycle-related screens (except in the token file).

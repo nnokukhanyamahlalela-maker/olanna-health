@@ -29,7 +29,7 @@ The application includes:
 - **Educational Content**: An evidence-based education library.
 - **AI Health Assistant**: A multilingual chatbot supporting English and five other South African languages (isiZulu, Afrikaans, Sesotho, isiXhosa, siSwati).
 - **Navigation**: Uses React Navigation with a 5-tab bottom navigation (Cycle, Check-in, Calendar, Health, Learn) and stack navigators. The Profile screen is accessible via a header button.
-- **Design System**: Features a sophisticated design language with generous whitespace, thin dividers, uppercase section labels with letter-spacing, and pull quotes. Phase-aware coloring (Menstrual: Terracotta/Orange, Follicular: Sage/Hot Pink, Ovulatory: Gold/Soft Pink, Luteal: Lavender/Purple) is used throughout. All screens use the `AppGradient` component (`client/components/AppGradient.tsx`) as the root wrapper for consistent brand gradient backgrounds (#FF9A6B → #FF3F9E → #F7B0C8 → #E7C2E8 with subtle white overlay).
+- **Design System**: Token-based color system in `client/constants/colors.ts` with brand (#E83E8C primary, gradient #FF6A4D → #FF2F8E → #D633A6), neutral (warm cream #F8F6F4 base), phase (Menstrual: soft pink #F2A2B8, Follicular: cool grey/lilac #CFCBD6, Ovulatory: warm peach #F2C9A2, Luteal: lavender #D7B3E7), and semantic (success/warning/danger/info) tokens. Helper utilities: `getPhaseGradient()`, `getPhaseColors()`, `getBrandGradient()`. Cycle components use tokens exclusively — no hardcoded hex values. Other screens use `AppGradient` component (`client/components/AppGradient.tsx`) for brand gradient backgrounds.
 - **Visualizations**: iOS-style cycle screen with:
   - Top header showing month/year with profile button
   - Mini week calendar row with gradient date pills (pink → orange)

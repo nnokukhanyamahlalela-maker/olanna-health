@@ -18,6 +18,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { getPhaseForDay, phaseConfig, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
+import { neutral } from "@/constants/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -312,9 +313,9 @@ export function LotusCycleWheel({
           <Svg width={size} height={size}>
             <Defs>
               <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
-                <Stop offset="80%" stopColor="#FFF7FA" stopOpacity={0.95} />
-                <Stop offset="100%" stopColor="#FDF0F5" stopOpacity={0.9} />
+                <Stop offset="0%" stopColor={neutral.bgSecondary} stopOpacity={1} />
+                <Stop offset="80%" stopColor={neutral.bgPrimary} stopOpacity={0.95} />
+                <Stop offset="100%" stopColor={neutral.bgSubtle} stopOpacity={0.9} />
               </RadialGradient>
             </Defs>
 
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
   hubDayText: {
     fontFamily: Fonts.heading,
     fontSize: 18,
-    color: "#3A2F35",
+    color: neutral.textPrimary,
     marginBottom: 4,
   },
   hubPhase: {
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
   hubTagline: {
     fontFamily: Fonts.body,
     fontSize: 12,
-    color: "#7A6A73",
+    color: neutral.textSecondary,
     fontStyle: "italic",
   },
 });

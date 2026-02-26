@@ -1,14 +1,13 @@
+import { phase as phaseTokens, neutral } from "@/constants/colors";
+
 export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal";
 
 export interface PhaseConfig {
   label: string;
   subtitle: string;
   tagline: string;
-  ringGradient: {
-    start: string;
-    end: string;
-  };
   color: string;
+  softBg: string;
   lotusVariant: "bud" | "rising" | "bloom" | "closing";
   accentColor: string;
   labelColor: string;
@@ -22,11 +21,11 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     label: "Menstrual",
     subtitle: "Rest & Release",
     tagline: "Rest & Release",
-    ringGradient: { start: "#F6BFD3", end: "#E8A0B8" },
-    color: "#F6BFD3",
+    color: phaseTokens.menstrual.solid,
+    softBg: phaseTokens.menstrual.softBg,
     lotusVariant: "bud",
-    accentColor: "#E8A0B8",
-    labelColor: "#C87898",
+    accentColor: phaseTokens.menstrual.gradientEnd,
+    labelColor: phaseTokens.menstrual.gradientMid,
     iconName: "droplet",
     startDay: 1,
     endDay: 4,
@@ -35,11 +34,11 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     label: "Follicular",
     subtitle: "Growth & Renewal",
     tagline: "Growth & Renewal",
-    ringGradient: { start: "#D6CEDD", end: "#C4B8CC" },
-    color: "#D6CEDD",
+    color: phaseTokens.follicular.solid,
+    softBg: phaseTokens.follicular.softBg,
     lotusVariant: "rising",
-    accentColor: "#C4B8CC",
-    labelColor: "#9888A8",
+    accentColor: phaseTokens.follicular.gradientMid,
+    labelColor: phaseTokens.follicular.gradientStart,
     iconName: "trending-up",
     startDay: 5,
     endDay: 13,
@@ -48,11 +47,11 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     label: "Ovulatory",
     subtitle: "Radiance & Expression",
     tagline: "Radiance & Expression",
-    ringGradient: { start: "#F5D0A8", end: "#ECC090" },
-    color: "#F5D0A8",
+    color: phaseTokens.ovulatory.solid,
+    softBg: phaseTokens.ovulatory.softBg,
     lotusVariant: "bloom",
-    accentColor: "#ECC090",
-    labelColor: "#C8A060",
+    accentColor: phaseTokens.ovulatory.gradientMid,
+    labelColor: phaseTokens.ovulatory.gradientStart,
     iconName: "sun",
     startDay: 14,
     endDay: 16,
@@ -61,11 +60,11 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     label: "Luteal",
     subtitle: "Boundaries & Reflection",
     tagline: "Boundaries & Reflection",
-    ringGradient: { start: "#E7C2E8", end: "#D0A8D8" },
-    color: "#E7C2E8",
+    color: phaseTokens.luteal.solid,
+    softBg: phaseTokens.luteal.softBg,
     lotusVariant: "closing",
-    accentColor: "#D0A8D8",
-    labelColor: "#A880B0",
+    accentColor: phaseTokens.luteal.gradientMid,
+    labelColor: phaseTokens.luteal.gradientStart,
     iconName: "moon",
     startDay: 17,
     endDay: 28,
@@ -107,6 +106,3 @@ export function getStatusText(selectedDay: number, cycleLength: number): string 
   if (phase === "menstrual") return "Currently in your period";
   return `Period starts in ${daysUntil} days`;
 }
-
-export const systemFontStack =
-  'ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
