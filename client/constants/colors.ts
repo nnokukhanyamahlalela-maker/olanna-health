@@ -95,3 +95,5 @@ export function getPhaseGradient(p: Phase): [string, string, string] {
 export function getBrandGradient(): [string, string, string] {
   return [brand.gradientStart, brand.gradientMid, brand.gradientEnd];
 }
+
+export const colors = { brand, neutral, phase, semantic } as const;

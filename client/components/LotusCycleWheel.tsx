@@ -6,7 +6,9 @@ import Svg, {
   G,
   Defs,
   RadialGradient,
+  LinearGradient as SvgLinearGradient,
   Stop,
+  Rect,
 } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -18,7 +20,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { getPhaseForDay, phaseConfig, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
-import { neutral } from "@/constants/colors";
+import { neutral, getPhaseColors } from "@/constants/colors";
+import { getPhaseGradient, toPhaseName } from "@/constants/phase";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -269,14 +272,32 @@ export function LotusCycleWheel({
 
   const selectedPhase = getPhaseForDay(selectedDay, cycleLength);
   const config = phaseConfig[selectedPhase];
+  const phaseWashColor = getPhaseColors(selectedPhase).softBg;
   const lotusSize = (outerRadius - strokeWidth) * 1.4;
 
-  const daySegments = [];
+  const phaseGradientDefs: React.ReactNode[] = [];
+  const addedGradients = new Set<string>();
+  const daySegments: React.ReactNode[] = [];
+
   for (let d = 1; d <= cycleLength; d++) {
     const startAngle = ((d - 1) / cycleLength) * 360 + gapDeg / 2;
     const endAngle = startAngle + segmentAngle;
-    const phase = getPhaseForDay(d, cycleLength);
-    const phaseColor = phaseConfig[phase].color;
+    const dayPhase = getPhaseForDay(d, cycleLength);
+    const pName = toPhaseName(dayPhase);
+    const gradId = `grad-${pName}`;
+
+    if (!addedGradients.has(gradId)) {
+      addedGradients.add(gradId);
+      const [gStart, gMid, gEnd] = getPhaseGradient(pName);
+      phaseGradientDefs.push(
+        <SvgLinearGradient key={gradId} id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <Stop offset="0%" stopColor={gStart} />
+          <Stop offset="50%" stopColor={gMid} />
+          <Stop offset="100%" stopColor={gEnd} />
+        </SvgLinearGradient>
+      );
+    }
+
     const isPast = d <= currentDay;
     const isSelected = d === selectedDay;
     const isCurrent = d === currentDay;
@@ -286,7 +307,7 @@ export function LotusCycleWheel({
       <Path
         key={d}
         d={describeArc(cx, cy, outerRadius, startAngle, endAngle)}
-        stroke={phaseColor}
+        stroke={`url(#${gradId})`}
         strokeWidth={isSelected ? strokeWidth + 4 : strokeWidth}
         fill="none"
         strokeLinecap="round"
@@ -299,8 +320,8 @@ export function LotusCycleWheel({
       const pos = polarToCartesian(cx, cy, outerRadius, midAngle);
       daySegments.push(
         <G key={`current-${d}`}>
-          <Circle cx={pos.x} cy={pos.y} r={strokeWidth / 2 + 3} fill="white" opacity={0.9} />
-          <Circle cx={pos.x} cy={pos.y} r={4} fill={phaseColor} />
+          <Circle cx={pos.x} cy={pos.y} r={strokeWidth / 2 + 3} fill={neutral.bgSecondary} opacity={0.9} />
+          <Circle cx={pos.x} cy={pos.y} r={4} fill={phaseConfig[dayPhase].color} />
         </G>
       );
     }
@@ -317,7 +338,14 @@ export function LotusCycleWheel({
                 <Stop offset="80%" stopColor={neutral.bgPrimary} stopOpacity={0.95} />
                 <Stop offset="100%" stopColor={neutral.bgSubtle} stopOpacity={0.9} />
               </RadialGradient>
+              <RadialGradient id="phaseWash" cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor={phaseWashColor} stopOpacity={0.1} />
+                <Stop offset="100%" stopColor={phaseWashColor} stopOpacity={0} />
+              </RadialGradient>
+              {phaseGradientDefs}
             </Defs>
+
+            <Circle cx={cx} cy={cy} r={outerRadius + strokeWidth / 2 + 8} fill="url(#phaseWash)" />
 
             {daySegments}
 

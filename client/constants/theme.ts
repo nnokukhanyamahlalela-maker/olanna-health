@@ -1,3 +1,5 @@
+import { colors } from "@/constants/colors";
+
 export const Spacing = {
   xs: 4,
   sm: 8,
@@ -425,3 +427,12 @@ export const Colors = {
     pmsLavenderLight: VogueColors.pmsLavenderLight,
   },
 };
+
+export const theme = {
+  colors,
+  spacing: Spacing,
+  radius: BorderRadius,
+  shadow: Shadows,
+  typography: Typography,
+  fonts: Fonts,
+} as const;
