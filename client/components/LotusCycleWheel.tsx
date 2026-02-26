@@ -66,6 +66,136 @@ function angleToDayNumber(angle: number, cycleLength: number): number {
   return Math.max(1, Math.min(cycleLength, day));
 }
 
+function CenterLotus({ variant, size, color }: { variant: string; size: number; color: string }) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.4;
+
+  if (variant === "bud") {
+    return (
+      <G>
+        <Path
+          d={`M ${cx} ${cy + r * 0.5} Q ${cx - r * 0.3} ${cy - r * 0.15} ${cx} ${cy - r * 0.75} Q ${cx + r * 0.3} ${cy - r * 0.15} ${cx} ${cy + r * 0.5} Z`}
+          fill={color}
+          opacity={0.12}
+          stroke={color}
+          strokeWidth={1.5}
+          strokeOpacity={0.35}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.5} L ${cx} ${cy + r * 0.85}`}
+          stroke={color}
+          strokeWidth={1.2}
+          strokeOpacity={0.3}
+        />
+      </G>
+    );
+  }
+
+  if (variant === "rising") {
+    return (
+      <G>
+        <Path
+          d={`M ${cx} ${cy + r * 0.35} Q ${cx - r * 0.3} ${cy - r * 0.1} ${cx} ${cy - r * 0.65} Q ${cx + r * 0.3} ${cy - r * 0.1} ${cx} ${cy + r * 0.35} Z`}
+          fill={color}
+          opacity={0.12}
+          stroke={color}
+          strokeWidth={1.5}
+          strokeOpacity={0.35}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.25} Q ${cx - r * 0.55} ${cy - r * 0.05} ${cx - r * 0.45} ${cy - r * 0.5} Q ${cx - r * 0.12} ${cy - r * 0.25} ${cx} ${cy + r * 0.25} Z`}
+          fill={color}
+          opacity={0.08}
+          stroke={color}
+          strokeWidth={1.2}
+          strokeOpacity={0.25}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.25} Q ${cx + r * 0.55} ${cy - r * 0.05} ${cx + r * 0.45} ${cy - r * 0.5} Q ${cx + r * 0.12} ${cy - r * 0.25} ${cx} ${cy + r * 0.25} Z`}
+          fill={color}
+          opacity={0.08}
+          stroke={color}
+          strokeWidth={1.2}
+          strokeOpacity={0.25}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.35} L ${cx} ${cy + r * 0.85}`}
+          stroke={color}
+          strokeWidth={1.2}
+          strokeOpacity={0.25}
+        />
+      </G>
+    );
+  }
+
+  if (variant === "bloom") {
+    const petalCount = 6;
+    const petals = [];
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i * 360) / petalCount - 90;
+      const rad = (angle * Math.PI) / 180;
+      const tipX = cx + r * 0.75 * Math.cos(rad);
+      const tipY = cy + r * 0.75 * Math.sin(rad);
+      const cp1Angle = rad - 0.4;
+      const cp2Angle = rad + 0.4;
+      const cp1X = cx + r * 0.4 * Math.cos(cp1Angle);
+      const cp1Y = cy + r * 0.4 * Math.sin(cp1Angle);
+      const cp2X = cx + r * 0.4 * Math.cos(cp2Angle);
+      const cp2Y = cy + r * 0.4 * Math.sin(cp2Angle);
+      petals.push(
+        <Path
+          key={`bloom-${i}`}
+          d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
+          fill={color}
+          opacity={0.1}
+          stroke={color}
+          strokeWidth={1.3}
+          strokeOpacity={0.3}
+        />
+      );
+    }
+    return (
+      <G>
+        {petals}
+        <Circle cx={cx} cy={cy} r={r * 0.12} fill={color} opacity={0.2} />
+      </G>
+    );
+  }
+
+  const petalCount = 8;
+  const petals = [];
+  for (let i = 0; i < petalCount; i++) {
+    const angle = (i * 360) / petalCount - 90;
+    const rad = (angle * Math.PI) / 180;
+    const tipX = cx + r * 0.85 * Math.cos(rad);
+    const tipY = cy + r * 0.85 * Math.sin(rad);
+    const cp1Angle = rad - 0.32;
+    const cp2Angle = rad + 0.32;
+    const cp1X = cx + r * 0.48 * Math.cos(cp1Angle);
+    const cp1Y = cy + r * 0.48 * Math.sin(cp1Angle);
+    const cp2X = cx + r * 0.48 * Math.cos(cp2Angle);
+    const cp2Y = cy + r * 0.48 * Math.sin(cp2Angle);
+    petals.push(
+      <Path
+        key={`closing-${i}`}
+        d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
+        fill={color}
+        opacity={i % 2 === 0 ? 0.1 : 0.06}
+        stroke={color}
+        strokeWidth={1.2}
+        strokeOpacity={i % 2 === 0 ? 0.3 : 0.18}
+      />
+    );
+  }
+  return (
+    <G>
+      {petals}
+      <Circle cx={cx} cy={cy} r={r * 0.1} fill={color} opacity={0.15} />
+    </G>
+  );
+}
+
 export function LotusCycleWheel({
   cycleLength = 28,
   currentDay = 22,
@@ -138,6 +268,7 @@ export function LotusCycleWheel({
 
   const selectedPhase = getPhaseForDay(selectedDay, cycleLength);
   const config = phaseConfig[selectedPhase];
+  const lotusSize = (outerRadius - strokeWidth) * 1.4;
 
   const daySegments = [];
   for (let d = 1; d <= cycleLength; d++) {
@@ -174,27 +305,6 @@ export function LotusCycleWheel({
     }
   }
 
-  const petalOpacity = 0.06;
-  const petalRadius = outerRadius - strokeWidth - 8;
-  const lotusPetals = [];
-  for (let i = 0; i < 8; i++) {
-    const angle = (i * 45 * Math.PI) / 180;
-    const tipX = cx + petalRadius * Math.sin(angle);
-    const tipY = cy - petalRadius * Math.cos(angle);
-    const cp1X = cx + petalRadius * 0.35 * Math.sin(angle - 0.4);
-    const cp1Y = cy - petalRadius * 0.35 * Math.cos(angle - 0.4);
-    const cp2X = cx + petalRadius * 0.35 * Math.sin(angle + 0.4);
-    const cp2Y = cy - petalRadius * 0.35 * Math.cos(angle + 0.4);
-    lotusPetals.push(
-      <Path
-        key={`petal-${i}`}
-        d={`M ${cx} ${cy} C ${cp1X} ${cp1Y} ${cp1X + (tipX - cx) * 0.5} ${cp1Y + (tipY - cy) * 0.5} ${tipX} ${tipY} C ${cp2X + (tipX - cx) * 0.5} ${cp2Y + (tipY - cy) * 0.5} ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
-        fill="#D0C0E8"
-        opacity={petalOpacity}
-      />
-    );
-  }
-
   return (
     <GestureDetector gesture={composedGesture}>
       <Animated.View style={[styles.container, animatedStyle]}>
@@ -203,25 +313,34 @@ export function LotusCycleWheel({
             <Defs>
               <RadialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
                 <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
-                <Stop offset="80%" stopColor="#FAF5FF" stopOpacity={0.95} />
-                <Stop offset="100%" stopColor="#F0E8F5" stopOpacity={0.9} />
+                <Stop offset="80%" stopColor="#FFF7FA" stopOpacity={0.95} />
+                <Stop offset="100%" stopColor="#FDF0F5" stopOpacity={0.9} />
               </RadialGradient>
             </Defs>
 
-            {lotusPetals}
             {daySegments}
 
-            <Circle cx={cx} cy={cy} r={outerRadius - strokeWidth - 12} fill="url(#centerGlow)" />
+            <Circle cx={cx} cy={cy} r={outerRadius - strokeWidth - 8} fill="url(#centerGlow)" />
+
+            <G transform={`translate(${cx - lotusSize / 2}, ${cy - lotusSize / 2 - 15})`}>
+              <CenterLotus
+                variant={config.lotusVariant}
+                size={lotusSize}
+                color={config.labelColor}
+              />
+            </G>
           </Svg>
 
           <View style={styles.centerHub}>
-            <Text style={styles.hubDayText}>
-              Day {selectedDay} of {cycleLength}
-            </Text>
-            <Text style={[styles.hubPhase, { color: config.labelColor }]}>
-              {config.label} Phase
-            </Text>
-            <Text style={styles.hubTagline}>{config.tagline}</Text>
+            <View style={styles.centerTextContainer}>
+              <Text style={styles.hubDayText}>
+                Day {selectedDay} of {cycleLength}
+              </Text>
+              <Text style={[styles.hubPhase, { color: config.labelColor }]}>
+                {config.label} Phase
+              </Text>
+              <Text style={styles.hubTagline}>{config.tagline}</Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -242,6 +361,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: "center",
     justifyContent: "center",
+  },
+  centerTextContainer: {
+    alignItems: "center",
+    marginTop: 30,
   },
   hubDayText: {
     fontFamily: Fonts.heading,

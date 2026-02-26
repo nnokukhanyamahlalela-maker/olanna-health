@@ -1,36 +1,145 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Svg, { Path, Circle, G } from "react-native-svg";
 import { phaseConfig, PHASE_ORDER, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
 
-interface PhaseChipProps {
+function LotusIcon({ variant, size = 48, color }: { variant: string; size?: number; color: string }) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.38;
+
+  if (variant === "bud") {
+    return (
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <Path
+          d={`M ${cx} ${cy + r * 0.6} Q ${cx - r * 0.25} ${cy - r * 0.2} ${cx} ${cy - r * 0.8} Q ${cx + r * 0.25} ${cy - r * 0.2} ${cx} ${cy + r * 0.6} Z`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.2}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.6} L ${cx} ${cy + r}`}
+          stroke={color}
+          strokeWidth={1}
+        />
+      </Svg>
+    );
+  }
+
+  if (variant === "rising") {
+    return (
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <Path
+          d={`M ${cx} ${cy + r * 0.4} Q ${cx - r * 0.3} ${cy - r * 0.1} ${cx} ${cy - r * 0.7} Q ${cx + r * 0.3} ${cy - r * 0.1} ${cx} ${cy + r * 0.4} Z`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.2}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.3} Q ${cx - r * 0.6} ${cy - r * 0.1} ${cx - r * 0.5} ${cy - r * 0.55} Q ${cx - r * 0.15} ${cy - r * 0.3} ${cx} ${cy + r * 0.3} Z`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.2}
+          opacity={0.7}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.3} Q ${cx + r * 0.6} ${cy - r * 0.1} ${cx + r * 0.5} ${cy - r * 0.55} Q ${cx + r * 0.15} ${cy - r * 0.3} ${cx} ${cy + r * 0.3} Z`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.2}
+          opacity={0.7}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.4} L ${cx} ${cy + r}`}
+          stroke={color}
+          strokeWidth={1}
+        />
+      </Svg>
+    );
+  }
+
+  if (variant === "bloom") {
+    const petalCount = 6;
+    const petals = [];
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i * 360) / petalCount - 90;
+      const rad = (angle * Math.PI) / 180;
+      const tipX = cx + r * 0.8 * Math.cos(rad);
+      const tipY = cy + r * 0.8 * Math.sin(rad);
+      const cp1Angle = rad - 0.35;
+      const cp2Angle = rad + 0.35;
+      const cp1X = cx + r * 0.45 * Math.cos(cp1Angle);
+      const cp1Y = cy + r * 0.45 * Math.sin(cp1Angle);
+      const cp2X = cx + r * 0.45 * Math.cos(cp2Angle);
+      const cp2Y = cy + r * 0.45 * Math.sin(cp2Angle);
+      petals.push(
+        <Path
+          key={i}
+          d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.2}
+        />
+      );
+    }
+    return (
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <G>{petals}</G>
+        <Circle cx={cx} cy={cy} r={r * 0.15} fill="none" stroke={color} strokeWidth={1} />
+      </Svg>
+    );
+  }
+
+  const petalCount = 8;
+  const petals = [];
+  for (let i = 0; i < petalCount; i++) {
+    const angle = (i * 360) / petalCount - 90;
+    const rad = (angle * Math.PI) / 180;
+    const tipX = cx + r * 0.9 * Math.cos(rad);
+    const tipY = cy + r * 0.9 * Math.sin(rad);
+    const cp1Angle = rad - 0.3;
+    const cp2Angle = rad + 0.3;
+    const cp1X = cx + r * 0.5 * Math.cos(cp1Angle);
+    const cp1Y = cy + r * 0.5 * Math.sin(cp1Angle);
+    const cp2X = cx + r * 0.5 * Math.cos(cp2Angle);
+    const cp2Y = cy + r * 0.5 * Math.sin(cp2Angle);
+    petals.push(
+      <Path
+        key={i}
+        d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.2}
+        opacity={i % 2 === 0 ? 1 : 0.6}
+      />
+    );
+  }
+  return (
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <G>{petals}</G>
+      <Circle cx={cx} cy={cy} r={r * 0.12} fill="none" stroke={color} strokeWidth={1} />
+    </Svg>
+  );
+}
+
+interface PhaseItemProps {
   phase: Phase;
   isActive: boolean;
 }
 
-function PhaseChip({ phase, isActive }: PhaseChipProps) {
+function PhaseItem({ phase, isActive }: PhaseItemProps) {
   const config = phaseConfig[phase];
-  const iconMap: Record<string, keyof typeof Feather.glyphMap> = {
-    droplet: "droplet",
-    "trending-up": "trending-up",
-    sun: "sun",
-    moon: "moon",
-  };
 
   return (
-    <View style={[styles.chip, isActive ? styles.chipActive : null]}>
+    <View style={styles.phaseItem}>
       <View style={[styles.iconCircle, { backgroundColor: config.color }]}>
-        <Feather
-          name={iconMap[config.iconName] || "circle"}
-          size={16}
-          color={config.labelColor}
-        />
+        <LotusIcon variant={config.lotusVariant} size={48} color={config.labelColor} />
       </View>
-      <View style={styles.chipText}>
-        <Text style={styles.chipName}>{config.label}</Text>
-        <Text style={styles.chipTagline}>{config.tagline}</Text>
-      </View>
+      <Text style={[styles.phaseName, { color: config.labelColor }, isActive ? styles.phaseNameActive : null]}>
+        {config.label}
+      </Text>
+      <Text style={styles.phaseTagline}>{config.tagline}</Text>
     </View>
   );
 }
@@ -45,7 +154,7 @@ export function PhaseCard({ currentPhase }: PhaseCardProps) {
       <Text style={styles.cardTitle}>The Lotus Cycle</Text>
       <View style={styles.grid}>
         {PHASE_ORDER.map((phase) => (
-          <PhaseChip
+          <PhaseItem
             key={phase}
             phase={phase}
             isActive={phase === currentPhase}
@@ -60,7 +169,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     width: "100%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -72,50 +181,40 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.heading,
     fontSize: 17,
     color: "#3A2F35",
-    marginBottom: 14,
+    marginBottom: 20,
     letterSpacing: 0.2,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    justifyContent: "space-around",
   },
-  chip: {
-    flexDirection: "row",
+  phaseItem: {
     alignItems: "center",
-    backgroundColor: "#FAFAFA",
-    borderRadius: 12,
-    padding: 10,
-    width: "48%",
-    flexGrow: 1,
-    flexBasis: "45%",
-    gap: 10,
-  },
-  chipActive: {
-    backgroundColor: "#F5F0FA",
-    borderWidth: 1,
-    borderColor: "rgba(180,160,210,0.3)",
+    width: "45%",
+    marginBottom: 20,
   },
   iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 10,
   },
-  chipText: {
-    flex: 1,
-  },
-  chipName: {
+  phaseName: {
     fontFamily: Fonts.heading,
-    fontSize: 13,
-    color: "#3A2F35",
-    marginBottom: 1,
+    fontSize: 14,
+    letterSpacing: 0.3,
+    marginBottom: 3,
   },
-  chipTagline: {
+  phaseNameActive: {
+    fontFamily: Fonts.numericBold,
+  },
+  phaseTagline: {
     fontFamily: Fonts.body,
-    fontSize: 11,
+    fontSize: 12,
     color: "#7A6A73",
-    lineHeight: 14,
+    textAlign: "center",
   },
 });
