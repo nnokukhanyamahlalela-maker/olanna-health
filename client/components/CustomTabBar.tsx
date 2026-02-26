@@ -18,36 +18,39 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { useTheme } from "@/hooks/useTheme";
 import { ThemedText } from "@/components/ThemedText";
+import { brand, neutral } from "@/constants/colors";
+import { Fonts } from "@/constants/theme";
 
 export const TAB_BAR_HEIGHT = 82;
 export const TAB_BAR_TOTAL_HEIGHT = 110;
 
 const TAB_BAR_SPECS = {
-  height: 82,
-  paddingTop: 10,
-  paddingBottom: 18,
-  paddingHorizontal: 22,
-  borderRadius: 28,
-  centerButtonSize: 58,
-  centerButtonOffset: -10,
+  height: 78,
+  paddingTop: 8,
+  paddingBottom: 14,
+  paddingHorizontal: 18,
+  borderRadius: 32,
+  centerButtonSize: 60,
+  centerButtonOffset: -14,
 };
 
 const LIGHT_GLASS = {
-  background: "rgba(255,255,255,0.38)",
-  border: "rgba(255,255,255,0.45)",
-  blurIntensity: 24,
+  background: "rgba(255,255,255,0.55)",
+  border: "rgba(255,255,255,0.50)",
+  blurIntensity: 32,
+  shimmer: "rgba(255,255,255,0.70)",
 };
 
 const DARK_GLASS = {
-  background: "rgba(25,14,28,0.42)",
-  border: "rgba(255,255,255,0.12)",
-  blurIntensity: 26,
+  background: "rgba(25,14,28,0.55)",
+  border: "rgba(255,255,255,0.10)",
+  blurIntensity: 34,
+  shimmer: "rgba(255,255,255,0.06)",
 };
-
-const ACCENT_COLOR = "#FF3F9E";
 
 type TabIconName = "sun" | "calendar" | "book-open" | "activity";
 
@@ -69,9 +72,10 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface CenterButtonProps {
   onPress: () => void;
+  isDark: boolean;
 }
 
-function CenterButton({ onPress }: CenterButtonProps) {
+function CenterButton({ onPress, isDark }: CenterButtonProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -79,7 +83,7 @@ function CenterButton({ onPress }: CenterButtonProps) {
   }));
 
   const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    scale.value = withSpring(0.92, { damping: 15, stiffness: 400 });
   }, [scale]);
 
   const handlePressOut = useCallback(() => {
@@ -87,7 +91,7 @@ function CenterButton({ onPress }: CenterButtonProps) {
   }, [scale]);
 
   const handlePress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
     onPress();
   }, [onPress]);
 
@@ -101,8 +105,16 @@ function CenterButton({ onPress }: CenterButtonProps) {
       accessibilityLabel="Check-in"
       testID="center-button-checkin"
     >
-      <View style={styles.centerButtonHighlight} />
-      <Feather name="heart" size={26} color="#FFFFFF" />
+      <View style={styles.centerButtonOuterRing} />
+      <LinearGradient
+        colors={[brand.gradientStart, brand.gradientMid, brand.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.centerButtonGradient}
+      >
+        <View style={styles.centerButtonShine} />
+        <Feather name="heart" size={26} color={neutral.textInverse} />
+      </LinearGradient>
     </AnimatedPressable>
   );
 }
@@ -112,14 +124,19 @@ interface TabItemProps {
   isFocused: boolean;
   onPress: () => void;
   onLongPress: () => void;
+  isDark: boolean;
 }
 
-function TabItem({ routeName, isFocused, onPress, onLongPress }: TabItemProps) {
-  const { theme } = useTheme();
+function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItemProps) {
   const iconName = TAB_ICONS[routeName] || "circle";
   const label = TAB_LABELS[routeName] || routeName;
 
-  const iconColor = isFocused ? ACCENT_COLOR : theme.textSecondary;
+  const activeColor = brand.primary;
+  const inactiveColor = isDark ? "rgba(255,255,255,0.45)" : neutral.textTertiary;
+  const iconColor = isFocused ? activeColor : inactiveColor;
+  const activePillBg = isDark
+    ? "rgba(232,62,140,0.12)"
+    : "rgba(232,62,140,0.08)";
 
   return (
     <Pressable
@@ -131,16 +148,23 @@ function TabItem({ routeName, isFocused, onPress, onLongPress }: TabItemProps) {
       accessibilityLabel={label}
       testID={`tab-${routeName.toLowerCase()}`}
     >
-      <Feather name={iconName} size={22} color={iconColor} />
-      <ThemedText
+      <View
         style={[
-          styles.tabLabel,
-          { color: iconColor },
-          isFocused && styles.tabLabelActive,
+          styles.tabPill,
+          isFocused ? { backgroundColor: activePillBg } : undefined,
         ]}
       >
-        {label}
-      </ThemedText>
+        <Feather name={iconName} size={23} color={iconColor} />
+        <ThemedText
+          style={[
+            styles.tabLabel,
+            { color: iconColor },
+            isFocused ? styles.tabLabelActive : undefined,
+          ]}
+        >
+          {label}
+        </ThemedText>
+      </View>
     </Pressable>
   );
 }
@@ -163,7 +187,6 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   }, [rootNavigation]);
 
   const renderTabItem = (route: typeof state.routes[0], index: number) => {
-    const { options } = descriptors[route.key];
     const isFocused = state.index === state.routes.findIndex((r) => r.key === route.key);
 
     const onPress = () => {
@@ -174,7 +197,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       });
 
       if (!isFocused && !event.defaultPrevented) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
         navigation.navigate(route.name);
       }
     };
@@ -193,11 +216,22 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         isFocused={isFocused}
         onPress={onPress}
         onLongPress={onLongPress}
+        isDark={isDark}
       />
     );
   };
 
-  const bottomPadding = Math.max(insets.bottom, TAB_BAR_SPECS.paddingBottom);
+  const tabBarContent = (
+    <View style={styles.tabsContainer}>
+      <View style={styles.tabGroup}>
+        {leftRoutes.map(renderTabItem)}
+      </View>
+      <View style={styles.centerSpacer} />
+      <View style={styles.tabGroup}>
+        {rightRoutes.map(renderTabItem)}
+      </View>
+    </View>
+  );
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
@@ -214,15 +248,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
               },
             ]}
           >
-            <View style={styles.tabsContainer}>
-              <View style={styles.tabGroup}>
-                {leftRoutes.map(renderTabItem)}
-              </View>
-              <View style={styles.centerSpacer} />
-              <View style={styles.tabGroup}>
-                {rightRoutes.map(renderTabItem)}
-              </View>
-            </View>
+            <View style={[styles.topShimmer, { backgroundColor: glassStyle.shimmer }]} />
+            {tabBarContent}
           </BlurView>
         ) : (
           <View
@@ -230,24 +257,17 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
               styles.blurContainer,
               styles.androidContainer,
               {
-                backgroundColor: isDark ? "rgba(35,24,38,0.95)" : "rgba(255,255,255,0.95)",
+                backgroundColor: isDark ? "rgba(35,24,38,0.96)" : "rgba(255,255,255,0.96)",
                 borderColor: glassStyle.border,
               },
             ]}
           >
-            <View style={styles.tabsContainer}>
-              <View style={styles.tabGroup}>
-                {leftRoutes.map(renderTabItem)}
-              </View>
-              <View style={styles.centerSpacer} />
-              <View style={styles.tabGroup}>
-                {rightRoutes.map(renderTabItem)}
-              </View>
-            </View>
+            <View style={[styles.topShimmer, { backgroundColor: glassStyle.shimmer }]} />
+            {tabBarContent}
           </View>
         )}
 
-        <CenterButton onPress={handleCenterPress} />
+        <CenterButton onPress={handleCenterPress} isDark={isDark} />
       </View>
     </View>
   );
@@ -263,23 +283,31 @@ const styles = StyleSheet.create({
   },
   tabBarWrapper: {
     width: "100%",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     alignItems: "center",
   },
   blurContainer: {
     width: "100%",
     height: TAB_BAR_SPECS.height,
     borderRadius: TAB_BAR_SPECS.borderRadius,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 10,
   },
   androidContainer: {
-    elevation: 8,
+    elevation: 10,
+  },
+  topShimmer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    opacity: 0.6,
   },
   tabsContainer: {
     flex: 1,
@@ -295,22 +323,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   centerSpacer: {
-    width: TAB_BAR_SPECS.centerButtonSize + 16,
+    width: TAB_BAR_SPECS.centerButtonSize + 20,
   },
   tabItem: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 4,
-    minWidth: 56,
+    minWidth: 58,
+  },
+  tabPill: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
   },
   tabLabel: {
-    fontSize: 10,
-    fontWeight: "500",
-    marginTop: 4,
-    letterSpacing: 0.2,
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11,
+    marginTop: 3,
+    letterSpacing: 0.3,
   },
   tabLabelActive: {
-    fontWeight: "600",
+    fontFamily: Fonts.heading,
   },
   centerButton: {
     position: "absolute",
@@ -318,22 +352,38 @@ const styles = StyleSheet.create({
     width: TAB_BAR_SPECS.centerButtonSize,
     height: TAB_BAR_SPECS.centerButtonSize,
     borderRadius: TAB_BAR_SPECS.centerButtonSize / 2,
-    backgroundColor: ACCENT_COLOR,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: ACCENT_COLOR,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
   },
-  centerButtonHighlight: {
+  centerButtonOuterRing: {
+    position: "absolute",
+    width: TAB_BAR_SPECS.centerButtonSize + 8,
+    height: TAB_BAR_SPECS.centerButtonSize + 8,
+    borderRadius: (TAB_BAR_SPECS.centerButtonSize + 8) / 2,
+    borderWidth: 2,
+    borderColor: "rgba(232,62,140,0.15)",
+    top: -4,
+    left: -4,
+  },
+  centerButtonGradient: {
+    width: TAB_BAR_SPECS.centerButtonSize,
+    height: TAB_BAR_SPECS.centerButtonSize,
+    borderRadius: TAB_BAR_SPECS.centerButtonSize / 2,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: brand.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  centerButtonShine: {
     position: "absolute",
     top: 3,
-    left: 8,
-    right: 8,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    left: 10,
+    right: 10,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "rgba(255,255,255,0.22)",
   },
 });
