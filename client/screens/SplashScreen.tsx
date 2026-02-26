@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Image, Dimensions, ImageBackground } from "react-native";
+import { Text, StyleSheet, ImageBackground } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,8 +12,6 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { storage } from "@/lib/storage";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -63,11 +61,8 @@ export default function SplashScreen() {
         resizeMode="cover"
       >
         <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-          <Image
-            source={require("@/assets/images/olanna-logo.png")}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <Text style={styles.brandName}>OLANNA</Text>
+          <Text style={styles.brandSubtitle}>HEALTH</Text>
         </Animated.View>
       </ImageBackground>
     </Animated.View>
@@ -87,8 +82,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logoImage: {
-    width: SCREEN_WIDTH * 0.7,
-    height: SCREEN_WIDTH * 0.7,
+  brandName: {
+    fontFamily: "Poppins_900Black",
+    fontSize: 52,
+    color: "#FFFFFF",
+    letterSpacing: 2,
+  },
+  brandSubtitle: {
+    fontFamily: "Poppins_300Light",
+    fontSize: 18,
+    color: "#FFFFFF",
+    letterSpacing: 10,
+    marginTop: 4,
   },
 });
