@@ -1,11 +1,11 @@
 {
-  "id": "df078006-3599-4702-84f7-64f9fb572a96",
-  "createdAt": "2026-02-26T08:30:29.600Z",
+  "id": "02483ae5-f274-4b0b-bc2d-e0d396927f60",
+  "createdAt": "2026-02-26T16:14:52.648Z",
   "runtimeVersion": "exposdk:54.0.0",
   "launchAsset": {
-    "key": "bundle-1772094629600-8541",
+    "key": "bundle-1772122492648-1508",
     "contentType": "application/javascript",
-    "url": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/1772094629600-8541/_expo/static/js/ios/bundle.js"
+    "url": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/1772122492648-1508/_expo/static/js/ios/bundle.js"
   },
   "assets": [],
   "metadata": {},
@@ -28,7 +28,7 @@
         "adaptiveIcon": {
           "backgroundColor": "#FFFFFF",
           "foregroundImage": "./assets/images/icon.png",
-          "foregroundImageUrl": "http://127.0.0.1:8081/assets/./assets/images/icon.png"
+          "foregroundImageUrl": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/assets/./assets/images/icon.png"
         },
         "edgeToEdgeEnabled": true,
         "predictiveBackGestureEnabled": false,
@@ -78,7 +78,7 @@
       "androidStatusBar": {
         "backgroundColor": "#F0699A"
       },
-      "iconUrl": "http://127.0.0.1:8081/assets/./assets/images/icon.png",
+      "iconUrl": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/assets/./assets/images/icon.png",
       "hostUri": "dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/ios"
     },
     "expoGo": {
@@ -92,6 +92,6 @@
       },
       "mainModuleName": "client/index"
     },
-    "scopeKey": "@anonymous/olanna-health-4698181b-571f-468c-bd97-0b539ff14bc7"
+    "scopeKey": "@anonymous/olanna-health-d400cf8f-1a82-4453-beab-a4565e77f789"
   }
 }

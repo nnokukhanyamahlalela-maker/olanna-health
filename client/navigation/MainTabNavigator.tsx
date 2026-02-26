@@ -10,8 +10,8 @@ import { CustomTabBar } from "@/components/CustomTabBar";
 
 export type MainTabParamList = {
   HomeTab: undefined;
-  CheckInTab: undefined;
   CalendarTab: undefined;
+  CheckInTab: undefined;
   HealthTab: undefined;
   LearnTab: undefined;
 };
