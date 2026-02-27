@@ -17,29 +17,29 @@ import { ThemedText } from "@/components/ThemedText";
 import { brand, neutral } from "@/constants/colors";
 import { Fonts } from "@/constants/theme";
 
-export const TAB_BAR_HEIGHT = 68;
-export const TAB_BAR_TOTAL_HEIGHT = 90;
+export const TAB_BAR_HEIGHT = 72;
+export const TAB_BAR_TOTAL_HEIGHT = 94;
 
 const TAB_BAR_SPECS = {
-  height: 68,
-  paddingTop: 8,
-  paddingBottom: 10,
-  paddingHorizontal: 8,
-  borderRadius: 28,
+  height: 72,
+  paddingTop: 10,
+  paddingBottom: 12,
+  paddingHorizontal: 4,
+  borderRadius: 24,
 };
 
 const LIGHT_GLASS = {
-  background: "rgba(255,255,255,0.60)",
-  border: "rgba(255,255,255,0.50)",
-  blurIntensity: 32,
-  shimmer: "rgba(255,255,255,0.70)",
+  background: "rgba(255,255,255,0.35)",
+  border: "rgba(255,255,255,0.55)",
+  blurIntensity: 50,
+  innerHighlight: "rgba(255,255,255,0.40)",
 };
 
 const DARK_GLASS = {
-  background: "rgba(25,14,28,0.58)",
-  border: "rgba(255,255,255,0.10)",
-  blurIntensity: 34,
-  shimmer: "rgba(255,255,255,0.06)",
+  background: "rgba(30,18,34,0.40)",
+  border: "rgba(255,255,255,0.12)",
+  blurIntensity: 50,
+  innerHighlight: "rgba(255,255,255,0.05)",
 };
 
 type TabIconName = "sun" | "calendar" | "book-open" | "activity";
@@ -109,11 +109,12 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItem
   const isLotus = routeName === "CheckInTab";
 
   const activeColor = brand.primary;
-  const inactiveColor = isDark ? "rgba(255,255,255,0.40)" : neutral.textTertiary;
+  const inactiveColor = isDark ? "rgba(255,255,255,0.45)" : neutral.textTertiary;
   const iconColor = isFocused ? activeColor : inactiveColor;
+
   const activePillBg = isDark
-    ? "rgba(232,62,140,0.14)"
-    : "rgba(232,62,140,0.08)";
+    ? "rgba(255,255,255,0.10)"
+    : "rgba(255,255,255,0.50)";
 
   return (
     <Pressable
@@ -128,13 +129,26 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItem
       <View
         style={[
           styles.tabPill,
-          isFocused ? { backgroundColor: activePillBg } : undefined,
+          isFocused
+            ? {
+                backgroundColor: activePillBg,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: isDark
+                  ? "rgba(255,255,255,0.14)"
+                  : "rgba(255,255,255,0.70)",
+                shadowColor: "rgba(0,0,0,0.06)",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 1,
+                shadowRadius: 4,
+                elevation: 2,
+              }
+            : undefined,
         ]}
       >
         {isLotus ? (
-          <LotusIcon color={iconColor} size={25} />
+          <LotusIcon color={iconColor} size={24} />
         ) : (
-          <Feather name={FEATHER_ICONS[routeName] || "circle"} size={22} color={iconColor} />
+          <Feather name={FEATHER_ICONS[routeName] || "circle"} size={21} color={iconColor} />
         )}
         <ThemedText
           style={[
@@ -204,28 +218,27 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             intensity={glassStyle.blurIntensity}
             tint={isDark ? "dark" : "light"}
             style={[
-              styles.blurContainer,
+              styles.glassContainer,
               {
                 backgroundColor: glassStyle.background,
                 borderColor: glassStyle.border,
               },
             ]}
           >
-            <View style={[styles.topShimmer, { backgroundColor: glassStyle.shimmer }]} />
+            <View style={[styles.innerHighlight, { backgroundColor: glassStyle.innerHighlight }]} />
             {tabBarContent}
           </BlurView>
         ) : (
           <View
             style={[
-              styles.blurContainer,
-              styles.androidContainer,
+              styles.glassContainer,
               {
-                backgroundColor: isDark ? "rgba(35,24,38,0.96)" : "rgba(255,255,255,0.96)",
+                backgroundColor: isDark ? "rgba(35,24,38,0.88)" : "rgba(255,255,255,0.82)",
                 borderColor: glassStyle.border,
               },
             ]}
           >
-            <View style={[styles.topShimmer, { backgroundColor: glassStyle.shimmer }]} />
+            <View style={[styles.innerHighlight, { backgroundColor: glassStyle.innerHighlight }]} />
             {tabBarContent}
           </View>
         )}
@@ -244,31 +257,28 @@ const styles = StyleSheet.create({
   },
   tabBarWrapper: {
     width: "100%",
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     alignItems: "center",
+    marginBottom: 2,
   },
-  blurContainer: {
+  glassContainer: {
     width: "100%",
     height: TAB_BAR_SPECS.height,
     borderRadius: TAB_BAR_SPECS.borderRadius,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
-    shadowColor: "rgba(0,0,0,0.12)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  androidContainer: {
-    elevation: 8,
-  },
-  topShimmer: {
+  innerHighlight: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: StyleSheet.hairlineWidth,
-    opacity: 0.5,
+    height: 1,
   },
   tabsContainer: {
     flex: 1,
@@ -287,15 +297,15 @@ const styles = StyleSheet.create({
   tabPill: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 5,
+    paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 18,
+    borderRadius: 16,
   },
   tabLabel: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 10,
-    marginTop: 2,
-    letterSpacing: 0.2,
+    marginTop: 3,
+    letterSpacing: 0.15,
   },
   tabLabelActive: {
     fontFamily: Fonts.heading,
