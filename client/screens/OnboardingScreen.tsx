@@ -513,8 +513,10 @@ function CarouselScreen({
           <Feather name={item.icon as any} size={48} color={BRAND_COLORS.hotPink} />
         </View>
       </View>
-      <ThemedText style={styles.carouselTitle}>{item.title}</ThemedText>
-      <ThemedText style={styles.carouselSubtitle}>{item.subtitle}</ThemedText>
+      <View style={styles.carouselTextContainer}>
+        <ThemedText style={styles.carouselTitle}>{item.title}</ThemedText>
+        <ThemedText style={styles.carouselSubtitle}>{item.subtitle}</ThemedText>
+      </View>
     </View>
   );
 
@@ -829,12 +831,18 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 8,
   },
+  carouselTextContainer: {
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    width: "100%",
+  },
   carouselTitle: {
     fontFamily: "Poppins_700Bold",
     fontSize: 28,
     color: BRAND_COLORS.white,
     textAlign: "center",
     marginBottom: Spacing.md,
+    letterSpacing: 0.3,
   },
   carouselSubtitle: {
     fontFamily: "Poppins_400Regular",

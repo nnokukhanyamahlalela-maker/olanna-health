@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
     color: BRAND_COLORS.white,
     lineHeight: 48,
+    letterSpacing: 0.3,
     textShadowColor: "rgba(0,0,0,0.1)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
