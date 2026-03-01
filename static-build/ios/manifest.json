@@ -1,11 +1,11 @@
 {
-  "id": "bcc4b3d1-601c-4898-a45c-1a91ddcfc2a0",
-  "createdAt": "2026-02-27T08:50:33.404Z",
+  "id": "f3d41621-d512-4cf7-a045-566d53cc3c48",
+  "createdAt": "2026-03-01T17:53:00.608Z",
   "runtimeVersion": "exposdk:54.0.0",
   "launchAsset": {
-    "key": "bundle-1772182233404-743",
+    "key": "bundle-1772387580608-1755",
     "contentType": "application/javascript",
-    "url": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/1772182233404-743/_expo/static/js/ios/bundle.js"
+    "url": "https://dd925497-1656-4b1f-b3b6-37f0c42171ee-00-3gus34u8ddrtr.riker.replit.dev/1772387580608-1755/_expo/static/js/ios/bundle.js"
   },
   "assets": [],
   "metadata": {},
@@ -92,6 +92,6 @@
       },
       "mainModuleName": "client/index"
     },
-    "scopeKey": "@anonymous/olanna-health-fd83e1b6-7b16-45bc-825f-d53a61368002"
+    "scopeKey": "@anonymous/olanna-health-3f0a8449-58fc-45b2-95cf-87541ed8b323"
   }
 }
