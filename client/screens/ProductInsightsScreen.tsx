@@ -153,7 +153,7 @@ function SwipeableLogRow({
         <Animated.View
           style={[
             styles.logCard,
-            { backgroundColor: theme.backgroundDefault },
+            { backgroundColor: "rgba(255,255,255,0.35)" },
             cardStyle,
           ]}
           accessibilityLabel={formatDate(log.date) + ", " + log.productType + (log.brand ? ", " + log.brand : "") + (log.scented ? ", scented" : "") + ". Swipe left to delete"}

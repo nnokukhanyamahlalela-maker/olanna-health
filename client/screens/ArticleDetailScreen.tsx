@@ -7,6 +7,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { AppText } from "@/components/AppText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
@@ -60,20 +61,20 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
       );
     case "quote":
       return (
-        <View style={[styles.quoteContainer, { borderLeftColor: theme.primary }]}>
+        <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.lg} tint="subtle" style={[styles.quoteContainer, { borderLeftColor: theme.primary }]}>
           <AppText variant="body" color={theme.text} style={styles.quoteText}>
             {section.content}
           </AppText>
-        </View>
+        </GlassSurface>
       );
     case "disclaimer":
       return (
-        <View style={[styles.disclaimerContainer, { backgroundColor: theme.backgroundSecondary }]}>
+        <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.md} tint="subtle" style={styles.disclaimerContainer}>
           <Feather name="alert-circle" size={16} color={theme.textSecondary} />
           <AppText variant="caption" color={theme.textSecondary} style={styles.disclaimerText}>
             {section.content}
           </AppText>
-        </View>
+        </GlassSurface>
       );
     default:
       return null;
@@ -134,7 +135,7 @@ export default function ArticleDetailScreen() {
           {article.subtitle}
         </AppText>
 
-        <View style={[styles.authorRow, { borderTopColor: theme.border, borderBottomColor: theme.border }]}>
+        <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.md} tint="subtle" style={styles.authorRow}>
           <View style={[styles.authorAvatar, { backgroundColor: theme.primary + "20" }]}>
             <Feather name="edit-3" size={14} color={theme.primary} />
           </View>
@@ -146,7 +147,7 @@ export default function ArticleDetailScreen() {
               {article.date}
             </AppText>
           </View>
-        </View>
+        </GlassSurface>
 
         <View style={styles.bodyContent}>
           {article.sections.map((section, index) => (
@@ -214,9 +215,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
     marginBottom: Spacing.xl,
   },
   authorAvatar: {
@@ -269,8 +267,6 @@ const styles = StyleSheet.create({
   },
   quoteContainer: {
     borderLeftWidth: 3,
-    paddingLeft: Spacing.lg,
-    paddingVertical: Spacing.sm,
     marginVertical: Spacing.sm,
   },
   quoteText: {
@@ -282,8 +278,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: Spacing.sm,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
     marginTop: Spacing.xl,
   },
   disclaimerText: {

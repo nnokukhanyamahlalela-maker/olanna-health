@@ -255,23 +255,23 @@ export default function TrackScreen() {
           <ThemedText type="h4" style={styles.sectionTitle}>
             Notes
           </ThemedText>
-          <TextInput
-            style={[
-              styles.notesInput,
-              {
-                backgroundColor: "transparent",
-                color: theme.text,
-                borderColor: theme.border,
-              },
-            ]}
-            placeholder="Add any additional notes..."
-            placeholderTextColor={theme.textSecondary}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
+          <GlassSurface noPadding borderRadius={BorderRadius.md} noShadow>
+            <TextInput
+              style={[
+                styles.notesInput,
+                {
+                  color: theme.text,
+                },
+              ]}
+              placeholder="Add any additional notes..."
+              placeholderTextColor={theme.textSecondary}
+              value={notes}
+              onChangeText={setNotes}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </GlassSurface>
         </View>
 
         <Button onPress={handleSave} disabled={isSaving} style={styles.saveButton}>
@@ -343,7 +343,6 @@ const styles = StyleSheet.create({
     minHeight: 100,
     padding: Spacing.lg,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
     fontSize: 16,
     lineHeight: 24,
   },

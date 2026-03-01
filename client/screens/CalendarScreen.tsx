@@ -14,7 +14,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -235,7 +235,6 @@ export default function CalendarScreen() {
 
   const textColor = isDark ? "#FFFFFF" : neutral.textPrimary;
   const subtextColor = isDark ? "rgba(255,255,255,0.55)" : neutral.textTertiary;
-  const cardBg = isDark ? "rgba(30,20,34,0.85)" : "rgba(255,255,255,0.92)";
 
   return (
     <AppGradient style={styles.container}>
@@ -272,7 +271,7 @@ export default function CalendarScreen() {
         </View>
 
         {/* Calendar glass card */}
-        <GlassCard style={styles.calendarCard}>
+        <GlassSurface style={styles.calendarCard} noPadding>
           {/* Weekday headers */}
           <View style={styles.weekdayRow}>
             {WEEKDAYS.map((wd) => (
@@ -347,7 +346,7 @@ export default function CalendarScreen() {
               );
             })}
           </View>
-        </GlassCard>
+        </GlassSurface>
 
         {/* Filter pills */}
         <View style={styles.filterRow}>
@@ -360,8 +359,16 @@ export default function CalendarScreen() {
                 style={[
                   styles.filterChip,
                   {
-                    backgroundColor: active ? chip.color : "transparent",
-                    borderColor: chip.color,
+                    backgroundColor: active
+                      ? chip.color
+                      : isDark
+                      ? "rgba(42,23,48,0.35)"
+                      : "rgba(255,255,255,0.25)",
+                    borderColor: active
+                      ? chip.color
+                      : isDark
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(255,255,255,0.40)",
                   },
                 ]}
                 testID={`filter-${chip.key}`}
@@ -381,7 +388,7 @@ export default function CalendarScreen() {
 
         {/* Daily Cycle Decode */}
         {selectedDayInfo ? (
-          <View style={[styles.decodeCard, { backgroundColor: cardBg }]}>
+          <GlassSurface style={styles.decodeCard} noPadding>
             <View style={styles.decodeHeader}>
               <View
                 style={[
@@ -533,11 +540,11 @@ export default function CalendarScreen() {
                 ) : null}
               </View>
             ) : null}
-          </View>
+          </GlassSurface>
         ) : null}
 
         {/* About your cycle */}
-        <View style={[styles.statsCard, { backgroundColor: cardBg }]}>
+        <GlassSurface style={styles.statsCard} noPadding>
           <Text style={[styles.sectionTitle, { color: textColor }]}>
             About your cycle
           </Text>
@@ -578,7 +585,7 @@ export default function CalendarScreen() {
               </Text>
             </View>
           </View>
-        </View>
+        </GlassSurface>
       </ScrollView>
     </AppGradient>
   );
@@ -662,7 +669,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1.5,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   filterLabel: {
     fontFamily: Fonts.bodySemibold,

@@ -6,7 +6,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { AppGradient } from '@/components/AppGradient';
 import { AfricanPattern } from '@/components/AfricanPattern';
 import { GlassSurface } from '@/components/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
@@ -32,7 +32,7 @@ interface PatternInsight {
 }
 
 export default function PatternsScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<'week' | 'month' | '3months'>('month');
@@ -253,7 +253,7 @@ export default function PatternsScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <AppGradient style={styles.container}>
       <AfricanPattern variant="waves" opacity={0.02} />
 
       <ScrollView
@@ -276,8 +276,8 @@ export default function PatternsScreen() {
               style={[
                 styles.timeTab,
                 {
-                  backgroundColor: selectedTimeRange === range ? theme.primary : 'transparent',
-                  borderColor: theme.primary,
+                  backgroundColor: selectedTimeRange === range ? theme.primary : isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
+                  borderColor: selectedTimeRange === range ? theme.primary : isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
                 },
               ]}
               testID={`time-range-${range}`}
@@ -377,7 +377,7 @@ export default function PatternsScreen() {
           </ThemedText>
         </GlassSurface>
       </ScrollView>
-    </ThemedView>
+    </AppGradient>
   );
 }
 
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   card: {
     padding: Spacing.lg,

@@ -59,9 +59,9 @@ function ActionButton({
       style={[
         styles.actionButton,
         {
-          backgroundColor: isPrimary ? "#F6BFD3" : theme.backgroundDefault,
-          borderWidth: isPrimary ? 0 : 1,
-          borderColor: isPrimary ? "transparent" : theme.border,
+          backgroundColor: isPrimary ? "#F6BFD3" : "rgba(255,255,255,0.30)",
+          borderWidth: isPrimary ? 0 : StyleSheet.hairlineWidth,
+          borderColor: isPrimary ? "transparent" : "rgba(255,255,255,0.45)",
         },
         animatedStyle,
       ]}

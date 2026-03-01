@@ -56,7 +56,7 @@ function getDaysUntil(date: Date): number {
 }
 
 export default function CycleCalculatorScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const navigation = useNavigation();
@@ -134,7 +134,7 @@ export default function CycleCalculatorScreen() {
             <ThemedText type="body" style={styles.inputLabel}>Last Period Start</ThemedText>
             <Pressable
               onPress={() => setShowDatePicker(true)}
-              style={[styles.dateButton, { backgroundColor: theme.background }]}
+              style={[styles.dateButton, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)" }]}
             >
               <Feather name="calendar" size={18} color={theme.text} />
               <ThemedText type="body">
@@ -167,9 +167,10 @@ export default function CycleCalculatorScreen() {
                 style={[
                   styles.numberInput,
                   {
-                    backgroundColor: theme.background,
+                    backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
                     color: theme.text,
-                    borderColor: theme.border,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
                   },
                 ]}
                 maxLength={2}
@@ -188,9 +189,10 @@ export default function CycleCalculatorScreen() {
                 style={[
                   styles.numberInput,
                   {
-                    backgroundColor: theme.background,
+                    backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
                     color: theme.text,
-                    borderColor: theme.border,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
                   },
                 ]}
                 maxLength={2}
@@ -326,7 +328,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
     fontSize: 16,
     fontFamily: Fonts.body,
     textAlign: "center",

@@ -82,34 +82,43 @@ export default function InsightsScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const renderTab = (tab: TabType, label: string, icon: keyof typeof Feather.glyphMap) => (
-    <Pressable
-      key={tab}
-      style={[
-        styles.tab,
-        { backgroundColor: activeTab === tab ? theme.primary : theme.backgroundDefault },
-      ]}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setActiveTab(tab);
-      }}
-    >
-      <Feather
-        name={icon}
-        size={16}
-        color={activeTab === tab ? theme.buttonText : theme.textSecondary}
-      />
-      <ThemedText
-        type="caption"
-        style={[
-          styles.tabText,
-          { color: activeTab === tab ? theme.buttonText : theme.textSecondary },
-        ]}
+  const renderTab = (tab: TabType, label: string, icon: keyof typeof Feather.glyphMap) => {
+    const isActive = activeTab === tab;
+    return (
+      <Pressable
+        key={tab}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setActiveTab(tab);
+        }}
       >
-        {label}
-      </ThemedText>
-    </Pressable>
-  );
+        <GlassSurface
+          noPadding
+          borderRadius={BorderRadius.full}
+          tint={isActive ? "prominent" : "subtle"}
+          noShadow
+          style={isActive ? { backgroundColor: theme.primary + "DD" } : undefined}
+        >
+          <View style={styles.tab}>
+            <Feather
+              name={icon}
+              size={16}
+              color={isActive ? theme.buttonText : theme.textSecondary}
+            />
+            <ThemedText
+              type="caption"
+              style={[
+                styles.tabText,
+                { color: isActive ? theme.buttonText : theme.textSecondary },
+              ]}
+            >
+              {label}
+            </ThemedText>
+          </View>
+        </GlassSurface>
+      </Pressable>
+    );
+  };
 
   const getSeverityColor = (severity: "info" | "warning" | "important") => {
     switch (severity) {
@@ -169,7 +178,7 @@ export default function InsightsScreen() {
                     <ThemedText type="body" style={{ fontWeight: "600", flex: 1 }}>
                       {insight.title}
                     </ThemedText>
-                    <View style={[styles.typeBadge, { backgroundColor: theme.backgroundSecondary }]}>
+                    <View style={[styles.typeBadge, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
                       <ThemedText type="caption" style={{ color: theme.textSecondary }}>
                         {insight.type}
                       </ThemedText>
@@ -288,7 +297,7 @@ export default function InsightsScreen() {
                   ) : null}
                 </View>
 
-                <View style={[styles.severityBar, { backgroundColor: theme.backgroundSecondary }]}>
+                <View style={[styles.severityBar, { backgroundColor: "rgba(255,255,255,0.20)" }]}>
                   <View 
                     style={[
                       styles.severityFill, 
@@ -381,13 +390,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   tab: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
     gap: Spacing.xs,
   },
   tabText: {

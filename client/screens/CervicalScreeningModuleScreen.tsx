@@ -15,7 +15,7 @@ import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, Screening, generateId } from "@/lib/storage";
 
 export default function CervicalScreeningModuleScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
@@ -113,7 +113,9 @@ export default function CervicalScreeningModuleScreen() {
               styles.toggleOption,
               {
                 backgroundColor:
-                  screeningType === "hpv" ? theme.primary : theme.backgroundDefault,
+                  screeningType === "hpv" ? theme.primary : isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
+                borderWidth: screeningType === "hpv" ? 0 : StyleSheet.hairlineWidth,
+                borderColor: screeningType === "hpv" ? "transparent" : isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
               },
             ]}
           >
@@ -141,7 +143,9 @@ export default function CervicalScreeningModuleScreen() {
               styles.toggleOption,
               {
                 backgroundColor:
-                  screeningType === "pap" ? theme.primary : theme.backgroundDefault,
+                  screeningType === "pap" ? theme.primary : isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
+                borderWidth: screeningType === "pap" ? 0 : StyleSheet.hairlineWidth,
+                borderColor: screeningType === "pap" ? "transparent" : isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
               },
             ]}
           >

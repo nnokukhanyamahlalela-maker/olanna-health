@@ -27,64 +27,74 @@ export function GlassCard({
   intensity = 60,
   gradient = false,
 }: Props) {
-  const { theme, isDark, reduceTransparency } = useTheme();
-  const useSolid = reduceTransparency || Platform.OS === "web";
+  const { theme, isDark } = useTheme();
 
   const glassColors = theme.glass;
   const blurTint = isDark ? "dark" : "light";
 
-  if (useSolid) {
+  const borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.55)";
+  const bgColor = isDark ? "rgba(42,23,48,0.42)" : "rgba(255,255,255,0.38)";
+
+  const webBlurStyle: any =
+    Platform.OS === "web"
+      ? {
+          backdropFilter: `blur(${intensity}px) saturate(1.6)`,
+          WebkitBackdropFilter: `blur(${intensity}px) saturate(1.6)`,
+          backgroundColor: bgColor,
+        }
+      : {};
+
+  if (Platform.OS === "ios") {
     return (
-      <View style={[
-        styles.solidCard, 
-        { 
-          backgroundColor: glassColors.solidFallback as string,
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-        },
-        style
-      ]}>
+      <View style={[styles.blurOuter, { borderColor }, style]}>
         {gradient ? (
           <LinearGradient
             start={{ x: 0.1, y: 0 }}
             end={{ x: 0.9, y: 1 }}
-            colors={isDark 
-              ? ["rgba(42,23,48,0.95)", "rgba(42,23,48,0.85)"]
-              : ["rgba(255,255,255,0.95)", "rgba(255,255,255,0.85)"]
+            colors={isDark
+              ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.05)"]
+              : ["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]
             }
             style={StyleSheet.absoluteFill}
           />
         ) : null}
-        <View style={styles.inner}>{children}</View>
+        <BlurView intensity={intensity} tint={blurTint} style={styles.blur}>
+          <View style={[
+            styles.inner,
+            styles.blurInner,
+            { backgroundColor: glassColors.fill as string }
+          ]}>
+            {children}
+          </View>
+        </BlurView>
       </View>
     );
   }
 
   return (
     <View style={[
-      styles.blurOuter, 
-      { borderColor: glassColors.border as string },
-      style
+      styles.blurOuter,
+      { borderColor, backgroundColor: bgColor },
+      webBlurStyle,
+      style,
     ]}>
       {gradient ? (
         <LinearGradient
           start={{ x: 0.1, y: 0 }}
           end={{ x: 0.9, y: 1 }}
           colors={isDark
-            ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.05)"]
-            : ["rgba(255,255,255,0.55)", "rgba(255,255,255,0.20)"]
+            ? ["rgba(255,255,255,0.08)", "rgba(255,255,255,0.03)"]
+            : ["rgba(255,255,255,0.35)", "rgba(255,255,255,0.12)"]
           }
           style={StyleSheet.absoluteFill}
         />
       ) : null}
-      <BlurView intensity={intensity} tint={blurTint} style={styles.blur}>
-        <View style={[
-          styles.inner, 
-          styles.blurInner, 
-          { backgroundColor: glassColors.fill as string }
-        ]}>
-          {children}
-        </View>
-      </BlurView>
+      <View style={styles.highlightWrap}>
+        <View style={[styles.highlightLine, {
+          backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.65)",
+        }]} />
+      </View>
+      <View style={styles.inner}>{children}</View>
     </View>
   );
 }
@@ -101,10 +111,10 @@ const styles = StyleSheet.create({
   blurOuter: {
     borderRadius: CardSpacing.radius,
     overflow: "hidden",
-    borderWidth: 1,
-    shadowColor: "#000",
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowColor: "rgba(80, 40, 60, 0.12)",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -115,14 +125,15 @@ const styles = StyleSheet.create({
   inner: {
     padding: CardSpacing.padding,
   },
-  solidCard: {
-    borderRadius: CardSpacing.radius,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    overflow: "hidden",
+  highlightWrap: {
+    position: "absolute",
+    top: 0,
+    left: 12,
+    right: 12,
+    zIndex: 3,
+  },
+  highlightLine: {
+    height: StyleSheet.hairlineWidth,
+    borderRadius: 1,
   },
 });

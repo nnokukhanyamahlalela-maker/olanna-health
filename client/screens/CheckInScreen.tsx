@@ -59,7 +59,7 @@ type ViewMode = 'categories' | 'bodymap' | 'patterns';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CheckInScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -519,8 +519,8 @@ export default function CheckInScreen() {
               style={[
                 styles.notesInput,
                 {
-                  backgroundColor: theme.backgroundSecondary,
-                  borderColor: theme.border,
+                  backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.20)",
+                  borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.35)",
                   color: theme.text,
                 },
               ]}
@@ -659,13 +659,13 @@ export default function CheckInScreen() {
                   </Pressable>
                 </View>
                 {showAddCustom ? (
-                  <View style={[styles.addCustomForm, { backgroundColor: theme.backgroundSecondary, borderColor: theme.border }]}>
+                  <View style={[styles.addCustomForm, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.18)", borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.30)" }]}>
                     <TextInput
                       value={newCustomName}
                       onChangeText={setNewCustomName}
                       placeholder="Symptom name..."
                       placeholderTextColor={theme.textSecondary}
-                      style={[styles.customInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
+                      style={[styles.customInput, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.20)", borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.35)", color: theme.text }]}
                       testID="custom-symptom-name"
                     />
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: Spacing.md }}>

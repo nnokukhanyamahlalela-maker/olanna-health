@@ -143,34 +143,43 @@ export default function FertilityTrackingScreen() {
     loadData();
   };
 
-  const renderTab = (tab: TabType, label: string, icon: keyof typeof Feather.glyphMap) => (
-    <Pressable
-      key={tab}
-      style={[
-        styles.tab,
-        { backgroundColor: activeTab === tab ? theme.primary : theme.backgroundDefault },
-      ]}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setActiveTab(tab);
-      }}
-    >
-      <Feather
-        name={icon}
-        size={16}
-        color={activeTab === tab ? theme.buttonText : theme.textSecondary}
-      />
-      <ThemedText
-        type="caption"
-        style={[
-          styles.tabText,
-          { color: activeTab === tab ? theme.buttonText : theme.textSecondary },
-        ]}
+  const renderTab = (tab: TabType, label: string, icon: keyof typeof Feather.glyphMap) => {
+    const isActive = activeTab === tab;
+    return (
+      <Pressable
+        key={tab}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setActiveTab(tab);
+        }}
       >
-        {label}
-      </ThemedText>
-    </Pressable>
-  );
+        <GlassSurface
+          noPadding
+          borderRadius={BorderRadius.full}
+          tint={isActive ? "prominent" : "subtle"}
+          noShadow
+          style={isActive ? { backgroundColor: theme.primary + "DD" } : undefined}
+        >
+          <View style={styles.tab}>
+            <Feather
+              name={icon}
+              size={16}
+              color={isActive ? theme.buttonText : theme.textSecondary}
+            />
+            <ThemedText
+              type="caption"
+              style={[
+                styles.tabText,
+                { color: isActive ? theme.buttonText : theme.textSecondary },
+              ]}
+            >
+              {label}
+            </ThemedText>
+          </View>
+        </GlassSurface>
+      </Pressable>
+    );
+  };
 
   const renderOverview = () => (
     <Animated.View entering={FadeInDown.duration(300)}>
@@ -468,14 +477,14 @@ export default function FertilityTrackingScreen() {
 
             <View style={styles.inputRow}>
               <TextInput
-                style={[styles.tempInput, { backgroundColor: theme.backgroundSecondary, color: theme.text }]}
+                style={[styles.tempInput, { backgroundColor: "rgba(255,255,255,0.25)", color: theme.text, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.40)" }]}
                 value={bbtTemp}
                 onChangeText={setBbtTemp}
                 placeholder={bbtUnit === "celsius" ? "36.5" : "97.7"}
                 placeholderTextColor={theme.textSecondary}
                 keyboardType="decimal-pad"
               />
-              <View style={[styles.unitPicker, { backgroundColor: theme.backgroundSecondary }]}>
+              <View style={[styles.unitPicker, { backgroundColor: "rgba(255,255,255,0.25)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.40)" }]}>
                 <Picker
                   selectedValue={bbtUnit}
                   onValueChange={(value) => setBbtUnit(value)}
@@ -521,7 +530,7 @@ export default function FertilityTrackingScreen() {
                   style={[
                     styles.mucusOption,
                     { 
-                      backgroundColor: mucusType === type.value ? theme.accent + "20" : theme.backgroundSecondary,
+                      backgroundColor: mucusType === type.value ? theme.accent + "20" : "rgba(255,255,255,0.20)",
                       borderColor: mucusType === type.value ? theme.accent : "transparent",
                     },
                   ]}
@@ -570,7 +579,7 @@ export default function FertilityTrackingScreen() {
                   style={[
                     styles.lhOption,
                     { 
-                      backgroundColor: lhResult === result.value ? result.color + "20" : theme.backgroundSecondary,
+                      backgroundColor: lhResult === result.value ? result.color + "20" : "rgba(255,255,255,0.20)",
                       borderColor: lhResult === result.value ? result.color : "transparent",
                     },
                   ]}
@@ -610,13 +619,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   tab: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
     gap: Spacing.xs,
   },
   tabText: {

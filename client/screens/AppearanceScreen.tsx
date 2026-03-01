@@ -89,7 +89,7 @@ export default function AppearanceScreen() {
 
       <GlassSurface borderRadius={BorderRadius.xl} padding={Spacing.lg}>
         <AppText variant="bodyStrong" style={styles.previewTitle}>Preview</AppText>
-        <View style={[styles.previewCard, { backgroundColor: theme.surfaceElevated as string }]}>
+        <View style={[styles.previewCard, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)" }]}>
           <View style={styles.previewRow}>
             <View style={[styles.previewDot, { backgroundColor: theme.accent as string }]} />
             <View style={styles.previewLines}>

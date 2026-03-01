@@ -28,9 +28,10 @@ interface MenuItemProps {
   showChevron?: boolean;
   isLast?: boolean;
   theme: ReturnType<typeof useTheme>["theme"];
+  isDark?: boolean;
 }
 
-function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = false, theme }: MenuItemProps) {
+function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = false, theme, isDark = false }: MenuItemProps) {
   const iconColor = color || theme.primary;
 
   return (
@@ -42,7 +43,7 @@ function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = fa
         isLast ? null : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border },
       ]}
     >
-      <View style={[styles.menuIcon, { backgroundColor: theme.primaryLight }]}>
+      <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)" }]}>
         <Feather name={icon} size={18} color={iconColor} />
       </View>
       <ThemedText type="body" style={[styles.menuLabel, { color: color || theme.textSecondary }]}>
@@ -56,7 +57,7 @@ function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = fa
 }
 
 export default function ProfileScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
@@ -133,7 +134,12 @@ export default function ProfileScreen() {
             onPress={() => navigation.navigate("EditProfile")}
             style={({ pressed }) => [
               styles.editButton,
-              { opacity: pressed ? 0.7 : 1, backgroundColor: theme.backgroundSecondary },
+              {
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
+              },
             ]}
           >
             <Feather name="edit-2" size={16} color={theme.textSecondary} />
@@ -161,6 +167,7 @@ export default function ProfileScreen() {
             color={theme.primary}
             onPress={() => navigation.navigate("AIChat")}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="users"
@@ -169,6 +176,7 @@ export default function ProfileScreen() {
             onPress={() => {}}
             isLast
             theme={theme}
+            isDark={isDark}
           />
         </GlassSurface>
       </View>
@@ -183,24 +191,28 @@ export default function ProfileScreen() {
             label="Appearance"
             onPress={() => navigation.navigate("Appearance")}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="bell"
             label="Notifications"
             onPress={() => {}}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="lock"
             label="Privacy & Data"
             onPress={() => navigation.navigate("PrivacySettings")}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="download"
             label="Export Data"
             onPress={() => {}}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="help-circle"
@@ -208,6 +220,7 @@ export default function ProfileScreen() {
             onPress={() => {}}
             isLast
             theme={theme}
+            isDark={isDark}
           />
         </GlassSurface>
       </View>
@@ -222,12 +235,14 @@ export default function ProfileScreen() {
             label="About Olanna Health"
             onPress={() => {}}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="file-text"
             label="Terms of Service"
             onPress={() => {}}
             theme={theme}
+            isDark={isDark}
           />
           <MenuItem
             icon="shield"
@@ -235,6 +250,7 @@ export default function ProfileScreen() {
             onPress={() => {}}
             isLast
             theme={theme}
+            isDark={isDark}
           />
         </GlassSurface>
       </View>
@@ -249,6 +265,7 @@ export default function ProfileScreen() {
             onPress={handleLogout}
             isLast
             theme={theme}
+            isDark={isDark}
           />
         </GlassSurface>
       ) : null}

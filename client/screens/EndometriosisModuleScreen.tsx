@@ -26,7 +26,7 @@ const endoSymptoms = [
 ];
 
 export default function EndometriosisModuleScreen() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
@@ -131,10 +131,10 @@ export default function EndometriosisModuleScreen() {
                 {
                   backgroundColor: selectedSymptoms.includes(symptom.id)
                     ? theme.secondary + "20"
-                    : theme.backgroundDefault,
+                    : isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)",
                   borderColor: selectedSymptoms.includes(symptom.id)
                     ? theme.secondary
-                    : "transparent",
+                    : isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)",
                 },
               ]}
             >
