@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { ThemeMode } from "@/constants/themeColors";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
@@ -47,45 +48,46 @@ export default function AppearanceScreen() {
             <Pressable
               key={option.mode}
               onPress={() => handleSelect(option.mode)}
-              style={[
-                styles.optionCard,
-                {
-                  backgroundColor: theme.surface as string,
-                  borderColor: isSelected ? (theme.accent as string) : (theme.divider as string),
-                  borderWidth: isSelected ? 2 : 1,
-                },
-              ]}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={`${option.label} mode`}
+              style={styles.optionPressable}
             >
-              <View style={[
-                styles.iconContainer,
-                { backgroundColor: isSelected ? (theme.accentSoft as string) : (theme.divider as string) }
-              ]}>
-                <Feather 
-                  name={option.icon} 
-                  size={24} 
-                  color={isSelected ? (theme.accent as string) : (theme.textSecondary as string)} 
-                />
-              </View>
-              <AppText 
-                variant="bodyStrong" 
-                color={isSelected ? (theme.accent as string) : (theme.textPrimary as string)}
+              <GlassSurface
+                borderRadius={BorderRadius.xl}
+                style={[
+                  styles.optionCard,
+                  isSelected ? { borderColor: theme.accent as string, borderWidth: 2 } : {},
+                ]}
               >
-                {option.label}
-              </AppText>
-              {isSelected ? (
-                <View style={[styles.checkmark, { backgroundColor: theme.accent as string }]}>
-                  <Feather name="check" size={14} color="#FFFFFF" />
+                <View style={[
+                  styles.iconContainer,
+                  { backgroundColor: isSelected ? (theme.accentSoft as string) : (theme.divider as string) }
+                ]}>
+                  <Feather 
+                    name={option.icon} 
+                    size={24} 
+                    color={isSelected ? (theme.accent as string) : (theme.textSecondary as string)} 
+                  />
                 </View>
-              ) : null}
+                <AppText 
+                  variant="bodyStrong" 
+                  color={isSelected ? (theme.accent as string) : (theme.textPrimary as string)}
+                >
+                  {option.label}
+                </AppText>
+                {isSelected ? (
+                  <View style={[styles.checkmark, { backgroundColor: theme.accent as string }]}>
+                    <Feather name="check" size={14} color="#FFFFFF" />
+                  </View>
+                ) : null}
+              </GlassSurface>
             </Pressable>
           );
         })}
       </View>
 
-      <View style={[styles.previewSection, { backgroundColor: theme.surface as string }]}>
+      <GlassSurface borderRadius={BorderRadius.xl} padding={Spacing.lg}>
         <AppText variant="bodyStrong" style={styles.previewTitle}>Preview</AppText>
         <View style={[styles.previewCard, { backgroundColor: theme.surfaceElevated as string }]}>
           <View style={styles.previewRow}>
@@ -99,7 +101,7 @@ export default function AppearanceScreen() {
         <AppText variant="caption" color={theme.textTertiary as string} style={styles.previewHint}>
           {isDark ? "Dark mode is active" : "Light mode is active"}
         </AppText>
-      </View>
+      </GlassSurface>
       </ScrollView>
     </AppGradient>
   );
@@ -120,11 +122,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     marginBottom: Spacing.xl,
   },
-  optionCard: {
+  optionPressable: {
     flex: 1,
+  },
+  optionCard: {
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
     gap: Spacing.sm,
   },
   iconContainer: {
@@ -145,7 +147,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   previewSection: {
-    padding: Spacing.lg,
     borderRadius: BorderRadius.xl,
   },
   previewTitle: {

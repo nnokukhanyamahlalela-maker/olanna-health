@@ -17,6 +17,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { Lotus } from "@/components/Lotus";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { storage } from "@/lib/storage";
@@ -128,7 +129,7 @@ export default function CycleCalculatorScreen() {
           </ThemedText>
         </View>
 
-        <View style={[styles.inputCard, { backgroundColor: theme.backgroundSecondary }]}>
+        <GlassSurface style={styles.inputCard}>
           <View style={styles.inputRow}>
             <ThemedText type="body" style={styles.inputLabel}>Last Period Start</ThemedText>
             <Pressable
@@ -201,13 +202,13 @@ export default function CycleCalculatorScreen() {
           <Button onPress={calculate} style={styles.calculateButton}>
             Calculate
           </Button>
-        </View>
+        </GlassSurface>
 
         {result ? (
           <View style={styles.resultsSection}>
             <ThemedText type="h3" style={styles.resultsTitle}>Your Predictions</ThemedText>
             
-            <View style={[styles.resultCard, { backgroundColor: BRAND_PINK + "20" }]}>
+            <GlassSurface style={styles.resultCard}>
               <View style={styles.resultIcon}>
                 <Lotus phase="menstrual" size={36} color={BRAND_PINK} />
               </View>
@@ -224,9 +225,9 @@ export default function CycleCalculatorScreen() {
                     : "Passed"}
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
 
-            <View style={[styles.resultCard, { backgroundColor: "#C9A24D20" }]}>
+            <GlassSurface style={styles.resultCard}>
               <View style={styles.resultIcon}>
                 <Lotus phase="ovulation" size={36} color="#C9A24D" />
               </View>
@@ -243,9 +244,9 @@ export default function CycleCalculatorScreen() {
                     : "Passed"}
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
 
-            <View style={[styles.resultCard, { backgroundColor: "#A8BFA520" }]}>
+            <GlassSurface style={styles.resultCard}>
               <View style={styles.resultIcon}>
                 <Lotus phase="follicular" size={36} color="#A8BFA5" />
               </View>
@@ -260,15 +261,15 @@ export default function CycleCalculatorScreen() {
                   6 days of peak fertility
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
 
-            <View style={[styles.infoBox, { backgroundColor: theme.backgroundSecondary }]}>
+            <GlassSurface style={styles.infoBox}>
               <Feather name="info" size={18} color={theme.textSecondary} />
               <ThemedText type="small" style={{ color: theme.textSecondary, flex: 1 }}>
                 These predictions are based on the calendar method and assume regular cycles. 
                 For more accurate tracking, log your symptoms daily.
               </ThemedText>
-            </View>
+            </GlassSurface>
           </View>
         ) : null}
       </ScrollView>

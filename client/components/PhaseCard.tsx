@@ -4,6 +4,7 @@ import Svg, { Path, Circle, G } from "react-native-svg";
 import { phaseConfig, PHASE_ORDER, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
 import { neutral } from "@/constants/colors";
+import { GlassSurface } from "@/components/GlassSurface";
 
 function LotusIcon({ variant, size = 48, color }: { variant: string; size?: number; color: string }) {
   const cx = size / 2;
@@ -135,6 +136,7 @@ function PhaseItem({ phase, isActive }: PhaseItemProps) {
   return (
     <View style={styles.phaseItem}>
       <View style={[styles.iconCircle, { backgroundColor: config.color }]}>
+        <View style={[styles.iconHalo, { shadowColor: config.color }]} />
         <LotusIcon variant={config.lotusVariant} size={48} color={config.labelColor} />
       </View>
       <Text style={[styles.phaseName, { color: config.labelColor }, isActive ? styles.phaseNameActive : null]}>
@@ -151,7 +153,7 @@ interface PhaseCardProps {
 
 export function PhaseCard({ currentPhase }: PhaseCardProps) {
   return (
-    <View style={styles.card}>
+    <GlassSurface style={styles.card} padding={20} borderRadius={16}>
       <Text style={styles.cardTitle}>The Lotus Cycle</Text>
       <View style={styles.grid}>
         {PHASE_ORDER.map((phase) => (
@@ -162,21 +164,13 @@ export function PhaseCard({ currentPhase }: PhaseCardProps) {
           />
         ))}
       </View>
-    </View>
+    </GlassSurface>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: neutral.bgSecondary,
-    borderRadius: 16,
-    padding: 20,
     width: "100%",
-    shadowColor: neutral.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
   },
   cardTitle: {
     fontFamily: Fonts.heading,
@@ -202,6 +196,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255, 255, 255, 0.45)",
+  },
+  iconHalo: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 40,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 4,
   },
   phaseName: {
     fontFamily: Fonts.heading,

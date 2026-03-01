@@ -24,6 +24,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -147,7 +148,7 @@ export default function LogProductScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.fieldCard}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             DATE
           </ThemedText>
@@ -157,11 +158,11 @@ export default function LogProductScreen() {
               {todayStr}
             </ThemedText>
           </View>
-        </View>
+        </GlassSurface>
 
         <View style={[styles.separator, { backgroundColor: theme.border }]} />
 
-        <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.fieldCard}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             PRODUCT TYPE
           </ThemedText>
@@ -215,11 +216,11 @@ export default function LogProductScreen() {
               ))}
             </View>
           ) : null}
-        </View>
+        </GlassSurface>
 
         <View style={[styles.separator, { backgroundColor: theme.border }]} />
 
-        <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.fieldCard}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             BRAND
           </ThemedText>
@@ -241,11 +242,11 @@ export default function LogProductScreen() {
             maxLength={60}
             editable={!isSaving}
           />
-        </View>
+        </GlassSurface>
 
         <View style={[styles.separator, { backgroundColor: theme.border }]} />
 
-        <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.fieldCard}>
           <View style={styles.toggleRow}>
             <View style={styles.toggleLabel}>
               <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary, marginBottom: 0 }]}>
@@ -265,11 +266,11 @@ export default function LogProductScreen() {
               disabled={isSaving}
             />
           </View>
-        </View>
+        </GlassSurface>
 
         <View style={[styles.separator, { backgroundColor: theme.border }]} />
 
-        <View style={[styles.fieldCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.fieldCard}>
           <ThemedText style={[styles.fieldLabel, { color: theme.textSecondary }]}>
             NOTES
           </ThemedText>
@@ -294,7 +295,7 @@ export default function LogProductScreen() {
             maxLength={500}
             editable={!isSaving}
           />
-        </View>
+        </GlassSurface>
 
         <AnimatedPressable
           testID="button-save-product"

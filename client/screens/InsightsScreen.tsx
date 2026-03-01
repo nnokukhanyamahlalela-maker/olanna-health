@@ -15,6 +15,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { 
@@ -155,7 +156,7 @@ export default function InsightsScreen() {
               key={insight.id}
               entering={FadeInDown.duration(300).delay(index * 50)}
             >
-              <View style={[styles.insightCard, { backgroundColor: theme.backgroundDefault }]}>
+              <GlassSurface style={styles.insightCard} noPadding>
                 <View style={[styles.insightIcon, { backgroundColor: getSeverityColor(insight.severity) + "20" }]}>
                   <Feather 
                     name={insight.icon as keyof typeof Feather.glyphMap} 
@@ -186,18 +187,18 @@ export default function InsightsScreen() {
                     </View>
                   ) : null}
                 </View>
-              </View>
+              </GlassSurface>
             </Animated.View>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="bar-chart-2" size={48} color={theme.textSecondary} />
           <ThemedText type="h4" style={{ marginTop: Spacing.lg }}>No insights yet</ThemedText>
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Keep tracking your symptoms to discover patterns and receive personalized insights.
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -211,7 +212,7 @@ export default function InsightsScreen() {
               key={rec.id}
               entering={FadeInDown.duration(300).delay(index * 50)}
             >
-              <View style={[styles.recCard, { backgroundColor: theme.backgroundDefault }]}>
+              <GlassSurface style={styles.recCard} noPadding>
                 <View style={[styles.recIcon, { backgroundColor: theme.primary + "15" }]}>
                   <Feather 
                     name={rec.icon as keyof typeof Feather.glyphMap || getRecommendationIcon(rec.category)} 
@@ -232,18 +233,18 @@ export default function InsightsScreen() {
                     </View>
                   ) : null}
                 </View>
-              </View>
+              </GlassSurface>
             </Animated.View>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="heart" size={48} color={theme.textSecondary} />
           <ThemedText type="h4" style={{ marginTop: Spacing.lg }}>No recommendations yet</ThemedText>
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Log more symptoms to get personalized wellness recommendations.
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -257,7 +258,7 @@ export default function InsightsScreen() {
               key={trend.symptomId}
               entering={FadeInDown.duration(300).delay(index * 50)}
             >
-              <View style={[styles.trendCard, { backgroundColor: theme.backgroundDefault }]}>
+              <GlassSurface style={styles.trendCard} noPadding>
                 <View style={styles.trendHeader}>
                   <ThemedText type="body" style={{ fontWeight: "600", flex: 1 }}>
                     {trend.symptomName}
@@ -298,18 +299,18 @@ export default function InsightsScreen() {
                     ]} 
                   />
                 </View>
-              </View>
+              </GlassSurface>
             </Animated.View>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="trending-up" size={48} color={theme.textSecondary} />
           <ThemedText type="h4" style={{ marginTop: Spacing.lg }}>No trends yet</ThemedText>
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Track symptoms over time to see your personal trends and patterns.
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -327,7 +328,7 @@ export default function InsightsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.primary} />
         }
       >
-      <View style={[styles.header, { backgroundColor: theme.primary + "15" }]}>
+      <GlassSurface style={styles.header}>
         <Feather name="bar-chart-2" size={24} color={theme.primary} />
         <View style={styles.headerContent}>
           <ThemedText type="h4">Your Health Insights</ThemedText>
@@ -335,7 +336,7 @@ export default function InsightsScreen() {
             Patterns and recommendations based on your tracking data
           </ThemedText>
         </View>
-      </View>
+      </GlassSurface>
 
       <View style={styles.tabBar}>
         {renderTab("insights", "Insights", "zap")}
@@ -347,13 +348,13 @@ export default function InsightsScreen() {
       {activeTab === "recommendations" && renderRecommendations()}
       {activeTab === "trends" && renderTrends()}
 
-      <View style={[styles.disclaimer, { backgroundColor: theme.backgroundSecondary }]}>
+      <GlassSurface style={styles.disclaimer}>
         <Feather name="info" size={16} color={theme.textSecondary} />
         <ThemedText type="caption" style={{ color: theme.textSecondary, flex: 1 }}>
           These insights are for informational purposes only and are not medical advice. 
           Consult a healthcare provider for any health concerns.
         </ThemedText>
-      </View>
+      </GlassSurface>
       </ScrollView>
     </AppGradient>
   );

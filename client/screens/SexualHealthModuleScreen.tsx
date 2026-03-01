@@ -7,6 +7,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -48,7 +49,7 @@ export default function SexualHealthModuleScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-      <View style={[styles.guidelineCard, { backgroundColor: theme.info + "15" }]}>
+      <GlassSurface style={styles.guidelineCard}>
         <Feather name="book-open" size={24} color={theme.info} />
         <View style={styles.guidelineContent}>
           <ThemedText type="h4" style={{ color: theme.info }}>
@@ -58,7 +59,7 @@ export default function SexualHealthModuleScreen() {
             Based on the Southern African HIV Clinicians Society 2022 guidelines for STI screening.
           </ThemedText>
         </View>
-      </View>
+      </GlassSurface>
 
       <View style={styles.section}>
         <ThemedText type="h3" style={styles.sectionTitle}>
@@ -96,9 +97,9 @@ export default function SexualHealthModuleScreen() {
         </ThemedText>
 
         {stiInfo.map((sti, index) => (
-          <View
+          <GlassSurface
             key={index}
-            style={[styles.stiCard, { backgroundColor: theme.backgroundDefault }]}
+            style={styles.stiCard}
           >
             <View style={styles.stiHeader}>
               <ThemedText type="h4">{sti.name}</ThemedText>
@@ -111,7 +112,7 @@ export default function SexualHealthModuleScreen() {
             <ThemedText type="small" style={styles.stiDescription}>
               {sti.description}
             </ThemedText>
-          </View>
+          </GlassSurface>
         ))}
       </View>
 
@@ -120,41 +121,49 @@ export default function SexualHealthModuleScreen() {
           Prevention Tips
         </ThemedText>
 
-        <View style={[styles.tipCard, { backgroundColor: theme.backgroundDefault }]}>
-          <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
-            <Feather name="check-circle" size={20} color={theme.success} />
+        <GlassSurface style={styles.tipCard} noPadding>
+          <View style={styles.tipCardInner}>
+            <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
+              <Feather name="check-circle" size={20} color={theme.success} />
+            </View>
+            <ThemedText type="body" style={styles.tipText}>
+              Use barrier protection consistently
+            </ThemedText>
           </View>
-          <ThemedText type="body" style={styles.tipText}>
-            Use barrier protection consistently
-          </ThemedText>
-        </View>
+        </GlassSurface>
 
-        <View style={[styles.tipCard, { backgroundColor: theme.backgroundDefault }]}>
-          <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
-            <Feather name="check-circle" size={20} color={theme.success} />
+        <GlassSurface style={styles.tipCard} noPadding>
+          <View style={styles.tipCardInner}>
+            <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
+              <Feather name="check-circle" size={20} color={theme.success} />
+            </View>
+            <ThemedText type="body" style={styles.tipText}>
+              Get tested regularly with new partners
+            </ThemedText>
           </View>
-          <ThemedText type="body" style={styles.tipText}>
-            Get tested regularly with new partners
-          </ThemedText>
-        </View>
+        </GlassSurface>
 
-        <View style={[styles.tipCard, { backgroundColor: theme.backgroundDefault }]}>
-          <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
-            <Feather name="check-circle" size={20} color={theme.success} />
+        <GlassSurface style={styles.tipCard} noPadding>
+          <View style={styles.tipCardInner}>
+            <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
+              <Feather name="check-circle" size={20} color={theme.success} />
+            </View>
+            <ThemedText type="body" style={styles.tipText}>
+              Communicate openly with partners about testing
+            </ThemedText>
           </View>
-          <ThemedText type="body" style={styles.tipText}>
-            Communicate openly with partners about testing
-          </ThemedText>
-        </View>
+        </GlassSurface>
 
-        <View style={[styles.tipCard, { backgroundColor: theme.backgroundDefault }]}>
-          <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
-            <Feather name="check-circle" size={20} color={theme.success} />
+        <GlassSurface style={styles.tipCard} noPadding>
+          <View style={styles.tipCardInner}>
+            <View style={[styles.tipIcon, { backgroundColor: theme.success + "20" }]}>
+              <Feather name="check-circle" size={20} color={theme.success} />
+            </View>
+            <ThemedText type="body" style={styles.tipText}>
+              Consider HPV vaccination if eligible
+            </ThemedText>
           </View>
-          <ThemedText type="body" style={styles.tipText}>
-            Consider HPV vaccination if eligible
-          </ThemedText>
-        </View>
+        </GlassSurface>
       </View>
 
       <Pressable
@@ -224,11 +233,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   tipCard: {
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.sm,
+  },
+  tipCardInner: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
     gap: Spacing.md,
   },
   tipIcon: {

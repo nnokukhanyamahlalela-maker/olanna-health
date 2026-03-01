@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -57,12 +58,12 @@ export default function EndometriosisModuleScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-      <View style={[styles.supportCard, { backgroundColor: theme.primary + "10" }]}>
+      <GlassSurface style={styles.supportCard}>
         <Feather name="heart" size={24} color={theme.primary} />
         <ThemedText type="body" style={[styles.supportText, { color: theme.primary }]}>
           You are not alone. Millions of women live with endometriosis. We're here to support you.
         </ThemedText>
-      </View>
+      </GlassSurface>
 
       <View style={styles.section}>
         <ThemedText type="h3" style={styles.sectionTitle}>
@@ -101,7 +102,7 @@ export default function EndometriosisModuleScreen() {
           ))}
         </View>
         {painLevel > 0 ? (
-          <View style={[styles.painDisplay, { backgroundColor: theme.backgroundDefault }]}>
+          <GlassSurface style={styles.painDisplay}>
             <ThemedText type="h2" style={{ color: getPainColor(painLevel) }}>
               {painLevel}/10
             </ThemedText>
@@ -112,7 +113,7 @@ export default function EndometriosisModuleScreen() {
                 ? "Moderate pain"
                 : "Severe pain - consider speaking with your doctor"}
             </ThemedText>
-          </View>
+          </GlassSurface>
         ) : null}
       </View>
 
@@ -190,7 +191,7 @@ export default function EndometriosisModuleScreen() {
         </View>
       </View>
 
-      <View style={[styles.exportCard, { backgroundColor: theme.backgroundDefault }]}>
+      <GlassSurface style={styles.exportCard}>
         <View style={styles.exportContent}>
           <Feather name="file-text" size={24} color={theme.info} />
           <View style={styles.exportText}>
@@ -201,7 +202,7 @@ export default function EndometriosisModuleScreen() {
           </View>
         </View>
         <Feather name="chevron-right" size={20} color={theme.textSecondary} />
-      </View>
+      </GlassSurface>
       </ScrollView>
     </AppGradient>
   );

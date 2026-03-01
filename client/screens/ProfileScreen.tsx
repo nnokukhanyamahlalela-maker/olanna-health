@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -13,20 +12,11 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
-
-const THEME_COLORS = {
-  background: "#FFF7FA",
-  cardBackground: "#FFFFFF",
-  primary: "#E85A9C",
-  primaryLight: "#FBE3EC",
-  text: "#3A2F35",
-  textSecondary: "#7A6A73",
-  border: "#F5E8ED",
-};
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -36,10 +26,12 @@ interface MenuItemProps {
   onPress: () => void;
   color?: string;
   showChevron?: boolean;
+  isLast?: boolean;
+  theme: ReturnType<typeof useTheme>["theme"];
 }
 
-function MenuItem({ icon, label, onPress, color, showChevron = true }: MenuItemProps) {
-  const iconColor = color || THEME_COLORS.primary;
+function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = false, theme }: MenuItemProps) {
+  const iconColor = color || theme.primary;
 
   return (
     <Pressable
@@ -47,16 +39,17 @@ function MenuItem({ icon, label, onPress, color, showChevron = true }: MenuItemP
       style={({ pressed }) => [
         styles.menuItem,
         { opacity: pressed ? 0.8 : 1 },
+        isLast ? null : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border },
       ]}
     >
-      <View style={[styles.menuIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
+      <View style={[styles.menuIcon, { backgroundColor: theme.primaryLight }]}>
         <Feather name={icon} size={18} color={iconColor} />
       </View>
-      <ThemedText type="body" style={[styles.menuLabel, { color: color || THEME_COLORS.textSecondary }]}>
+      <ThemedText type="body" style={[styles.menuLabel, { color: color || theme.textSecondary }]}>
         {label}
       </ThemedText>
       {showChevron ? (
-        <Feather name="chevron-right" size={18} color={THEME_COLORS.textSecondary} />
+        <Feather name="chevron-right" size={18} color={theme.textSecondary} />
       ) : null}
     </Pressable>
   );
@@ -110,13 +103,13 @@ export default function ProfileScreen() {
       <KeyboardAwareScrollViewCompat
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + 110, // QA: Consistent bottom padding for glass tab bar
+          paddingBottom: insets.bottom + 110,
           paddingHorizontal: Spacing.lg,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
         showsVerticalScrollIndicator={false}
       >
-      <View style={styles.profileCard}>
+      <GlassSurface style={styles.profileCard}>
         <View style={styles.avatarContainer}>
           <LinearGradient
             colors={["#F7A37A", "#E85A9C", "#D070A0"]}
@@ -124,14 +117,14 @@ export default function ProfileScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.avatarGradient}
           >
-            <View style={styles.avatarInner}>
-              <View style={styles.avatarO} />
+            <View style={[styles.avatarInner, { backgroundColor: theme.backgroundDefault }]}>
+              <View style={[styles.avatarO, { borderColor: theme.primary }]} />
             </View>
           </LinearGradient>
         </View>
         <View style={styles.profileInfo}>
-          <ThemedText type="h3" style={{ color: THEME_COLORS.text }}>{profile?.name || "Guest User"}</ThemedText>
-          <ThemedText type="small" style={styles.profileSubtext}>
+          <ThemedText type="h3" style={{ color: theme.text }}>{profile?.name || "Guest User"}</ThemedText>
+          <ThemedText type="small" style={{ color: theme.textSecondary }}>
             {profile ? `Tracking for ${profile.cycleLength} day cycle` : "Set up your profile to get started"}
           </ThemedText>
         </View>
@@ -140,13 +133,13 @@ export default function ProfileScreen() {
             onPress={() => navigation.navigate("EditProfile")}
             style={({ pressed }) => [
               styles.editButton,
-              { opacity: pressed ? 0.7 : 1 },
+              { opacity: pressed ? 0.7 : 1, backgroundColor: theme.backgroundSecondary },
             ]}
           >
-            <Feather name="edit-2" size={16} color={THEME_COLORS.textSecondary} />
+            <Feather name="edit-2" size={16} color={theme.textSecondary} />
           </Pressable>
         ) : null}
-      </View>
+      </GlassSurface>
 
       {!profile ? (
         <Button
@@ -158,94 +151,109 @@ export default function ProfileScreen() {
       ) : null}
 
       <View style={styles.section}>
-        <ThemedText type="h4" style={styles.sectionTitle}>
+        <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
           Support
         </ThemedText>
-        <View style={styles.menuGroup}>
+        <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
             icon="message-circle"
             label="AI Health Assistant"
             color={theme.primary}
             onPress={() => navigation.navigate("AIChat")}
+            theme={theme}
           />
           <MenuItem
             icon="users"
             label="Community"
             color={theme.secondary}
             onPress={() => {}}
+            isLast
+            theme={theme}
           />
-        </View>
+        </GlassSurface>
       </View>
 
       <View style={styles.section}>
-        <ThemedText type="h4" style={styles.sectionTitle}>
+        <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
           Settings
         </ThemedText>
-        <View style={styles.menuGroup}>
+        <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
             icon="sun"
             label="Appearance"
             onPress={() => navigation.navigate("Appearance")}
+            theme={theme}
           />
           <MenuItem
             icon="bell"
             label="Notifications"
             onPress={() => {}}
+            theme={theme}
           />
           <MenuItem
             icon="lock"
             label="Privacy & Data"
             onPress={() => navigation.navigate("PrivacySettings")}
+            theme={theme}
           />
           <MenuItem
             icon="download"
             label="Export Data"
             onPress={() => {}}
+            theme={theme}
           />
           <MenuItem
             icon="help-circle"
             label="Help & Support"
             onPress={() => {}}
+            isLast
+            theme={theme}
           />
-        </View>
+        </GlassSurface>
       </View>
 
       <View style={styles.section}>
-        <ThemedText type="h4" style={styles.sectionTitle}>
+        <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
           About
         </ThemedText>
-        <View style={styles.menuGroup}>
+        <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
             icon="info"
             label="About Olanna Health"
             onPress={() => {}}
+            theme={theme}
           />
           <MenuItem
             icon="file-text"
             label="Terms of Service"
             onPress={() => {}}
+            theme={theme}
           />
           <MenuItem
             icon="shield"
             label="Privacy Policy"
             onPress={() => {}}
+            isLast
+            theme={theme}
           />
-        </View>
+        </GlassSurface>
       </View>
 
       {profile ? (
-        <View style={styles.logoutSection}>
+        <GlassSurface noPadding borderRadius={BorderRadius.xl} style={styles.logoutSection}>
           <MenuItem
             icon="log-out"
             label="Log Out"
             color={theme.error}
             showChevron={false}
             onPress={handleLogout}
+            isLast
+            theme={theme}
           />
-        </View>
+        </GlassSurface>
       ) : null}
 
-      <ThemedText type="caption" style={styles.version}>
+      <ThemedText type="caption" style={[styles.version, { color: theme.textSecondary }]}>
         Version 1.0.0
       </ThemedText>
       </KeyboardAwareScrollViewCompat>
@@ -260,12 +268,8 @@ const styles = StyleSheet.create({
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
     marginBottom: Spacing.xl,
     gap: Spacing.md,
-    backgroundColor: THEME_COLORS.cardBackground,
-    ...Shadows.sm,
   },
   avatarContainer: {
     width: 72,
@@ -286,7 +290,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: THEME_COLORS.cardBackground,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -295,14 +298,10 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 4,
-    borderColor: THEME_COLORS.primary,
   },
   profileInfo: {
     flex: 1,
     gap: Spacing.xs,
-  },
-  profileSubtext: {
-    color: THEME_COLORS.textSecondary,
   },
   editButton: {
     width: 40,
@@ -310,7 +309,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: THEME_COLORS.background,
   },
   getStartedButton: {
     marginBottom: Spacing.xl,
@@ -320,21 +318,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: Spacing.md,
-    color: THEME_COLORS.text,
-  },
-  menuGroup: {
-    borderRadius: BorderRadius.xl,
-    overflow: "hidden",
-    backgroundColor: THEME_COLORS.cardBackground,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
     gap: Spacing.md,
-    backgroundColor: THEME_COLORS.cardBackground,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME_COLORS.border,
+    backgroundColor: "transparent",
   },
   menuIcon: {
     width: 44,
@@ -348,13 +338,9 @@ const styles = StyleSheet.create({
   },
   logoutSection: {
     marginBottom: Spacing.xl,
-    backgroundColor: THEME_COLORS.cardBackground,
-    borderRadius: BorderRadius.xl,
-    overflow: "hidden",
   },
   version: {
     textAlign: "center",
-    color: THEME_COLORS.textSecondary,
     marginTop: Spacing.lg,
   },
 });

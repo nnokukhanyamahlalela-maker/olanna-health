@@ -12,6 +12,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { SymptomChip } from "@/components/SymptomChip";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
@@ -114,32 +115,32 @@ export default function EditProfileScreen() {
         <ThemedText type="h4" style={styles.label}>
           Name
         </ThemedText>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-          ]}
-          placeholder="Your name"
-          placeholderTextColor={theme.textSecondary}
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
-        />
+        <GlassSurface style={styles.inputWrapper} noPadding>
+          <TextInput
+            style={[
+              styles.input,
+              { color: theme.text },
+            ]}
+            placeholder="Your name"
+            placeholderTextColor={theme.textSecondary}
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+          />
+        </GlassSurface>
       </View>
 
       <View style={styles.section}>
         <ThemedText type="h4" style={styles.label}>
           Date of Birth
         </ThemedText>
-        <Pressable
-          onPress={() => setShowDatePicker(true)}
-          style={[
-            styles.dateButton,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-          ]}
-        >
-          <ThemedText type="body">{formatDate(dateOfBirth)}</ThemedText>
-          <Feather name="calendar" size={20} color={theme.textSecondary} />
+        <Pressable onPress={() => setShowDatePicker(true)}>
+          <GlassSurface style={styles.dateButton} noPadding>
+            <View style={styles.dateButtonInner}>
+              <ThemedText type="body">{formatDate(dateOfBirth)}</ThemedText>
+              <Feather name="calendar" size={20} color={theme.textSecondary} />
+            </View>
+          </GlassSurface>
         </Pressable>
         {showDatePicker ? (
           <DateTimePicker
@@ -159,51 +160,53 @@ export default function EditProfileScreen() {
         <ThemedText type="h4" style={styles.label}>
           Average Cycle Length (days)
         </ThemedText>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-          ]}
-          placeholder="28"
-          placeholderTextColor={theme.textSecondary}
-          value={cycleLength}
-          onChangeText={setCycleLength}
-          keyboardType="number-pad"
-          maxLength={2}
-        />
+        <GlassSurface style={styles.inputWrapper} noPadding>
+          <TextInput
+            style={[
+              styles.input,
+              { color: theme.text },
+            ]}
+            placeholder="28"
+            placeholderTextColor={theme.textSecondary}
+            value={cycleLength}
+            onChangeText={setCycleLength}
+            keyboardType="number-pad"
+            maxLength={2}
+          />
+        </GlassSurface>
       </View>
 
       <View style={styles.section}>
         <ThemedText type="h4" style={styles.label}>
           Average Period Length (days)
         </ThemedText>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border },
-          ]}
-          placeholder="5"
-          placeholderTextColor={theme.textSecondary}
-          value={periodLength}
-          onChangeText={setPeriodLength}
-          keyboardType="number-pad"
-          maxLength={2}
-        />
+        <GlassSurface style={styles.inputWrapper} noPadding>
+          <TextInput
+            style={[
+              styles.input,
+              { color: theme.text },
+            ]}
+            placeholder="5"
+            placeholderTextColor={theme.textSecondary}
+            value={periodLength}
+            onChangeText={setPeriodLength}
+            keyboardType="number-pad"
+            maxLength={2}
+          />
+        </GlassSurface>
       </View>
 
       <View style={styles.section}>
         <ThemedText type="h4" style={styles.label}>
           Last Period Start Date
         </ThemedText>
-        <Pressable
-          onPress={() => setShowLastPeriodPicker(true)}
-          style={[
-            styles.dateButton,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-          ]}
-        >
-          <ThemedText type="body">{formatDate(lastPeriodStart)}</ThemedText>
-          <Feather name="calendar" size={20} color={theme.textSecondary} />
+        <Pressable onPress={() => setShowLastPeriodPicker(true)}>
+          <GlassSurface style={styles.dateButton} noPadding>
+            <View style={styles.dateButtonInner}>
+              <ThemedText type="body">{formatDate(lastPeriodStart)}</ThemedText>
+              <Feather name="calendar" size={20} color={theme.textSecondary} />
+            </View>
+          </GlassSurface>
         </Pressable>
         {showLastPeriodPicker ? (
           <DateTimePicker
@@ -253,18 +256,21 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: Spacing.sm,
   },
+  inputWrapper: {
+    borderRadius: BorderRadius.md,
+  },
   input: {
     height: Spacing.inputHeight,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
     fontSize: 16,
   },
   dateButton: {
+    borderRadius: BorderRadius.md,
+  },
+  dateButtonInner: {
     height: Spacing.inputHeight,
     paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

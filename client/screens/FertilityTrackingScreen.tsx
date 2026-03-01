@@ -19,6 +19,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { SeveritySlider } from "@/components/SeveritySlider";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -174,7 +175,7 @@ export default function FertilityTrackingScreen() {
   const renderOverview = () => (
     <Animated.View entering={FadeInDown.duration(300)}>
       {fertilityWindow ? (
-        <View style={[styles.windowCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.windowCard}>
           <View style={styles.windowHeader}>
             <View style={[styles.windowIcon, { backgroundColor: theme.accent + "20" }]}>
               <Feather name="calendar" size={24} color={theme.accent} />
@@ -210,9 +211,9 @@ export default function FertilityTrackingScreen() {
               </View>
             ))}
           </View>
-        </View>
+        </GlassSurface>
       ) : (
-        <View style={[styles.emptyCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyCard}>
           <Feather name="calendar" size={40} color={theme.textSecondary} />
           <ThemedText type="body" style={{ textAlign: "center", marginTop: Spacing.md }}>
             Start tracking to see your fertility window
@@ -220,40 +221,46 @@ export default function FertilityTrackingScreen() {
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Log BBT, cervical mucus, or LH tests for more accurate predictions
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
 
       <ThemedText type="h4" style={styles.sectionTitle}>Quick Log</ThemedText>
       
       <View style={styles.quickActions}>
         <Pressable
-          style={[styles.quickAction, { backgroundColor: theme.backgroundDefault }]}
+          style={styles.quickAction}
           onPress={() => setShowBBTModal(true)}
         >
-          <View style={[styles.actionIcon, { backgroundColor: theme.primary + "20" }]}>
-            <Feather name="thermometer" size={20} color={theme.primary} />
-          </View>
-          <ThemedText type="small">Log BBT</ThemedText>
+          <GlassSurface style={styles.quickActionInner} noPadding>
+            <View style={[styles.actionIcon, { backgroundColor: theme.primary + "20" }]}>
+              <Feather name="thermometer" size={20} color={theme.primary} />
+            </View>
+            <ThemedText type="small">Log BBT</ThemedText>
+          </GlassSurface>
         </Pressable>
 
         <Pressable
-          style={[styles.quickAction, { backgroundColor: theme.backgroundDefault }]}
+          style={styles.quickAction}
           onPress={() => setShowMucusModal(true)}
         >
-          <View style={[styles.actionIcon, { backgroundColor: theme.accent + "20" }]}>
-            <Feather name="droplet" size={20} color={theme.accent} />
-          </View>
-          <ThemedText type="small">Cervical Mucus</ThemedText>
+          <GlassSurface style={styles.quickActionInner} noPadding>
+            <View style={[styles.actionIcon, { backgroundColor: theme.accent + "20" }]}>
+              <Feather name="droplet" size={20} color={theme.accent} />
+            </View>
+            <ThemedText type="small">Cervical Mucus</ThemedText>
+          </GlassSurface>
         </Pressable>
 
         <Pressable
-          style={[styles.quickAction, { backgroundColor: theme.backgroundDefault }]}
+          style={styles.quickAction}
           onPress={() => setShowLHModal(true)}
         >
-          <View style={[styles.actionIcon, { backgroundColor: theme.tertiary + "40" }]}>
-            <Feather name="activity" size={20} color={theme.text} />
-          </View>
-          <ThemedText type="small">LH Test</ThemedText>
+          <GlassSurface style={styles.quickActionInner} noPadding>
+            <View style={[styles.actionIcon, { backgroundColor: theme.tertiary + "40" }]}>
+              <Feather name="activity" size={20} color={theme.text} />
+            </View>
+            <ThemedText type="small">LH Test</ThemedText>
+          </GlassSurface>
         </Pressable>
       </View>
 
@@ -262,25 +269,25 @@ export default function FertilityTrackingScreen() {
       {bbtLogs.length > 0 || mucusLogs.length > 0 || lhTests.length > 0 ? (
         <View style={styles.recentLogs}>
           {bbtLogs.slice(0, 3).map((log) => (
-            <View key={log.id} style={[styles.logItem, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logItem} noPadding>
               <Feather name="thermometer" size={16} color={theme.primary} />
               <ThemedText type="small" style={{ flex: 1 }}>{log.date}</ThemedText>
               <ThemedText type="body" style={{ fontWeight: "600" }}>
                 {log.temperature}°{log.unit === "celsius" ? "C" : "F"}
               </ThemedText>
-            </View>
+            </GlassSurface>
           ))}
           {mucusLogs.slice(0, 3).map((log) => (
-            <View key={log.id} style={[styles.logItem, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logItem} noPadding>
               <Feather name="droplet" size={16} color={theme.accent} />
               <ThemedText type="small" style={{ flex: 1 }}>{log.date}</ThemedText>
               <ThemedText type="body" style={{ fontWeight: "600" }}>
                 {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
               </ThemedText>
-            </View>
+            </GlassSurface>
           ))}
           {lhTests.slice(0, 3).map((log) => (
-            <View key={log.id} style={[styles.logItem, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logItem} noPadding>
               <Feather name="activity" size={16} color={theme.tertiary} />
               <ThemedText type="small" style={{ flex: 1 }}>{log.date}</ThemedText>
               <View style={[styles.lhBadge, { backgroundColor: LH_RESULTS.find(r => r.value === log.result)?.color + "20" }]}>
@@ -288,15 +295,15 @@ export default function FertilityTrackingScreen() {
                   {log.result.charAt(0).toUpperCase() + log.result.slice(1)}
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             No fertility data logged yet. Start tracking above.
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -312,7 +319,7 @@ export default function FertilityTrackingScreen() {
       {bbtLogs.length > 0 ? (
         <View style={styles.logsList}>
           {bbtLogs.map((log) => (
-            <View key={log.id} style={[styles.logCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logCard}>
               <View style={styles.logCardHeader}>
                 <ThemedText type="body" style={{ fontWeight: "600" }}>{log.date}</ThemedText>
                 <ThemedText type="caption" style={{ color: theme.textSecondary }}>{log.time}</ThemedText>
@@ -320,11 +327,11 @@ export default function FertilityTrackingScreen() {
               <ThemedText type="h3" style={{ color: theme.primary }}>
                 {log.temperature}°{log.unit === "celsius" ? "C" : "F"}
               </ThemedText>
-            </View>
+            </GlassSurface>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="thermometer" size={40} color={theme.textSecondary} />
           <ThemedText type="body" style={{ textAlign: "center", marginTop: Spacing.md }}>
             No BBT data yet
@@ -332,7 +339,7 @@ export default function FertilityTrackingScreen() {
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Take your temperature first thing each morning for best results
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -348,7 +355,7 @@ export default function FertilityTrackingScreen() {
       {mucusLogs.length > 0 ? (
         <View style={styles.logsList}>
           {mucusLogs.map((log) => (
-            <View key={log.id} style={[styles.logCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logCard}>
               <ThemedText type="body" style={{ fontWeight: "600" }}>{log.date}</ThemedText>
               <View style={styles.mucusInfo}>
                 <ThemedText type="h4" style={{ color: theme.accent }}>
@@ -358,11 +365,11 @@ export default function FertilityTrackingScreen() {
                   {log.amount} amount
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="droplet" size={40} color={theme.textSecondary} />
           <ThemedText type="body" style={{ textAlign: "center", marginTop: Spacing.md }}>
             No cervical mucus data yet
@@ -370,7 +377,7 @@ export default function FertilityTrackingScreen() {
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Track changes throughout your cycle to identify fertile days
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -386,7 +393,7 @@ export default function FertilityTrackingScreen() {
       {lhTests.length > 0 ? (
         <View style={styles.logsList}>
           {lhTests.map((log) => (
-            <View key={log.id} style={[styles.logCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface key={log.id} style={styles.logCard}>
               <View style={styles.logCardHeader}>
                 <ThemedText type="body" style={{ fontWeight: "600" }}>{log.date}</ThemedText>
                 <ThemedText type="caption" style={{ color: theme.textSecondary }}>{log.time}</ThemedText>
@@ -396,11 +403,11 @@ export default function FertilityTrackingScreen() {
                   {log.result.charAt(0).toUpperCase() + log.result.slice(1)}
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
           ))}
         </View>
       ) : (
-        <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.emptyState}>
           <Feather name="activity" size={40} color={theme.textSecondary} />
           <ThemedText type="body" style={{ textAlign: "center", marginTop: Spacing.md }}>
             No LH test results yet
@@ -408,7 +415,7 @@ export default function FertilityTrackingScreen() {
           <ThemedText type="small" style={{ color: theme.textSecondary, textAlign: "center" }}>
             Test mid-morning or early afternoon for best accuracy
           </ThemedText>
-        </View>
+        </GlassSurface>
       )}
     </Animated.View>
   );
@@ -673,6 +680,8 @@ const styles = StyleSheet.create({
   },
   quickAction: {
     flex: 1,
+  },
+  quickActionInner: {
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: "center",

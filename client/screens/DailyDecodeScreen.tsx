@@ -10,6 +10,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Button } from '@/components/Button';
 import { AppGradient } from '@/components/AppGradient';
+import { GlassSurface } from '@/components/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, BorderRadius } from '@/constants/theme';
 import { RootStackParamList } from '@/navigation/RootStackNavigator';
@@ -50,7 +51,7 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(400)}>
-          <View style={[styles.card, { backgroundColor: theme.backgroundDefault }]}>
+          <GlassSurface style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={[styles.iconCircle, { backgroundColor: `${PINK_PRIMARY}30` }]}>
                 <Feather name="sun" size={20} color={PINK_PRIMARY} />
@@ -60,11 +61,11 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
             <ThemedText style={[styles.vibeText, { color: theme.text }]}>
               {decode.vibeText}
             </ThemedText>
-          </View>
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-          <View style={[styles.card, { backgroundColor: theme.backgroundDefault }]}>
+          <GlassSurface style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={[styles.iconCircle, { backgroundColor: '#D1FAE530' }]}>
                 <Feather name="activity" size={20} color="#10B981" />
@@ -77,11 +78,11 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
             <ThemedText style={[styles.movementBody, { color: theme.textSecondary }]}>
               {decode.movementBody}
             </ThemedText>
-          </View>
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-          <View style={[styles.card, { backgroundColor: theme.backgroundDefault }]}>
+          <GlassSurface style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={[styles.iconCircle, { backgroundColor: '#FEF3C730' }]}>
                 <Feather name="heart" size={20} color="#F59E0B" />
@@ -98,11 +99,11 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
             <ThemedText style={[styles.foodsBody, { color: theme.textSecondary }]}>
               {decode.foodsBody}
             </ThemedText>
-          </View>
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <View style={[styles.card, { backgroundColor: theme.backgroundDefault }]}>
+          <GlassSurface style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={[styles.iconCircle, { backgroundColor: '#E0E7FF30' }]}>
                 <Feather name="clock" size={20} color="#6366F1" />
@@ -112,7 +113,7 @@ export default function DailyDecodeScreen({ route, navigation }: Props) {
             <ThemedText style={[styles.resetText, { color: theme.text }]}>
               {decode.tinyReset}
             </ThemedText>
-          </View>
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(400).duration(400)}>

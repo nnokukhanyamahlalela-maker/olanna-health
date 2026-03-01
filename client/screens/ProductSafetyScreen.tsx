@@ -14,6 +14,7 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
@@ -112,7 +113,7 @@ export default function ProductSafetyScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.introCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.introCard}>
           <ThemedText style={[styles.introText, { color: theme.text }]}>
             A recent South African study found that some menstrual products may contain
             low levels of endocrine-disrupting chemicals. While research is ongoing,
@@ -122,7 +123,7 @@ export default function ProductSafetyScreen() {
             Olanna helps you track what you use — so you can make informed choices aligned
             with your body.
           </ThemedText>
-        </View>
+        </GlassSurface>
 
         <View style={styles.buttonGroup}>
           <ActionButton
@@ -144,7 +145,7 @@ export default function ProductSafetyScreen() {
           accessibilityRole="button"
           accessibilityLabel="Learn more about this research"
           onPress={handleLearnMore}
-          style={[styles.learnMoreButton, { backgroundColor: theme.backgroundDefault }]}
+          style={[styles.learnMoreButton]}
         >
           <View style={[styles.learnMoreIconWrap, { backgroundColor: "#C4B5AD18" }]}>
             <Feather name="book-open" size={18} color="#C4B5AD" />

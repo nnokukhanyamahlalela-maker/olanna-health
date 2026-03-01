@@ -18,6 +18,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { privacyStorage, PrivacySettings } from "@/lib/privacyStorage";
@@ -35,26 +36,28 @@ function SettingRow({ icon, title, description, value, onToggle, iconColor }: Se
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.settingRow, { backgroundColor: theme.backgroundDefault }]}>
-      <View style={[styles.settingIcon, { backgroundColor: (iconColor || theme.primary) + "15" }]}>
-        <Feather name={icon} size={20} color={iconColor || theme.primary} />
+    <GlassSurface style={styles.settingRow} noPadding>
+      <View style={styles.settingRowInner}>
+        <View style={[styles.settingIcon, { backgroundColor: (iconColor || theme.primary) + "15" }]}>
+          <Feather name={icon} size={20} color={iconColor || theme.primary} />
+        </View>
+        <View style={styles.settingContent}>
+          <ThemedText type="body" style={styles.settingTitle}>{title}</ThemedText>
+          <ThemedText type="caption" style={[styles.settingDesc, { color: theme.textSecondary }]}>
+            {description}
+          </ThemedText>
+        </View>
+        <Switch
+          value={value}
+          onValueChange={(newValue) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onToggle(newValue);
+          }}
+          trackColor={{ false: theme.border, true: theme.primary + "80" }}
+          thumbColor={value ? theme.primary : theme.backgroundSecondary}
+        />
       </View>
-      <View style={styles.settingContent}>
-        <ThemedText type="body" style={styles.settingTitle}>{title}</ThemedText>
-        <ThemedText type="caption" style={[styles.settingDesc, { color: theme.textSecondary }]}>
-          {description}
-        </ThemedText>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={(newValue) => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onToggle(newValue);
-        }}
-        trackColor={{ false: theme.border, true: theme.primary + "80" }}
-        thumbColor={value ? theme.primary : theme.backgroundSecondary}
-      />
-    </View>
+    </GlassSurface>
   );
 }
 
@@ -73,27 +76,28 @@ function ActionRow({ icon, title, description, onPress, iconColor, destructive }
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.settingRow,
-        { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.8 : 1 },
-      ]}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
       }}
+      style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
     >
-      <View style={[styles.settingIcon, { backgroundColor: color + "15" }]}>
-        <Feather name={icon} size={20} color={color} />
-      </View>
-      <View style={styles.settingContent}>
-        <ThemedText type="body" style={[styles.settingTitle, destructive && { color: theme.error }]}>
-          {title}
-        </ThemedText>
-        <ThemedText type="caption" style={[styles.settingDesc, { color: theme.textSecondary }]}>
-          {description}
-        </ThemedText>
-      </View>
-      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+      <GlassSurface style={styles.settingRow} noPadding>
+        <View style={styles.settingRowInner}>
+          <View style={[styles.settingIcon, { backgroundColor: color + "15" }]}>
+            <Feather name={icon} size={20} color={color} />
+          </View>
+          <View style={styles.settingContent}>
+            <ThemedText type="body" style={[styles.settingTitle, destructive && { color: theme.error }]}>
+              {title}
+            </ThemedText>
+            <ThemedText type="caption" style={[styles.settingDesc, { color: theme.textSecondary }]}>
+              {description}
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+        </View>
+      </GlassSurface>
     </Pressable>
   );
 }
@@ -221,7 +225,7 @@ export default function PrivacySettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
       <Animated.View entering={FadeInDown.duration(300)}>
-        <View style={[styles.infoCard, { backgroundColor: theme.accent + "20" }]}>
+        <GlassSurface style={styles.infoCard}>
           <Feather name="shield" size={24} color={theme.accent} />
           <View style={styles.infoContent}>
             <ThemedText type="h4">Your Privacy Matters</ThemedText>
@@ -229,7 +233,7 @@ export default function PrivacySettingsScreen() {
               All your health data is stored locally on your device. We never sell or share your personal information.
             </ThemedText>
           </View>
-        </View>
+        </GlassSurface>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(300).delay(100)}>
@@ -278,7 +282,7 @@ export default function PrivacySettingsScreen() {
       <Animated.View entering={FadeInDown.duration(300).delay(300)}>
         <ThemedText type="h4" style={styles.sectionTitle}>Your Data</ThemedText>
         
-        <View style={[styles.dataSummary, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.dataSummary}>
           <ThemedText type="small" style={{ color: theme.textSecondary, marginBottom: Spacing.sm }}>
             Currently stored on your device:
           </ThemedText>
@@ -294,7 +298,7 @@ export default function PrivacySettingsScreen() {
             <ThemedText type="body">Screenings</ThemedText>
             <ThemedText type="body" style={{ color: theme.primary }}>{dataSummary.screenings || 0}</ThemedText>
           </View>
-        </View>
+        </GlassSurface>
 
         <View style={styles.section}>
           <ActionRow
@@ -335,12 +339,12 @@ export default function PrivacySettingsScreen() {
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(300).delay(500)}>
-        <View style={[styles.policyCard, { backgroundColor: theme.backgroundSecondary }]}>
+        <GlassSurface style={styles.policyCard}>
           <Feather name="file-text" size={20} color={theme.textSecondary} />
           <ThemedText type="small" style={[styles.policyText, { color: theme.textSecondary }]}>
             Read our full Privacy Policy to understand how we protect your data and your rights.
           </ThemedText>
-        </View>
+        </GlassSurface>
       </Animated.View>
       </ScrollView>
     </AppGradient>
@@ -370,10 +374,12 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   settingRow: {
+    borderRadius: BorderRadius.md,
+  },
+  settingRowInner: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.md,
-    borderRadius: BorderRadius.md,
     gap: Spacing.md,
   },
   settingIcon: {

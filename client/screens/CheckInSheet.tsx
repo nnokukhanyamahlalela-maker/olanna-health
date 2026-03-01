@@ -21,6 +21,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Spacing } from "@/constants/spacing";
@@ -64,18 +65,18 @@ interface QuickActionProps {
 
 function QuickAction({ icon, label, onPress, theme }: QuickActionProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.quickAction,
-        { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-      ]}
-    >
-      <Feather name={icon} size={18} color={ACCENT_COLOR} />
-      <ThemedText style={[styles.quickActionLabel, { color: theme.text }]}>
-        {label}
-      </ThemedText>
-    </Pressable>
+    <GlassSurface noPadding borderRadius={22} noShadow>
+      <Pressable
+        onPress={onPress}
+        style={styles.quickAction}
+        testID={`button-quick-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <Feather name={icon} size={18} color={ACCENT_COLOR} />
+        <ThemedText style={[styles.quickActionLabel, { color: theme.text }]}>
+          {label}
+        </ThemedText>
+      </Pressable>
+    </GlassSurface>
   );
 }
 
@@ -128,13 +129,16 @@ export default function CheckInSheet() {
         <ThemedText style={[styles.title, { color: theme.text }]}>
           Quick Check-in
         </ThemedText>
-        <Pressable
-          onPress={handleDismiss}
-          style={[styles.closeButton, { backgroundColor: theme.backgroundDefault }]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Feather name="x" size={18} color={theme.textSecondary} />
-        </Pressable>
+        <GlassSurface noPadding borderRadius={16} noShadow>
+          <Pressable
+            onPress={handleDismiss}
+            style={styles.closeButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            testID="button-close-checkin-sheet"
+          >
+            <Feather name="x" size={18} color={theme.textSecondary} />
+          </Pressable>
+        </GlassSurface>
       </View>
 
       <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
@@ -322,8 +326,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 44,
     paddingHorizontal: Spacing.md,
-    borderRadius: 22,
-    borderWidth: 1,
     gap: Spacing.xs,
   },
   quickActionLabel: {

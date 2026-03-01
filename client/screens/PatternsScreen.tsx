@@ -8,6 +8,7 @@ import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { AfricanPattern } from '@/components/AfricanPattern';
+import { GlassSurface } from '@/components/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, BorderRadius } from '@/constants/theme';
 import { getSymptomLogsByDateRange, getDailyCheckIns } from '@/lib/symptomStorage';
@@ -293,17 +294,18 @@ export default function PatternsScreen() {
 
         <Animated.View
           entering={FadeInDown.duration(300)}
-          style={[styles.card, { backgroundColor: theme.cardBackground }]}
         >
-          <ThemedText type="h4" style={styles.cardTitle}>Activity Heatmap</ThemedText>
-          {renderCalendarHeatmap()}
+          <GlassSurface style={styles.card}>
+            <ThemedText type="h4" style={styles.cardTitle}>Activity Heatmap</ThemedText>
+            {renderCalendarHeatmap()}
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View
           entering={FadeInDown.delay(100).duration(300)}
-          style={[styles.card, { backgroundColor: theme.cardBackground }]}
         >
-          <ThemedText type="h4" style={styles.cardTitle}>Top Symptoms</ThemedText>
+          <GlassSurface style={styles.card}>
+            <ThemedText type="h4" style={styles.cardTitle}>Top Symptoms</ThemedText>
           {topSymptoms.length > 0 ? (
             <View style={styles.symptomsList}>
               {topSymptoms.map((symptom, index) => (
@@ -338,13 +340,14 @@ export default function PatternsScreen() {
               Start tracking to see your top symptoms
             </ThemedText>
           )}
+          </GlassSurface>
         </Animated.View>
 
         <Animated.View
           entering={FadeInDown.delay(200).duration(300)}
-          style={[styles.card, { backgroundColor: theme.cardBackground }]}
         >
-          <ThemedText type="h4" style={styles.cardTitle}>Insights</ThemedText>
+          <GlassSurface style={styles.card}>
+            <ThemedText type="h4" style={styles.cardTitle}>Insights</ThemedText>
           {insights.map((insight) => (
             <View
               key={insight.id}
@@ -363,15 +366,16 @@ export default function PatternsScreen() {
               </View>
             </View>
           ))}
+          </GlassSurface>
         </Animated.View>
 
-        <View style={[styles.disclaimer, { backgroundColor: `${theme.info}10` }]}>
+        <GlassSurface style={styles.disclaimer}>
           <Feather name="info" size={16} color={theme.info} />
           <ThemedText type="caption" style={{ color: theme.info, flex: 1 }}>
             These insights are based on your logged data and are not medical advice.
             Please consult a healthcare provider for medical concerns.
           </ThemedText>
-        </View>
+        </GlassSurface>
       </ScrollView>
     </ThemedView>
   );

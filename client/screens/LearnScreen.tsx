@@ -10,6 +10,7 @@ import { AppText } from "@/components/AppText";
 import { ArticleCard } from "@/components/ArticleCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
@@ -98,18 +99,20 @@ export default function LearnScreen() {
       <View style={styles.quickLinksRow}>
         <Pressable
           onPress={() => navigation.navigate("Glossary")}
-          style={[styles.quickLinkCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}
           testID="button-glossary"
+          style={styles.quickLinkPressable}
         >
-          <View style={[styles.quickLinkIcon, { backgroundColor: theme.primary + "15" }]}>
-            <Feather name="book" size={18} color={theme.primary} />
-          </View>
-          <AppText variant="label" color={theme.text}>
-            Glossary
-          </AppText>
-          <AppText variant="caption" color={theme.textSecondary}>
-            Health terms explained
-          </AppText>
+          <GlassSurface style={styles.quickLinkCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
+            <View style={[styles.quickLinkIcon, { backgroundColor: theme.primary + "15" }]}>
+              <Feather name="book" size={18} color={theme.primary} />
+            </View>
+            <AppText variant="label" color={theme.text}>
+              Glossary
+            </AppText>
+            <AppText variant="caption" color={theme.textSecondary}>
+              Health terms explained
+            </AppText>
+          </GlassSurface>
         </Pressable>
       </View>
 
@@ -126,72 +129,77 @@ export default function LearnScreen() {
             <Pressable
               key={topic.id}
               onPress={() => setSelectedCategory(topic.label === "Periods 101" ? "Periods" : topic.label)}
-              style={[
-                styles.topicCard,
-                { backgroundColor: topic.color + "20", borderColor: topic.color + "40" },
-              ]}
             >
-              <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "30" }]}>
-                <Feather name={topic.icon} size={20} color={topic.color} />
-              </View>
-              <AppText variant="label" color={theme.text} style={styles.topicCardTitle}>
-                {topic.label}
-              </AppText>
-              <AppText variant="caption" color={theme.textSecondary} numberOfLines={2} style={styles.topicCardDesc}>
-                {topic.description}
-              </AppText>
+              <GlassSurface style={styles.topicCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
+                <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "30" }]}>
+                  <Feather name={topic.icon} size={20} color={topic.color} />
+                </View>
+                <AppText variant="label" color={theme.text} style={styles.topicCardTitle}>
+                  {topic.label}
+                </AppText>
+                <AppText variant="caption" color={theme.textSecondary} numberOfLines={2} style={styles.topicCardDesc}>
+                  {topic.description}
+                </AppText>
+              </GlassSurface>
             </Pressable>
           ))}
         </ScrollView>
       </View>
 
-      <View
-        style={[
-          styles.searchContainer,
-          { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-        ]}
-      >
-        <Feather name="search" size={18} color={theme.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          placeholder="Search articles..."
-          placeholderTextColor={theme.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          testID="input-article-search"
-        />
-        {searchQuery.length > 0 ? (
-          <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={18} color={theme.textSecondary} />
-          </Pressable>
-        ) : null}
-      </View>
+      <GlassSurface noPadding borderRadius={BorderRadius.md} style={styles.searchContainer}>
+        <View style={styles.searchInner}>
+          <Feather name="search" size={18} color={theme.textSecondary} />
+          <TextInput
+            style={[styles.searchInput, { color: theme.text }]}
+            placeholder="Search articles..."
+            placeholderTextColor={theme.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            testID="input-article-search"
+          />
+          {searchQuery.length > 0 ? (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <Feather name="x" size={18} color={theme.textSecondary} />
+            </Pressable>
+          ) : null}
+        </View>
+      </GlassSurface>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesList}
       >
-        {categories.map((item) => (
-          <Pressable
-            key={item}
-            onPress={() => setSelectedCategory(item)}
-            style={[
-              styles.categoryChip,
-              {
-                backgroundColor: selectedCategory === item ? theme.primary : "transparent",
-                borderColor: selectedCategory === item ? theme.primary : theme.border,
-              },
-            ]}
-          >
-            <AppText
-              variant="caption"
-              color={selectedCategory === item ? "#FFFCFA" : theme.textSecondary}
+        {categories.map((item) => {
+          const isSelected = selectedCategory === item;
+          return isSelected ? (
+            <Pressable key={item} onPress={() => setSelectedCategory(item)}>
+              <GlassSurface
+                noPadding
+                borderRadius={BorderRadius.full}
+                style={[styles.categoryChip, { backgroundColor: theme.primary + "DD" }]}
+              >
+                <View style={styles.categoryChipInner}>
+                  <AppText variant="caption" color="#FFFCFA">
+                    {item}
+                  </AppText>
+                </View>
+              </GlassSurface>
+            </Pressable>
+          ) : (
+            <Pressable
+              key={item}
+              onPress={() => setSelectedCategory(item)}
+              style={[styles.categoryChip, { borderColor: theme.border, borderWidth: 1 }]}
             >
-              {item}
-            </AppText>
-          </Pressable>
-        ))}
+              <View style={styles.categoryChipInner}>
+                <AppText variant="caption" color={theme.textSecondary}>
+                  {item}
+                </AppText>
+              </View>
+            </Pressable>
+          );
+        })}
       </ScrollView>
 
       {featuredArticle ? (
@@ -279,11 +287,10 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginBottom: Spacing.xl,
   },
-  quickLinkCard: {
+  quickLinkPressable: {
     flex: 1,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    padding: Spacing.md,
+  },
+  quickLinkCard: {
     gap: 6,
   },
   quickLinkIcon: {
@@ -303,9 +310,6 @@ const styles = StyleSheet.create({
   },
   topicCard: {
     width: 160,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    padding: Spacing.md,
     gap: 6,
   },
   topicIconCircle: {
@@ -324,14 +328,14 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   searchContainer: {
+    marginBottom: Spacing.lg,
+  },
+  searchInner: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.md,
     height: 44,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
     gap: Spacing.sm,
-    marginBottom: Spacing.lg,
   },
   searchInput: {
     flex: 1,
@@ -345,10 +349,11 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   categoryChip: {
+    borderRadius: BorderRadius.full,
+  },
+  categoryChipInner: {
     paddingVertical: 8,
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
   },
   divider: {
     height: 1,

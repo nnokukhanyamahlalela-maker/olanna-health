@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface Message {
@@ -57,17 +58,30 @@ export default function AIChatScreen() {
     const isUser = item.role === "user";
     return (
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
-        <View style={[
-          styles.messageBubble,
-          { backgroundColor: isUser ? (theme.accent as string) : (theme.surface as string) },
-        ]}>
-          <AppText 
-            variant="body" 
-            color={isUser ? "#FFFFFF" : (theme.textPrimary as string)}
+        {isUser ? (
+          <View style={[
+            styles.messageBubble,
+            { backgroundColor: theme.accent as string },
+          ]}>
+            <AppText variant="body" color="#FFFFFF">
+              {item.content}
+            </AppText>
+          </View>
+        ) : (
+          <GlassSurface
+            borderRadius={18}
+            padding={0}
+            noPadding
+            noShadow
+            style={styles.messageBubble}
           >
-            {item.content}
-          </AppText>
-        </View>
+            <View style={styles.messageBubbleInner}>
+              <AppText variant="body" color={theme.textPrimary as string}>
+                {item.content}
+              </AppText>
+            </View>
+          </GlassSurface>
+        )}
       </View>
     );
   }, [theme]);
@@ -91,43 +105,46 @@ export default function AIChatScreen() {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
-      <View style={[
-        styles.inputContainer,
-        { 
-          backgroundColor: theme.surface as string,
-          paddingBottom: insets.bottom + Spacing.md,
-          borderTopColor: theme.divider as string,
-        }
-      ]}>
-        <TextInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: theme.surfaceElevated as string,
-              color: theme.textPrimary as string,
-            }
-          ]}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ask me anything..."
-          placeholderTextColor={theme.textTertiary as string}
-          multiline
-          maxLength={500}
-          returnKeyType="send"
-          onSubmitEditing={sendMessage}
-        />
-        <Pressable
-          onPress={sendMessage}
-          disabled={!input.trim() || isLoading}
-          style={[
-            styles.sendButton,
-            { backgroundColor: theme.accent as string },
-            (!input.trim() || isLoading) && { opacity: 0.5 }
-          ]}
-        >
-          <Feather name="send" size={20} color="#FFFFFF" />
-        </Pressable>
-      </View>
+      <GlassSurface
+        borderRadius={0}
+        noPadding
+        noShadow={false}
+        style={[
+          styles.inputContainer,
+          { paddingBottom: insets.bottom + Spacing.md }
+        ]}
+      >
+        <View style={styles.inputRow}>
+          <TextInput
+            style={[
+              styles.input,
+              { 
+                backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                color: theme.textPrimary as string,
+              }
+            ]}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Ask me anything..."
+            placeholderTextColor={theme.textTertiary as string}
+            multiline
+            maxLength={500}
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+          />
+          <Pressable
+            onPress={sendMessage}
+            disabled={!input.trim() || isLoading}
+            style={[
+              styles.sendButton,
+              { backgroundColor: theme.accent as string },
+              (!input.trim() || isLoading) && { opacity: 0.5 }
+            ]}
+          >
+            <Feather name="send" size={20} color="#FFFFFF" />
+          </Pressable>
+        </View>
+      </GlassSurface>
       </KeyboardAvoidingView>
     </AppGradient>
   );
@@ -157,12 +174,17 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
+  messageBubbleInner: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
-    borderTopWidth: 1,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
     gap: Spacing.sm,
   },
   input: {

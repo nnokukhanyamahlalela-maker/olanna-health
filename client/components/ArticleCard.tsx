@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
@@ -68,29 +69,31 @@ export function ArticleCard({
         onPressOut={handlePressOut}
         style={[styles.featuredContainer, animatedStyle]}
       >
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.featuredImage} contentFit="cover" />
-        ) : (
-          <View style={[styles.featuredImagePlaceholder, { backgroundColor: theme.backgroundSecondary }]}>
-            <Feather name="book-open" size={48} color={theme.textSecondary} />
-          </View>
-        )}
-        <View style={styles.featuredContent}>
-          <ThemedText style={[styles.categoryLabel, { color: categoryColor }]}>
-            {category.toUpperCase()}
-          </ThemedText>
-          <ThemedText style={[styles.featuredTitle, { color: theme.text }]} numberOfLines={3}>
-            {title}
-          </ThemedText>
-          <ThemedText style={[styles.featuredSummary, { color: theme.textSecondary }]} numberOfLines={2}>
-            {summary}
-          </ThemedText>
-          <View style={styles.readTimeRow}>
-            <ThemedText style={[styles.readTimeText, { color: theme.textSecondary }]}>
-              {readTime} read
+        <GlassSurface noPadding borderRadius={BorderRadius.md}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.featuredImage} contentFit="cover" />
+          ) : (
+            <View style={[styles.featuredImagePlaceholder, { backgroundColor: theme.backgroundSecondary }]}>
+              <Feather name="book-open" size={48} color={theme.textSecondary} />
+            </View>
+          )}
+          <View style={styles.featuredContent}>
+            <ThemedText style={[styles.categoryLabel, { color: categoryColor }]}>
+              {category.toUpperCase()}
             </ThemedText>
+            <ThemedText style={[styles.featuredTitle, { color: theme.text }]} numberOfLines={3}>
+              {title}
+            </ThemedText>
+            <ThemedText style={[styles.featuredSummary, { color: theme.textSecondary }]} numberOfLines={2}>
+              {summary}
+            </ThemedText>
+            <View style={styles.readTimeRow}>
+              <ThemedText style={[styles.readTimeText, { color: theme.textSecondary }]}>
+                {readTime} read
+              </ThemedText>
+            </View>
           </View>
-        </View>
+        </GlassSurface>
       </AnimatedPressable>
     );
   }
@@ -197,6 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   featuredContent: {
+    padding: Spacing.lg,
     paddingTop: Spacing.lg,
     gap: Spacing.xs,
   },

@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -48,15 +49,17 @@ export default function LearnMoreSheet() {
           <ThemedText style={[styles.title, { color: theme.text }]}>
             About This Research
           </ThemedText>
-          <Pressable
-            onPress={handleClose}
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-            style={[styles.closeButton, { backgroundColor: theme.backgroundDefault }]}
-            testID="button-close-learn-more"
-          >
-            <Feather name="x" size={18} color={theme.textSecondary} />
-          </Pressable>
+          <GlassSurface noPadding borderRadius={16} noShadow>
+            <Pressable
+              onPress={handleClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              style={styles.closeButton}
+              testID="button-close-learn-more"
+            >
+              <Feather name="x" size={18} color={theme.textSecondary} />
+            </Pressable>
+          </GlassSurface>
         </View>
       </View>
 
@@ -69,9 +72,10 @@ export default function LearnMoreSheet() {
         showsVerticalScrollIndicator={false}
       >
         {LEARN_MORE_ITEMS.map((item, index) => (
-          <View
+          <GlassSurface
             key={index}
-            style={[styles.card, { backgroundColor: theme.backgroundDefault }]}
+            borderRadius={BorderRadius.lg}
+            style={styles.card}
           >
             <View style={[styles.numberBadge, { backgroundColor: "#C4B5AD18" }]}>
               <ThemedText style={[styles.numberText, { color: "#C4B5AD" }]}>
@@ -86,7 +90,7 @@ export default function LearnMoreSheet() {
                 {item.text}
               </ThemedText>
             </View>
-          </View>
+          </GlassSurface>
         ))}
 
         <ThemedText style={[styles.disclaimer, { color: theme.textSecondary }]}>
@@ -136,8 +140,6 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: "row",
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
     marginBottom: 12,
     gap: Spacing.md,
   },

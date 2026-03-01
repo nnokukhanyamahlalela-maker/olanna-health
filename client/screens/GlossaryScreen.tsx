@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius } from "@/constants/theme";
@@ -29,57 +30,55 @@ function TermCard({ term, theme, expanded, onToggle }: {
   const color = categoryColors[term.category] || theme.primary;
 
   return (
-    <Pressable
-      onPress={onToggle}
-      style={[
-        styles.termCard,
-        { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={`${term.term}: ${expanded ? "collapse" : "expand"}`}
-      testID={`glossary-term-${term.id}`}
-    >
-      <View style={styles.termHeader}>
-        <View style={styles.termTitleRow}>
-          <ThemedText style={[styles.termTitle, { color: theme.text }]}>
-            {term.term}
-          </ThemedText>
-          <View style={[styles.termCategoryBadge, { backgroundColor: color + "20" }]}>
-            <ThemedText style={[styles.termCategoryText, { color }]}>
-              {term.category}
+    <GlassSurface borderRadius={BorderRadius.md} style={styles.termCard}>
+      <Pressable
+        onPress={onToggle}
+        accessibilityRole="button"
+        accessibilityLabel={`${term.term}: ${expanded ? "collapse" : "expand"}`}
+        testID={`glossary-term-${term.id}`}
+      >
+        <View style={styles.termHeader}>
+          <View style={styles.termTitleRow}>
+            <ThemedText style={[styles.termTitle, { color: theme.text }]}>
+              {term.term}
             </ThemedText>
-          </View>
-        </View>
-        <Feather
-          name={expanded ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={theme.textSecondary}
-        />
-      </View>
-      {expanded ? (
-        <View style={styles.termBody}>
-          <ThemedText style={[styles.termDefinition, { color: theme.textSecondary }]}>
-            {term.definition}
-          </ThemedText>
-          {term.relatedTerms && term.relatedTerms.length > 0 ? (
-            <View style={styles.relatedRow}>
-              <ThemedText style={[styles.relatedLabel, { color: theme.textSecondary }]}>
-                Related:
+            <View style={[styles.termCategoryBadge, { backgroundColor: color + "20" }]}>
+              <ThemedText style={[styles.termCategoryText, { color }]}>
+                {term.category}
               </ThemedText>
-              <View style={styles.relatedTags}>
-                {term.relatedTerms.map((rt) => (
-                  <View key={rt} style={[styles.relatedTag, { backgroundColor: theme.primary + "15" }]}>
-                    <ThemedText style={[styles.relatedTagText, { color: theme.primary }]}>
-                      {rt}
-                    </ThemedText>
-                  </View>
-                ))}
-              </View>
             </View>
-          ) : null}
+          </View>
+          <Feather
+            name={expanded ? "chevron-up" : "chevron-down"}
+            size={18}
+            color={theme.textSecondary}
+          />
         </View>
-      ) : null}
-    </Pressable>
+        {expanded ? (
+          <View style={styles.termBody}>
+            <ThemedText style={[styles.termDefinition, { color: theme.textSecondary }]}>
+              {term.definition}
+            </ThemedText>
+            {term.relatedTerms && term.relatedTerms.length > 0 ? (
+              <View style={styles.relatedRow}>
+                <ThemedText style={[styles.relatedLabel, { color: theme.textSecondary }]}>
+                  Related:
+                </ThemedText>
+                <View style={styles.relatedTags}>
+                  {term.relatedTerms.map((rt) => (
+                    <View key={rt} style={[styles.relatedTag, { backgroundColor: theme.primary + "15" }]}>
+                      <ThemedText style={[styles.relatedTagText, { color: theme.primary }]}>
+                        {rt}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+      </Pressable>
+    </GlassSurface>
   );
 }
 
@@ -159,12 +158,8 @@ export default function GlossaryScreen() {
               {glossaryTerms.length} terms explained simply
             </ThemedText>
 
-            <View
-              style={[
-                styles.searchContainer,
-                { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-              ]}
-            >
+            <GlassSurface noPadding borderRadius={BorderRadius.md} noShadow style={styles.searchContainer}>
+              <View style={styles.searchInner}>
               <Feather name="search" size={18} color={theme.textSecondary} />
               <TextInput
                 style={[styles.searchInput, { color: theme.text }]}
@@ -179,7 +174,8 @@ export default function GlossaryScreen() {
                   <Feather name="x" size={18} color={theme.textSecondary} />
                 </Pressable>
               ) : null}
-            </View>
+              </View>
+            </GlassSurface>
 
             <ScrollView
               horizontal
@@ -254,14 +250,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   searchContainer: {
+    marginBottom: Spacing.lg,
+  },
+  searchInner: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.md,
     height: 44,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
     gap: Spacing.sm,
-    marginBottom: Spacing.lg,
   },
   searchInput: {
     flex: 1,
@@ -290,9 +286,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   termCard: {
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
   termHeader: {

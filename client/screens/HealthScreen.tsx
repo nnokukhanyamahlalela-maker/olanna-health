@@ -16,6 +16,7 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -63,19 +64,20 @@ function TrackerCard({
       }}
       style={[
         styles.trackerCard,
-        { backgroundColor: theme.backgroundDefault },
         animatedStyle,
       ]}
     >
-      <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "18" }]}>
-        <Feather name={item.icon} size={22} color={item.color} />
-      </View>
-      <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
-        {item.title}
-      </ThemedText>
-      <ThemedText style={[styles.trackerSubtitle, { color: theme.textSecondary }]}>
-        {item.subtitle}
-      </ThemedText>
+      <GlassSurface style={styles.trackerCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
+        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "18" }]}>
+          <Feather name={item.icon} size={22} color={item.color} />
+        </View>
+        <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
+          {item.title}
+        </ThemedText>
+        <ThemedText style={[styles.trackerSubtitle, { color: theme.textSecondary }]}>
+          {item.subtitle}
+        </ThemedText>
+      </GlassSurface>
     </AnimatedPressable>
   );
 }
@@ -108,22 +110,25 @@ function InsightPlaceholderCard({
       }}
       style={[
         styles.insightCard,
-        { backgroundColor: theme.backgroundDefault },
         animatedStyle,
       ]}
     >
-      <View style={[styles.insightIconWrap, { backgroundColor: color + "18" }]}>
-        <Feather name={icon} size={20} color={color} />
-      </View>
-      <View style={styles.insightContent}>
-        <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
-          {title}
-        </ThemedText>
-        <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
-          Coming soon
-        </ThemedText>
-      </View>
-      <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+      <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
+        <View style={styles.insightCardRow}>
+          <View style={[styles.insightIconWrap, { backgroundColor: color + "18" }]}>
+            <Feather name={icon} size={20} color={color} />
+          </View>
+          <View style={styles.insightContent}>
+            <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
+              {title}
+            </ThemedText>
+            <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
+              Coming soon
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+        </View>
+      </GlassSurface>
     </AnimatedPressable>
   );
 }
@@ -248,7 +253,7 @@ export default function HealthScreen() {
           Your hormonal intelligence
         </ThemedText>
 
-        <View style={[styles.phaseCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.phaseCard} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
           <View style={styles.phaseRow}>
             <View style={[styles.phaseDot, { backgroundColor: "#F6BFD3" }]} />
             <ThemedText style={[styles.phaseLabel, { color: theme.text }]}>
@@ -258,7 +263,7 @@ export default function HealthScreen() {
           <ThemedText style={[styles.phaseInsight, { color: theme.textSecondary }]}>
             Your hormones shift throughout each cycle, influencing mood, energy, and well-being.
           </ThemedText>
-        </View>
+        </GlassSurface>
 
         <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
           TRACKERS
@@ -318,8 +323,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   phaseCard: {
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
     marginBottom: Spacing.xl,
     gap: Spacing.sm,
   },
@@ -357,8 +360,9 @@ const styles = StyleSheet.create({
     width: "48%",
     flexGrow: 1,
     flexBasis: "46%",
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+  },
+  trackerCardGlass: {
+    flex: 1,
     gap: 6,
   },
   trackerIconWrap: {
@@ -386,12 +390,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   insightCard: {
+    minHeight: 52,
+  },
+  insightCardGlass: {
+    flex: 1,
+  },
+  insightCardRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
     gap: Spacing.md,
-    minHeight: 52,
   },
   insightIconWrap: {
     width: 40,

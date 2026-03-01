@@ -13,6 +13,7 @@ import { FlowSelector } from "@/components/FlowSelector";
 import { MoodSelector } from "@/components/MoodSelector";
 import { SymptomChip } from "@/components/SymptomChip";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, DailyLog, generateId } from "@/lib/storage";
@@ -137,15 +138,18 @@ export default function TrackScreen() {
   return (
     <AppGradient style={styles.container}>
       <View style={[styles.dateSelector, { paddingTop: headerHeight + Spacing.md }]}>
-        <Pressable
-          onPress={() => handleDateChange(-1)}
-          style={({ pressed }) => [
-            styles.dateButton,
-            { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.7 : 1 },
-          ]}
-        >
-          <Feather name="chevron-left" size={24} color={theme.text} />
-        </Pressable>
+        <GlassSurface noPadding borderRadius={BorderRadius.md} noShadow>
+          <Pressable
+            onPress={() => handleDateChange(-1)}
+            style={({ pressed }) => [
+              styles.dateButton,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+            testID="button-date-prev"
+          >
+            <Feather name="chevron-left" size={24} color={theme.text} />
+          </Pressable>
+        </GlassSurface>
         <View style={styles.dateDisplay}>
           <ThemedText type="h3">{formatDisplayDate(selectedDate)}</ThemedText>
           <ThemedText type="small" style={styles.dateSubtext}>
@@ -156,19 +160,19 @@ export default function TrackScreen() {
             })}
           </ThemedText>
         </View>
-        <Pressable
-          onPress={() => handleDateChange(1)}
-          disabled={isToday}
-          style={({ pressed }) => [
-            styles.dateButton,
-            {
-              backgroundColor: theme.backgroundDefault,
-              opacity: isToday ? 0.3 : pressed ? 0.7 : 1,
-            },
-          ]}
-        >
-          <Feather name="chevron-right" size={24} color={theme.text} />
-        </Pressable>
+        <GlassSurface noPadding borderRadius={BorderRadius.md} noShadow>
+          <Pressable
+            onPress={() => handleDateChange(1)}
+            disabled={isToday}
+            style={({ pressed }) => [
+              styles.dateButton,
+              { opacity: isToday ? 0.3 : pressed ? 0.7 : 1 },
+            ]}
+            testID="button-date-next"
+          >
+            <Feather name="chevron-right" size={24} color={theme.text} />
+          </Pressable>
+        </GlassSurface>
       </View>
 
       <KeyboardAwareScrollViewCompat
@@ -255,7 +259,7 @@ export default function TrackScreen() {
             style={[
               styles.notesInput,
               {
-                backgroundColor: theme.backgroundDefault,
+                backgroundColor: "transparent",
                 color: theme.text,
                 borderColor: theme.border,
               },

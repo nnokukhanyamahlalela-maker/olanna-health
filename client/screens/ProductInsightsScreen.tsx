@@ -18,6 +18,7 @@ import { File as ExpoFile, Paths } from "expo-file-system";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -325,9 +326,8 @@ export default function ProductInsightsScreen() {
             <ActivityIndicator size="large" color="#F6BFD3" />
           </View>
         ) : logs.length === 0 ? (
-          <View
-            style={[styles.emptyCard, { backgroundColor: theme.backgroundDefault }]}
-            accessibilityLabel="No product logs yet. Start by logging what you used."
+          <GlassSurface
+            style={styles.emptyCard}
           >
             <Feather name="inbox" size={32} color={theme.textSecondary} style={{ marginBottom: 12 }} />
             <ThemedText style={[styles.emptyTitle, { color: theme.text }]}>
@@ -336,7 +336,7 @@ export default function ProductInsightsScreen() {
             <ThemedText style={[styles.emptySubtext, { color: theme.textSecondary }]}>
               Start by logging what you used. Your insights will appear here.
             </ThemedText>
-          </View>
+          </GlassSurface>
         ) : (
           <>
             <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
@@ -345,10 +345,9 @@ export default function ProductInsightsScreen() {
 
             <View style={styles.cardList}>
               {insightItems.map((item) => (
-                <View
+                <GlassSurface
                   key={item.label}
-                  style={[styles.insightCard, { backgroundColor: theme.backgroundDefault }]}
-                  accessibilityLabel={item.label + ": " + item.value}
+                  style={styles.insightCard}
                 >
                   <View style={[styles.iconWrap, { backgroundColor: "#C4B5AD18" }]}>
                     <Feather name={item.icon} size={20} color="#C4B5AD" />
@@ -361,7 +360,7 @@ export default function ProductInsightsScreen() {
                       {item.value}
                     </ThemedText>
                   </View>
-                </View>
+                </GlassSurface>
               ))}
             </View>
 

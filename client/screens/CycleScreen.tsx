@@ -20,6 +20,7 @@ import {
 } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
 import { neutral } from "@/constants/colors";
+import { GlassSurface } from "@/components/GlassSurface";
 
 const CYCLE_LENGTH = 28;
 const CURRENT_DAY = 22;
@@ -54,14 +55,21 @@ export function CycleScreen() {
         <View style={styles.navBar}>
           <View style={styles.navSpacer} />
           <Text style={styles.navTitle}>Cycle</Text>
-          <Pressable
+          <GlassSurface
+            borderRadius={20}
+            padding={0}
+            noPadding
             style={styles.navButton}
-            onPress={() => setLogSheetVisible(true)}
-            accessibilityLabel="Log symptoms"
-            testID="button-log"
           >
-            <Feather name="plus" size={20} color={neutral.textPrimary} />
-          </Pressable>
+            <Pressable
+              style={styles.navButtonInner}
+              onPress={() => setLogSheetVisible(true)}
+              accessibilityLabel="Log symptoms"
+              testID="button-log"
+            >
+              <Feather name="plus" size={20} color={neutral.textPrimary} />
+            </Pressable>
+          </GlassSurface>
         </View>
 
         <PhaseCard currentPhase={currentPhase} />
@@ -112,8 +120,10 @@ const styles = StyleSheet.create({
   navButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.04)",
+  },
+  navButtonInner: {
+    width: 40,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },

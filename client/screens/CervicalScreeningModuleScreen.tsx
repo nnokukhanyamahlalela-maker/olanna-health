@@ -9,6 +9,7 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { storage, Screening, generateId } from "@/lib/storage";
@@ -89,7 +90,7 @@ export default function CervicalScreeningModuleScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-      <View style={[styles.guidelineCard, { backgroundColor: theme.secondary + "15" }]}>
+      <GlassSurface style={styles.guidelineCard}>
         <Feather name="book-open" size={24} color={theme.secondary} />
         <View style={styles.guidelineContent}>
           <ThemedText type="h4" style={{ color: theme.secondary }}>
@@ -99,7 +100,7 @@ export default function CervicalScreeningModuleScreen() {
             Based on SASOG and BetterGyn cervical screening guidelines. HPV testing every 5 years for women aged 25-65.
           </ThemedText>
         </View>
-      </View>
+      </GlassSurface>
 
       <View style={styles.section}>
         <ThemedText type="h3" style={styles.sectionTitle}>
@@ -171,21 +172,21 @@ export default function CervicalScreeningModuleScreen() {
         </ThemedText>
         <Pressable
           onPress={() => setShowDatePicker(true)}
-          style={[
-            styles.dateButton,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-          ]}
         >
-          <Feather name="calendar" size={20} color={theme.textSecondary} />
-          <ThemedText type="body">
-            {lastPapDate
-              ? lastPapDate.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              : "Select date"}
-          </ThemedText>
+          <GlassSurface style={styles.dateButton} noPadding>
+            <View style={styles.dateButtonInner}>
+              <Feather name="calendar" size={20} color={theme.textSecondary} />
+              <ThemedText type="body">
+                {lastPapDate
+                  ? lastPapDate.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "Select date"}
+              </ThemedText>
+            </View>
+          </GlassSurface>
         </Pressable>
         {showDatePicker ? (
           <DateTimePicker
@@ -240,7 +241,7 @@ export default function CervicalScreeningModuleScreen() {
         </View>
       ) : null}
 
-      <View style={[styles.reminderRow, { backgroundColor: theme.backgroundDefault }]}>
+      <GlassSurface style={styles.reminderRow}>
         <View style={styles.reminderContent}>
           <Feather name="bell" size={20} color={theme.primary} />
           <ThemedText type="body">Enable reminder notifications</ThemedText>
@@ -251,7 +252,7 @@ export default function CervicalScreeningModuleScreen() {
           trackColor={{ false: theme.backgroundSecondary, true: theme.primary + "60" }}
           thumbColor={reminderEnabled ? theme.primary : theme.textSecondary}
         />
-      </View>
+      </GlassSurface>
 
       <Button onPress={saveScreening} style={styles.saveButton}>
         Save Screening Info
@@ -262,7 +263,7 @@ export default function CervicalScreeningModuleScreen() {
           Important Information
         </ThemedText>
 
-        <View style={[styles.infoCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.infoCard}>
           <Feather name="info" size={20} color={theme.info} />
           <View style={styles.infoContent}>
             <ThemedText type="h4">Who should be screened?</ThemedText>
@@ -270,9 +271,9 @@ export default function CervicalScreeningModuleScreen() {
               Women aged 25-65 should have regular cervical screening. High-risk women (HIV positive or HPV 16/18/45 positive) may need more frequent screening.
             </ThemedText>
           </View>
-        </View>
+        </GlassSurface>
 
-        <View style={[styles.infoCard, { backgroundColor: theme.backgroundDefault }]}>
+        <GlassSurface style={styles.infoCard}>
           <Feather name="alert-triangle" size={20} color={theme.warning} />
           <View style={styles.infoContent}>
             <ThemedText type="h4">When to see a doctor</ThemedText>
@@ -280,7 +281,7 @@ export default function CervicalScreeningModuleScreen() {
               Contact your healthcare provider if you experience unusual bleeding, pelvic pain, or changes in vaginal discharge.
             </ThemedText>
           </View>
-        </View>
+        </GlassSurface>
       </View>
       </ScrollView>
     </AppGradient>
@@ -322,11 +323,12 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   dateButton: {
+    borderRadius: BorderRadius.md,
+  },
+  dateButtonInner: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
     gap: Spacing.md,
   },
   statusCard: {

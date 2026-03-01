@@ -28,6 +28,7 @@ import { TagSelector } from '@/components/TagSelector';
 import { BodyMap } from '@/components/BodyMap';
 import { AfricanPattern } from '@/components/AfricanPattern';
 import { AppGradient } from '@/components/AppGradient';
+import { GlassSurface } from '@/components/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, ScreenPadding, CardSpacing, PillSpacing, ButtonSpacing, TabBarSpacing } from '@/constants/spacing';
 import { BorderRadius } from '@/constants/theme';
@@ -52,16 +53,6 @@ import {
   saveCustomSymptom,
   CustomSymptom,
 } from '@/lib/symptomStorage';
-
-const THEME_COLORS = {
-  background: "#FFF7FA",
-  cardBackground: "#FFFFFF",
-  primary: "#E85A9C",
-  primaryLight: "#FBE3EC",
-  text: "#3A2F35",
-  textSecondary: "#7A6A73",
-  border: "#F5E8ED",
-};
 
 type ViewMode = 'categories' | 'bodymap' | 'patterns';
 
@@ -282,44 +273,46 @@ export default function CheckInScreen() {
     <Animated.View
       key={category.id}
       entering={FadeInDown.delay(index * 50).duration(300)}
-      style={[styles.categorySection, { backgroundColor: THEME_COLORS.cardBackground }]}
+      style={styles.categorySectionOuter}
     >
-      <View style={styles.categoryHeader}>
-        <View style={[styles.categoryIcon, { backgroundColor: THEME_COLORS.primaryLight }]}>
-          <Feather name={category.icon as any} size={18} color={THEME_COLORS.primary} />
+      <GlassSurface borderRadius={CardSpacing.radius} padding={CardSpacing.padding}>
+        <View style={styles.categoryHeader}>
+          <View style={[styles.categoryIcon, { backgroundColor: `${theme.primary}20` }]}>
+            <Feather name={category.icon as any} size={18} color={theme.primary} />
+          </View>
+          <ThemedText type="h4" style={{ flex: 1, color: theme.text }}>{category.name}</ThemedText>
+          {category.isPCOS ? (
+            <View style={[styles.badge, { backgroundColor: `${theme.primary}20` }]}>
+              <ThemedText type="caption" style={{ color: theme.primary }}>PCOS</ThemedText>
+            </View>
+          ) : null}
+          {category.isEndometriosis ? (
+            <View style={[styles.badge, { backgroundColor: `${theme.primary}20` }]}>
+              <ThemedText type="caption" style={{ color: theme.primary }}>Endo</ThemedText>
+            </View>
+          ) : null}
         </View>
-        <ThemedText type="h4" style={{ flex: 1, color: THEME_COLORS.text }}>{category.name}</ThemedText>
-        {category.isPCOS ? (
-          <View style={[styles.badge, { backgroundColor: THEME_COLORS.primaryLight }]}>
-            <ThemedText type="caption" style={{ color: THEME_COLORS.primary }}>PCOS</ThemedText>
-          </View>
-        ) : null}
-        {category.isEndometriosis ? (
-          <View style={[styles.badge, { backgroundColor: THEME_COLORS.primaryLight }]}>
-            <ThemedText type="caption" style={{ color: THEME_COLORS.primary }}>Endo</ThemedText>
-          </View>
-        ) : null}
-      </View>
-      <View style={styles.symptomsGrid}>
-        {getVisibleSymptoms(category).map(symptom => {
-          const key = `${category.id}-${symptom.id}`;
-          const isSelected = selectedSymptoms.has(key);
-          const log = selectedSymptoms.get(key);
-          return (
-            <SymptomChip
-              key={symptom.id}
-              label={symptom.name}
-              icon={symptom.icon as any}
-              selected={isSelected}
-              severity={log?.severity}
-              color={THEME_COLORS.primary}
-              isFavorite={favorites.includes(symptom.id)}
-              onPress={() => handleSymptomPress(category, symptom)}
-              onLongPress={() => handleSymptomLongPress(symptom)}
-            />
-          );
-        })}
-      </View>
+        <View style={styles.symptomsGrid}>
+          {getVisibleSymptoms(category).map(symptom => {
+            const key = `${category.id}-${symptom.id}`;
+            const isSelected = selectedSymptoms.has(key);
+            const log = selectedSymptoms.get(key);
+            return (
+              <SymptomChip
+                key={symptom.id}
+                label={symptom.name}
+                icon={symptom.icon as any}
+                selected={isSelected}
+                severity={log?.severity}
+                color={theme.primary}
+                isFavorite={favorites.includes(symptom.id)}
+                onPress={() => handleSymptomPress(category, symptom)}
+                onLongPress={() => handleSymptomLongPress(symptom)}
+              />
+            );
+          })}
+        </View>
+      </GlassSurface>
     </Animated.View>
   );
 
@@ -327,8 +320,8 @@ export default function CheckInScreen() {
     <AppGradient style={styles.container}>
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
         <View>
-          <ThemedText type="h2" style={{ color: THEME_COLORS.text }}>Daily Check-in</ThemedText>
-          <ThemedText type="small" style={{ color: THEME_COLORS.textSecondary }}>
+          <ThemedText type="h2" style={{ color: theme.text }}>Daily Check-in</ThemedText>
+          <ThemedText type="small" style={{ color: theme.textSecondary }}>
             {new Date().toLocaleDateString('en-ZA', {
               weekday: 'long',
               day: 'numeric',
@@ -337,69 +330,81 @@ export default function CheckInScreen() {
           </ThemedText>
         </View>
         <View style={styles.headerRight}>
-          <View style={[styles.progressBadge, { backgroundColor: THEME_COLORS.primaryLight }]}>
-            <Feather name="check-circle" size={16} color={THEME_COLORS.primary} />
-            <ThemedText type="small" style={{ color: THEME_COLORS.primary, fontWeight: '600' }}>
-              {loggedCount} logged
-            </ThemedText>
-          </View>
-          <Pressable
-            onPress={() => setShowCustomizeModal(true)}
-            style={[styles.settingsButton, { backgroundColor: THEME_COLORS.cardBackground }]}
-            testID="customize-symptoms"
-          >
-            <Feather name="sliders" size={18} color={THEME_COLORS.textSecondary} />
-          </Pressable>
+          <GlassSurface borderRadius={BorderRadius.full} padding={0} noPadding>
+            <View style={styles.progressBadge}>
+              <Feather name="check-circle" size={16} color={theme.primary} />
+              <ThemedText type="small" style={{ color: theme.primary, fontWeight: '600' }}>
+                {loggedCount} logged
+              </ThemedText>
+            </View>
+          </GlassSurface>
+          <GlassSurface borderRadius={BorderRadius.md} padding={0} noPadding>
+            <Pressable
+              onPress={() => setShowCustomizeModal(true)}
+              style={styles.settingsButton}
+              testID="customize-symptoms"
+            >
+              <Feather name="sliders" size={18} color={theme.textSecondary} />
+            </Pressable>
+          </GlassSurface>
         </View>
       </View>
 
       <View style={styles.viewTabs}>
-        <Pressable
-          onPress={() => setViewMode('categories')}
-          style={[
-            styles.viewTab,
-            {
-              backgroundColor: viewMode === 'categories' ? THEME_COLORS.primaryLight : THEME_COLORS.cardBackground,
-              borderColor: viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.border,
-            },
-          ]}
-          testID="tab-categories"
+        <GlassSurface
+          borderRadius={PillSpacing.radius}
+          padding={0}
+          noPadding
+          style={viewMode === 'categories' ? { borderColor: `${theme.primary}40` } : undefined}
         >
-          <Feather
-            name="grid"
-            size={16}
-            color={viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.textSecondary}
-          />
-          <ThemedText
-            type="small"
-            style={{ color: viewMode === 'categories' ? THEME_COLORS.primary : THEME_COLORS.textSecondary }}
+          <Pressable
+            onPress={() => setViewMode('categories')}
+            style={[
+              styles.viewTab,
+              viewMode === 'categories' ? { backgroundColor: `${theme.primary}18` } : undefined,
+            ]}
+            testID="tab-categories"
           >
-            Symptoms
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => setViewMode('bodymap')}
-          style={[
-            styles.viewTab,
-            {
-              backgroundColor: viewMode === 'bodymap' ? THEME_COLORS.primaryLight : THEME_COLORS.cardBackground,
-              borderColor: viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.border,
-            },
-          ]}
-          testID="tab-bodymap"
+            <Feather
+              name="grid"
+              size={16}
+              color={viewMode === 'categories' ? theme.primary : theme.textSecondary}
+            />
+            <ThemedText
+              type="small"
+              style={{ color: viewMode === 'categories' ? theme.primary : theme.textSecondary }}
+            >
+              Symptoms
+            </ThemedText>
+          </Pressable>
+        </GlassSurface>
+        <GlassSurface
+          borderRadius={PillSpacing.radius}
+          padding={0}
+          noPadding
+          style={viewMode === 'bodymap' ? { borderColor: `${theme.primary}40` } : undefined}
         >
-          <Feather
-            name="user"
-            size={16}
-            color={viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.textSecondary}
-          />
-          <ThemedText
-            type="small"
-            style={{ color: viewMode === 'bodymap' ? THEME_COLORS.primary : THEME_COLORS.textSecondary }}
+          <Pressable
+            onPress={() => setViewMode('bodymap')}
+            style={[
+              styles.viewTab,
+              viewMode === 'bodymap' ? { backgroundColor: `${theme.primary}18` } : undefined,
+            ]}
+            testID="tab-bodymap"
           >
-            Body Map
-          </ThemedText>
-        </Pressable>
+            <Feather
+              name="user"
+              size={16}
+              color={viewMode === 'bodymap' ? theme.primary : theme.textSecondary}
+            />
+            <ThemedText
+              type="small"
+              style={{ color: viewMode === 'bodymap' ? theme.primary : theme.textSecondary }}
+            >
+              Body Map
+            </ThemedText>
+          </Pressable>
+        </GlassSurface>
       </View>
 
       <ScrollView
@@ -412,7 +417,7 @@ export default function CheckInScreen() {
         {viewMode === 'categories' ? (
           <>
             {favorites.length > 0 ? (
-              <View style={[styles.favoritesSection, { backgroundColor: `${theme.tertiary}10` }]}>
+              <GlassSurface borderRadius={BorderRadius.lg} padding={Spacing.md} style={styles.favoritesSection}>
                 <View style={styles.favoritesHeader}>
                   <Feather name="star" size={16} color={theme.tertiary} />
                   <ThemedText type="h4" style={{ color: theme.tertiary }}>
@@ -442,7 +447,7 @@ export default function CheckInScreen() {
                       })
                   )}
                 </View>
-              </View>
+              </GlassSurface>
             ) : null}
 
             {getOrderedCategories().map((category, index) => renderCategorySection(category, index))}
@@ -465,13 +470,15 @@ export default function CheckInScreen() {
       </ScrollView>
 
       <View style={[styles.saveButtonContainer, { bottom: insets.bottom + TabBarSpacing.totalHeight + Spacing.md }]}>
-        <Pressable 
-          onPress={handleSaveCheckIn} 
-          testID="save-checkin"
-          style={styles.saveButton}
-        >
-          <ThemedText style={styles.saveButtonText}>SAVE TODAY'S CHECK-IN</ThemedText>
-        </Pressable>
+        <GlassSurface borderRadius={ButtonSpacing.radius} padding={0} noPadding>
+          <Pressable 
+            onPress={handleSaveCheckIn} 
+            testID="save-checkin"
+            style={styles.saveButton}
+          >
+            <ThemedText style={[styles.saveButtonText, { color: theme.primary }]}>SAVE TODAY'S CHECK-IN</ThemedText>
+          </Pressable>
+        </GlassSurface>
       </View>
 
       <Modal
@@ -768,15 +775,11 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     height: PillSpacing.height,
     paddingHorizontal: PillSpacing.paddingHorizontal,
-    borderRadius: PillSpacing.radius,
-    borderWidth: 1,
   },
   scrollContent: {
     paddingHorizontal: ScreenPadding.horizontal,
   },
   favoritesSection: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
   },
   favoritesHeader: {
@@ -785,15 +788,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginBottom: Spacing.md,
   },
-  categorySection: {
-    padding: CardSpacing.padding,
-    borderRadius: CardSpacing.radius,
+  categorySectionOuter: {
     marginBottom: CardSpacing.gap,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
   },
   categoryHeader: {
     flexDirection: 'row',
@@ -834,14 +830,11 @@ const styles = StyleSheet.create({
     right: ScreenPadding.horizontal,
   },
   saveButton: {
-    backgroundColor: THEME_COLORS.primaryLight,
     height: ButtonSpacing.height,
-    borderRadius: ButtonSpacing.radius,
     alignItems: 'center',
     justifyContent: 'center',
   },
   saveButtonText: {
-    color: THEME_COLORS.primary,
     fontWeight: '600',
     fontSize: 14,
     letterSpacing: 0.5,

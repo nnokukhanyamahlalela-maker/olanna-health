@@ -8,6 +8,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { InsightCard } from "@/components/InsightCard";
 import { SymptomChip } from "@/components/SymptomChip";
 import { AppGradient } from "@/components/AppGradient";
+import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
@@ -117,7 +118,7 @@ export default function PCOSModuleScreen() {
               ))}
             </View>
 
-            <View style={[styles.infoCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface style={styles.infoCard}>
               <View style={[styles.infoIcon, { backgroundColor: theme.info + "20" }]}>
                 <Feather name="info" size={20} color={theme.info} />
               </View>
@@ -127,7 +128,7 @@ export default function PCOSModuleScreen() {
                   Polycystic Ovary Syndrome (PCOS) is a hormonal disorder common among women of reproductive age. It can affect your periods, fertility, hormones, and appearance.
                 </ThemedText>
               </View>
-            </View>
+            </GlassSurface>
           </View>
         ) : null}
 
@@ -162,7 +163,7 @@ export default function PCOSModuleScreen() {
               Track your symptoms regularly to see personalized insights and patterns.
             </ThemedText>
 
-            <View style={[styles.insightCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface style={styles.insightCard}>
               <View style={styles.insightHeader}>
                 <Feather name="trending-up" size={24} color={theme.primary} />
                 <ThemedText type="h4">Symptom Trends</ThemedText>
@@ -170,9 +171,9 @@ export default function PCOSModuleScreen() {
               <ThemedText type="body" style={styles.insightText}>
                 Continue tracking your symptoms to see trends and correlations with your cycle.
               </ThemedText>
-            </View>
+            </GlassSurface>
 
-            <View style={[styles.insightCard, { backgroundColor: theme.backgroundDefault }]}>
+            <GlassSurface style={styles.insightCard}>
               <View style={styles.insightHeader}>
                 <Feather name="calendar" size={24} color={theme.secondary} />
                 <ThemedText type="h4">Cycle Patterns</ThemedText>
@@ -180,7 +181,7 @@ export default function PCOSModuleScreen() {
               <ThemedText type="body" style={styles.insightText}>
                 Your cycle data will be analyzed to identify patterns related to PCOS.
               </ThemedText>
-            </View>
+            </GlassSurface>
           </View>
         ) : null}
       </ScrollView>
