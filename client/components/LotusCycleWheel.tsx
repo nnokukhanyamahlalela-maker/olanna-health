@@ -70,27 +70,32 @@ function angleToDayNumber(angle: number, cycleLength: number): number {
   return Math.max(1, Math.min(cycleLength, day));
 }
 
+const PHASE_BG_COLORS: Record<string, string> = {
+  bud: "#F2C9A2",
+  rising: "#C9B6D9",
+  bloom: "#F28C5A",
+  closing: "#E83E8C",
+};
+
 function CenterLotus({ variant, size, color }: { variant: string; size: number; color: string }) {
   const cx = size / 2;
   const cy = size / 2;
-  const r = size * 0.4;
+  const r = size * 0.38;
+  const bgColor = PHASE_BG_COLORS[variant] || color;
+  const petalColor = "#FFFFFF";
 
   if (variant === "bud") {
     return (
       <G>
+        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
         <Path
-          d={`M ${cx} ${cy + r * 0.5} Q ${cx - r * 0.3} ${cy - r * 0.15} ${cx} ${cy - r * 0.75} Q ${cx + r * 0.3} ${cy - r * 0.15} ${cx} ${cy + r * 0.5} Z`}
-          fill={color}
-          opacity={0.12}
-          stroke={color}
-          strokeWidth={1.5}
-          strokeOpacity={0.35}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.5} L ${cx} ${cy + r * 0.85}`}
-          stroke={color}
-          strokeWidth={1.2}
-          strokeOpacity={0.3}
+          d={`M ${cx} ${cy + r * 0.45}
+              Q ${cx - r * 0.22} ${cy + r * 0.1} ${cx - r * 0.18} ${cy - r * 0.15}
+              Q ${cx - r * 0.12} ${cy - r * 0.55} ${cx} ${cy - r * 0.65}
+              Q ${cx + r * 0.12} ${cy - r * 0.55} ${cx + r * 0.18} ${cy - r * 0.15}
+              Q ${cx + r * 0.22} ${cy + r * 0.1} ${cx} ${cy + r * 0.45} Z`}
+          fill={petalColor}
+          opacity={0.95}
         />
       </G>
     );
@@ -99,103 +104,141 @@ function CenterLotus({ variant, size, color }: { variant: string; size: number; 
   if (variant === "rising") {
     return (
       <G>
+        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
         <Path
-          d={`M ${cx} ${cy + r * 0.35} Q ${cx - r * 0.3} ${cy - r * 0.1} ${cx} ${cy - r * 0.65} Q ${cx + r * 0.3} ${cy - r * 0.1} ${cx} ${cy + r * 0.35} Z`}
-          fill={color}
-          opacity={0.12}
-          stroke={color}
-          strokeWidth={1.5}
-          strokeOpacity={0.35}
+          d={`M ${cx} ${cy + r * 0.3}
+              Q ${cx - r * 0.15} ${cy} ${cx} ${cy - r * 0.55}
+              Q ${cx + r * 0.15} ${cy} ${cx} ${cy + r * 0.3} Z`}
+          fill={petalColor}
+          opacity={0.95}
         />
         <Path
-          d={`M ${cx} ${cy + r * 0.25} Q ${cx - r * 0.55} ${cy - r * 0.05} ${cx - r * 0.45} ${cy - r * 0.5} Q ${cx - r * 0.12} ${cy - r * 0.25} ${cx} ${cy + r * 0.25} Z`}
-          fill={color}
-          opacity={0.08}
-          stroke={color}
-          strokeWidth={1.2}
-          strokeOpacity={0.25}
+          d={`M ${cx} ${cy + r * 0.15}
+              Q ${cx - r * 0.15} ${cy + r * 0.05} ${cx - r * 0.5} ${cy - r * 0.35}
+              Q ${cx - r * 0.2} ${cy - r * 0.35} ${cx} ${cy + r * 0.15} Z`}
+          fill={petalColor}
+          opacity={0.85}
         />
         <Path
-          d={`M ${cx} ${cy + r * 0.25} Q ${cx + r * 0.55} ${cy - r * 0.05} ${cx + r * 0.45} ${cy - r * 0.5} Q ${cx + r * 0.12} ${cy - r * 0.25} ${cx} ${cy + r * 0.25} Z`}
-          fill={color}
-          opacity={0.08}
-          stroke={color}
-          strokeWidth={1.2}
-          strokeOpacity={0.25}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.35} L ${cx} ${cy + r * 0.85}`}
-          stroke={color}
-          strokeWidth={1.2}
-          strokeOpacity={0.25}
+          d={`M ${cx} ${cy + r * 0.15}
+              Q ${cx + r * 0.15} ${cy + r * 0.05} ${cx + r * 0.5} ${cy - r * 0.35}
+              Q ${cx + r * 0.2} ${cy - r * 0.35} ${cx} ${cy + r * 0.15} Z`}
+          fill={petalColor}
+          opacity={0.85}
         />
       </G>
     );
   }
 
   if (variant === "bloom") {
-    const petalCount = 6;
-    const petals = [];
-    for (let i = 0; i < petalCount; i++) {
-      const angle = (i * 360) / petalCount - 90;
-      const rad = (angle * Math.PI) / 180;
-      const tipX = cx + r * 0.75 * Math.cos(rad);
-      const tipY = cy + r * 0.75 * Math.sin(rad);
-      const cp1Angle = rad - 0.4;
-      const cp2Angle = rad + 0.4;
-      const cp1X = cx + r * 0.4 * Math.cos(cp1Angle);
-      const cp1Y = cy + r * 0.4 * Math.sin(cp1Angle);
-      const cp2X = cx + r * 0.4 * Math.cos(cp2Angle);
-      const cp2Y = cy + r * 0.4 * Math.sin(cp2Angle);
-      petals.push(
-        <Path
-          key={`bloom-${i}`}
-          d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
-          fill={color}
-          opacity={0.1}
-          stroke={color}
-          strokeWidth={1.3}
-          strokeOpacity={0.3}
-        />
-      );
-    }
     return (
       <G>
-        {petals}
-        <Circle cx={cx} cy={cy} r={r * 0.12} fill={color} opacity={0.2} />
+        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
+        <Path
+          d={`M ${cx} ${cy + r * 0.05}
+              Q ${cx - r * 0.12} ${cy - r * 0.1} ${cx} ${cy - r * 0.55}
+              Q ${cx + r * 0.12} ${cy - r * 0.1} ${cx} ${cy + r * 0.05} Z`}
+          fill={petalColor}
+          opacity={0.95}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.05}
+              Q ${cx - r * 0.08} ${cy - r * 0.15} ${cx - r * 0.42} ${cy - r * 0.4}
+              Q ${cx - r * 0.18} ${cy - r * 0.3} ${cx} ${cy + r * 0.05} Z`}
+          fill={petalColor}
+          opacity={0.9}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.05}
+              Q ${cx + r * 0.08} ${cy - r * 0.15} ${cx + r * 0.42} ${cy - r * 0.4}
+              Q ${cx + r * 0.18} ${cy - r * 0.3} ${cx} ${cy + r * 0.05} Z`}
+          fill={petalColor}
+          opacity={0.9}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.05}
+              Q ${cx - r * 0.2} ${cy - r * 0.05} ${cx - r * 0.6} ${cy - r * 0.12}
+              Q ${cx - r * 0.35} ${cy - r * 0.2} ${cx} ${cy + r * 0.05} Z`}
+          fill={petalColor}
+          opacity={0.8}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.05}
+              Q ${cx + r * 0.2} ${cy - r * 0.05} ${cx + r * 0.6} ${cy - r * 0.12}
+              Q ${cx + r * 0.35} ${cy - r * 0.2} ${cx} ${cy + r * 0.05} Z`}
+          fill={petalColor}
+          opacity={0.8}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.15}
+              Q ${cx - r * 0.25} ${cy + r * 0.15} ${cx - r * 0.55} ${cy + r * 0.25}
+              Q ${cx - r * 0.25} ${cy + r * 0.05} ${cx} ${cy + r * 0.15} Z`}
+          fill={petalColor}
+          opacity={0.7}
+        />
+        <Path
+          d={`M ${cx} ${cy + r * 0.15}
+              Q ${cx + r * 0.25} ${cy + r * 0.15} ${cx + r * 0.55} ${cy + r * 0.25}
+              Q ${cx + r * 0.25} ${cy + r * 0.05} ${cx} ${cy + r * 0.15} Z`}
+          fill={petalColor}
+          opacity={0.7}
+        />
       </G>
     );
   }
 
-  const petalCount = 8;
-  const petals = [];
-  for (let i = 0; i < petalCount; i++) {
-    const angle = (i * 360) / petalCount - 90;
-    const rad = (angle * Math.PI) / 180;
-    const tipX = cx + r * 0.85 * Math.cos(rad);
-    const tipY = cy + r * 0.85 * Math.sin(rad);
-    const cp1Angle = rad - 0.32;
-    const cp2Angle = rad + 0.32;
-    const cp1X = cx + r * 0.48 * Math.cos(cp1Angle);
-    const cp1Y = cy + r * 0.48 * Math.sin(cp1Angle);
-    const cp2X = cx + r * 0.48 * Math.cos(cp2Angle);
-    const cp2Y = cy + r * 0.48 * Math.sin(cp2Angle);
-    petals.push(
-      <Path
-        key={`closing-${i}`}
-        d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
-        fill={color}
-        opacity={i % 2 === 0 ? 0.1 : 0.06}
-        stroke={color}
-        strokeWidth={1.2}
-        strokeOpacity={i % 2 === 0 ? 0.3 : 0.18}
-      />
-    );
-  }
   return (
     <G>
-      {petals}
-      <Circle cx={cx} cy={cy} r={r * 0.1} fill={color} opacity={0.15} />
+      <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
+      <Path
+        d={`M ${cx} ${cy + r * 0.1}
+            Q ${cx - r * 0.12} ${cy - r * 0.05} ${cx} ${cy - r * 0.5}
+            Q ${cx + r * 0.12} ${cy - r * 0.05} ${cx} ${cy + r * 0.1} Z`}
+        fill={petalColor}
+        opacity={0.95}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.1}
+            Q ${cx - r * 0.1} ${cy - r * 0.1} ${cx - r * 0.38} ${cy - r * 0.38}
+            Q ${cx - r * 0.15} ${cy - r * 0.25} ${cx} ${cy + r * 0.1} Z`}
+        fill={petalColor}
+        opacity={0.9}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.1}
+            Q ${cx + r * 0.1} ${cy - r * 0.1} ${cx + r * 0.38} ${cy - r * 0.38}
+            Q ${cx + r * 0.15} ${cy - r * 0.25} ${cx} ${cy + r * 0.1} Z`}
+        fill={petalColor}
+        opacity={0.9}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.15}
+            Q ${cx - r * 0.2} ${cy} ${cx - r * 0.55} ${cy - r * 0.08}
+            Q ${cx - r * 0.3} ${cy - r * 0.18} ${cx} ${cy + r * 0.15} Z`}
+        fill={petalColor}
+        opacity={0.82}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.15}
+            Q ${cx + r * 0.2} ${cy} ${cx + r * 0.55} ${cy - r * 0.08}
+            Q ${cx + r * 0.3} ${cy - r * 0.18} ${cx} ${cy + r * 0.15} Z`}
+        fill={petalColor}
+        opacity={0.82}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.25}
+            Q ${cx - r * 0.3} ${cy + r * 0.2} ${cx - r * 0.6} ${cy + r * 0.3}
+            Q ${cx - r * 0.25} ${cy + r * 0.08} ${cx} ${cy + r * 0.25} Z`}
+        fill={petalColor}
+        opacity={0.7}
+      />
+      <Path
+        d={`M ${cx} ${cy + r * 0.25}
+            Q ${cx + r * 0.3} ${cy + r * 0.2} ${cx + r * 0.6} ${cy + r * 0.3}
+            Q ${cx + r * 0.25} ${cy + r * 0.08} ${cx} ${cy + r * 0.25} Z`}
+        fill={petalColor}
+        opacity={0.7}
+      />
     </G>
   );
 }
