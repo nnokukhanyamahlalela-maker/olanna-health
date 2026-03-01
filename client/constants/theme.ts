@@ -305,8 +305,8 @@ export const ThemePresets = {
 
 export const Colors = {
   light: {
-    text: VogueColors.charcoal,
-    textSecondary: VogueColors.warmGray,
+    text: "#2D1F2B",
+    textSecondary: "#5A3D55",
     background: VogueColors.cream,
     backgroundRoot: VogueColors.cream,
     backgroundDefault: VogueColors.warmWhite,
@@ -366,13 +366,13 @@ export const Colors = {
     pmsLavenderLight: VogueColors.pmsLavenderLight,
   },
   dark: {
-    text: VogueColors.charcoal,
-    textSecondary: VogueColors.warmGray,
-    background: VogueColors.cream,
-    backgroundRoot: VogueColors.cream,
-    backgroundDefault: VogueColors.warmWhite,
-    backgroundSecondary: VogueColors.sandLight,
-    border: VogueColors.sand,
+    text: "#F5F0F3",
+    textSecondary: "#C4B3BF",
+    background: "#1A0E1E",
+    backgroundRoot: "#1A0E1E",
+    backgroundDefault: "#241828",
+    backgroundSecondary: "#2E1F33",
+    border: "rgba(255,255,255,0.12)",
     tint: VogueColors.dustyRose,
 
     primary: VogueColors.logoPink,

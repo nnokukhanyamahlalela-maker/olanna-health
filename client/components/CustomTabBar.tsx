@@ -13,20 +13,10 @@ import * as Haptics from "expo-haptics";
 import Svg, { Path } from "react-native-svg";
 
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
 import { brand, neutral } from "@/constants/colors";
-import { Fonts } from "@/constants/theme";
 
-export const TAB_BAR_HEIGHT = 72;
-export const TAB_BAR_TOTAL_HEIGHT = 94;
-
-const TAB_BAR_SPECS = {
-  height: 72,
-  paddingTop: 10,
-  paddingBottom: 12,
-  paddingHorizontal: 4,
-  borderRadius: 24,
-};
+export const TAB_BAR_HEIGHT = 56;
+export const TAB_BAR_TOTAL_HEIGHT = 78;
 
 const LIGHT_GLASS = {
   background: "rgba(255,255,255,0.35)",
@@ -109,12 +99,8 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItem
   const isLotus = routeName === "CheckInTab";
 
   const activeColor = brand.primary;
-  const inactiveColor = isDark ? "rgba(255,255,255,0.45)" : neutral.textTertiary;
+  const inactiveColor = isDark ? "rgba(255,255,255,0.40)" : "rgba(90,74,71,0.45)";
   const iconColor = isFocused ? activeColor : inactiveColor;
-
-  const activePillBg = isDark
-    ? "rgba(255,255,255,0.10)"
-    : "rgba(255,255,255,0.50)";
 
   return (
     <Pressable
@@ -126,40 +112,16 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItem
       accessibilityLabel={label}
       testID={`tab-${routeName.toLowerCase()}`}
     >
-      <View
-        style={[
-          styles.tabPill,
-          isFocused
-            ? {
-                backgroundColor: activePillBg,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: isDark
-                  ? "rgba(255,255,255,0.14)"
-                  : "rgba(255,255,255,0.70)",
-                shadowColor: "rgba(0,0,0,0.06)",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 1,
-                shadowRadius: 4,
-                elevation: 2,
-              }
-            : undefined,
-        ]}
-      >
+      <View style={styles.iconContainer}>
         {isLotus ? (
-          <LotusIcon color={iconColor} size={24} />
+          <LotusIcon color={iconColor} size={26} />
         ) : (
-          <Feather name={FEATHER_ICONS[routeName] || "circle"} size={21} color={iconColor} />
+          <Feather name={FEATHER_ICONS[routeName] || "circle"} size={23} color={iconColor} />
         )}
-        <ThemedText
-          style={[
-            styles.tabLabel,
-            { color: iconColor },
-            isFocused ? styles.tabLabelActive : undefined,
-          ]}
-        >
-          {label}
-        </ThemedText>
       </View>
+      {isFocused ? (
+        <View style={[styles.activeDot, { backgroundColor: activeColor }]} />
+      ) : null}
     </Pressable>
   );
 }
@@ -257,14 +219,14 @@ const styles = StyleSheet.create({
   },
   tabBarWrapper: {
     width: "100%",
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     alignItems: "center",
     marginBottom: 2,
   },
   glassContainer: {
     width: "100%",
-    height: TAB_BAR_SPECS.height,
-    borderRadius: TAB_BAR_SPECS.borderRadius,
+    height: TAB_BAR_HEIGHT,
+    borderRadius: 28,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
     shadowColor: "rgba(0,0,0,0.10)",
@@ -285,29 +247,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
-    paddingHorizontal: TAB_BAR_SPECS.paddingHorizontal,
-    paddingTop: TAB_BAR_SPECS.paddingTop,
-    paddingBottom: TAB_BAR_SPECS.paddingBottom,
+    paddingHorizontal: 8,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    height: "100%",
+    gap: 4,
   },
-  tabPill: {
+  iconContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    width: 44,
+    height: 32,
   },
-  tabLabel: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 10,
-    marginTop: 3,
-    letterSpacing: 0.15,
-  },
-  tabLabelActive: {
-    fontFamily: Fonts.heading,
+  activeDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
 });
