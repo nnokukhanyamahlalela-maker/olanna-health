@@ -19,20 +19,20 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function IntroLogo() {
   const navigation = useNavigation<NavigationProp>();
-  const opacity = useSharedValue(0);
+  const logoOpacity = useSharedValue(0);
   const [reduceMotion, setReduceMotion] = React.useState(false);
 
   useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (reduceMotion) {
-      opacity.value = 1;
+      logoOpacity.value = 1;
     } else {
-      opacity.value = withDelay(
-        300,
-        withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) })
+      logoOpacity.value = withDelay(
+        1200,
+        withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) })
       );
     }
 
@@ -43,8 +43,8 @@ export default function IntroLogo() {
     return () => clearTimeout(timer);
   }, [navigation, reduceMotion]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+  const logoAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
   }));
 
   return (
@@ -56,7 +56,7 @@ export default function IntroLogo() {
         resizeMode="cover"
       />
       <Animated.View
-        style={[StyleSheet.absoluteFill, animatedStyle]}
+        style={[StyleSheet.absoluteFill, logoAnimatedStyle]}
         accessibilityLabel="Olanna Health"
         accessibilityRole="header"
       >
