@@ -9,7 +9,6 @@ import {
   ScrollView,
   AccessibilityInfo,
   FlatList,
-  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -55,7 +54,7 @@ import {
 import { storage, UserProfile, generateId } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
-import brandLogo from "../assets/images/olanna-brand-logo.png";
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -135,18 +134,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-function BrandLogo() {
-  return (
-    <View style={styles.brandLogoContainer}>
-      <Image
-        source={brandLogo}
-        style={styles.brandLogoImage}
-        resizeMode="contain"
-        accessibilityLabel="Olanna Health"
-      />
-    </View>
-  );
-}
 
 function IntroScreen({ onComplete }: { onComplete: () => void }) {
   const insets = useSafeAreaInsets();
@@ -154,7 +141,6 @@ function IntroScreen({ onComplete }: { onComplete: () => void }) {
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text="Hi." delay={200} />
           <AnimatedHeading text="I'm Olanna." delay={600} />
@@ -206,8 +192,6 @@ function NameScreen({
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
             <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
           </Pressable>
-          <BrandLogo />
-          <View style={styles.backButtonSpacer} />
         </View>
         
         <View style={styles.progressContainer}>
@@ -260,7 +244,6 @@ function GreetingScreen({ name, onComplete }: { name: string; onComplete: () => 
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text={`Nice to meet you,`} delay={200} />
           <AnimatedHeading text={name} delay={600} style={styles.nameHighlight} />
@@ -321,8 +304,6 @@ function ProfileScreen({
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
             <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
           </Pressable>
-          <BrandLogo />
-          <View style={styles.backButtonSpacer} />
         </View>
 
         <View style={styles.progressContainer}>
@@ -442,8 +423,6 @@ function GoalsScreen({
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
             <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
           </Pressable>
-          <BrandLogo />
-          <View style={styles.backButtonSpacer} />
         </View>
 
         <View style={styles.progressContainer}>
@@ -503,7 +482,6 @@ function ConfirmationScreen({ onComplete }: { onComplete: () => void }) {
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text="Perfect." delay={200} />
           <AnimatedHeading text="Let's get started." delay={600} />
@@ -556,7 +534,6 @@ function CarouselScreen({
   return (
     <GradientBackground>
       <View style={[styles.carouselContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <BrandLogo />
         <FlatList
           ref={flatListRef}
           data={CAROUSEL_SCREENS}
@@ -757,16 +734,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  brandLogoContainer: {
-    alignItems: "center",
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
-  },
-  brandLogoImage: {
-    width: 100,
-    height: 40,
-    opacity: 0.9,
-  },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -775,9 +742,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 4,
-    width: 36,
-  },
-  backButtonSpacer: {
     width: 36,
   },
   progressContainer: {
