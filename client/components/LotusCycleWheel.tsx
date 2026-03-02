@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { View, Text, StyleSheet, Dimensions, Platform } from "react-native";
+import { View, Text, Image as RNImage, StyleSheet, Dimensions, Platform } from "react-native";
 import Svg, {
   Path,
   Circle,
@@ -70,178 +70,14 @@ function angleToDayNumber(angle: number, cycleLength: number): number {
   return Math.max(1, Math.min(cycleLength, day));
 }
 
-const PHASE_BG_COLORS: Record<string, string> = {
-  bud: "#F2C9A2",
-  rising: "#C9B6D9",
-  bloom: "#F28C5A",
-  closing: "#E83E8C",
+type LotusVariant = "bud" | "rising" | "bloom" | "closing";
+
+const LOTUS_PHASE_IMAGES: Record<LotusVariant, any> = {
+  bud: require("@/assets/images/lotus-menstrual.png"),
+  rising: require("@/assets/images/lotus-follicular.png"),
+  bloom: require("@/assets/images/lotus-ovulation.png"),
+  closing: require("@/assets/images/lotus-luteal.png"),
 };
-
-function CenterLotus({ variant, size, color }: { variant: string; size: number; color: string }) {
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size * 0.38;
-  const bgColor = PHASE_BG_COLORS[variant] || color;
-  const petalColor = "#FFFFFF";
-
-  if (variant === "bud") {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
-        <Path
-          d={`M ${cx} ${cy + r * 0.45}
-              Q ${cx - r * 0.22} ${cy + r * 0.1} ${cx - r * 0.18} ${cy - r * 0.15}
-              Q ${cx - r * 0.12} ${cy - r * 0.55} ${cx} ${cy - r * 0.65}
-              Q ${cx + r * 0.12} ${cy - r * 0.55} ${cx + r * 0.18} ${cy - r * 0.15}
-              Q ${cx + r * 0.22} ${cy + r * 0.1} ${cx} ${cy + r * 0.45} Z`}
-          fill={petalColor}
-          opacity={0.95}
-        />
-      </G>
-    );
-  }
-
-  if (variant === "rising") {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
-        <Path
-          d={`M ${cx} ${cy + r * 0.3}
-              Q ${cx - r * 0.15} ${cy} ${cx} ${cy - r * 0.55}
-              Q ${cx + r * 0.15} ${cy} ${cx} ${cy + r * 0.3} Z`}
-          fill={petalColor}
-          opacity={0.95}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.15}
-              Q ${cx - r * 0.15} ${cy + r * 0.05} ${cx - r * 0.5} ${cy - r * 0.35}
-              Q ${cx - r * 0.2} ${cy - r * 0.35} ${cx} ${cy + r * 0.15} Z`}
-          fill={petalColor}
-          opacity={0.85}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.15}
-              Q ${cx + r * 0.15} ${cy + r * 0.05} ${cx + r * 0.5} ${cy - r * 0.35}
-              Q ${cx + r * 0.2} ${cy - r * 0.35} ${cx} ${cy + r * 0.15} Z`}
-          fill={petalColor}
-          opacity={0.85}
-        />
-      </G>
-    );
-  }
-
-  if (variant === "bloom") {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
-        <Path
-          d={`M ${cx} ${cy + r * 0.05}
-              Q ${cx - r * 0.12} ${cy - r * 0.1} ${cx} ${cy - r * 0.55}
-              Q ${cx + r * 0.12} ${cy - r * 0.1} ${cx} ${cy + r * 0.05} Z`}
-          fill={petalColor}
-          opacity={0.95}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.05}
-              Q ${cx - r * 0.08} ${cy - r * 0.15} ${cx - r * 0.42} ${cy - r * 0.4}
-              Q ${cx - r * 0.18} ${cy - r * 0.3} ${cx} ${cy + r * 0.05} Z`}
-          fill={petalColor}
-          opacity={0.9}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.05}
-              Q ${cx + r * 0.08} ${cy - r * 0.15} ${cx + r * 0.42} ${cy - r * 0.4}
-              Q ${cx + r * 0.18} ${cy - r * 0.3} ${cx} ${cy + r * 0.05} Z`}
-          fill={petalColor}
-          opacity={0.9}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.05}
-              Q ${cx - r * 0.2} ${cy - r * 0.05} ${cx - r * 0.6} ${cy - r * 0.12}
-              Q ${cx - r * 0.35} ${cy - r * 0.2} ${cx} ${cy + r * 0.05} Z`}
-          fill={petalColor}
-          opacity={0.8}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.05}
-              Q ${cx + r * 0.2} ${cy - r * 0.05} ${cx + r * 0.6} ${cy - r * 0.12}
-              Q ${cx + r * 0.35} ${cy - r * 0.2} ${cx} ${cy + r * 0.05} Z`}
-          fill={petalColor}
-          opacity={0.8}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.15}
-              Q ${cx - r * 0.25} ${cy + r * 0.15} ${cx - r * 0.55} ${cy + r * 0.25}
-              Q ${cx - r * 0.25} ${cy + r * 0.05} ${cx} ${cy + r * 0.15} Z`}
-          fill={petalColor}
-          opacity={0.7}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.15}
-              Q ${cx + r * 0.25} ${cy + r * 0.15} ${cx + r * 0.55} ${cy + r * 0.25}
-              Q ${cx + r * 0.25} ${cy + r * 0.05} ${cx} ${cy + r * 0.15} Z`}
-          fill={petalColor}
-          opacity={0.7}
-        />
-      </G>
-    );
-  }
-
-  return (
-    <G>
-      <Circle cx={cx} cy={cy} r={r} fill={bgColor} opacity={0.85} />
-      <Path
-        d={`M ${cx} ${cy + r * 0.1}
-            Q ${cx - r * 0.12} ${cy - r * 0.05} ${cx} ${cy - r * 0.5}
-            Q ${cx + r * 0.12} ${cy - r * 0.05} ${cx} ${cy + r * 0.1} Z`}
-        fill={petalColor}
-        opacity={0.95}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.1}
-            Q ${cx - r * 0.1} ${cy - r * 0.1} ${cx - r * 0.38} ${cy - r * 0.38}
-            Q ${cx - r * 0.15} ${cy - r * 0.25} ${cx} ${cy + r * 0.1} Z`}
-        fill={petalColor}
-        opacity={0.9}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.1}
-            Q ${cx + r * 0.1} ${cy - r * 0.1} ${cx + r * 0.38} ${cy - r * 0.38}
-            Q ${cx + r * 0.15} ${cy - r * 0.25} ${cx} ${cy + r * 0.1} Z`}
-        fill={petalColor}
-        opacity={0.9}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.15}
-            Q ${cx - r * 0.2} ${cy} ${cx - r * 0.55} ${cy - r * 0.08}
-            Q ${cx - r * 0.3} ${cy - r * 0.18} ${cx} ${cy + r * 0.15} Z`}
-        fill={petalColor}
-        opacity={0.82}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.15}
-            Q ${cx + r * 0.2} ${cy} ${cx + r * 0.55} ${cy - r * 0.08}
-            Q ${cx + r * 0.3} ${cy - r * 0.18} ${cx} ${cy + r * 0.15} Z`}
-        fill={petalColor}
-        opacity={0.82}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.25}
-            Q ${cx - r * 0.3} ${cy + r * 0.2} ${cx - r * 0.6} ${cy + r * 0.3}
-            Q ${cx - r * 0.25} ${cy + r * 0.08} ${cx} ${cy + r * 0.25} Z`}
-        fill={petalColor}
-        opacity={0.7}
-      />
-      <Path
-        d={`M ${cx} ${cy + r * 0.25}
-            Q ${cx + r * 0.3} ${cy + r * 0.2} ${cx + r * 0.6} ${cy + r * 0.3}
-            Q ${cx + r * 0.25} ${cy + r * 0.08} ${cx} ${cy + r * 0.25} Z`}
-        fill={petalColor}
-        opacity={0.7}
-      />
-    </G>
-  );
-}
 
 export function LotusCycleWheel({
   cycleLength = 28,
@@ -393,15 +229,15 @@ export function LotusCycleWheel({
             {daySegments}
 
             <Circle cx={cx} cy={cy} r={outerRadius - strokeWidth - 8} fill="url(#centerGlow)" />
-
-            <G transform={`translate(${cx - lotusSize / 2}, ${cy - lotusSize / 2 - 15})`}>
-              <CenterLotus
-                variant={config.lotusVariant}
-                size={lotusSize}
-                color={config.labelColor}
-              />
-            </G>
           </Svg>
+
+          <View style={[styles.lotusOverlay, { top: cy - lotusSize / 2 - 15, left: cx - lotusSize / 2 }]}>
+            <RNImage
+              source={LOTUS_PHASE_IMAGES[config.lotusVariant as LotusVariant]}
+              style={{ width: lotusSize, height: lotusSize, borderRadius: lotusSize / 2 }}
+              resizeMode="contain"
+            />
+          </View>
 
           <View style={styles.centerHub}>
             <View style={styles.centerTextContainer}>
@@ -424,6 +260,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  lotusOverlay: {
+    position: "absolute",
   },
   centerHub: {
     position: "absolute",

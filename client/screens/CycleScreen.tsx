@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   Dimensions,
@@ -61,109 +62,20 @@ const PHASE_LABEL_COLORS: Record<Phase, string> = {
 
 type LotusVariant = "bud" | "rising" | "bloom" | "closing";
 
+const LOTUS_IMAGES: Record<LotusVariant, any> = {
+  bud: require("@/assets/images/lotus-menstrual.png"),
+  rising: require("@/assets/images/lotus-follicular.png"),
+  bloom: require("@/assets/images/lotus-ovulation.png"),
+  closing: require("@/assets/images/lotus-luteal.png"),
+};
+
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
-  const BASE_Y = 78;
-
-  if (variant === "bud") {
-    return (
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Path
-          d={`M 50 ${BASE_Y} C 38 64 36 44 36 34 C 36 18 43 10 50 10 C 57 10 64 18 64 34 C 64 44 62 64 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-        />
-      </Svg>
-    );
-  }
-
-  if (variant === "rising") {
-    return (
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Path
-          d={`M 50 ${BASE_Y} C 42 64 41 48 41 38 C 41 24 45 16 50 16 C 55 16 59 24 59 38 C 59 48 58 64 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 44 62 32 46 24 32 C 20 24 24 18 30 22 C 38 28 48 52 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.92}
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 56 62 68 46 76 32 C 80 24 76 18 70 22 C 62 28 52 52 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.92}
-        />
-      </Svg>
-    );
-  }
-
-  if (variant === "bloom") {
-    return (
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Path
-          d={`M 50 ${BASE_Y} C 43 64 43 50 43 40 C 43 28 46 20 50 20 C 54 20 57 28 57 40 C 57 50 57 64 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 44 62 34 48 28 34 C 24 26 28 20 33 24 C 40 30 48 54 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.92}
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 56 62 66 48 72 34 C 76 26 72 20 67 24 C 60 30 52 54 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.92}
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 40 64 24 50 16 36 C 12 28 16 20 22 26 C 30 34 44 58 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.82}
-        />
-        <Path
-          d={`M 50 ${BASE_Y} C 60 64 76 50 84 36 C 88 28 84 20 78 26 C 70 34 56 58 50 ${BASE_Y} Z`}
-          fill="#FFFFFF"
-          opacity={0.82}
-        />
-      </Svg>
-    );
-  }
-
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Path
-        d={`M 50 ${BASE_Y} C 44 66 44 54 44 44 C 44 32 47 26 50 26 C 53 26 56 32 56 44 C 56 54 56 66 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 45 64 36 50 30 38 C 27 32 30 26 34 30 C 40 36 48 56 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.93}
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 55 64 64 50 70 38 C 73 32 70 26 66 30 C 60 36 52 56 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.93}
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 42 66 28 52 20 38 C 16 30 20 24 25 28 C 32 34 46 58 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.85}
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 58 66 72 52 80 38 C 84 30 80 24 75 28 C 68 34 54 58 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.85}
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 38 68 18 56 10 42 C 6 34 10 26 16 32 C 24 40 42 62 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.72}
-      />
-      <Path
-        d={`M 50 ${BASE_Y} C 62 68 82 56 90 42 C 94 34 90 26 84 32 C 76 40 58 62 50 ${BASE_Y} Z`}
-        fill="#FFFFFF"
-        opacity={0.72}
-      />
-    </Svg>
+    <Image
+      source={LOTUS_IMAGES[variant]}
+      style={{ width: size, height: size }}
+      resizeMode="contain"
+    />
   );
 }
 
@@ -182,12 +94,12 @@ function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean })
             width: circleSize,
             height: circleSize,
             borderRadius: circleSize / 2,
-            backgroundColor: circleColor,
+            overflow: "hidden",
           },
           isActive ? styles.phaseCircleActive : null,
         ]}
       >
-        <PhaseLotus variant={config.lotusVariant} size={circleSize * 0.7} />
+        <PhaseLotus variant={config.lotusVariant} size={circleSize} />
       </View>
       <Text style={[styles.phaseLabel, { color: labelColor }]}>{config.label}</Text>
       <Text style={styles.phaseSubtitle}>{config.subtitle}</Text>
@@ -236,7 +148,6 @@ function angleToDayNumber(angle: number, cycleLength: number): number {
 function CenterLotusInWheel({
   variant,
   size,
-  bgColor,
 }: {
   variant: LotusVariant;
   size: number;
@@ -250,11 +161,11 @@ function CenterLotusInWheel({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: bgColor,
+          overflow: "hidden",
         },
       ]}
     >
-      <PhaseLotus variant={variant} size={size * 0.7} />
+      <PhaseLotus variant={variant} size={size} />
     </View>
   );
 }

@@ -39,12 +39,11 @@ The application includes:
   - Mini week calendar row with gradient date pills (pink → orange)
   - Main glass card (BlurView) containing interactive circular cycle wheel with 4-phase gradient segments (Menstrual: purple/lavender, Follicular: soft lilac, Ovulation: peach/orange, Luteal: pink/magenta)
   - Interactive wheel features: Users can drag or tap anywhere on the wheel to explore different days; haptic feedback on day changes; "Return to Today" button appears when viewing other days
-  - Phase-specific abstract white Lotus flower in center that changes based on cycle phase:
-    - Menstrual: Closed teardrop bud shape
-    - Follicular: 3-petal partially opening bud
-    - Ovulation: Layered opening bloom with multiple petals
-    - Luteal: Full bloom with wide spread petals
-  - Design: Pure white with subtle lavender gradients and soft shadows
+  - Phase-specific lotus flower PNG images in center that change based on cycle phase (stored in `client/assets/images/`):
+    - Menstrual (bud): Pink circle with single white petal (`lotus-menstrual.png`)
+    - Follicular (rising): Light pink circle with 3 white petals (`lotus-follicular.png`)
+    - Ovulation (bloom): Orange circle with 7 white petals, full bloom (`lotus-ovulation.png`)
+    - Luteal (closing): Lavender circle with 5 white petals (`lotus-luteal.png`)
   - Phase Explainer card below the wheel with iOS-friendly educational content:
     - "This phase" heading with phase name badge
     - "What's happening" - 3 concise bullet points about hormonal/body changes

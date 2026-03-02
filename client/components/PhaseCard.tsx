@@ -1,127 +1,26 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Svg, { Path, Circle, G } from "react-native-svg";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { phaseConfig, PHASE_ORDER, Phase } from "@/constants/phaseConfig";
 import { Fonts } from "@/constants/theme";
 import { neutral } from "@/constants/colors";
 import { GlassSurface } from "@/components/GlassSurface";
 
-function LotusIcon({ variant, size = 48, color }: { variant: string; size?: number; color: string }) {
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size * 0.38;
+type LotusVariant = "bud" | "rising" | "bloom" | "closing";
 
-  if (variant === "bud") {
-    return (
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Path
-          d={`M ${cx} ${cy + r * 0.6} Q ${cx - r * 0.25} ${cy - r * 0.2} ${cx} ${cy - r * 0.8} Q ${cx + r * 0.25} ${cy - r * 0.2} ${cx} ${cy + r * 0.6} Z`}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.2}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.6} L ${cx} ${cy + r}`}
-          stroke={color}
-          strokeWidth={1}
-        />
-      </Svg>
-    );
-  }
+const LOTUS_IMAGES: Record<LotusVariant, any> = {
+  bud: require("@/assets/images/lotus-menstrual.png"),
+  rising: require("@/assets/images/lotus-follicular.png"),
+  bloom: require("@/assets/images/lotus-ovulation.png"),
+  closing: require("@/assets/images/lotus-luteal.png"),
+};
 
-  if (variant === "rising") {
-    return (
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Path
-          d={`M ${cx} ${cy + r * 0.4} Q ${cx - r * 0.3} ${cy - r * 0.1} ${cx} ${cy - r * 0.7} Q ${cx + r * 0.3} ${cy - r * 0.1} ${cx} ${cy + r * 0.4} Z`}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.2}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.3} Q ${cx - r * 0.6} ${cy - r * 0.1} ${cx - r * 0.5} ${cy - r * 0.55} Q ${cx - r * 0.15} ${cy - r * 0.3} ${cx} ${cy + r * 0.3} Z`}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.2}
-          opacity={0.7}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.3} Q ${cx + r * 0.6} ${cy - r * 0.1} ${cx + r * 0.5} ${cy - r * 0.55} Q ${cx + r * 0.15} ${cy - r * 0.3} ${cx} ${cy + r * 0.3} Z`}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.2}
-          opacity={0.7}
-        />
-        <Path
-          d={`M ${cx} ${cy + r * 0.4} L ${cx} ${cy + r}`}
-          stroke={color}
-          strokeWidth={1}
-        />
-      </Svg>
-    );
-  }
-
-  if (variant === "bloom") {
-    const petalCount = 6;
-    const petals = [];
-    for (let i = 0; i < petalCount; i++) {
-      const angle = (i * 360) / petalCount - 90;
-      const rad = (angle * Math.PI) / 180;
-      const tipX = cx + r * 0.8 * Math.cos(rad);
-      const tipY = cy + r * 0.8 * Math.sin(rad);
-      const cp1Angle = rad - 0.35;
-      const cp2Angle = rad + 0.35;
-      const cp1X = cx + r * 0.45 * Math.cos(cp1Angle);
-      const cp1Y = cy + r * 0.45 * Math.sin(cp1Angle);
-      const cp2X = cx + r * 0.45 * Math.cos(cp2Angle);
-      const cp2Y = cy + r * 0.45 * Math.sin(cp2Angle);
-      petals.push(
-        <Path
-          key={i}
-          d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.2}
-        />
-      );
-    }
-    return (
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <G>{petals}</G>
-        <Circle cx={cx} cy={cy} r={r * 0.15} fill="none" stroke={color} strokeWidth={1} />
-      </Svg>
-    );
-  }
-
-  const petalCount = 8;
-  const petals = [];
-  for (let i = 0; i < petalCount; i++) {
-    const angle = (i * 360) / petalCount - 90;
-    const rad = (angle * Math.PI) / 180;
-    const tipX = cx + r * 0.9 * Math.cos(rad);
-    const tipY = cy + r * 0.9 * Math.sin(rad);
-    const cp1Angle = rad - 0.3;
-    const cp2Angle = rad + 0.3;
-    const cp1X = cx + r * 0.5 * Math.cos(cp1Angle);
-    const cp1Y = cy + r * 0.5 * Math.sin(cp1Angle);
-    const cp2X = cx + r * 0.5 * Math.cos(cp2Angle);
-    const cp2Y = cy + r * 0.5 * Math.sin(cp2Angle);
-    petals.push(
-      <Path
-        key={i}
-        d={`M ${cx} ${cy} Q ${cp1X} ${cp1Y} ${tipX} ${tipY} Q ${cp2X} ${cp2Y} ${cx} ${cy} Z`}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.2}
-        opacity={i % 2 === 0 ? 1 : 0.6}
-      />
-    );
-  }
+function LotusIcon({ variant, size = 48 }: { variant: string; size?: number; color: string }) {
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <G>{petals}</G>
-      <Circle cx={cx} cy={cy} r={r * 0.12} fill="none" stroke={color} strokeWidth={1} />
-    </Svg>
+    <Image
+      source={LOTUS_IMAGES[variant as LotusVariant]}
+      style={{ width: size, height: size, borderRadius: size / 2 }}
+      resizeMode="contain"
+    />
   );
 }
 
