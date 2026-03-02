@@ -70,12 +70,15 @@ const LOTUS_IMAGES: Record<LotusVariant, any> = {
   closing: require("@/assets/images/lotus-luteal.png"),
 };
 
+const LOTUS_SCALE = 1.35;
+
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
+  const scaledSize = size * LOTUS_SCALE;
   return (
     <Image
       source={LOTUS_IMAGES[variant]}
-      style={{ width: size, height: size }}
-      resizeMode="contain"
+      style={{ width: scaledSize, height: scaledSize }}
+      resizeMode="cover"
     />
   );
 }
