@@ -16,7 +16,6 @@ import Svg, {
   RadialGradient,
   LinearGradient as SvgLinearGradient,
   Stop,
-  Rect,
 } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -63,19 +62,13 @@ const PHASE_LABEL_COLORS: Record<Phase, string> = {
 type LotusVariant = "bud" | "rising" | "bloom" | "closing";
 
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
-  const s = size;
-  const cx = s / 2;
-  const cy = s / 2;
+  const BASE_Y = 78;
 
   if (variant === "bud") {
     return (
-      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <Svg width={size} height={size} viewBox="0 0 100 100">
         <Path
-          d={`M ${cx} ${cy + s * 0.32}
-              Q ${cx - s * 0.13} ${cy + s * 0.15} ${cx - s * 0.13} ${cy - s * 0.05}
-              Q ${cx - s * 0.13} ${cy - s * 0.25} ${cx} ${cy - s * 0.35}
-              Q ${cx + s * 0.13} ${cy - s * 0.25} ${cx + s * 0.13} ${cy - s * 0.05}
-              Q ${cx + s * 0.13} ${cy + s * 0.15} ${cx} ${cy + s * 0.32} Z`}
+          d={`M 50 ${BASE_Y} C 38 64 36 44 36 34 C 36 18 43 10 50 10 C 57 10 64 18 64 34 C 64 44 62 64 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
         />
       </Svg>
@@ -84,30 +77,20 @@ function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) 
 
   if (variant === "rising") {
     return (
-      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <Svg width={size} height={size} viewBox="0 0 100 100">
         <Path
-          d={`M ${cx} ${cy + s * 0.28}
-              Q ${cx - s * 0.11} ${cy + s * 0.1} ${cx - s * 0.11} ${cy - s * 0.08}
-              Q ${cx - s * 0.11} ${cy - s * 0.25} ${cx} ${cy - s * 0.33}
-              Q ${cx + s * 0.11} ${cy - s * 0.25} ${cx + s * 0.11} ${cy - s * 0.08}
-              Q ${cx + s * 0.11} ${cy + s * 0.1} ${cx} ${cy + s * 0.28} Z`}
+          d={`M 50 ${BASE_Y} C 42 64 41 48 41 38 C 41 24 45 16 50 16 C 55 16 59 24 59 38 C 59 48 58 64 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
         />
         <Path
-          d={`M ${cx - s * 0.04} ${cy + s * 0.18}
-              Q ${cx - s * 0.22} ${cy + s * 0.05} ${cx - s * 0.28} ${cy - s * 0.12}
-              Q ${cx - s * 0.22} ${cy - s * 0.2} ${cx - s * 0.1} ${cy - s * 0.08}
-              Q ${cx - s * 0.04} ${cy + s * 0.02} ${cx - s * 0.04} ${cy + s * 0.18} Z`}
+          d={`M 50 ${BASE_Y} C 44 62 32 46 24 32 C 20 24 24 18 30 22 C 38 28 48 52 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.85}
+          opacity={0.92}
         />
         <Path
-          d={`M ${cx + s * 0.04} ${cy + s * 0.18}
-              Q ${cx + s * 0.22} ${cy + s * 0.05} ${cx + s * 0.28} ${cy - s * 0.12}
-              Q ${cx + s * 0.22} ${cy - s * 0.2} ${cx + s * 0.1} ${cy - s * 0.08}
-              Q ${cx + s * 0.04} ${cy + s * 0.02} ${cx + s * 0.04} ${cy + s * 0.18} Z`}
+          d={`M 50 ${BASE_Y} C 56 62 68 46 76 32 C 80 24 76 18 70 22 C 62 28 52 52 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.85}
+          opacity={0.92}
         />
       </Svg>
     );
@@ -115,108 +98,70 @@ function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) 
 
   if (variant === "bloom") {
     return (
-      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <Svg width={size} height={size} viewBox="0 0 100 100">
         <Path
-          d={`M ${cx} ${cy + s * 0.22}
-              Q ${cx - s * 0.1} ${cy + s * 0.05} ${cx - s * 0.1} ${cy - s * 0.1}
-              Q ${cx - s * 0.1} ${cy - s * 0.25} ${cx} ${cy - s * 0.3}
-              Q ${cx + s * 0.1} ${cy - s * 0.25} ${cx + s * 0.1} ${cy - s * 0.1}
-              Q ${cx + s * 0.1} ${cy + s * 0.05} ${cx} ${cy + s * 0.22} Z`}
+          d={`M 50 ${BASE_Y} C 43 64 43 50 43 40 C 43 28 46 20 50 20 C 54 20 57 28 57 40 C 57 50 57 64 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
         />
         <Path
-          d={`M ${cx - s * 0.03} ${cy + s * 0.12}
-              Q ${cx - s * 0.2} ${cy} ${cx - s * 0.3} ${cy - s * 0.15}
-              Q ${cx - s * 0.2} ${cy - s * 0.25} ${cx - s * 0.08} ${cy - s * 0.12}
-              Q ${cx - s * 0.03} ${cy} ${cx - s * 0.03} ${cy + s * 0.12} Z`}
+          d={`M 50 ${BASE_Y} C 44 62 34 48 28 34 C 24 26 28 20 33 24 C 40 30 48 54 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.88}
+          opacity={0.92}
         />
         <Path
-          d={`M ${cx + s * 0.03} ${cy + s * 0.12}
-              Q ${cx + s * 0.2} ${cy} ${cx + s * 0.3} ${cy - s * 0.15}
-              Q ${cx + s * 0.2} ${cy - s * 0.25} ${cx + s * 0.08} ${cy - s * 0.12}
-              Q ${cx + s * 0.03} ${cy} ${cx + s * 0.03} ${cy + s * 0.12} Z`}
+          d={`M 50 ${BASE_Y} C 56 62 66 48 72 34 C 76 26 72 20 67 24 C 60 30 52 54 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.88}
+          opacity={0.92}
         />
         <Path
-          d={`M ${cx - s * 0.06} ${cy + s * 0.2}
-              Q ${cx - s * 0.26} ${cy + s * 0.12} ${cx - s * 0.35} ${cy}
-              Q ${cx - s * 0.28} ${cy - s * 0.1} ${cx - s * 0.14} ${cy + s * 0.02}
-              Q ${cx - s * 0.06} ${cy + s * 0.1} ${cx - s * 0.06} ${cy + s * 0.2} Z`}
+          d={`M 50 ${BASE_Y} C 40 64 24 50 16 36 C 12 28 16 20 22 26 C 30 34 44 58 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.75}
+          opacity={0.82}
         />
         <Path
-          d={`M ${cx + s * 0.06} ${cy + s * 0.2}
-              Q ${cx + s * 0.26} ${cy + s * 0.12} ${cx + s * 0.35} ${cy}
-              Q ${cx + s * 0.28} ${cy - s * 0.1} ${cx + s * 0.14} ${cy + s * 0.02}
-              Q ${cx + s * 0.06} ${cy + s * 0.1} ${cx + s * 0.06} ${cy + s * 0.2} Z`}
+          d={`M 50 ${BASE_Y} C 60 64 76 50 84 36 C 88 28 84 20 78 26 C 70 34 56 58 50 ${BASE_Y} Z`}
           fill="#FFFFFF"
-          opacity={0.75}
+          opacity={0.82}
         />
       </Svg>
     );
   }
 
   return (
-    <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+    <Svg width={size} height={size} viewBox="0 0 100 100">
       <Path
-        d={`M ${cx} ${cy + s * 0.18}
-            Q ${cx - s * 0.09} ${cy + s * 0.02} ${cx - s * 0.09} ${cy - s * 0.1}
-            Q ${cx - s * 0.09} ${cy - s * 0.22} ${cx} ${cy - s * 0.28}
-            Q ${cx + s * 0.09} ${cy - s * 0.22} ${cx + s * 0.09} ${cy - s * 0.1}
-            Q ${cx + s * 0.09} ${cy + s * 0.02} ${cx} ${cy + s * 0.18} Z`}
+        d={`M 50 ${BASE_Y} C 44 66 44 54 44 44 C 44 32 47 26 50 26 C 53 26 56 32 56 44 C 56 54 56 66 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
       />
       <Path
-        d={`M ${cx - s * 0.02} ${cy + s * 0.1}
-            Q ${cx - s * 0.18} ${cy - s * 0.02} ${cx - s * 0.26} ${cy - s * 0.16}
-            Q ${cx - s * 0.18} ${cy - s * 0.24} ${cx - s * 0.06} ${cy - s * 0.1}
-            Q ${cx - s * 0.02} ${cy} ${cx - s * 0.02} ${cy + s * 0.1} Z`}
+        d={`M 50 ${BASE_Y} C 45 64 36 50 30 38 C 27 32 30 26 34 30 C 40 36 48 56 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.9}
+        opacity={0.93}
       />
       <Path
-        d={`M ${cx + s * 0.02} ${cy + s * 0.1}
-            Q ${cx + s * 0.18} ${cy - s * 0.02} ${cx + s * 0.26} ${cy - s * 0.16}
-            Q ${cx + s * 0.18} ${cy - s * 0.24} ${cx + s * 0.06} ${cy - s * 0.1}
-            Q ${cx + s * 0.02} ${cy} ${cx + s * 0.02} ${cy + s * 0.1} Z`}
+        d={`M 50 ${BASE_Y} C 55 64 64 50 70 38 C 73 32 70 26 66 30 C 60 36 52 56 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.9}
+        opacity={0.93}
       />
       <Path
-        d={`M ${cx - s * 0.06} ${cy + s * 0.2}
-            Q ${cx - s * 0.25} ${cy + s * 0.1} ${cx - s * 0.35} ${cy - s * 0.02}
-            Q ${cx - s * 0.27} ${cy - s * 0.12} ${cx - s * 0.12} ${cy + s * 0.02}
-            Q ${cx - s * 0.06} ${cy + s * 0.1} ${cx - s * 0.06} ${cy + s * 0.2} Z`}
+        d={`M 50 ${BASE_Y} C 42 66 28 52 20 38 C 16 30 20 24 25 28 C 32 34 46 58 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.8}
+        opacity={0.85}
       />
       <Path
-        d={`M ${cx + s * 0.06} ${cy + s * 0.2}
-            Q ${cx + s * 0.25} ${cy + s * 0.1} ${cx + s * 0.35} ${cy - s * 0.02}
-            Q ${cx + s * 0.27} ${cy - s * 0.12} ${cx + s * 0.12} ${cy + s * 0.02}
-            Q ${cx + s * 0.06} ${cy + s * 0.1} ${cx + s * 0.06} ${cy + s * 0.2} Z`}
+        d={`M 50 ${BASE_Y} C 58 66 72 52 80 38 C 84 30 80 24 75 28 C 68 34 54 58 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.8}
+        opacity={0.85}
       />
       <Path
-        d={`M ${cx - s * 0.1} ${cy + s * 0.26}
-            Q ${cx - s * 0.3} ${cy + s * 0.18} ${cx - s * 0.38} ${cy + s * 0.08}
-            Q ${cx - s * 0.3} ${cy} ${cx - s * 0.16} ${cy + s * 0.1}
-            Q ${cx - s * 0.1} ${cy + s * 0.18} ${cx - s * 0.1} ${cy + s * 0.26} Z`}
+        d={`M 50 ${BASE_Y} C 38 68 18 56 10 42 C 6 34 10 26 16 32 C 24 40 42 62 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.65}
+        opacity={0.72}
       />
       <Path
-        d={`M ${cx + s * 0.1} ${cy + s * 0.26}
-            Q ${cx + s * 0.3} ${cy + s * 0.18} ${cx + s * 0.38} ${cy + s * 0.08}
-            Q ${cx + s * 0.3} ${cy} ${cx + s * 0.16} ${cy + s * 0.1}
-            Q ${cx + s * 0.1} ${cy + s * 0.18} ${cx + s * 0.1} ${cy + s * 0.26} Z`}
+        d={`M 50 ${BASE_Y} C 62 68 82 56 90 42 C 94 34 90 26 84 32 C 76 40 58 62 50 ${BASE_Y} Z`}
         fill="#FFFFFF"
-        opacity={0.65}
+        opacity={0.72}
       />
     </Svg>
   );
