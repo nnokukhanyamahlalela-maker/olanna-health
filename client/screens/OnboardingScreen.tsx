@@ -825,6 +825,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: Spacing["2xl"],
+    paddingTop: 60,
   },
   carouselIconContainer: {
     marginBottom: Spacing["2xl"],
