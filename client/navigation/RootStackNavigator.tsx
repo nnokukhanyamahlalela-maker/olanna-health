@@ -25,6 +25,9 @@ import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
 import LogProductScreen from "@/screens/LogProductScreen";
 import ProductInsightsScreen from "@/screens/ProductInsightsScreen";
 import LearnMoreSheet from "@/screens/LearnMoreSheet";
+import PartnerSettingsScreen from "@/screens/PartnerSettingsScreen";
+import PartnerPreviewScreen from "@/screens/PartnerPreviewScreen";
+import PartnerDashboardScreen from "@/screens/PartnerDashboardScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -52,6 +55,9 @@ export type RootStackParamList = {
   LogProduct: undefined;
   ProductInsights: undefined;
   LearnMoreSheet: undefined;
+  PartnerSettings: undefined;
+  PartnerPreview: undefined;
+  PartnerDashboard: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -198,6 +204,27 @@ export default function RootStackNavigator() {
         component={ProductInsightsScreen}
         options={{
           headerTitle: "My Product Insights",
+        }}
+      />
+      <Stack.Screen
+        name="PartnerSettings"
+        component={PartnerSettingsScreen}
+        options={{
+          headerTitle: "Partner Mode",
+        }}
+      />
+      <Stack.Screen
+        name="PartnerPreview"
+        component={PartnerPreviewScreen}
+        options={{
+          headerTitle: "Partner Preview",
+        }}
+      />
+      <Stack.Screen
+        name="PartnerDashboard"
+        component={PartnerDashboardScreen}
+        options={{
+          headerTitle: "Partner Dashboard",
         }}
       />
       <Stack.Screen

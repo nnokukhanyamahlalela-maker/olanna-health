@@ -78,6 +78,10 @@ export const saveDailyCheckIn = async (checkIn: DailyCheckIn): Promise<void> => 
       existingCheckIns.push(checkIn);
     }
     await AsyncStorage.setItem(STORAGE_KEYS.DAILY_CHECKINS, JSON.stringify(existingCheckIns));
+    try {
+      const { pushCycleSnapshot } = require("./partnerSync");
+      pushCycleSnapshot();
+    } catch {}
   } catch (error) {
     console.error('Error saving daily check-in:', error);
     throw error;

@@ -80,6 +80,10 @@ export const storage = {
 
   async setCycleData(cycleData: CycleData): Promise<void> {
     await secureStorage.setCycleData(cycleData);
+    try {
+      const { pushCycleSnapshot } = require("./partnerSync");
+      pushCycleSnapshot();
+    } catch {}
   },
 
   async getDailyLogs(): Promise<DailyLog[]> {

@@ -187,6 +187,20 @@ export default function ProfileScreen() {
         </ThemedText>
         <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
+            icon="heart"
+            label="Partner Mode"
+            onPress={() => navigation.navigate("PartnerSettings")}
+            theme={theme}
+            isDark={isDark}
+          />
+          <MenuItem
+            icon="users"
+            label="Partner Dashboard"
+            onPress={() => navigation.navigate("PartnerDashboard")}
+            theme={theme}
+            isDark={isDark}
+          />
+          <MenuItem
             icon="sun"
             label="Appearance"
             onPress={() => navigation.navigate("Appearance")}
