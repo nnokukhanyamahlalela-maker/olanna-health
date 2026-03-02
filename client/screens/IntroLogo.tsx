@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View, AccessibilityInfo, StatusBar } from "react-native";
+import { StyleSheet, View, Image, AccessibilityInfo, StatusBar } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,6 +11,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+import introBackground from "../assets/images/intro-background.png";
+import introLogo from "../assets/images/intro-logo.png";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -48,22 +50,22 @@ export default function IntroLogo() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <LinearGradient
-        colors={["#FF8C42", "#FF5E8A", "#FF3F9E", "#F7A8C9", "#E8B4D9"]}
-        locations={[0, 0.3, 0.5, 0.75, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
+      <Image
+        source={introBackground}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
+      <Animated.View
+        style={[StyleSheet.absoluteFill, animatedStyle]}
+        accessibilityLabel="Olanna Health"
+        accessibilityRole="header"
       >
-        <Animated.View
-          style={[styles.logoContainer, animatedStyle]}
-          accessibilityLabel="Olanna Health"
-          accessibilityRole="header"
-        >
-          <Animated.Text style={styles.brandName}>OLANNA</Animated.Text>
-          <Animated.Text style={styles.brandSub}>HEALTH</Animated.Text>
-        </Animated.View>
-      </LinearGradient>
+        <Image
+          source={introLogo}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -72,32 +74,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FF5E8A",
-  },
-  gradient: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: "28%",
-  },
-  logoContainer: {
-    alignItems: "center",
-    gap: 2,
-  },
-  brandName: {
-    fontFamily: "Poppins_900Black",
-    fontSize: 52,
-    color: "#FFFFFF",
-    letterSpacing: 2,
-    textAlign: "center",
-    includeFontPadding: false,
-  },
-  brandSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 22,
-    color: "#FFFFFF",
-    letterSpacing: 8,
-    textAlign: "center",
-    marginTop: -4,
-    includeFontPadding: false,
   },
 });
