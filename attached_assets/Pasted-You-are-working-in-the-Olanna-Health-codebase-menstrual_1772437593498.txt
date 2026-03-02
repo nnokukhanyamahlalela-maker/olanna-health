@@ -1,0 +1,120 @@
+You are working in the Olanna Health codebase (menstrual cycle tracking + wellness). Implement a new feature called Partner Mode that allows a primary user to share select cycle insights with a partner without exposing private health details by default.
+
+Core goals
+	1.	Privacy-first: The primary user controls exactly what is shared. Default = minimal sharing (opt-in).
+	2.	Confidentiality: Partner must never be able to see sensitive data (e.g., symptom logs, sexual activity, notes, test results, medications, doctor visits) unless explicitly enabled by the primary user.
+	3.	Safety: The primary user can revoke access instantly. Provide an “Emergency revoke” button.
+	4.	Non-identifying summaries: Prefer generalized insights over raw data (e.g., “low energy day likely” instead of “cramps 7/10 + mood swings”).
+
+⸻
+
+Feature requirements
+
+1) Data model additions
+
+Add tables/collections to support partner sharing.
+
+PartnerInvite
+	•	id
+	•	primaryUserId
+	•	partnerEmailOrPhone (optional)
+	•	inviteCode (short-lived, e.g., expires in 24h)
+	•	status (pending|accepted|revoked|expired)
+	•	createdAt, expiresAt
+
+PartnerLink
+	•	id
+	•	primaryUserId
+	•	partnerUserId
+	•	createdAt
+	•	revokedAt (nullable)
+	•	isActive (boolean)
+
+PartnerSharingSettings
+	•	primaryUserId
+	•	shareCyclePhase (default true)
+	•	shareNextPeriodWindow (default true but only as a window, not exact date)
+	•	shareFertileWindow (default false)
+	•	shareOvulationEstimate (default false)
+	•	shareMoodSummary (default false, summary only)
+	•	shareEnergySummary (default false, summary only)
+	•	shareTipsForPartner (default true) (e.g., “be gentle today”, “plan a cozy night”)
+	•	shareNotifications (default false) (partner notifications)
+	•	precisionLevel (low|medium) default low
+	•	updatedAt
+
+AuditLog
+	•	id
+	•	actorUserId
+	•	action (e.g., PARTNER_INVITE_CREATED, PARTNER_SETTINGS_UPDATED, PARTNER_REVOKED)
+	•	metadata (JSON)
+	•	createdAt
+
+⸻
+
+2) Sharing rules (strict)
+
+Create a server-side “shared view” generator that ONLY returns approved fields.
+
+Partner can access:
+	•	Current Lotus Cycle phase (Menstrual/Follicular/Ovulatory/Luteal) + phase theme label
+	•	Approximate next period window (e.g., “in ~5–9 days” or “Mar 10–Mar 14”)
+	•	If enabled: approximate fertile window/ovulation as a window (never exact timestamp)
+	•	If enabled: “mood/energy summary” as one of: low/steady/high + a short sentence
+	•	Partner-friendly tips (non-medical, supportive)
+
+Partner can NEVER access (even if bugged UI tries):
+	•	Symptom entries, symptom intensity
+	•	Any free-text notes/journals
+	•	Sexual activity logs
+	•	Cervical mucus details
+	•	Test results, medications, supplements
+	•	Diagnoses labels unless primary explicitly shares a generic category (optional future)
+	•	Any raw daily logs or timestamps
+
+Enforce these on the backend with allowlists—do not rely on frontend hiding.
+
+⸻
+
+3) Invitation + linking flow
+
+Primary user can:
+	•	Go to Settings → Partner Mode
+	•	Tap Invite Partner
+	•	Generate a time-limited invite code/link
+	•	Partner accepts by creating/logging into an account and entering code
+	•	Once accepted, create PartnerLink and PartnerSharingSettings if missing
+
+Primary can revoke at any time:
+	•	Button: Revoke Partner Access
+	•	Button: Emergency Revoke Now (also logs out partner sessions and invalidates tokens)
+
+⸻
+
+4) Authentication / authorization
+
+Add role-based authorization:
+	•	A partner is just a regular user account but with a PartnerLink mapping.
+	•	Create middleware/guards so that partner endpoints can only read the shared view for the linked primary user.
+
+Token/session handling:
+	•	If revoked, partner tokens should be rejected (e.g., check PartnerLink.isActive).
+
+⸻
+
+5) API endpoints
+
+Implement endpoints (adjust to the stack used in Olanna):
+
+Primary user
+	•	POST /partner/invite → creates invite code
+	•	POST /partner/accept → partner accepts with code
+	•	GET /partner/settings → current settings
+	•	PUT /partner/settings → update toggles + precision level
+	•	POST /partner/revoke → revoke access (normal)
+	•	POST /partner/revoke-emergency → revoke + invalidate sessions
+
+Partner user
+	•	GET /partner/dashboard → returns only the shared view payload
+
+Shared view payload example:
