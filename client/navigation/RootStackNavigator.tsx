@@ -12,6 +12,7 @@ import SexualHealthModuleScreen from "@/screens/SexualHealthModuleScreen";
 import CervicalScreeningModuleScreen from "@/screens/CervicalScreeningModuleScreen";
 import EditProfileScreen from "@/screens/EditProfileScreen";
 import PrivacySettingsScreen from "@/screens/PrivacySettingsScreen";
+import PrivacyStatementScreen from "@/screens/PrivacyStatementScreen";
 import FertilityTrackingScreen from "@/screens/FertilityTrackingScreen";
 import InsightsScreen from "@/screens/InsightsScreen";
 import CheckInScreen from "@/screens/CheckInScreen";
@@ -42,6 +43,7 @@ export type RootStackParamList = {
   CervicalScreeningModule: undefined;
   EditProfile: undefined;
   PrivacySettings: undefined;
+  PrivacyStatement: undefined;
   FertilityTracking: undefined;
   Insights: undefined;
   CheckIn: undefined;
@@ -127,6 +129,13 @@ export default function RootStackNavigator() {
         component={PrivacySettingsScreen}
         options={{
           headerTitle: "Privacy & Data",
+        }}
+      />
+      <Stack.Screen
+        name="PrivacyStatement"
+        component={PrivacyStatementScreen}
+        options={{
+          headerTitle: "Privacy Statement",
         }}
       />
       <Stack.Screen

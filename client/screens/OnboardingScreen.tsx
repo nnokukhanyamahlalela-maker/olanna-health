@@ -456,6 +456,13 @@ function GoalsScreen({
             />
           ) : null}
         </View>
+
+        <View style={styles.privacyNotice}>
+          <Feather name="shield" size={14} color="rgba(255,255,255,0.6)" />
+          <ThemedText style={styles.privacyNoticeText}>
+            Your data stays on your device.
+          </ThemedText>
+        </View>
       </ScrollView>
     </GradientBackground>
   );
@@ -884,5 +891,18 @@ const styles = StyleSheet.create({
   carouselActions: {
     paddingHorizontal: Spacing["2xl"],
     paddingBottom: Spacing["2xl"],
+  },
+  privacyNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  privacyNoticeText: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.6)",
+    fontFamily: "Poppins_400Regular",
   },
 });

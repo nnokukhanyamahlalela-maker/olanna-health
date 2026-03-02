@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -22,6 +24,7 @@ import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { privacyStorage, PrivacySettings } from "@/lib/privacyStorage";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 interface SettingRowProps {
   icon: keyof typeof Feather.glyphMap;
@@ -106,6 +109,7 @@ export default function PrivacySettingsScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [settings, setSettings] = useState<PrivacySettings>({
     anonymousMode: false,
@@ -339,12 +343,19 @@ export default function PrivacySettingsScreen() {
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(300).delay(500)}>
-        <GlassSurface style={styles.policyCard}>
-          <Feather name="file-text" size={20} color={theme.textSecondary} />
-          <ThemedText type="small" style={[styles.policyText, { color: theme.textSecondary }]}>
-            Read our full Privacy Policy to understand how we protect your data and your rights.
-          </ThemedText>
-        </GlassSurface>
+        <Pressable
+          onPress={() => navigation.navigate("PrivacyStatement")}
+          style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+          testID="button-privacy-statement"
+        >
+          <GlassSurface style={styles.policyCard}>
+            <Feather name="file-text" size={20} color={theme.primary} />
+            <ThemedText type="small" style={[styles.policyText, { color: theme.textSecondary }]}>
+              Read our full Privacy Statement to understand how we protect your data and your rights.
+            </ThemedText>
+            <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+          </GlassSurface>
+        </Pressable>
       </Animated.View>
       </ScrollView>
     </AppGradient>
