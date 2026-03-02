@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 
 import {
@@ -40,11 +40,12 @@ import {
 import { Fonts } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
+import { storage, calculateCycleData } from "@/lib/storage";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const CYCLE_LENGTH = 28;
-const CURRENT_DAY = 12;
+const DEFAULT_CYCLE_LENGTH = 28;
+const DEFAULT_CURRENT_DAY = 12;
 
 const PHASE_CIRCLE_COLORS: Record<Phase, string> = {
   menstrual: "#E8588D",
@@ -364,9 +365,30 @@ export function CycleScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
-  const [selectedDay, setSelectedDay] = useState(CURRENT_DAY);
 
-  const currentPhase = getPhaseForDay(selectedDay, CYCLE_LENGTH);
+  const [cycleLength, setCycleLength] = useState(DEFAULT_CYCLE_LENGTH);
+  const [currentDay, setCurrentDay] = useState(DEFAULT_CURRENT_DAY);
+  const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const profile = await storage.getUserProfile();
+          if (!profile || !active) return;
+          const cycleData = calculateCycleData(profile);
+          setCycleLength(profile.cycleLength || DEFAULT_CYCLE_LENGTH);
+          const day = cycleData.currentDay || DEFAULT_CURRENT_DAY;
+          setCurrentDay(day);
+          setSelectedDay(day);
+        } catch {}
+      })();
+      return () => { active = false; };
+    }, [])
+  );
+
+  const currentPhase = getPhaseForDay(selectedDay, cycleLength);
 
   return (
     <View style={styles.root}>
@@ -403,8 +425,8 @@ export function CycleScreen() {
         </View>
 
         <InteractiveCycleWheel
-          cycleLength={CYCLE_LENGTH}
-          currentDay={CURRENT_DAY}
+          cycleLength={cycleLength}
+          currentDay={currentDay}
           selectedDay={selectedDay}
           onDaySelect={setSelectedDay}
         />

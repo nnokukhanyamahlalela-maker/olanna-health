@@ -21,6 +21,7 @@ import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 import { getPhaseForDay, phaseConfig, Phase } from "@/constants/phaseConfig";
+import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const DAY_SIZE = Math.floor((SCREEN_WIDTH - 80) / 7);
@@ -98,6 +99,7 @@ export default function CalendarScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
 
   const loadData = useCallback(async () => {
     const [userProfile, logs] = await Promise.all([
@@ -540,6 +542,38 @@ export default function CalendarScreen() {
                 ) : null}
               </View>
             ) : null}
+
+            <Pressable
+              testID="button-log-period"
+              onPress={() => setPeriodSheetVisible(true)}
+              style={({ pressed }) => [
+                styles.logPeriodButton,
+                {
+                  backgroundColor: pressed
+                    ? phaseTokens.menstrual.solid + "20"
+                    : phaseTokens.menstrual.solid + "12",
+                },
+              ]}
+            >
+              <Feather
+                name="droplet"
+                size={16}
+                color={phaseTokens.menstrual.solid}
+              />
+              <Text
+                style={[
+                  styles.logPeriodText,
+                  { color: phaseTokens.menstrual.solid },
+                ]}
+              >
+                {selectedLog?.flow ? "Edit period log" : "Log your period"}
+              </Text>
+              <Feather
+                name="chevron-right"
+                size={16}
+                color={phaseTokens.menstrual.solid}
+              />
+            </Pressable>
           </GlassSurface>
         ) : null}
 
@@ -587,6 +621,17 @@ export default function CalendarScreen() {
           </View>
         </GlassSurface>
       </ScrollView>
+
+      <PeriodLogSheet
+        visible={periodSheetVisible}
+        date={selectedDate || todayKey}
+        existingLog={selectedLog || null}
+        onSave={() => {
+          setPeriodSheetVisible(false);
+          loadData();
+        }}
+        onDismiss={() => setPeriodSheetVisible(false)}
+      />
     </AppGradient>
   );
 }
@@ -802,5 +847,19 @@ const styles = StyleSheet.create({
     width: 1,
     height: 60,
     marginHorizontal: 12,
+  },
+  logPeriodButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    marginTop: 12,
+    borderRadius: 14,
+  },
+  logPeriodText: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 14,
+    flex: 1,
   },
 });

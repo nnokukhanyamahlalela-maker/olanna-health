@@ -198,3 +198,31 @@ export function calculateCycleData(profile: UserProfile): CycleData {
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
+
+export function detectPeriodStart(
+  dateKey: string,
+  dailyLogs: DailyLog[],
+  currentLastPeriodStart?: string
+): boolean {
+  const current = dailyLogs.find((l) => l.date === dateKey);
+  if (!current || !current.flow) return false;
+
+  const logsWithFlow = dailyLogs
+    .filter((l) => l.flow && l.date < dateKey)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  if (logsWithFlow.length === 0) return true;
+
+  const mostRecentFlowDate = logsWithFlow[0].date;
+  const recent = new Date(mostRecentFlowDate + "T12:00:00");
+  const current_ = new Date(dateKey + "T12:00:00");
+  const gapDays = Math.round(
+    (current_.getTime() - recent.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (gapDays <= 1) return false;
+
+  if (currentLastPeriodStart && dateKey <= currentLastPeriodStart) return false;
+
+  return true;
+}
