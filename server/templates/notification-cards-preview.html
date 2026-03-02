@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olanna Health — Notification Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Poppins',system-ui,sans-serif;
+    background:linear-gradient(165deg,#FFF5F7 0%,#FBF0F4 35%,#F3EAF5 65%,#EDE8F6 100%);
+    min-height:100vh;
+    padding:40px 20px 80px;
+    color:#3D2B3D;
+  }
+
+  .page-header{
+    text-align:center;
+    margin-bottom:48px;
+  }
+  .page-header h1{
+    font-weight:700;
+    font-size:28px;
+    color:#3D2B3D;
+    letter-spacing:-0.3px;
+    margin-bottom:6px;
+  }
+  .page-header p{
+    font-weight:300;
+    font-size:14px;
+    color:#8A6D8A;
+    letter-spacing:0.2px;
+  }
+
+  .section-label{
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:#B48EB4;
+    margin-bottom:20px;
+    padding-left:4px;
+  }
+
+  .cards-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+    gap:20px;
+    max-width:780px;
+    margin:0 auto 52px;
+  }
+
+  .card{
+    position:relative;
+    background:rgba(255,255,255,0.72);
+    backdrop-filter:blur(20px) saturate(1.4);
+    -webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border:1px solid rgba(255,255,255,0.85);
+    border-radius:22px;
+    padding:24px 24px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    transition:transform 0.22s ease,box-shadow 0.22s ease;
+    box-shadow:
+      0 2px 8px rgba(180,142,180,0.08),
+      0 8px 24px rgba(180,142,180,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    box-shadow:
+      0 4px 12px rgba(180,142,180,0.12),
+      0 12px 32px rgba(180,142,180,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+
+  .card-top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .icon-wrap{
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:24px;
+    box-shadow:inset 0 -1px 2px rgba(0,0,0,0.04);
+  }
+
+  .icon-pink    { background:linear-gradient(135deg,#FDDDE6 0%,#F8C4D4 100%); }
+  .icon-lilac   { background:linear-gradient(135deg,#E8DAFB 0%,#D5C3F0 100%); }
+  .icon-blue    { background:linear-gradient(135deg,#D6EAF8 0%,#BDD8F0 100%); }
+  .icon-peach   { background:linear-gradient(135deg,#FDE8D8 0%,#F8D4B8 100%); }
+  .icon-sage    { background:linear-gradient(135deg,#DDE8DC 0%,#C5D9C2 100%); }
+  .icon-rose    { background:linear-gradient(135deg,#F6D0D0 0%,#EDAFAF 100%); }
+  .icon-lavender{ background:linear-gradient(135deg,#E0D4F0 0%,#CDB8E6 100%); }
+  .icon-cream   { background:linear-gradient(135deg,#F8EDD8 0%,#F0DFC0 100%); }
+
+  .card-headline{
+    font-weight:600;
+    font-size:15px;
+    color:#3D2B3D;
+    line-height:1.35;
+    letter-spacing:-0.1px;
+  }
+
+  .card-body{
+    font-weight:400;
+    font-size:13.5px;
+    line-height:1.65;
+    color:#6B5070;
+  }
+
+  .card-action{
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-weight:600;
+    font-size:12.5px;
+    letter-spacing:0.3px;
+    padding:9px 18px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+    transition:opacity 0.18s ease,transform 0.18s ease;
+  }
+  .card-action:hover{
+    opacity:0.85;
+    transform:scale(1.03);
+  }
+  .card-action:active{transform:scale(0.97)}
+
+  .action-pink   {background:#E83E8C;color:#fff}
+  .action-lilac  {background:#9B6EC6;color:#fff}
+  .action-peach  {background:#E8885A;color:#fff}
+  .action-sage   {background:#6BA367;color:#fff}
+  .action-rose   {background:#D46B6B;color:#fff}
+  .action-blue   {background:#5A9ECF;color:#fff}
+  .action-soft   {background:rgba(232,62,140,0.12);color:#C22E6E}
+
+  .card-tag{
+    position:absolute;
+    top:14px;
+    right:16px;
+    font-weight:500;
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:100px;
+  }
+  .tag-phase   {background:rgba(232,62,140,0.10);color:#C22E6E}
+  .tag-ritual  {background:rgba(155,110,198,0.10);color:#7B54A3}
+  .tag-partner {background:rgba(90,158,207,0.10);color:#3D7FAF}
+  .tag-care    {background:rgba(107,163,103,0.10);color:#4E8A4A}
+
+  .divider{
+    width:60px;
+    height:3px;
+    border-radius:2px;
+    background:linear-gradient(90deg,#F6BFD3,#D5C3F0);
+    margin:8px auto 48px;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-size:12px;
+    font-weight:300;
+    color:#B48EB4;
+    max-width:500px;
+    margin:0 auto;
+    line-height:1.7;
+  }
+
+  .arrow-icon::after{content:" \2192"}
+
+  @media(max-width:420px){
+    .cards-grid{grid-template-columns:1fr;gap:16px}
+    .card{padding:20px 18px 16px}
+    .page-header h1{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Notification Cards</h1>
+  <p>Push notification concepts for Olanna Health</p>
+</div>
+
+<!-- PRIMARY USER -->
+<div class="section-label" style="max-width:780px;margin-left:auto;margin-right:auto">FOR HER</div>
+<div class="cards-grid">
+
+  <!-- 1 — Period approaching -->
+  <div class="card">
+    <span class="card-tag tag-phase">Cycle</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-pink">&#127800;</div>
+      <div class="card-headline">Heads up, love</div>
+    </div>
+    <div class="card-body">
+      Your period is about 2 days away. Time to stock the snack drawer, queue the playlist and give yourself full permission to cancel plans.
+    </div>
+    <button class="card-action action-pink arrow-icon">View cycle</button>
+  </div>
+
+  <!-- 2 — Menstrual phase -->
+  <div class="card">
+    <span class="card-tag tag-ritual">Rest</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-rose">&#9749;</div>
+      <div class="card-headline">Day 1 energy report</div>
+    </div>
+    <div class="card-body">
+      Your body is doing the most right now. Honour it. A warm drink, a slow morning, and absolutely zero guilt for saying "not today."
+    </div>
+    <button class="card-action action-rose arrow-icon">Log how you feel</button>
+  </div>
+
+  <!-- 3 — Follicular -->
+  <div class="card">
+    <span class="card-tag tag-phase">Follicular</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-lilac">&#127803;</div>
+      <div class="card-headline">Main character season</div>
+    </div>
+    <div class="card-body">
+      Oestrogen is rising and so are you. This is your window for new ideas, bold lipstick and that thing you have been putting off. Go get it.
+    </div>
+    <button class="card-action action-lilac arrow-icon">Explore phase tips</button>
+  </div>
+
+  <!-- 4 — Ovulation -->
+  <div class="card">
+    <span class="card-tag tag-phase">Ovulation</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-peach">&#127774;</div>
+      <div class="card-headline">You are literally glowing</div>
+    </div>
+    <div class="card-body">
+      Peak energy, peak confidence, peak skin. Whatever you have been meaning to say or do — this is the week. Your hormones are cheering you on.
+    </div>
+    <button class="card-action action-peach arrow-icon">Open app</button>
+  </div>
+
+  <!-- 5 — Luteal / PMS -->
+  <div class="card">
+    <span class="card-tag tag-care">Self-care</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-lavender">&#128156;</div>
+      <div class="card-headline">Internal Affairs Bureau</div>
+    </div>
+    <div class="card-body">
+      This is your luteal phase speaking. Cravings are valid. Tears are valid. Not wanting to be around people? Also valid. Curl up — you have earned it.
+    </div>
+    <button class="card-action action-soft arrow-icon">Check PMS score</button>
+  </div>
+
+  <!-- 6 — Hydration nudge -->
+  <div class="card">
+    <span class="card-tag tag-ritual">Ritual</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-blue">&#128167;</div>
+      <div class="card-headline">Gentle reminder</div>
+    </div>
+    <div class="card-body">
+      Have you had water today? Not coffee. Not rooibos. Actual water. Your cramps will thank you later. Go on, queen.
+    </div>
+    <button class="card-action action-blue">Noted, thanks</button>
+  </div>
+
+  <!-- 7 — Self-love check-in -->
+  <div class="card">
+    <span class="card-tag tag-care">Check-in</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-sage">&#127807;</div>
+      <div class="card-headline">You are whole, just as you are</div>
+    </div>
+    <div class="card-body">
+      Quick reminder that your worth is not measured by a relationship status, a ring, or anyone else's timeline. You are the main event.
+    </div>
+    <button class="card-action action-sage arrow-icon">Daily check-in</button>
+  </div>
+
+  <!-- 8 — Fertility window -->
+  <div class="card">
+    <span class="card-tag tag-phase">Fertility</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-cream">&#127804;</div>
+      <div class="card-headline">Fertile window is open</div>
+    </div>
+    <div class="card-body">
+      Your fertile window starts today and lasts roughly 5 days. Whether you are planning or protecting, knowledge is your superpower.
+    </div>
+    <button class="card-action action-pink arrow-icon">View fertile days</button>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- PARTNER -->
+<div class="section-label" style="max-width:780px;margin-left:auto;margin-right:auto">FOR HER PARTNER</div>
+<div class="cards-grid">
+
+  <!-- P1 — Period starting -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-blue">&#127861;</div>
+      <div class="card-headline">Tea o'clock</div>
+    </div>
+    <div class="card-body">
+      Her cycle is shifting this week. A warm drink, fewer questions and a little extra patience go a long way. You do not need details — just be present.
+    </div>
+    <button class="card-action action-blue arrow-icon">Supportive ideas</button>
+  </div>
+
+  <!-- P2 — Energy dip -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-lilac">&#128164;</div>
+      <div class="card-headline">Low-key energy ahead</div>
+    </div>
+    <div class="card-body">
+      She might need more rest over the next few days. Maybe handle dinner, skip the pep talk, and let her set the pace. Quiet support speaks volumes.
+    </div>
+    <button class="card-action action-lilac">Got it</button>
+  </div>
+
+  <!-- P3 — Good phase -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-peach">&#127774;</div>
+      <div class="card-headline">She is in her element</div>
+    </div>
+    <div class="card-body">
+      Great time for plans, adventures or that conversation you have been saving. Her energy is up — match it with something thoughtful.
+    </div>
+    <button class="card-action action-peach arrow-icon">Open app</button>
+  </div>
+
+  <!-- P4 — PMS window -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-pink">&#129505;</div>
+      <div class="card-headline">Tenderness window</div>
+    </div>
+    <div class="card-body">
+      Things may feel a bit more intense for her right now — and that is completely normal. No fixing needed. Just warmth, snacks, and zero judgment.
+    </div>
+    <button class="card-action action-pink arrow-icon">Read more</button>
+  </div>
+
+  <!-- P5 — General check-in -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-sage">&#128154;</div>
+      <div class="card-headline">Small gestures, big impact</div>
+    </div>
+    <div class="card-body">
+      You do not need to understand every hormone to be supportive. Showing up consistently matters more than grand gestures. You are doing great.
+    </div>
+    <button class="card-action action-sage">Thanks, Olanna</button>
+  </div>
+
+  <!-- P6 — Respect her space -->
+  <div class="card">
+    <span class="card-tag tag-partner">Partner</span>
+    <div class="card-top">
+      <div class="icon-wrap icon-lavender">&#128156;</div>
+      <div class="card-headline">Space is love, too</div>
+    </div>
+    <div class="card-body">
+      She may want time alone — and it is not about you. Respecting her boundaries without taking it personally is one of the kindest things you can do.
+    </div>
+    <button class="card-action action-soft">Understood</button>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<p class="footer-note">
+  These notification concepts follow Olanna Health's brand guidelines — pastel palette, Poppins typography, glass-card surfaces, and a tone that is warm, witty and unapologetically woman-first. Partner notifications never expose cycle details; they share just enough context to encourage empathy.
+</p>
+
+</body>
+</html>
