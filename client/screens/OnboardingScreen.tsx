@@ -9,6 +9,7 @@ import {
   ScrollView,
   AccessibilityInfo,
   FlatList,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -53,6 +54,8 @@ import {
 } from "@/constants/onboardingTokens";
 import { storage, UserProfile, generateId } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+import brandLogo from "../assets/images/olanna-brand-logo.png";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -132,12 +135,26 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+function BrandLogo() {
+  return (
+    <View style={styles.brandLogoContainer}>
+      <Image
+        source={brandLogo}
+        style={styles.brandLogoImage}
+        resizeMode="contain"
+        accessibilityLabel="Olanna Health"
+      />
+    </View>
+  );
+}
+
 function IntroScreen({ onComplete }: { onComplete: () => void }) {
   const insets = useSafeAreaInsets();
 
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text="Hi." delay={200} />
           <AnimatedHeading text="I'm Olanna." delay={600} />
@@ -182,19 +199,23 @@ function NameScreen({
         style={styles.flex1}
         contentContainerStyle={[
           styles.screenContent,
-          { paddingTop: insets.top + Spacing["2xl"], paddingBottom: insets.bottom + Spacing.xl }
+          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
         ]}
       >
-        <Pressable onPress={onBack} style={styles.backButton}>
-          <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
-        </Pressable>
+        <View style={styles.topRow}>
+          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+          </Pressable>
+          <BrandLogo />
+          <View style={styles.backButtonSpacer} />
+        </View>
         
         <View style={styles.progressContainer}>
           <ProgressDots currentStep={0} totalSteps={3} />
         </View>
 
         <View style={styles.questionSection}>
-          <AnimatedHeading text="And what shall I call you?" delay={200} />
+          <AnimatedHeading text="And what shall I call you?" delay={200} style={styles.smallerHeading} />
         </View>
 
         <Animated.View style={[styles.formSection, inputStyle]}>
@@ -214,7 +235,7 @@ function NameScreen({
           </OnboardingGlassCard>
         </Animated.View>
 
-        <View style={styles.bottomActions}>
+        <View style={styles.bottomActionsScrollable}>
           {name.trim().length > 0 ? (
             <PrimaryButton 
               label="Continue" 
@@ -239,6 +260,7 @@ function GreetingScreen({ name, onComplete }: { name: string; onComplete: () => 
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text={`Nice to meet you,`} delay={200} />
           <AnimatedHeading text={name} delay={600} style={styles.nameHighlight} />
@@ -291,13 +313,17 @@ function ProfileScreen({
         style={styles.flex1}
         contentContainerStyle={[
           styles.screenContent,
-          { paddingTop: insets.top + Spacing["2xl"], paddingBottom: insets.bottom + Spacing.xl }
+          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable onPress={onBack} style={styles.backButton}>
-          <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
-        </Pressable>
+        <View style={styles.topRow}>
+          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+          </Pressable>
+          <BrandLogo />
+          <View style={styles.backButtonSpacer} />
+        </View>
 
         <View style={styles.progressContainer}>
           <ProgressDots currentStep={1} totalSteps={3} />
@@ -409,12 +435,16 @@ function GoalsScreen({
         style={styles.flex1}
         contentContainerStyle={[
           styles.screenContent,
-          { paddingTop: insets.top + Spacing["2xl"], paddingBottom: insets.bottom + Spacing.xl }
+          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
         ]}
       >
-        <Pressable onPress={onBack} style={styles.backButton}>
-          <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
-        </Pressable>
+        <View style={styles.topRow}>
+          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+          </Pressable>
+          <BrandLogo />
+          <View style={styles.backButtonSpacer} />
+        </View>
 
         <View style={styles.progressContainer}>
           <ProgressDots currentStep={2} totalSteps={3} />
@@ -473,6 +503,7 @@ function ConfirmationScreen({ onComplete }: { onComplete: () => void }) {
   return (
     <GradientBackground>
       <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <BrandLogo />
         <View style={styles.introContent}>
           <AnimatedHeading text="Perfect." delay={200} />
           <AnimatedHeading text="Let's get started." delay={600} />
@@ -525,6 +556,7 @@ function CarouselScreen({
   return (
     <GradientBackground>
       <View style={[styles.carouselContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <BrandLogo />
         <FlatList
           ref={flatListRef}
           data={CAROUSEL_SCREENS}
@@ -725,24 +757,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
+  brandLogoContainer: {
+    alignItems: "center",
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  brandLogoImage: {
+    width: 100,
+    height: 40,
+    opacity: 0.9,
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.sm,
+  },
   backButton: {
-    position: "absolute",
-    top: 60,
-    left: Spacing.lg,
-    zIndex: 10,
-    padding: 8,
+    padding: 4,
+    width: 36,
+  },
+  backButtonSpacer: {
+    width: 36,
   },
   progressContainer: {
-    marginTop: Spacing["4xl"],
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   questionSection: {
-    marginBottom: Spacing["2xl"],
-    gap: 12,
+    marginBottom: Spacing.lg,
+    gap: 8,
   },
   smallerHeading: {
-    fontSize: 32,
-    lineHeight: 42,
+    fontSize: 28,
+    lineHeight: 36,
   },
   nameHighlight: {
     color: BRAND_COLORS.white,
@@ -751,15 +798,15 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   inputGroup: {
-    marginBottom: Spacing.lg,
-    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+    gap: Spacing.xs,
   },
   inputLabel: {
     fontFamily: "Poppins_500Medium",
     fontSize: 14,
     color: "rgba(255,255,255,0.9)",
     letterSpacing: 0.3,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   glassInput: {
     fontSize: 20,
@@ -796,7 +843,7 @@ const styles = StyleSheet.create({
   },
   bottomActionsScrollable: {
     marginTop: "auto",
-    paddingTop: Spacing["2xl"],
+    paddingTop: Spacing.lg,
     gap: 12,
   },
   goalsSection: {
