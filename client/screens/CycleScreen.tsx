@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  Image,
   Platform,
   Pressable,
 } from "react-native";
@@ -17,6 +16,7 @@ import Svg, {
   RadialGradient,
   LinearGradient as SvgLinearGradient,
   Stop,
+  Rect,
 } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -41,8 +41,6 @@ import { Fonts } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
 
-import lotusPhaseIcon from "../assets/images/lotus-phase-icon.jpeg";
-
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const CYCLE_LENGTH = 28;
@@ -61,6 +59,168 @@ const PHASE_LABEL_COLORS: Record<Phase, string> = {
   ovulation: "#E09940",
   luteal: "#A87ABD",
 };
+
+type LotusVariant = "bud" | "rising" | "bloom" | "closing";
+
+function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
+  const s = size;
+  const cx = s / 2;
+  const cy = s / 2;
+
+  if (variant === "bud") {
+    return (
+      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <Path
+          d={`M ${cx} ${cy + s * 0.32}
+              Q ${cx - s * 0.13} ${cy + s * 0.15} ${cx - s * 0.13} ${cy - s * 0.05}
+              Q ${cx - s * 0.13} ${cy - s * 0.25} ${cx} ${cy - s * 0.35}
+              Q ${cx + s * 0.13} ${cy - s * 0.25} ${cx + s * 0.13} ${cy - s * 0.05}
+              Q ${cx + s * 0.13} ${cy + s * 0.15} ${cx} ${cy + s * 0.32} Z`}
+          fill="#FFFFFF"
+        />
+      </Svg>
+    );
+  }
+
+  if (variant === "rising") {
+    return (
+      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <Path
+          d={`M ${cx} ${cy + s * 0.28}
+              Q ${cx - s * 0.11} ${cy + s * 0.1} ${cx - s * 0.11} ${cy - s * 0.08}
+              Q ${cx - s * 0.11} ${cy - s * 0.25} ${cx} ${cy - s * 0.33}
+              Q ${cx + s * 0.11} ${cy - s * 0.25} ${cx + s * 0.11} ${cy - s * 0.08}
+              Q ${cx + s * 0.11} ${cy + s * 0.1} ${cx} ${cy + s * 0.28} Z`}
+          fill="#FFFFFF"
+        />
+        <Path
+          d={`M ${cx - s * 0.04} ${cy + s * 0.18}
+              Q ${cx - s * 0.22} ${cy + s * 0.05} ${cx - s * 0.28} ${cy - s * 0.12}
+              Q ${cx - s * 0.22} ${cy - s * 0.2} ${cx - s * 0.1} ${cy - s * 0.08}
+              Q ${cx - s * 0.04} ${cy + s * 0.02} ${cx - s * 0.04} ${cy + s * 0.18} Z`}
+          fill="#FFFFFF"
+          opacity={0.85}
+        />
+        <Path
+          d={`M ${cx + s * 0.04} ${cy + s * 0.18}
+              Q ${cx + s * 0.22} ${cy + s * 0.05} ${cx + s * 0.28} ${cy - s * 0.12}
+              Q ${cx + s * 0.22} ${cy - s * 0.2} ${cx + s * 0.1} ${cy - s * 0.08}
+              Q ${cx + s * 0.04} ${cy + s * 0.02} ${cx + s * 0.04} ${cy + s * 0.18} Z`}
+          fill="#FFFFFF"
+          opacity={0.85}
+        />
+      </Svg>
+    );
+  }
+
+  if (variant === "bloom") {
+    return (
+      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <Path
+          d={`M ${cx} ${cy + s * 0.22}
+              Q ${cx - s * 0.1} ${cy + s * 0.05} ${cx - s * 0.1} ${cy - s * 0.1}
+              Q ${cx - s * 0.1} ${cy - s * 0.25} ${cx} ${cy - s * 0.3}
+              Q ${cx + s * 0.1} ${cy - s * 0.25} ${cx + s * 0.1} ${cy - s * 0.1}
+              Q ${cx + s * 0.1} ${cy + s * 0.05} ${cx} ${cy + s * 0.22} Z`}
+          fill="#FFFFFF"
+        />
+        <Path
+          d={`M ${cx - s * 0.03} ${cy + s * 0.12}
+              Q ${cx - s * 0.2} ${cy} ${cx - s * 0.3} ${cy - s * 0.15}
+              Q ${cx - s * 0.2} ${cy - s * 0.25} ${cx - s * 0.08} ${cy - s * 0.12}
+              Q ${cx - s * 0.03} ${cy} ${cx - s * 0.03} ${cy + s * 0.12} Z`}
+          fill="#FFFFFF"
+          opacity={0.88}
+        />
+        <Path
+          d={`M ${cx + s * 0.03} ${cy + s * 0.12}
+              Q ${cx + s * 0.2} ${cy} ${cx + s * 0.3} ${cy - s * 0.15}
+              Q ${cx + s * 0.2} ${cy - s * 0.25} ${cx + s * 0.08} ${cy - s * 0.12}
+              Q ${cx + s * 0.03} ${cy} ${cx + s * 0.03} ${cy + s * 0.12} Z`}
+          fill="#FFFFFF"
+          opacity={0.88}
+        />
+        <Path
+          d={`M ${cx - s * 0.06} ${cy + s * 0.2}
+              Q ${cx - s * 0.26} ${cy + s * 0.12} ${cx - s * 0.35} ${cy}
+              Q ${cx - s * 0.28} ${cy - s * 0.1} ${cx - s * 0.14} ${cy + s * 0.02}
+              Q ${cx - s * 0.06} ${cy + s * 0.1} ${cx - s * 0.06} ${cy + s * 0.2} Z`}
+          fill="#FFFFFF"
+          opacity={0.75}
+        />
+        <Path
+          d={`M ${cx + s * 0.06} ${cy + s * 0.2}
+              Q ${cx + s * 0.26} ${cy + s * 0.12} ${cx + s * 0.35} ${cy}
+              Q ${cx + s * 0.28} ${cy - s * 0.1} ${cx + s * 0.14} ${cy + s * 0.02}
+              Q ${cx + s * 0.06} ${cy + s * 0.1} ${cx + s * 0.06} ${cy + s * 0.2} Z`}
+          fill="#FFFFFF"
+          opacity={0.75}
+        />
+      </Svg>
+    );
+  }
+
+  return (
+    <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <Path
+        d={`M ${cx} ${cy + s * 0.18}
+            Q ${cx - s * 0.09} ${cy + s * 0.02} ${cx - s * 0.09} ${cy - s * 0.1}
+            Q ${cx - s * 0.09} ${cy - s * 0.22} ${cx} ${cy - s * 0.28}
+            Q ${cx + s * 0.09} ${cy - s * 0.22} ${cx + s * 0.09} ${cy - s * 0.1}
+            Q ${cx + s * 0.09} ${cy + s * 0.02} ${cx} ${cy + s * 0.18} Z`}
+        fill="#FFFFFF"
+      />
+      <Path
+        d={`M ${cx - s * 0.02} ${cy + s * 0.1}
+            Q ${cx - s * 0.18} ${cy - s * 0.02} ${cx - s * 0.26} ${cy - s * 0.16}
+            Q ${cx - s * 0.18} ${cy - s * 0.24} ${cx - s * 0.06} ${cy - s * 0.1}
+            Q ${cx - s * 0.02} ${cy} ${cx - s * 0.02} ${cy + s * 0.1} Z`}
+        fill="#FFFFFF"
+        opacity={0.9}
+      />
+      <Path
+        d={`M ${cx + s * 0.02} ${cy + s * 0.1}
+            Q ${cx + s * 0.18} ${cy - s * 0.02} ${cx + s * 0.26} ${cy - s * 0.16}
+            Q ${cx + s * 0.18} ${cy - s * 0.24} ${cx + s * 0.06} ${cy - s * 0.1}
+            Q ${cx + s * 0.02} ${cy} ${cx + s * 0.02} ${cy + s * 0.1} Z`}
+        fill="#FFFFFF"
+        opacity={0.9}
+      />
+      <Path
+        d={`M ${cx - s * 0.06} ${cy + s * 0.2}
+            Q ${cx - s * 0.25} ${cy + s * 0.1} ${cx - s * 0.35} ${cy - s * 0.02}
+            Q ${cx - s * 0.27} ${cy - s * 0.12} ${cx - s * 0.12} ${cy + s * 0.02}
+            Q ${cx - s * 0.06} ${cy + s * 0.1} ${cx - s * 0.06} ${cy + s * 0.2} Z`}
+        fill="#FFFFFF"
+        opacity={0.8}
+      />
+      <Path
+        d={`M ${cx + s * 0.06} ${cy + s * 0.2}
+            Q ${cx + s * 0.25} ${cy + s * 0.1} ${cx + s * 0.35} ${cy - s * 0.02}
+            Q ${cx + s * 0.27} ${cy - s * 0.12} ${cx + s * 0.12} ${cy + s * 0.02}
+            Q ${cx + s * 0.06} ${cy + s * 0.1} ${cx + s * 0.06} ${cy + s * 0.2} Z`}
+        fill="#FFFFFF"
+        opacity={0.8}
+      />
+      <Path
+        d={`M ${cx - s * 0.1} ${cy + s * 0.26}
+            Q ${cx - s * 0.3} ${cy + s * 0.18} ${cx - s * 0.38} ${cy + s * 0.08}
+            Q ${cx - s * 0.3} ${cy} ${cx - s * 0.16} ${cy + s * 0.1}
+            Q ${cx - s * 0.1} ${cy + s * 0.18} ${cx - s * 0.1} ${cy + s * 0.26} Z`}
+        fill="#FFFFFF"
+        opacity={0.65}
+      />
+      <Path
+        d={`M ${cx + s * 0.1} ${cy + s * 0.26}
+            Q ${cx + s * 0.3} ${cy + s * 0.18} ${cx + s * 0.38} ${cy + s * 0.08}
+            Q ${cx + s * 0.3} ${cy} ${cx + s * 0.16} ${cy + s * 0.1}
+            Q ${cx + s * 0.1} ${cy + s * 0.18} ${cx + s * 0.1} ${cy + s * 0.26} Z`}
+        fill="#FFFFFF"
+        opacity={0.65}
+      />
+    </Svg>
+  );
+}
 
 function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean }) {
   const config = phaseConfig[phase];
@@ -82,16 +242,7 @@ function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean })
           isActive ? styles.phaseCircleActive : null,
         ]}
       >
-        <Image
-          source={lotusPhaseIcon}
-          style={{
-            width: circleSize * 0.65,
-            height: circleSize * 0.65,
-            borderRadius: circleSize * 0.325,
-          }}
-          resizeMode="contain"
-          tintColor="#FFFFFF"
-        />
+        <PhaseLotus variant={config.lotusVariant} size={circleSize * 0.7} />
       </View>
       <Text style={[styles.phaseLabel, { color: labelColor }]}>{config.label}</Text>
       <Text style={styles.phaseSubtitle}>{config.subtitle}</Text>
@@ -135,6 +286,32 @@ function cartesianToAngle(x: number, y: number, cx: number, cy: number): number 
 function angleToDayNumber(angle: number, cycleLength: number): number {
   const day = Math.round((angle / 360) * cycleLength) + 1;
   return Math.max(1, Math.min(cycleLength, day));
+}
+
+function CenterLotusInWheel({
+  variant,
+  size,
+  bgColor,
+}: {
+  variant: LotusVariant;
+  size: number;
+  bgColor: string;
+}) {
+  return (
+    <View
+      style={[
+        styles.centerLotusCircle,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: bgColor,
+        },
+      ]}
+    >
+      <PhaseLotus variant={variant} size={size * 0.7} />
+    </View>
+  );
 }
 
 function InteractiveCycleWheel({
@@ -269,7 +446,7 @@ function InteractiveCycleWheel({
     }
   }
 
-  const lotusImageSize = (outerRadius - strokeWidth) * 0.9;
+  const lotusDisplaySize = (outerRadius - strokeWidth) * 1.0;
 
   return (
     <GestureDetector gesture={composedGesture}>
@@ -297,27 +474,11 @@ function InteractiveCycleWheel({
           </Svg>
 
           <View style={styles.centerHub}>
-            <View
-              style={[
-                styles.centerLotusCircle,
-                {
-                  width: lotusImageSize,
-                  height: lotusImageSize,
-                  borderRadius: lotusImageSize / 2,
-                  backgroundColor: lotusCircleColor,
-                },
-              ]}
-            >
-              <Image
-                source={lotusPhaseIcon}
-                style={{
-                  width: lotusImageSize * 0.6,
-                  height: lotusImageSize * 0.6,
-                }}
-                resizeMode="contain"
-                tintColor="#FFFFFF"
-              />
-            </View>
+            <CenterLotusInWheel
+              variant={config.lotusVariant}
+              size={lotusDisplaySize}
+              bgColor={lotusCircleColor}
+            />
             <Text style={[styles.hubPhase, { color: config.labelColor }]}>
               {config.label}
             </Text>
