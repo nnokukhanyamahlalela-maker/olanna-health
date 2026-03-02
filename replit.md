@@ -28,6 +28,7 @@ Olanna Health is built with a React Native frontend (using Expo) and an Express.
 The application includes:
 - **Core Tracking**: Menstrual and fertility tracking with user-selectable Lotus flower or traditional cycle wheel visualizations. Daily logging for flow, symptoms, mood, and energy.
 - **Health Modules**: Dedicated modules for PCOS and Endometriosis, offering symptom tracking and lifestyle management insights. Sexual health features include STI screening reminders based on SAHCS 2022, and cervical screening reminders per SASOG guidelines.
+- **Health Tools**: PMS Symptom Checker (`PMSCheckerScreen.tsx`) — 3-category quiz (Physical/Emotional/Behavioral), 16 symptoms with severity rating (None/Mild/Moderate/Severe), scoring engine, personalized results with top symptoms and lifestyle recommendations. Cycle Length Calculator (`CycleCalculatorScreen.tsx`) for period/ovulation/fertile window prediction. Both accessible from Health tab's TOOLS section.
 - **Educational Content**: An evidence-based education library.
 - **AI Health Assistant**: A multilingual chatbot supporting English and five other South African languages (isiZulu, Afrikaans, Sesotho, isiXhosa, siSwati).
 - **Navigation**: Uses React Navigation with a 5-tab bottom navigation (Cycle, Calendar, Check-in, Health, Learn) with inline lotus icon for center tab. No floating FAB — all tabs evenly spaced. The Profile screen is accessible via a header button.

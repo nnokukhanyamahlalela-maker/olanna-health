@@ -29,6 +29,7 @@ import LearnMoreSheet from "@/screens/LearnMoreSheet";
 import PartnerSettingsScreen from "@/screens/PartnerSettingsScreen";
 import PartnerPreviewScreen from "@/screens/PartnerPreviewScreen";
 import PartnerDashboardScreen from "@/screens/PartnerDashboardScreen";
+import PMSCheckerScreen from "@/screens/PMSCheckerScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -60,6 +61,7 @@ export type RootStackParamList = {
   PartnerSettings: undefined;
   PartnerPreview: undefined;
   PartnerDashboard: undefined;
+  PMSChecker: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -234,6 +236,13 @@ export default function RootStackNavigator() {
         component={PartnerDashboardScreen}
         options={{
           headerTitle: "Partner Dashboard",
+        }}
+      />
+      <Stack.Screen
+        name="PMSChecker"
+        component={PMSCheckerScreen}
+        options={{
+          headerTitle: "PMS Symptom Checker",
         }}
       />
       <Stack.Screen

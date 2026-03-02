@@ -282,6 +282,64 @@ export default function HealthScreen() {
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
         <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+          TOOLS
+        </ThemedText>
+
+        <View style={styles.insightsList}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("PMSChecker");
+            }}
+            testID="tool-pms-checker"
+          >
+            <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
+              <View style={styles.insightCardRow}>
+                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C18" }]}>
+                  <Feather name="clipboard" size={20} color="#E83E8C" />
+                </View>
+                <View style={styles.insightContent}>
+                  <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
+                    PMS Symptom Checker
+                  </ThemedText>
+                  <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
+                    Assess your symptoms and get personalised tips
+                  </ThemedText>
+                </View>
+                <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+              </View>
+            </GlassSurface>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("CycleCalculator");
+            }}
+            testID="tool-cycle-calculator"
+          >
+            <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
+              <View style={styles.insightCardRow}>
+                <View style={[styles.insightIconWrap, { backgroundColor: "#FF6A4D18" }]}>
+                  <Feather name="calendar" size={20} color="#FF6A4D" />
+                </View>
+                <View style={styles.insightContent}>
+                  <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
+                    Cycle Length Calculator
+                  </ThemedText>
+                  <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
+                    Predict your next period, ovulation and fertile window
+                  </ThemedText>
+                </View>
+                <Feather name="chevron-right" size={18} color={theme.textSecondary} />
+              </View>
+            </GlassSurface>
+          </Pressable>
+        </View>
+
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
           INSIGHTS
         </ThemedText>
 
