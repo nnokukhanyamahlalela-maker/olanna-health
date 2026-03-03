@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
@@ -214,9 +215,24 @@ export default function CalendarScreen() {
       return undefined;
     }
     if (info.isPeriod) return phaseTokens.menstrual.solid;
-    if (info.isOvulation) return phaseTokens.ovulatory.gradientStart;
+    if (info.isOvulation) return phaseTokens.ovulatory.solid;
     if (info.isFertile) return phaseTokens.ovulatory.softBg;
     if (info.isPMS) return phaseTokens.luteal.softBg;
+    return undefined;
+  };
+
+  const getDayDotColor = (info: DayCellInfo): string | undefined => {
+    if (filter !== "all") {
+      if (filter === "period" && info.isPeriod) return phaseTokens.menstrual.solid;
+      if (filter === "fertile" && info.isOvulation) return phaseTokens.ovulatory.solid;
+      if (filter === "fertile" && info.isFertile) return phaseTokens.ovulatory.softBg;
+      if (filter === "pms" && info.isPMS) return phaseTokens.luteal.solid;
+      return undefined;
+    }
+    if (info.isPeriod) return phaseTokens.menstrual.solid;
+    if (info.isOvulation) return phaseTokens.ovulatory.solid;
+    if (info.isFertile) return phaseTokens.ovulatory.gradientStart;
+    if (info.isPMS) return phaseTokens.luteal.solid;
     return undefined;
   };
 
@@ -293,13 +309,19 @@ export default function CalendarScreen() {
               }
 
               const bgColor = getDayBgColor(info);
+              const dotColor = getDayDotColor(info);
               const isSelected = selectedDate === info.dateKey;
               const show = shouldShow(info);
+              const isDimmed = filter !== "all" && !show;
               const dayTextColor =
                 isSelected
                   ? "#FFFFFF"
                   : info.isToday
                   ? brand.primary
+                  : isDimmed
+                  ? isDark
+                    ? "rgba(255,255,255,0.3)"
+                    : "rgba(0,0,0,0.25)"
                   : show && bgColor
                   ? isDark
                     ? "#FFFFFF"
@@ -308,18 +330,23 @@ export default function CalendarScreen() {
                   ? "rgba(255,255,255,0.8)"
                   : neutral.textPrimary;
 
+              const bgOpacity = filter === "all" ? "B3" : "CC";
+
               return (
                 <Pressable
                   key={info.dateKey}
                   style={styles.dayCell}
-                  onPress={() => setSelectedDate(info.dateKey)}
+                  onPress={() => {
+                    setSelectedDate(info.dateKey);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
                   testID={`calendar-day-${info.day}`}
                 >
                   <View
                     style={[
                       styles.dayCircle,
                       show && bgColor
-                        ? { backgroundColor: bgColor + (isSelected ? "" : "55") }
+                        ? { backgroundColor: bgColor + (isSelected ? "" : bgOpacity) }
                         : undefined,
                       isSelected
                         ? { backgroundColor: brand.primary }
@@ -344,6 +371,9 @@ export default function CalendarScreen() {
                       {info.day}
                     </Text>
                   </View>
+                  {dotColor && !isSelected ? (
+                    <View style={[styles.phaseDot, { backgroundColor: dotColor }]} />
+                  ) : null}
                 </Pressable>
               );
             })}
@@ -357,7 +387,10 @@ export default function CalendarScreen() {
             return (
               <Pressable
                 key={chip.key}
-                onPress={() => setFilter(chip.key)}
+                onPress={() => {
+                  setFilter(chip.key);
+                  Haptics.selectionAsync();
+                }}
                 style={[
                   styles.filterChip,
                   {
@@ -703,6 +736,12 @@ const styles = StyleSheet.create({
   dayText: {
     fontFamily: Fonts.numeric,
     fontSize: 15,
+  },
+  phaseDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginTop: 2,
   },
   filterRow: {
     flexDirection: "row",
