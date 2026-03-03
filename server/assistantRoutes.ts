@@ -18,52 +18,108 @@ interface UserContext {
   tryingToConceive: boolean;
 }
 
-function buildSystemPrompt(ctx: UserContext): string {
-  return `You are Olanna, a warm and knowledgeable women's health assistant for African women, particularly in South Africa. You follow South African health guidelines (SAHCS, SASOG) and evidence-based research.
+type PromptBuilder = (ctx: { userContext: UserContext }) => string;
 
-Your tone is empathetic, conversational, and empowering. You never diagnose or prescribe. You encourage users to consult a healthcare provider for specific medical concerns. You use "you" and "your" to keep things personal.
+const PROMPT_TEMPLATES: Record<string, PromptBuilder> = {
+  phase_today: ({ userContext }) => `
+User context:
+- cycleDay: ${userContext.cycleDay}
+- avgCycleLength: ${userContext.averageCycleLength}
+- phase: ${userContext.phase}
+- symptoms: ${(userContext.symptoms || []).join(", ")}
 
-Current user context:
-- Cycle day: ${ctx.cycleDay} of ${ctx.averageCycleLength}
-- Current phase: ${ctx.phase}
-- Reported symptoms: ${ctx.symptoms.length > 0 ? ctx.symptoms.join(", ") : "none reported"}
-- Bleeding level: ${ctx.bleedingLevel}
-- Pain score: ${ctx.painScore}/10
-- On hormonal contraception: ${ctx.onHormonalContraception ? "yes" : "no"}
-- Trying to conceive: ${ctx.tryingToConceive ? "yes" : "no"}
+Task:
+Explain what this phase typically means and what is common to feel.
+Give practical tips (sleep, movement, hydration).
+Suggest 2-3 things to track today.
+Include red flags and a short medical disclaimer.
+Keep tone warm, simple, and non-alarming.
+Do NOT diagnose.
+`,
 
-Guidelines:
-- Reference the user's current cycle phase and day when relevant
-- Suggest evidence-based lifestyle adjustments (nutrition, movement, rest)
-- Keep responses concise (3-5 paragraphs max)
-- Use South African English spelling (e.g., "colour", "honour", "organise")
-- Never use emojis
-- If asked about medications or diagnoses, gently redirect to a healthcare provider`;
+  symptom_normal: ({ userContext }) => `
+User context:
+- phase: ${userContext.phase}
+- symptoms: ${(userContext.symptoms || []).join(", ")}
+- bleedingLevel: ${userContext.bleedingLevel}
+- painScore: ${userContext.painScore}
+
+Task:
+Explain whether these symptoms can be common in this phase (general info).
+Offer self-care actions.
+Suggest what to track.
+List red flags.
+No diagnosis. No medication dosing.
+`,
+
+  late_period: ({ userContext }) => `
+User context:
+- avgCycleLength: ${userContext.averageCycleLength}
+- tryingToConceive: ${userContext.tryingToConceive}
+- onHormonalContraception: ${userContext.onHormonalContraception}
+
+Task:
+List common reasons a period can be late (stress, illness, travel, weight changes, PCOS, etc).
+Provide what to do next steps (tracking, pregnancy test timing as general info if TTC).
+Red flags + disclaimer. No diagnosis.
+`,
+
+  cramps_help: ({ userContext }) => `
+User context:
+- phase: ${userContext.phase}
+- painScore: ${userContext.painScore}
+- bleedingLevel: ${userContext.bleedingLevel}
+
+Task:
+Explain common causes of cramps across the cycle.
+Give at-home relief options (heat, gentle movement, hydration, rest).
+Explain when cramps are concerning (sudden severe, fever, fainting, heavy bleeding).
+No diagnosis. No dosing instructions.
+`,
+
+  pcos_basics: () => `
+Task:
+Explain PCOS in plain language, common signs, how clinicians diagnose it (general).
+Suggest what to track (cycle length, symptoms, acne/hair changes, weight changes, mood).
+Encourage medical evaluation for diagnosis.
+Red flags + disclaimer. No diagnosis.
+`,
+
+  doctor_when: () => `
+Task:
+Give a clear list of reproductive health red flags that need urgent care vs routine appointment.
+Keep it calm, practical, and short.
+Add disclaimer.
+`,
+};
+
+function buildPrompt(promptId: string, userContext: UserContext): string | null {
+  const fn = PROMPT_TEMPLATES[promptId];
+  if (!fn) return null;
+  return fn({ userContext });
 }
 
-const PROMPT_INSTRUCTIONS: Record<string, string> = {
-  phase_today:
-    "Explain what phase the user is currently in based on their cycle day. Describe what is happening hormonally and what they might expect physically and emotionally. Offer one practical tip for this phase.",
-  symptom_normal:
-    "The user wants to know if their current symptoms are typical for their cycle phase. Reference their logged symptoms and cycle day. Explain what is common and what might warrant attention. Be reassuring but honest.",
-  late_period:
-    "Explain common reasons a period can be late, including stress, weight changes, hormonal shifts, PCOS, and early pregnancy. Tailor the response to whether the user is trying to conceive. Suggest when to see a doctor.",
-  cramps_help:
-    "Explain what causes menstrual cramps (prostaglandins, uterine contractions). Reference the user's pain score. Suggest evidence-based relief: heat therapy, gentle movement, magnesium-rich foods, anti-inflammatory options. Mention when to seek medical help.",
-  pcos_basics:
-    "Explain PCOS clearly: what it is, common signs (irregular cycles, acne, weight changes, hair growth), how it is diagnosed (Rotterdam criteria), and what users can track to support management. Be validating and non-alarmist.",
-  doctor_when:
-    "List red flags that warrant seeing a healthcare provider: very heavy bleeding, severe pain unresponsive to home care, irregular cycles lasting over 3 months, bleeding between periods, symptoms of infection. Encourage proactive health management.",
-};
+function wrapSafetyFooter(text: string): string {
+  const footer =
+    "\n\n---\n**Note:** I can share general health information, not a medical diagnosis. " +
+    "If you have severe or sudden pain, fainting, fever, or very heavy bleeding (soaking pads hourly), please seek urgent care.";
+  return text + footer;
+}
+
+const SYSTEM_PROMPT =
+  "You are Olanna Health Assistant, a warm and knowledgeable women's health guide for African women, " +
+  "particularly in South Africa. You follow South African health guidelines (SAHCS, SASOG) and evidence-based research. " +
+  "Provide educational info about menstrual cycles and reproductive health. " +
+  "Do not diagnose. Do not give medication dosing. Encourage seeking professional care when appropriate. " +
+  "If urgent symptoms are described, advise urgent care. " +
+  "Use South African English spelling (e.g., colour, honour, organise). " +
+  "Keep tone warm, empathetic, conversational, and empowering. Never use emojis. " +
+  "Keep responses concise (3-5 paragraphs max).";
 
 export function registerAssistantRoutes(app: Express): void {
   app.post("/api/assistant", apiKeyAuth, async (req: Request, res: Response) => {
     try {
       const { promptId, userContext, freeText } = req.body;
-
-      if (!promptId && !freeText) {
-        return res.status(400).json({ error: "Either promptId or freeText is required" });
-      }
 
       const ctx: UserContext = {
         cycleDay: userContext?.cycleDay ?? 14,
@@ -76,31 +132,40 @@ export function registerAssistantRoutes(app: Express): void {
         tryingToConceive: userContext?.tryingToConceive ?? false,
       };
 
-      const systemPrompt = buildSystemPrompt(ctx);
+      let userMessage: string;
 
-      let userMessage = freeText || "";
-      if (promptId && PROMPT_INSTRUCTIONS[promptId]) {
-        userMessage = PROMPT_INSTRUCTIONS[promptId];
-      } else if (promptId) {
-        userMessage = `Answer the user's question about: ${promptId}`;
+      if (promptId) {
+        const prompt = buildPrompt(promptId, ctx);
+        if (!prompt) {
+          return res.status(400).json({ error: "Invalid promptId" });
+        }
+        userMessage = prompt;
+      } else if (freeText && typeof freeText === "string" && freeText.trim().length > 0) {
+        if (freeText.length > 10000) {
+          return res.status(400).json({ error: "Message too long (max 10000 characters)" });
+        }
+        userMessage = `User context:\n- cycleDay: ${ctx.cycleDay}\n- phase: ${ctx.phase}\n- symptoms: ${(ctx.symptoms || []).join(", ")}\n\nUser question:\n${freeText.trim()}`;
+      } else {
+        return res.status(400).json({ error: "Either promptId or freeText is required" });
       }
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userMessage },
         ],
+        temperature: 0.4,
         max_completion_tokens: 1024,
-        temperature: 0.7,
       });
 
-      const reply = completion.choices[0]?.message?.content || "I wasn't able to generate a response. Please try again.";
+      const raw = completion.choices?.[0]?.message?.content?.trim() || "";
+      const reply = wrapSafetyFooter(raw);
 
-      res.json({ reply });
+      return res.json({ reply });
     } catch (error) {
       console.error("Assistant error:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      return res.status(500).json({ error: "AI request failed" });
     }
   });
 }
