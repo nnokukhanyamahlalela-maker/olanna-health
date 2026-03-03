@@ -764,7 +764,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: Spacing["2xl"],
-    paddingTop: 60,
   },
   carouselIconContainer: {
     marginBottom: Spacing["2xl"],
@@ -790,6 +789,7 @@ const styles = StyleSheet.create({
   carouselTitle: {
     fontFamily: "Poppins_700Bold",
     fontSize: 28,
+    lineHeight: 38,
     color: BRAND_COLORS.white,
     textAlign: "center",
     marginBottom: Spacing.md,
