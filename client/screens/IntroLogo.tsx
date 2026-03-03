@@ -33,7 +33,7 @@ export default function IntroLogo() {
 
     const fallback = setTimeout(() => {
       navigate();
-    }, 8000);
+    }, 30000);
 
     return () => {
       subscription.remove();
