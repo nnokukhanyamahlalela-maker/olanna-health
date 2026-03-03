@@ -164,7 +164,7 @@ export default function PrivacyStatementScreen() {
             <View style={styles.contactContent}>
               <ThemedText type="body" style={{ fontWeight: "600" }}>Questions or Concerns?</ThemedText>
               <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 20 }}>
-                If you have any questions about how your data is handled, please reach out to us at privacy@olannahealth.com
+                If you have any questions about how your data is handled, please reach out to us at admin@olanna.health
               </ThemedText>
             </View>
           </GlassSurface>
