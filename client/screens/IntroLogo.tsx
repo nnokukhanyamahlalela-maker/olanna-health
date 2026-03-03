@@ -8,7 +8,7 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const introVideoSource = require("@/assets/videos/olanna-intro.mp4");
 
-const VIDEO_DURATION_MS = 6100;
+const VIDEO_DURATION_MS = 7000;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
