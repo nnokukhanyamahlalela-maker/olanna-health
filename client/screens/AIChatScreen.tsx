@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { View, StyleSheet, FlatList, Pressable, TextInput, Platform, ScrollView } from "react-native";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { View, StyleSheet, FlatList, Pressable, TextInput, Platform, ScrollView, ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -11,6 +11,9 @@ import { AppGradient } from "@/components/AppGradient";
 import { GlassSurface } from "@/components/GlassSurface";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 import { PROMPTS, Prompt } from "@/constants/promptCatalog";
+import { getApiUrl } from "@/lib/query-client";
+import { storage, calculateCycleData } from "@/lib/storage";
+import { getPhaseForDay } from "@/constants/phaseConfig";
 
 interface Message {
   id: string;
@@ -24,6 +27,65 @@ const WELCOME_MESSAGE: Message = {
   content: "Sawubona! I'm your health assistant. How can I help you today? I can answer questions about your cycle, symptoms, or general reproductive health.",
 };
 
+interface UserContext {
+  cycleDay: number;
+  averageCycleLength: number;
+  phase: string;
+  symptoms: string[];
+  bleedingLevel: string;
+  painScore: number;
+  onHormonalContraception: boolean;
+  tryingToConceive: boolean;
+}
+
+async function buildUserContext(): Promise<UserContext> {
+  try {
+    const profile = await storage.getUserProfile();
+    const dailyLogs = await storage.getDailyLogs();
+    const today = new Date().toISOString().split("T")[0];
+    const todayLog = dailyLogs.find((l) => l.date === today);
+
+    let cycleDay = 14;
+    let cycleLength = 28;
+
+    if (profile) {
+      cycleLength = profile.cycleLength || 28;
+      const cycleData = calculateCycleData(profile);
+      cycleDay = cycleData.currentDay;
+    }
+
+    const phase = getPhaseForDay(cycleDay, cycleLength);
+    const phaseLabels: Record<string, string> = {
+      menstrual: "Menstrual",
+      follicular: "Follicular",
+      ovulation: "Ovulatory",
+      luteal: "Luteal",
+    };
+
+    return {
+      cycleDay,
+      averageCycleLength: cycleLength,
+      phase: phaseLabels[phase] || "Unknown",
+      symptoms: todayLog?.symptoms || [],
+      bleedingLevel: todayLog?.flow || "none",
+      painScore: 0,
+      onHormonalContraception: false,
+      tryingToConceive: false,
+    };
+  } catch {
+    return {
+      cycleDay: 14,
+      averageCycleLength: 28,
+      phase: "Unknown",
+      symptoms: [],
+      bleedingLevel: "none",
+      painScore: 0,
+      onHormonalContraception: false,
+      tryingToConceive: false,
+    };
+  }
+}
+
 export default function AIChatScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -32,43 +94,89 @@ export default function AIChatScreen() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const userContextRef = useRef<UserContext | null>(null);
 
   const showChips = messages.length <= 1;
 
-  const sendText = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
+  useEffect(() => {
+    buildUserContext().then((ctx) => {
+      userContextRef.current = ctx;
+    });
+  }, []);
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text.trim(),
-    };
+  const callAssistant = useCallback(
+    async (promptId: string | null, freeText: string | null) => {
+      setIsLoading(true);
+      try {
+        const ctx = userContextRef.current || (await buildUserContext());
+        const baseUrl = getApiUrl();
+        const url = new URL("/api/assistant", baseUrl);
 
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+        const res = await fetch(url.toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            promptId,
+            freeText,
+            userContext: ctx,
+          }),
+        });
 
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "I'm here to help you understand your body better. This is a demo response - in the full version, I'd provide personalised health guidance based on evidence-based information.",
+        if (!res.ok) throw new Error("Request failed");
+        const data = await res.json();
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.reply,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content:
+            "Sorry, I could not respond right now. Please try again in a moment.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const sendText = useCallback(
+    async (text: string, promptId?: string) => {
+      if (!text.trim() || isLoading) return;
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: text.trim(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000);
-  }, [isLoading]);
+
+      setMessages((prev) => [...prev, userMessage]);
+      setInput("");
+
+      await callAssistant(promptId || null, promptId ? null : text.trim());
+    },
+    [isLoading, callAssistant]
+  );
 
   const sendMessage = useCallback(() => {
     sendText(input);
   }, [input, sendText]);
 
-  const handlePromptPick = useCallback((prompt: Prompt) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }
-    sendText(prompt.userFacing);
-  }, [sendText]);
+  const handlePromptPick = useCallback(
+    (prompt: Prompt) => {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      }
+      sendText(prompt.userFacing, prompt.id);
+    },
+    [sendText]
+  );
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     const isUser = item.role === "user";

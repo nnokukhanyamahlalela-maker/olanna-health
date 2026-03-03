@@ -24,9 +24,9 @@ export const phase = {
   menstrual: {
     solid: "#F472B6",
     softBg: "#FDE8F1",
-    gradientStart: "#C2185B",
-    gradientMid: "#E8588D",
-    gradientEnd: "#F472B6",
+    gradientStart: "#E8588D",
+    gradientMid: "#F472B6",
+    gradientEnd: "#F9A8D4",
   },
   follicular: {
     solid: "#F9C8E0",
@@ -38,14 +38,14 @@ export const phase = {
   ovulatory: {
     solid: "#F59E0B",
     softBg: "#FEF3C7",
-    gradientStart: "#D97706",
+    gradientStart: "#E68A00",
     gradientMid: "#F59E0B",
-    gradientEnd: "#FBBF24",
+    gradientEnd: "#F5C06B",
   },
   luteal: {
     solid: "#D8B4FE",
     softBg: "#F4ECFA",
-    gradientStart: "#9333EA",
+    gradientStart: "#A855C6",
     gradientMid: "#C084E8",
     gradientEnd: "#D8B4FE",
   },
