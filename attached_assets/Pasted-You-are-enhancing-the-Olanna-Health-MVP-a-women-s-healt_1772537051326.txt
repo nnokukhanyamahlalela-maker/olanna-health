@@ -1,0 +1,39 @@
+You are enhancing the Olanna Health MVP, a women’s health app built in React Native (or similar).  Your task is to refine the user experience for each onboarding selection, ensuring that content, features and prompts are evidence‑based and aligned with the Lotus Cycle philosophy.  Implement the following modules:
+
+1. **Universal Components**
+   - Create a central “Lotus Cycle” component that visually represents the four phases (menstrual, follicular, ovulatory, luteal).  Each phase should display current day, symptoms logged and nutritional suggestions.
+   - Build a reusable **FoodCard** component that accepts a list of foods and a rationale (e.g., iron‑rich foods to replace blood loss) and displays an icon, food names and a brief description.
+   - Implement **SymptomLogger** and **MoodTracker** components with simple forms and local storage integration.
+   - Ensure internationalisation and timezone support (use Africa/Johannesburg as the default, but allow user override).
+
+2. **Track My Period**
+   - Onboarding: ask for last period start date, average cycle length (with an “I’m not sure” option) and common symptoms.
+   - Dashboard: show cycle phase, countdown to next period, symptom log, and a FoodCard for the current phase.  Use research‑backed nutrition: iron‑rich foods and vitamin C during menstruation; lean proteins and whole grains during follicular; continue balanced diet during ovulation; high‑fiber carbohydrates, nuts/seeds and hydration during luteal:contentReference[oaicite:32]{index=32}.
+   - Notifications: send daily push messages summarising the phase and one actionable tip (e.g., “Try adding spinach and lentils today to replenish iron”).
+
+3. **Manage PCOS**
+   - Onboarding: validate the user’s feelings (e.g., “PCOS is complex—you’re not broken”), then ask if they are diagnosed or suspect PCOS, whether cycles are irregular, and common symptoms (acne, weight changes, hair growth/loss).
+   - Dashboard modifications: highlight blood‑sugar‑friendly meal suggestions.  Use the FoodCard to recommend omega‑3 fish, leafy greens, legumes and whole grains:contentReference[oaicite:33]{index=33}.  Provide gentle education on avoiding fried foods, red meat and processed sugars:contentReference[oaicite:34]{index=34}.  Add an insulin/lab tracker module where users can manually log lab results.
+   - Weekly summary: generate a report showing symptom trends and share evidence‑based articles on lifestyle interventions for PCOS.
+
+4. **Manage Endometriosis**
+   - Onboarding: validate pain and set up a pain‑mapping tool (location, severity, timing).
+   - Dashboard: display pain trends correlated with cycle phases.  Use the FoodCard to suggest anti‑inflammatory foods (omega‑3 sources, cruciferous veggies, berries) and highlight vitamin D and flavonoid‑rich foods:contentReference[oaicite:35]{index=35}.  Educate users about limiting red meat and saturated fat:contentReference[oaicite:36]{index=36}.
+   - Provide optional heat‑therapy reminders and rest suggestions.
+
+5. **Track Fertility**
+   - Onboarding: determine whether the user is trying to conceive or avoid pregnancy; gather BBT, cervical mucus observations and use of ovulation predictor kits.
+   - Dashboard: show ovulation prediction, BBT chart, fertile window visualisation and intercourse timing.  Use the FoodCard to suggest foods rich in monounsaturated fats (avocados, olive oil) and whole grains:contentReference[oaicite:37]{index=37}.  Encourage daily multivitamin/folic acid reminders:contentReference[oaicite:38]{index=38}.
+   - Provide educational snippets about normal cycle variation and when to consult a specialist.
+
+6. **Sexual Health**
+   - Onboarding: discreetly ask about sexual activity, contraception method, STI testing history and libido concerns.
+   - Dashboard: include a libido tracker and contraception tracker.  Use the FoodCard to promote heart‑healthy foods (fruits, vegetables, whole grains, healthy oils, seafood, nuts and legumes):contentReference[oaicite:39]{index=39} and mention zinc‑rich foods (oysters, shellfish, nuts) for libido support:contentReference[oaicite:40]{index=40}.
+   - Provide reminders for STI testing and safe sex resources.  Emphasise that sexual desire is multifaceted and influenced by stress and relationships:contentReference[oaicite:41]{index=41}.
+
+7. **General Wellness**
+   - Onboarding: ask about stress levels, sleep quality, movement frequency and mood patterns.
+   - Dashboard: display mood and sleep trackers, offer micro‑resets (breathing exercises, mindfulness).  Use the FoodCard to suggest balanced, varied diets drawn from the cycle‑syncing nutrition (e.g., lean proteins, whole grains, fruits, vegetables, nuts and seeds):contentReference[oaicite:42]{index=42}:contentReference[oaicite:43]{index=43}.
+   - Provide monthly wellness reflections and highlight patterns (e.g., stress spikes before period).
+
+Ensure that all educational text in the UI is written in an empathetic, conversational tone and cites evidence where appropriate.  The UI should remain simple, elegant and consistent with Olanna’s soft‑luxury brand identity.  Keep code modular and document components so future iterations (e.g., lab test integration) can be added without extensive rewrites.
