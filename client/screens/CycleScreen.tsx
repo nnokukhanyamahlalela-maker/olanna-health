@@ -70,29 +70,21 @@ const LOTUS_IMAGES: Record<LotusVariant, any> = {
   closing: require("@/assets/images/lotus-luteal.png"),
 };
 
-const LOTUS_SCALE: Record<LotusVariant, number> = {
-  bud: 1.75,
-  rising: 1.55,
-  bloom: 1.55,
-  closing: 1.55,
-};
-
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
-  const scale = LOTUS_SCALE[variant];
-  const scaledSize = size * scale;
-  const offset = (scaledSize - size) / 2;
+  const scaled = size * 1.12;
+  const offset = (scaled - size) / 2;
   return (
     <View style={{ width: size, height: size, overflow: "hidden" }}>
       <Image
         source={LOTUS_IMAGES[variant]}
         style={{
-          width: scaledSize,
-          height: scaledSize,
+          width: scaled,
+          height: scaled,
           position: "absolute",
           top: -offset,
           left: -offset,
         }}
-        resizeMode="contain"
+        resizeMode="cover"
       />
     </View>
   );
