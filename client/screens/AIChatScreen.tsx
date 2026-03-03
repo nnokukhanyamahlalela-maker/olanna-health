@@ -1,13 +1,16 @@
 import React, { useState, useRef, useCallback } from "react";
-import { View, StyleSheet, FlatList, Pressable, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, FlatList, Pressable, TextInput, Platform, ScrollView } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/components/ThemeProvider";
 import { AppText } from "@/components/AppText";
 import { AppGradient } from "@/components/AppGradient";
 import { GlassSurface } from "@/components/GlassSurface";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
+import { PROMPTS, Prompt } from "@/constants/promptCatalog";
 
 interface Message {
   id: string;
@@ -30,13 +33,15 @@ export default function AIChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const sendMessage = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+  const showChips = messages.length <= 1;
+
+  const sendText = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: text.trim(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -47,12 +52,23 @@ export default function AIChatScreen() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'm here to help you understand your body better. This is a demo response - in the full version, I'd provide personalized health guidance based on evidence-based information.",
+        content: "I'm here to help you understand your body better. This is a demo response - in the full version, I'd provide personalised health guidance based on evidence-based information.",
       };
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
     }, 1000);
-  }, [input, isLoading]);
+  }, [isLoading]);
+
+  const sendMessage = useCallback(() => {
+    sendText(input);
+  }, [input, sendText]);
+
+  const handlePromptPick = useCallback((prompt: Prompt) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    sendText(prompt.userFacing);
+  }, [sendText]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     const isUser = item.role === "user";
@@ -104,6 +120,42 @@ export default function AIChatScreen() {
         ]}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
+
+      {showChips ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          {PROMPTS.map((prompt) => (
+            <Pressable
+              key={prompt.id}
+              testID={`chip-${prompt.id}`}
+              onPress={() => handlePromptPick(prompt)}
+              style={({ pressed }) => [
+                styles.chip,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.10)"
+                    : "rgba(255,255,255,0.55)",
+                  borderColor: isDark
+                    ? "rgba(255,255,255,0.18)"
+                    : "rgba(0,0,0,0.08)",
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <AppText
+                variant="caption"
+                style={[styles.chipText, { color: theme.textPrimary as string }]}
+              >
+                {prompt.title}
+              </AppText>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
 
       <GlassSurface
         borderRadius={0}
@@ -202,5 +254,22 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
+  },
+  chipsContainer: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    gap: 8,
+    flexDirection: "row",
+  },
+  chip: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  chipText: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    letterSpacing: 0.1,
   },
 });

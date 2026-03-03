@@ -1,0 +1,82 @@
+const PROMPT_TEMPLATES = {
+  phase_today: ({ userContext }) => `
+User context:
+- cycleDay: ${userContext.cycleDay}
+- avgCycleLength: ${userContext.averageCycleLength}
+- phase: ${userContext.phase}
+- symptoms: ${(userContext.symptoms || []).join(", ")}
+
+Task:
+Explain what this phase typically means and what is common to feel.
+Give practical tips (sleep, movement, hydration).
+Suggest 2-3 things to track today.
+Include red flags and a short medical disclaimer.
+Keep tone warm, simple, and non-alarming.
+Do NOT diagnose.
+`,
+  symptom_normal: ({ userContext }) => `
+User context:
+- phase: ${userContext.phase}
+- symptoms: ${(userContext.symptoms || []).join(", ")}
+- bleedingLevel: ${userContext.bleedingLevel}
+- painScore: ${userContext.painScore}
+
+Task:
+Explain whether these symptoms can be common in this phase (general info).
+Offer self-care actions.
+Suggest what to track.
+List red flags.
+No diagnosis. No medication dosing.
+`,
+  late_period: ({ userContext }) => `
+User context:
+- avgCycleLength: ${userContext.averageCycleLength}
+- tryingToConceive: ${userContext.tryingToConceive}
+- onHormonalContraception: ${userContext.onHormonalContraception}
+
+Task:
+List common reasons a period can be late (stress, illness, travel, weight changes, PCOS, etc).
+Provide what to do next steps (tracking, pregnancy test timing as general info if TTC).
+Red flags + disclaimer. No diagnosis.
+`,
+  cramps_help: ({ userContext }) => `
+User context:
+- phase: ${userContext.phase}
+- painScore: ${userContext.painScore}
+- bleedingLevel: ${userContext.bleedingLevel}
+
+Task:
+Explain common causes of cramps across the cycle.
+Give at-home relief options (heat, gentle movement, hydration, rest).
+Explain when cramps are concerning (sudden severe, fever, fainting, heavy bleeding).
+No diagnosis. No dosing instructions.
+`,
+  pcos_basics: () => `
+Task:
+Explain PCOS in plain language, common signs, how clinicians diagnose it (general).
+Suggest what to track (cycle length, symptoms, acne/hair changes, weight changes, mood).
+Encourage medical evaluation for diagnosis.
+Red flags + disclaimer. No diagnosis.
+`,
+  doctor_when: () => `
+Task:
+Give a clear list of reproductive health red flags that need urgent care vs routine appointment.
+Keep it calm, practical, and short.
+Add disclaimer.
+`,
+};
+
+function buildPrompt(promptId, userContext) {
+  const fn = PROMPT_TEMPLATES[promptId];
+  if (!fn) return null;
+  return fn({ userContext });
+}
+
+function wrapSafetyFooter(text) {
+  const footer =
+    "\n\n---\n**Note:** I can share general health information, not a medical diagnosis. " +
+    "If you have severe or sudden pain, fainting, fever, or very heavy bleeding (soaking pads hourly), please seek urgent care.";
+  return text + footer;
+}
+
+module.exports = { buildPrompt, wrapSafetyFooter };
