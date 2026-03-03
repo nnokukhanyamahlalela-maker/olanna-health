@@ -28,12 +28,14 @@ export default function IntroLogo() {
 
   useEffect(() => {
     const subscription = player.addListener("playToEnd", () => {
-      navigate();
+      setTimeout(() => {
+        navigate();
+      }, 500);
     });
 
     const fallback = setTimeout(() => {
       navigate();
-    }, 8000);
+    }, 15000);
 
     return () => {
       subscription.remove();
