@@ -19,6 +19,7 @@ interface ArticleCardProps {
   category: string;
   readTime: string;
   imageUri?: string;
+  imageSource?: any;
   onPress?: () => void;
   featured?: boolean;
 }
@@ -41,6 +42,7 @@ export function ArticleCard({
   category,
   readTime,
   imageUri,
+  imageSource,
   onPress,
   featured = false,
 }: ArticleCardProps) {

@@ -7,7 +7,6 @@ import {
   Pressable, 
   Dimensions, 
   ScrollView,
-  AccessibilityInfo,
   FlatList,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +16,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useVideoPlayer, VideoView } from "expo-video";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -25,7 +23,6 @@ import Animated, {
   withDelay,
   withSpring,
   Easing,
-  runOnJS,
   FadeIn,
   FadeOut,
   SlideInRight,
@@ -61,7 +58,6 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type OnboardingStep = 
-  | "splash"
   | "intro"
   | "name"
   | "greeting"
@@ -69,8 +65,6 @@ type OnboardingStep =
   | "goals"
   | "confirmation"
   | "carousel";
-
-const introVideoSource = require("@/assets/videos/olanna-intro.mp4");
 
 function GradientBackground({ children }: { children: React.ReactNode }) {
   return (
@@ -85,55 +79,6 @@ function GradientBackground({ children }: { children: React.ReactNode }) {
     </LinearGradient>
   );
 }
-
-function SplashScreen({ onComplete }: { onComplete: () => void }) {
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const contentOpacity = useSharedValue(0);
-  const contentScale = useSharedValue(0.95);
-
-  const player = useVideoPlayer(introVideoSource, (p) => {
-    p.loop = true;
-    p.muted = true;
-    p.play();
-  });
-
-  useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
-  }, []);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      contentOpacity.value = withTiming(1, { duration: 200 });
-      contentScale.value = 1;
-    } else {
-      contentOpacity.value = withDelay(100, withTiming(1, { duration: 400 }));
-      contentScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 80 }));
-    }
-
-    const timer = setTimeout(() => {
-      runOnJS(onComplete)();
-    }, 900);
-
-    return () => clearTimeout(timer);
-  }, [reduceMotion]);
-
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: contentOpacity.value,
-    transform: reduceMotion ? [] : [{ scale: contentScale.value }],
-  }));
-
-  return (
-    <Animated.View style={[styles.splashFullScreen, contentStyle]}>
-      <VideoView
-        player={player}
-        style={styles.splashVideo}
-        contentFit="cover"
-        nativeControls={false}
-      />
-    </Animated.View>
-  );
-}
-
 
 function IntroScreen({ onComplete }: { onComplete: () => void }) {
   const insets = useSafeAreaInsets();
@@ -650,9 +595,6 @@ export default function OnboardingScreen() {
   };
 
   switch (step) {
-    case "splash":
-      return <SplashScreen onComplete={() => setStep("intro")} />;
-    
     case "intro":
       return <IntroScreen onComplete={() => setStep("name")} />;
     
@@ -706,7 +648,7 @@ export default function OnboardingScreen() {
       );
     
     default:
-      return <SplashScreen onComplete={() => setStep("intro")} />;
+      return <IntroScreen onComplete={() => setStep("name")} />;
   }
 }
 
@@ -716,16 +658,6 @@ const styles = StyleSheet.create({
   },
   gradientBg: {
     flex: 1,
-  },
-  splashFullScreen: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-  },
-  splashVideo: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
   },
   screenContainer: {
     flex: 1,

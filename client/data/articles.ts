@@ -21,6 +21,7 @@ export interface Article {
   date: string;
   readTime: string;
   featured?: boolean;
+  imageSource?: any;
   sections: ArticleSection[];
   references: ArticleReference[];
 }
@@ -51,6 +52,215 @@ export const TOPIC_CATEGORIES = [
 
 export const articles: Article[] = [
   {
+    id: "4",
+    slug: "whats-in-your-period-pad",
+    title: "What\u2019s Really in Your Period Pad? And What Can We Use Instead?",
+    subtitle: "The product that sits against one of the most absorbent parts of your body for days every month \u2014 and we rarely question what\u2019s inside it.",
+    summary: "A recent South African study found hormone-disrupting chemicals in period pads. Here is what you need to know \u2014 and safer alternatives to consider.",
+    category: "Periods",
+    topic: "periods-101",
+    author: "Olanna Editorial",
+    date: "2 March 2026",
+    readTime: "6 min",
+    featured: true,
+    imageSource: require("@/assets/images/articles/period-products-featured.jpeg"),
+    sections: [
+      {
+        type: "paragraph",
+        content: "For years, most of us have never questioned what is inside our period pads.",
+      },
+      {
+        type: "paragraph",
+        content: "We check ingredients on our skincare. We avoid parabens in shampoo. We debate seed oils in our food.",
+      },
+      {
+        type: "paragraph",
+        content: "But the product that sits against one of the most absorbent parts of our body for days every single month? That, we rarely question.",
+      },
+      {
+        type: "heading",
+        content: "The Study That Changed the Conversation",
+      },
+      {
+        type: "paragraph",
+        content: "A recent study conducted by researchers at the University of the Free State revealed that multiple sanitary pad and pantyliner brands sold in South Africa contained endocrine-disrupting chemicals (EDCs), including phthalates, parabens, and bisphenols. These chemicals are known to interfere with hormone function and have been linked in broader research to reproductive health concerns.",
+      },
+      {
+        type: "paragraph",
+        content: "While the concentrations detected were low, the concern lies in repeated exposure \u2014 month after month, year after year \u2014 on highly absorbent vaginal tissue.",
+      },
+      {
+        type: "paragraph",
+        content: "And here is the uncomfortable truth: menstrual product ingredients are not required to be fully disclosed on packaging.",
+      },
+      {
+        type: "heading",
+        content: "Why This Matters",
+      },
+      {
+        type: "paragraph",
+        content: "Period poverty is a global reality. Many girls and women rely on the most affordable disposable products available \u2014 and when ingredient transparency is limited, those with the fewest options often carry the highest exposure risk.",
+      },
+      {
+        type: "paragraph",
+        content: "Add to that rising rates of hormonal disorders like PCOS, endometriosis, and infertility \u2014 and it becomes clear that menstrual health deserves far more scrutiny than it currently receives.",
+      },
+      {
+        type: "paragraph",
+        content: "This is not about fear. It is about informed choice.",
+      },
+      {
+        type: "heading",
+        content: "So What Can We Use Instead?",
+      },
+      {
+        type: "paragraph",
+        content: "Fortunately, there are safer, more sustainable alternatives widely available \u2014 including across Southern Africa. The right option depends on your lifestyle, budget, comfort level, and access to water.",
+      },
+      {
+        type: "subheading",
+        content: "1. Reusable Cloth Pads",
+      },
+      {
+        type: "paragraph",
+        content: "Modern reusable pads are absorbent, breathable, and designed to last up to five years with proper care. Brands like Palesa Pads offer locally produced options that reduce both waste and long-term costs.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: Eco-friendly, cost-effective over time, minimal chemical exposure",
+          "Cons: Require washing and drying; access to clean water is important",
+        ],
+      },
+      {
+        type: "subheading",
+        content: "2. Antimicrobial Reusable Pads",
+      },
+      {
+        type: "paragraph",
+        content: "Products like Safepad use permanently bonded antimicrobial technology that reduces bacterial growth and can be washed even in low-resource settings.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: Long lifespan (up to five years), suitable for limited water access",
+          "Cons: Higher upfront cost than disposable pads",
+        ],
+      },
+      {
+        type: "subheading",
+        content: "3. Menstrual Cups",
+      },
+      {
+        type: "paragraph",
+        content: "Made from medical-grade silicone, menstrual cups collect rather than absorb blood. Brands like Mina Cup are locally available and can last up to five years.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: No disposable waste, lower long-term cost, preserves natural vaginal moisture",
+          "Cons: Learning curve for insertion; requires sterilisation between cycles",
+        ],
+      },
+      {
+        type: "subheading",
+        content: "4. Period Underwear",
+      },
+      {
+        type: "paragraph",
+        content: "Period panties from brands like Miss Ruby and Blushproof contain built-in absorbent layers and can be worn for up to 12 hours depending on flow.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: Comfortable, discreet, reusable for years",
+          "Cons: Requires washing; higher initial purchase price",
+        ],
+      },
+      {
+        type: "subheading",
+        content: "5. Organic and Biodegradable Disposable Pads",
+      },
+      {
+        type: "paragraph",
+        content: "If you prefer disposables, look for brands made from 100% organic cotton and plant-based materials, free from added fragrances and dyes. Options like ANNA Pure Organic are available in major South African retailers.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: Lower chemical exposure, more breathable materials",
+          "Cons: Still single-use; slightly more expensive than mainstream pads",
+        ],
+      },
+      {
+        type: "subheading",
+        content: "6. Menstrual Discs",
+      },
+      {
+        type: "paragraph",
+        content: "Menstrual discs sit higher in the vaginal canal and can be worn for up to 12 hours. Some reusable versions are available.",
+      },
+      {
+        type: "bullets",
+        content: "",
+        items: [
+          "Pros: Long wear time; suitable for heavy flow",
+          "Cons: Insertion and removal require practice; not as widely available locally",
+        ],
+      },
+      {
+        type: "heading",
+        content: "Where to Find These Products",
+      },
+      {
+        type: "paragraph",
+        content: "Many of these products are available online and in pharmacies and health stores globally. In Southern Africa, you will find options at Clicks, Dischem, Checkers, Pick n Pay, and online platforms like Takealot and Faithful to Nature. NGOs and community initiatives also distribute reusable pads and menstrual cups in schools and underserved communities.",
+      },
+      {
+        type: "heading",
+        content: "The Bigger Conversation",
+      },
+      {
+        type: "paragraph",
+        content: "Discovering that period products may contain hormone-disrupting chemicals can feel unsettling. But this moment is also empowering.",
+      },
+      {
+        type: "paragraph",
+        content: "We deserve ingredient transparency. We deserve regulation that prioritises women\u2019s health. And we deserve options that align with our bodies, our values, and our budgets.",
+      },
+      {
+        type: "paragraph",
+        content: "Your period is not a luxury. It is not a trend. It is a biological process that happens roughly 450 times in a lifetime.",
+      },
+      {
+        type: "paragraph",
+        content: "The products we use during that time should be as safe as possible.",
+      },
+      {
+        type: "paragraph",
+        content: "At Olanna Health, we believe menstrual health is foundational health. And informed women make powerful choices.",
+      },
+      {
+        type: "disclaimer",
+        content: "This article is for educational purposes only and does not constitute medical advice. Always consult with a qualified healthcare provider regarding any medical condition or treatment.",
+      },
+    ],
+    references: [
+      { number: 1, text: "University of the Free State. Endocrine-disrupting chemicals in sanitary pads and pantyliners sold in South Africa. 2024." },
+      { number: 2, text: "UNFPA. Menstrual Health Management in East and Southern Africa: A Review Paper. 2018." },
+      { number: 3, text: "Sumpter JP, Johnson AC. Endocrine disruption: Causes and consequences in aquatic environments. 2008." },
+      { number: 4, text: "Madwantsi V. Understanding menorrhagia: the significant effects of heavy periods on South African women. IOL. 2025." },
+      { number: 5, text: "Crankshaw T et al. Menstrual health management and schooling experience amongst female learners in South Africa. 2020." },
+      { number: 6, text: "Palesa Pads. About our reusable menstrual products. 2024." },
+      { number: 7, text: "Faithful to Nature. Sustainable menstrual product guide. 2024." },
+    ],
+  },
+  {
     id: "1",
     slug: "irregular-periods-health-signal",
     title: "We Should All Be Worried About Irregular Periods",
@@ -61,7 +271,8 @@ export const articles: Article[] = [
     author: "Olanna Editorial",
     date: "8 December 2025",
     readTime: "8 min",
-    featured: true,
+    featured: false,
+    imageSource: require("@/assets/images/articles/period-products-featured.jpeg"),
     sections: [
       {
         type: "heading",
@@ -271,6 +482,7 @@ export const articles: Article[] = [
     author: "Olanna Editorial",
     date: "8 December 2025",
     readTime: "4 min",
+    imageSource: require("@/assets/images/articles/pcos-hair-loss.png"),
     sections: [
       {
         type: "paragraph",
@@ -437,6 +649,7 @@ export const articles: Article[] = [
     author: "Olanna Editorial",
     date: "4 December 2025",
     readTime: "7 min",
+    imageSource: require("@/assets/images/articles/endometriosis-hero.jpg"),
     sections: [
       {
         type: "paragraph",
