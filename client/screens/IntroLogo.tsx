@@ -8,11 +8,14 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const introVideoSource = require("@/assets/videos/olanna-intro.mp4");
 
+const VIDEO_DURATION_MS = 6100;
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function IntroLogo() {
   const navigation = useNavigation<NavigationProp>();
   const hasNavigated = useRef(false);
+  const videoStarted = useRef(false);
 
   const navigate = () => {
     if (hasNavigated.current) return;
@@ -27,18 +30,26 @@ export default function IntroLogo() {
   });
 
   useEffect(() => {
-    const subscription = player.addListener("playToEnd", () => {
-      setTimeout(() => {
-        navigate();
-      }, 500);
+    const sub1 = player.addListener("playToEnd", () => {
+      setTimeout(navigate, 400);
     });
 
-    const fallback = setTimeout(() => {
-      navigate();
-    }, 15000);
+    const sub2 = player.addListener("statusChange", (newStatus) => {
+      if (newStatus.status === "readyToPlay" && !videoStarted.current) {
+        videoStarted.current = true;
+        setTimeout(navigate, VIDEO_DURATION_MS + 400);
+      }
+
+      if (newStatus.status === "idle" && videoStarted.current) {
+        setTimeout(navigate, 400);
+      }
+    });
+
+    const fallback = setTimeout(navigate, 15000);
 
     return () => {
-      subscription.remove();
+      sub1.remove();
+      sub2.remove();
       clearTimeout(fallback);
     };
   }, []);
