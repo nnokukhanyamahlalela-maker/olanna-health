@@ -12,7 +12,7 @@ interface PhaseBadgeProps {
 }
 
 const POETIC_NAMES: Record<CyclePhase, string> = {
-  menstrual: "Rest & Release",
+  menstrual: "Rest and Release",
   follicular: "Rising Energy",
   ovulation: "Full Radiance",
   luteal: "Inner Reflection",

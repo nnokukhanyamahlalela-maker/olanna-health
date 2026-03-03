@@ -33,22 +33,22 @@ const GLOW_COLOR = "rgba(246, 191, 211, 0.6)";
 
 export const PHASE_INFO = {
   menstrual: {
-    title: "Rest & Release",
+    title: "Rest and Release",
     subtitle: "This is the wisdom phase.",
     description: "A time for introspection and honoring your body's need for rest.",
   },
   follicular: {
-    title: "Growth & Renewal",
+    title: "Growth and Renewal",
     subtitle: "This is the becoming phase.",
     description: "Energy rises as your body prepares for new possibilities.",
   },
   ovulation: {
-    title: "Radiance & Expression",
+    title: "Radiance and Expression",
     subtitle: "This is the radiance phase.",
     description: "Your energy peaks - embrace connection and creativity.",
   },
   luteal: {
-    title: "Boundaries & Reflection",
+    title: "Boundaries and Reflection",
     subtitle: "This is the refinement phase.",
     description: "A time to complete projects and turn inward.",
   },

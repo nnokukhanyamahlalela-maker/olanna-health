@@ -157,10 +157,10 @@ const VogueColors = {
   textSecondary: "#7A6A73",
   
   // Phase Colors
-  menstrual: "#E7B4B8",
-  follicular: "#DDE5DC",
-  ovulatory: "#E6D2A8",
-  luteal: "#D6CEDD",
+  menstrual: "#F472B6",
+  follicular: "#F9C8E0",
+  ovulatory: "#F59E0B",
+  luteal: "#D8B4FE",
   
   // Legacy colors for compatibility
   cream: "#FFF7FA",
@@ -211,7 +211,7 @@ export const PhaseColors = {
     gradientEnd: VogueColors.pinkPrimary,
     name: "Menstrual",
     lotusState: "closed",
-    mood: "Rest & Release",
+    mood: "Rest and Release",
   },
   follicular: {
     primary: VogueColors.follicular,

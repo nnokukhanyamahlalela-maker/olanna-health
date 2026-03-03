@@ -4,10 +4,10 @@ import { getApiUrl } from "./query-client";
 import { isPartnerLinked, getPartnerRole } from "./partnerStorage";
 
 const PHASE_LABELS: Record<string, string> = {
-  menstrual: "Rest & Release",
-  follicular: "Growth & Renewal",
+  menstrual: "Rest and Release",
+  follicular: "Growth and Renewal",
   ovulation: "Peak Energy",
-  luteal: "Boundaries & Reflection",
+  luteal: "Boundaries and Reflection",
 };
 
 const PHASE_TIPS: Record<string, string[]> = {

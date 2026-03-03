@@ -19,8 +19,8 @@ export interface PhaseConfig {
 export const phaseConfig: Record<Phase, PhaseConfig> = {
   menstrual: {
     label: "Menstrual",
-    subtitle: "Rest & Release",
-    tagline: "Rest & Release",
+    subtitle: "Rest and Release",
+    tagline: "Rest and Release",
     color: phaseTokens.menstrual.solid,
     softBg: phaseTokens.menstrual.softBg,
     lotusVariant: "bud",
@@ -32,8 +32,8 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
   },
   follicular: {
     label: "Follicular",
-    subtitle: "Growth & Renewal",
-    tagline: "Growth & Renewal",
+    subtitle: "Growth and Renewal",
+    tagline: "Growth and Renewal",
     color: phaseTokens.follicular.solid,
     softBg: phaseTokens.follicular.softBg,
     lotusVariant: "rising",
@@ -45,8 +45,8 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
   },
   ovulation: {
     label: "Ovulatory",
-    subtitle: "Radiance & Expression",
-    tagline: "Radiance & Expression",
+    subtitle: "Radiance and Expression",
+    tagline: "Radiance and Expression",
     color: phaseTokens.ovulatory.solid,
     softBg: phaseTokens.ovulatory.softBg,
     lotusVariant: "bloom",
@@ -58,8 +58,8 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
   },
   luteal: {
     label: "Luteal",
-    subtitle: "Boundaries & Reflection",
-    tagline: "Boundaries & Reflection",
+    subtitle: "Boundaries and Reflection",
+    tagline: "Boundaries and Reflection",
     color: phaseTokens.luteal.solid,
     softBg: phaseTokens.luteal.softBg,
     lotusVariant: "closing",

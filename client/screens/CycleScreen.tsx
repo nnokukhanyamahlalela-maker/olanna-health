@@ -48,17 +48,17 @@ const DEFAULT_CYCLE_LENGTH = 28;
 const DEFAULT_CURRENT_DAY = 12;
 
 const PHASE_CIRCLE_COLORS: Record<Phase, string> = {
-  menstrual: "#E8588D",
-  follicular: "#EF7B2C",
-  ovulation: "#F5B06B",
-  luteal: "#C9A2D7",
+  menstrual: "#F472B6",
+  follicular: "#F9C8E0",
+  ovulation: "#F59E0B",
+  luteal: "#D8B4FE",
 };
 
 const PHASE_LABEL_COLORS: Record<Phase, string> = {
-  menstrual: "#D6456F",
-  follicular: "#E06A1B",
-  ovulation: "#E09940",
-  luteal: "#A87ABD",
+  menstrual: "#E8588D",
+  follicular: "#D98CB3",
+  ovulation: "#D97706",
+  luteal: "#9333EA",
 };
 
 type LotusVariant = "bud" | "rising" | "bloom" | "closing";
@@ -71,7 +71,7 @@ const LOTUS_IMAGES: Record<LotusVariant, any> = {
 };
 
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
-  const scaled = size * 1.12;
+  const scaled = size * 1.18;
   const offset = (scaled - size) / 2;
   return (
     <View style={{ width: size, height: size, overflow: "hidden" }}>
