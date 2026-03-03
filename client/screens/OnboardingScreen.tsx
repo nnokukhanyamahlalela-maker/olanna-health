@@ -582,7 +582,7 @@ function CarouselScreen({
 
 export default function OnboardingScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [step, setStep] = useState<OnboardingStep>("splash");
+  const [step, setStep] = useState<OnboardingStep>("intro");
   const [isSaving, setIsSaving] = useState(false);
 
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
