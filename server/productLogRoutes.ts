@@ -66,10 +66,14 @@ export function registerProductLogRoutes(app: Express): void {
       const rows = logs.map((l) => {
         const escapeCsv = (val: string | null) => {
           if (!val) return "";
-          if (val.includes(",") || val.includes('"') || val.includes("\n")) {
-            return `"${val.replace(/"/g, '""')}"`;
+          let safe = val;
+          if (/^[=+\-@\t\r]/.test(safe)) {
+            safe = "'" + safe;
           }
-          return val;
+          if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+            return `"${safe.replace(/"/g, '""')}"`;
+          }
+          return safe;
         };
         return [
           l.date,

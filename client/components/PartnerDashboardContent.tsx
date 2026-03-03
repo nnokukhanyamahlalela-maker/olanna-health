@@ -47,7 +47,7 @@ export function PartnerDashboardContent({ data }: { data: SharedViewPayload }) {
 
   const hasWindows = data.nextPeriodWindow || data.fertileWindow || data.ovulationWindow;
   const hasMoodEnergy = data.moodSummary || data.energySummary;
-  const isEmpty = !data.phase && !hasWindows && !hasMoodEnergy && data.tips.length === 0;
+  const isEmpty = !data.phase && !hasWindows && !hasMoodEnergy && (!data.tips || data.tips.length === 0);
 
   if (isEmpty) {
     return (
@@ -152,7 +152,7 @@ export function PartnerDashboardContent({ data }: { data: SharedViewPayload }) {
         </View>
       ) : null}
 
-      {data.tips.length > 0 ? (
+      {data.tips && data.tips.length > 0 ? (
         <GlassSurface style={styles.tipsCard}>
           <ThemedText type="h4" style={[styles.sectionLabel, { color: theme.text }]}>
             Tips for You

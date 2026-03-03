@@ -10,7 +10,7 @@ const openai = new OpenAI({
 
 export function registerChatRoutes(app: Express): void {
   // Get all conversations
-  app.get("/api/conversations", async (req: Request, res: Response) => {
+  app.get("/api/conversations", apiKeyAuth, async (req: Request, res: Response) => {
     try {
       const conversations = await chatStorage.getAllConversations();
       res.json(conversations);
@@ -21,7 +21,7 @@ export function registerChatRoutes(app: Express): void {
   });
 
   // Get single conversation with messages
-  app.get("/api/conversations/:id", async (req: Request, res: Response) => {
+  app.get("/api/conversations/:id", apiKeyAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string);
       if (isNaN(id) || id <= 0) {
@@ -40,7 +40,7 @@ export function registerChatRoutes(app: Express): void {
   });
 
   // Create new conversation
-  app.post("/api/conversations", async (req: Request, res: Response) => {
+  app.post("/api/conversations", apiKeyAuth, async (req: Request, res: Response) => {
     try {
       const { title } = req.body;
       if (title !== undefined && (typeof title !== "string" || title.length > 200)) {
@@ -55,7 +55,7 @@ export function registerChatRoutes(app: Express): void {
   });
 
   // Delete conversation
-  app.delete("/api/conversations/:id", async (req: Request, res: Response) => {
+  app.delete("/api/conversations/:id", apiKeyAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string);
       if (isNaN(id) || id <= 0) {
@@ -94,43 +94,20 @@ export function registerChatRoutes(app: Express): void {
         content: m.content,
       }));
 
-      // Set up SSE
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-cache");
-      res.setHeader("Connection", "keep-alive");
-
-      // Stream response from OpenAI
-      const stream = await openai.chat.completions.create({
-        model: "gpt-5.1",
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4.1-mini",
         messages: chatMessages,
-        stream: true,
         max_completion_tokens: 2048,
       });
 
-      let fullResponse = "";
+      const assistantContent = completion.choices[0]?.message?.content || "";
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || "";
-        if (content) {
-          fullResponse += content;
-          res.write(`data: ${JSON.stringify({ content })}\n\n`);
-        }
-      }
+      const assistantMessage = await chatStorage.createMessage(conversationId, "assistant", assistantContent);
 
-      // Save assistant message
-      await chatStorage.createMessage(conversationId, "assistant", fullResponse);
-
-      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-      res.end();
+      res.json({ userMessage: { role: "user", content }, assistantMessage: { role: "assistant", content: assistantContent, id: assistantMessage.id } });
     } catch (error) {
       console.error("Error sending message:", error);
-      // Check if headers already sent (SSE streaming started)
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Failed to send message" })}\n\n`);
-        res.end();
-      } else {
-        res.status(500).json({ error: "Failed to send message" });
-      }
+      res.status(500).json({ error: "Failed to send message" });
     }
   });
 }
