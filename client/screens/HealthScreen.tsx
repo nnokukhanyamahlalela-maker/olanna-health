@@ -68,7 +68,7 @@ function TrackerCard({
       ]}
     >
       <GlassSurface style={styles.trackerCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "18" }]}>
+        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "20" }]}>
           <Feather name={item.icon} size={22} color={item.color} />
         </View>
         <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
@@ -115,7 +115,7 @@ function InsightPlaceholderCard({
     >
       <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
         <View style={styles.insightCardRow}>
-          <View style={[styles.insightIconWrap, { backgroundColor: color + "18" }]}>
+          <View style={[styles.insightIconWrap, { backgroundColor: color + "20" }]}>
             <Feather name={icon} size={20} color={color} />
           </View>
           <View style={styles.insightContent}>
@@ -170,7 +170,7 @@ export default function HealthScreen() {
       title: "Symptoms",
       subtitle: "Log and track daily symptoms",
       icon: "thermometer",
-      color: "#E7B4B8",
+      color: "#C2185B",
       route: "CheckIn",
     },
     {
@@ -178,28 +178,28 @@ export default function HealthScreen() {
       title: "Supplements",
       subtitle: "Track your daily supplements",
       icon: "sun",
-      color: "#DDE5DC",
+      color: "#7A8C5E",
     },
     {
       id: "medications",
       title: "Medications",
       subtitle: "Manage your medications",
       icon: "package",
-      color: "#D6CEDD",
+      color: "#7B5EA7",
     },
     {
       id: "gut-health",
       title: "Gut Health",
       subtitle: "Monitor digestive wellness",
       icon: "heart",
-      color: "#E6D2A8",
+      color: "#B8860B",
     },
     {
       id: "sexual-health",
       title: "Sexual Health",
       subtitle: "STI screening and resources",
       icon: "shield",
-      color: "#F6BFD3",
+      color: "#C2185B",
       route: "SexualHealthModule",
     },
     {
@@ -207,7 +207,7 @@ export default function HealthScreen() {
       title: "Menstrual Product Safety",
       subtitle: "Understand what your period products may contain.",
       icon: "info",
-      color: "#C4B5AD",
+      color: "#7A6B63",
       route: "ProductSafety",
     },
   ];
@@ -295,8 +295,8 @@ export default function HealthScreen() {
           >
             <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
               <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C18" }]}>
-                  <Feather name="clipboard" size={20} color="#E83E8C" />
+                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C20" }]}>
+                  <Feather name="clipboard" size={20} color="#C2185B" />
                 </View>
                 <View style={styles.insightContent}>
                   <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
@@ -320,8 +320,8 @@ export default function HealthScreen() {
           >
             <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
               <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#FF6A4D18" }]}>
-                  <Feather name="calendar" size={20} color="#FF6A4D" />
+                <View style={[styles.insightIconWrap, { backgroundColor: "#D4502020" }]}>
+                  <Feather name="calendar" size={20} color="#D45020" />
                 </View>
                 <View style={styles.insightContent}>
                   <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
@@ -347,12 +347,12 @@ export default function HealthScreen() {
           <InsightPlaceholderCard
             title="Hormone Patterns"
             icon="trending-up"
-            color="#E6D2A8"
+            color="#B8860B"
           />
           <InsightPlaceholderCard
             title="PMS Trends"
             icon="bar-chart-2"
-            color="#D6CEDD"
+            color="#7B5EA7"
           />
         </View>
 
@@ -437,8 +437,8 @@ const styles = StyleSheet.create({
   },
   trackerSubtitle: {
     fontFamily: Fonts.body,
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 18,
   },
   divider: {
     height: 1,
