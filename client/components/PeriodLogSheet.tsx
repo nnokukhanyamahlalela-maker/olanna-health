@@ -110,6 +110,7 @@ export function PeriodLogSheet({
       };
 
       await storage.addDailyLog(log);
+      console.log("[PeriodLog] Saved daily log:", { date, flow, mood });
 
       if (flow) {
         const [allLogs, profile] = await Promise.all([

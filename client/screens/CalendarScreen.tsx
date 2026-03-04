@@ -109,6 +109,7 @@ export default function CalendarScreen() {
       storage.getUserProfile(),
       storage.getDailyLogs(),
     ]);
+    console.log("[Calendar] Loaded", logs.length, "daily logs, flow logs:", logs.filter((l: DailyLog) => l.flow).map((l: DailyLog) => l.date));
     setProfile(userProfile);
     setDailyLogs(logs);
   }, []);

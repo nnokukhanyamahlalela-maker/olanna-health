@@ -154,8 +154,17 @@ export const secureStorage = {
   async getDailyLogs(): Promise<any[]> {
     try {
       const data = await secureGet("daily_logs");
-      return data ? JSON.parse(data) : [];
+      if (data) return JSON.parse(data);
+      const fallbackKey = SECURE_PREFIX + "daily_logs";
+      const fallbackData = await AsyncStorage.getItem(fallbackKey);
+      if (fallbackData) return JSON.parse(fallbackData);
+      return [];
     } catch {
+      try {
+        const fallbackKey = SECURE_PREFIX + "daily_logs";
+        const fallbackData = await AsyncStorage.getItem(fallbackKey);
+        if (fallbackData) return JSON.parse(fallbackData);
+      } catch {}
       return [];
     }
   },
