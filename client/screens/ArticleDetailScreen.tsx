@@ -1,5 +1,6 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp } from "@react-navigation/native";
@@ -51,7 +52,7 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
         <View style={styles.bulletList}>
           {section.items?.map((item, i) => (
             <View key={i} style={styles.bulletItem}>
-              <View style={[styles.bulletDot, { backgroundColor: theme.primary }]} />
+              <View style={[styles.bulletDot, { backgroundColor: "#C2185B" }]} />
               <AppText variant="body" color={theme.textSecondary} style={styles.bulletText}>
                 {item}
               </AppText>
@@ -61,7 +62,7 @@ function SectionRenderer({ section, theme }: { section: ArticleSection; theme: a
       );
     case "quote":
       return (
-        <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.lg} tint="subtle" style={[styles.quoteContainer, { borderLeftColor: theme.primary }]}>
+        <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.lg} tint="subtle" style={[styles.quoteContainer, { borderLeftColor: "#C2185B" }]}>
           <AppText variant="body" color={theme.text} style={styles.quoteText}>
             {section.content}
           </AppText>
@@ -135,9 +136,13 @@ export default function ArticleDetailScreen() {
           {article.subtitle}
         </AppText>
 
+        {article.imageSource ? (
+          <Image source={article.imageSource} style={styles.heroImage} contentFit="cover" />
+        ) : null}
+
         <GlassSurface borderRadius={BorderRadius.md} padding={Spacing.md} tint="subtle" style={styles.authorRow}>
-          <View style={[styles.authorAvatar, { backgroundColor: theme.primary + "20" }]}>
-            <Feather name="edit-3" size={14} color={theme.primary} />
+          <View style={[styles.authorAvatar, { backgroundColor: "rgba(194,24,91,0.12)" }]}>
+            <Feather name="edit-3" size={14} color="#C2185B" />
           </View>
           <View>
             <AppText variant="label" color={theme.text} style={styles.authorName}>
@@ -209,6 +214,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     fontStyle: "italic",
+    marginBottom: Spacing.xl,
+  },
+  heroImage: {
+    width: "100%",
+    height: 220,
+    borderRadius: BorderRadius.md,
     marginBottom: Spacing.xl,
   },
   authorRow: {

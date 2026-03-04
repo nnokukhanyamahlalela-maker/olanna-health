@@ -272,7 +272,7 @@ export const articles: Article[] = [
     date: "8 December 2025",
     readTime: "8 min",
     featured: false,
-    imageSource: require("@/assets/images/articles/period-products-featured.jpeg"),
+    imageSource: require("@/assets/images/articles/irregular-periods-hero.png"),
     sections: [
       {
         type: "heading",

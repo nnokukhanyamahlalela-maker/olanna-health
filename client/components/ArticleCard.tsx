@@ -72,7 +72,9 @@ export function ArticleCard({
         style={[styles.featuredContainer, animatedStyle]}
       >
         <GlassSurface noPadding borderRadius={BorderRadius.md}>
-          {imageUri ? (
+          {imageSource ? (
+            <Image source={imageSource} style={styles.featuredImage} contentFit="cover" />
+          ) : imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.featuredImage} contentFit="cover" />
           ) : (
             <View style={[styles.featuredImagePlaceholder, { backgroundColor: theme.backgroundSecondary }]}>
@@ -124,7 +126,9 @@ export function ArticleCard({
           <Feather name="arrow-right" size={14} color={theme.textSecondary} />
         </View>
       </View>
-      {imageUri ? (
+      {imageSource ? (
+        <Image source={imageSource} style={styles.thumbnail} contentFit="cover" />
+      ) : imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.thumbnail} contentFit="cover" />
       ) : (
         <View style={[styles.thumbnailPlaceholder, { backgroundColor: theme.backgroundSecondary }]}>

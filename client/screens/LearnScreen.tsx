@@ -213,6 +213,7 @@ export default function LearnScreen() {
             summary={featuredArticle.summary}
             category={featuredArticle.category}
             readTime={featuredArticle.readTime}
+            imageSource={featuredArticle.imageSource}
             featured
             onPress={() => handleArticlePress(featuredArticle)}
           />
@@ -252,6 +253,7 @@ export default function LearnScreen() {
             summary={item.summary}
             category={item.category}
             readTime={item.readTime}
+            imageSource={item.imageSource}
             onPress={() => handleArticlePress(item)}
           />
         )}
