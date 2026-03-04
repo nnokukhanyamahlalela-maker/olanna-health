@@ -15,6 +15,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function IntroLogo() {
   const navigation = useNavigation<NavigationProp>();
   const hasNavigated = useRef(false);
+  const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigate = () => {
     if (hasNavigated.current) return;
@@ -25,12 +26,28 @@ export default function IntroLogo() {
   const player = useVideoPlayer(introVideoSource, (p) => {
     p.loop = true;
     p.muted = true;
-    p.play();
   });
 
   useEffect(() => {
-    const timer = setTimeout(navigate, DISPLAY_DURATION_MS);
-    return () => clearTimeout(timer);
+    const statusSub = player.addListener("statusChange", (newStatus) => {
+      if (newStatus.status === "readyToPlay" && !playTimerRef.current) {
+        player.play();
+        playTimerRef.current = setTimeout(navigate, DISPLAY_DURATION_MS);
+      }
+    });
+
+    if (player.status === "readyToPlay") {
+      player.play();
+      playTimerRef.current = setTimeout(navigate, DISPLAY_DURATION_MS);
+    }
+
+    const fallback = setTimeout(navigate, 15000);
+
+    return () => {
+      statusSub.remove();
+      if (playTimerRef.current) clearTimeout(playTimerRef.current);
+      clearTimeout(fallback);
+    };
   }, []);
 
   return (
