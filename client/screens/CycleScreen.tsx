@@ -55,10 +55,10 @@ const PHASE_CIRCLE_COLORS: Record<Phase, string> = {
 };
 
 const PHASE_LABEL_COLORS: Record<Phase, string> = {
-  menstrual: "#E8588D",
-  follicular: "#D98CB3",
-  ovulation: "#E68A00",
-  luteal: "#A855C6",
+  menstrual: "#C2185B",
+  follicular: "#8E4470",
+  ovulation: "#B8730A",
+  luteal: "#7B1FA2",
 };
 
 type LotusVariant = "bud" | "rising" | "bloom" | "closing";

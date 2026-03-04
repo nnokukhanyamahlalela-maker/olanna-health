@@ -15,8 +15,8 @@ export const neutral = {
   bgSubtle: "#F1ECE9",
   border: "#E6DFDA",
   textPrimary: "#2D1F2B",
-  textSecondary: "#5A3D55",
-  textTertiary: "#7A6570",
+  textSecondary: "#3D2838",
+  textTertiary: "#5A4550",
   textInverse: "#FFFFFF",
 } as const;
 

@@ -153,8 +153,8 @@ const VogueColors = {
   // Neutrals
   bgMain: "#FFF7FA",
   whiteSoft: "rgba(255, 255, 255, 0.85)",
-  textPrimary: "#3A2F35",
-  textSecondary: "#7A6A73",
+  textPrimary: "#2D1F2B",
+  textSecondary: "#4A3345",
   
   // Phase Colors
   menstrual: "#F472B6",
@@ -172,7 +172,7 @@ const VogueColors = {
   taupeLight: "#DDD4CF",
   taupeDark: "#9A8B82",
   charcoal: "#3A2F35",
-  warmGray: "#7A6A73",
+  warmGray: "#4A3345",
   softPink: "#F6BFD3",
   dustyRose: "#F6BFD3",
   sand: "#E5DDD8",
@@ -306,7 +306,7 @@ export const ThemePresets = {
 export const Colors = {
   light: {
     text: "#2D1F2B",
-    textSecondary: "#5A3D55",
+    textSecondary: "#3D2838",
     background: VogueColors.cream,
     backgroundRoot: VogueColors.cream,
     backgroundDefault: VogueColors.warmWhite,

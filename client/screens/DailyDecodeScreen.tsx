@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_500Medium',
     fontSize: 12,
     letterSpacing: 1.5,
-    color: '#7A6A73',
+    color: '#4A3345',
     flex: 1,
   },
   vibeText: {

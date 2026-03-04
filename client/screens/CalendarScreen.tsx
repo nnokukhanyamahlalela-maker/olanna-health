@@ -245,11 +245,11 @@ export default function CalendarScreen() {
     return true;
   };
 
-  const filterChips: { key: FilterType; label: string; color: string }[] = [
-    { key: "period", label: "Period", color: phaseTokens.menstrual.solid },
-    { key: "fertile", label: "Fertile", color: phaseTokens.ovulatory.solid },
-    { key: "pms", label: "PMS", color: phaseTokens.luteal.solid },
-    { key: "all", label: "All", color: isDark ? "#FFFFFF" : neutral.textSecondary },
+  const filterChips: { key: FilterType; label: string; color: string; inactiveColor: string }[] = [
+    { key: "period", label: "Period", color: phaseTokens.menstrual.solid, inactiveColor: isDark ? "#F472B6" : "#B8396E" },
+    { key: "fertile", label: "Fertile", color: phaseTokens.ovulatory.solid, inactiveColor: isDark ? "#F59E0B" : "#B8730A" },
+    { key: "pms", label: "PMS", color: phaseTokens.luteal.solid, inactiveColor: isDark ? "#D8B4FE" : "#7B1FA2" },
+    { key: "all", label: "All", color: isDark ? "#FFFFFF" : neutral.textSecondary, inactiveColor: isDark ? "#FFFFFF" : neutral.textSecondary },
   ];
 
   const textColor = isDark ? "#FFFFFF" : neutral.textPrimary;
@@ -321,8 +321,8 @@ export default function CalendarScreen() {
                   ? brand.primary
                   : isDimmed
                   ? isDark
-                    ? "rgba(255,255,255,0.3)"
-                    : "rgba(0,0,0,0.25)"
+                    ? "rgba(255,255,255,0.35)"
+                    : "rgba(0,0,0,0.4)"
                   : show && bgColor
                   ? isDark
                     ? "#FFFFFF"
@@ -412,7 +412,7 @@ export default function CalendarScreen() {
                 <Text
                   style={[
                     styles.filterLabel,
-                    { color: active ? "#FFFFFF" : chip.color },
+                    { color: active ? "#FFFFFF" : chip.inactiveColor },
                   ]}
                 >
                   {chip.label}
