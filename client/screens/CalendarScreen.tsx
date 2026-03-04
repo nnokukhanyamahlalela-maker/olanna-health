@@ -16,6 +16,7 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { AppGradient } from "@/components/AppGradient";
 import { GlassSurface } from "@/components/GlassSurface";
+import { LotusIcon } from "@/components/LotusIcon";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
@@ -61,6 +62,7 @@ interface DayCellInfo {
   isToday: boolean;
   phase: Phase;
   dayInCycle: number;
+  hasFlowLog: boolean;
 }
 
 const PHASE_DECODE: Record<Phase, { title: string; body: string; tip: string }> = {
@@ -143,6 +145,14 @@ export default function CalendarScreen() {
     [profile]
   );
 
+  const flowLogDates = useMemo(() => {
+    const set = new Set<string>();
+    dailyLogs.forEach((log) => {
+      if (log.flow) set.add(log.date);
+    });
+    return set;
+  }, [dailyLogs]);
+
   const calendarDays: (DayCellInfo | null)[] = useMemo(() => {
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
@@ -159,8 +169,9 @@ export default function CalendarScreen() {
       const date = new Date(viewYear, viewMonth, d);
       const dateKey = formatDateKey(date);
       const dayInCycle = getDayInCycle(date);
+      const hasFlowLog = flowLogDates.has(dateKey);
 
-      const isPeriod = dayInCycle > 0 && dayInCycle <= periodLength;
+      const isPeriod = hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
       const ovulationDay = cycleLength - 14;
       const isFertile =
         dayInCycle > 0 &&
@@ -173,6 +184,7 @@ export default function CalendarScreen() {
         dayInCycle <= cycleLength;
       const isToday = dateKey === todayKey;
       const phase =
+        hasFlowLog ? "menstrual" :
         dayInCycle > 0 ? getPhaseForDay(dayInCycle, cycleLength) : "follicular";
 
       cells.push({
@@ -185,22 +197,30 @@ export default function CalendarScreen() {
         isToday,
         phase: phase as Phase,
         dayInCycle,
+        hasFlowLog,
       });
     }
 
     return cells;
-  }, [viewYear, viewMonth, profile, getDayInCycle, todayKey]);
+  }, [viewYear, viewMonth, profile, getDayInCycle, todayKey, flowLogDates]);
 
   const selectedDayInfo = useMemo(() => {
     if (!selectedDate) return null;
-    if (!profile) return { dayInCycle: 0, cycleLength: 28, phase: "follicular" as Phase, hasProfile: false };
+    const hasFlow = flowLogDates.has(selectedDate);
+    if (!profile) {
+      if (hasFlow) return { dayInCycle: 1, cycleLength: 28, phase: "menstrual" as Phase, hasProfile: false };
+      return { dayInCycle: 0, cycleLength: 28, phase: "follicular" as Phase, hasProfile: false };
+    }
     const date = new Date(selectedDate + "T12:00:00");
     const dayInCycle = getDayInCycle(date);
-    if (dayInCycle <= 0) return { dayInCycle: 0, cycleLength: profile.cycleLength, phase: "follicular" as Phase, hasProfile: true };
+    if (dayInCycle <= 0) {
+      if (hasFlow) return { dayInCycle: 1, cycleLength: profile.cycleLength, phase: "menstrual" as Phase, hasProfile: true };
+      return { dayInCycle: 0, cycleLength: profile.cycleLength, phase: "follicular" as Phase, hasProfile: true };
+    }
     const cycleLength = profile.cycleLength;
-    const p = getPhaseForDay(dayInCycle, cycleLength);
-    return { dayInCycle, cycleLength, phase: p, hasProfile: true };
-  }, [selectedDate, profile, getDayInCycle]);
+    const p = hasFlow ? "menstrual" : getPhaseForDay(dayInCycle, cycleLength);
+    return { dayInCycle, cycleLength, phase: p as Phase, hasProfile: true };
+  }, [selectedDate, profile, getDayInCycle, flowLogDates]);
 
   const selectedLog = selectedDate
     ? dailyLogs.find((log) => log.date === selectedDate)
@@ -372,7 +392,11 @@ export default function CalendarScreen() {
                       {info.day}
                     </Text>
                   </View>
-                  {dotColor && !isSelected ? (
+                  {info.hasFlowLog && !isSelected ? (
+                    <View style={styles.petalIndicator}>
+                      <LotusIcon size={12} color={phaseTokens.menstrual.solid} variant="mini" />
+                    </View>
+                  ) : dotColor && !isSelected ? (
                     <View style={[styles.phaseDot, { backgroundColor: dotColor }]} />
                   ) : null}
                 </Pressable>
@@ -769,6 +793,11 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     marginTop: 2,
+  },
+  petalIndicator: {
+    marginTop: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterRow: {
     flexDirection: "row",
