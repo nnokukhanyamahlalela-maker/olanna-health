@@ -122,17 +122,14 @@ const styles = StyleSheet.create({
   heading: {
     fontFamily: "Poppins_700Bold",
     fontSize: 38,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
     lineHeight: 48,
     letterSpacing: 0.3,
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
   },
   subtext: {
     fontFamily: "Poppins_400Regular",
     fontSize: 16,
-    color: "rgba(255,255,255,0.85)",
+    color: BRAND_COLORS.textSecondary,
     lineHeight: 24,
   },
 });

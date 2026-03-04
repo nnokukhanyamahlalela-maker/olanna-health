@@ -135,7 +135,7 @@ function NameScreen({
       >
         <View style={styles.topRow}>
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
           </Pressable>
         </View>
         
@@ -152,7 +152,7 @@ function NameScreen({
             <TextInput
               style={styles.glassInput}
               placeholder="Your name"
-              placeholderTextColor="rgba(255,255,255,0.6)"
+              placeholderTextColor="rgba(45,31,43,0.4)"
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
@@ -247,7 +247,7 @@ function ProfileScreen({
       >
         <View style={styles.topRow}>
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
           </Pressable>
         </View>
 
@@ -279,7 +279,7 @@ function ProfileScreen({
               accessibilityLabel="Select last period date"
             >
               <ThemedText style={styles.dateText}>{formatDate(lastPeriodDate)}</ThemedText>
-              <Feather name="calendar" size={20} color="rgba(255,255,255,0.8)" />
+              <Feather name="calendar" size={20} color={BRAND_COLORS.textSecondary} />
             </Pressable>
             {showPeriodPicker ? (
               <DateTimePicker
@@ -294,7 +294,7 @@ function ProfileScreen({
                   }
                 }}
                 maximumDate={new Date()}
-                textColor="#FFFFFF"
+                textColor={BRAND_COLORS.textPrimary}
               />
             ) : null}
           </View>
@@ -305,7 +305,7 @@ function ProfileScreen({
               <TextInput
                 style={styles.glassInputSmall}
                 placeholder="28"
-                placeholderTextColor="rgba(255,255,255,0.6)"
+                placeholderTextColor="rgba(45,31,43,0.4)"
                 value={data.avgCycleLength?.toString() || ""}
                 onChangeText={(text) => setData({ ...data, avgCycleLength: parseInt(text) || undefined })}
                 keyboardType="number-pad"
@@ -366,7 +366,7 @@ function GoalsScreen({
       >
         <View style={styles.topRow}>
           <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.white} />
+            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
           </Pressable>
         </View>
 
@@ -403,7 +403,7 @@ function GoalsScreen({
         </View>
 
         <View style={styles.privacyNotice}>
-          <Feather name="shield" size={14} color="rgba(255,255,255,0.6)" />
+          <Feather name="shield" size={14} color={BRAND_COLORS.textSecondary} />
           <ThemedText style={styles.privacyNoticeText}>
             Your data stays on your device.
           </ThemedText>
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   nameHighlight: {
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
   },
   formSection: {
     gap: Spacing.lg,
@@ -707,19 +707,19 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontFamily: "Poppins_500Medium",
     fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
+    color: BRAND_COLORS.textSecondary,
     letterSpacing: 0.3,
     marginBottom: 4,
   },
   glassInput: {
     fontSize: 20,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
     fontFamily: "Poppins_500Medium",
     padding: 0,
   },
   glassInputSmall: {
     fontSize: 18,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
     fontFamily: "Poppins_500Medium",
     padding: 0,
   },
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontFamily: "Poppins_500Medium",
     fontSize: 16,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
   },
   bottomActions: {
     paddingHorizontal: Spacing.xl,
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
     fontSize: 28,
     lineHeight: 38,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
     textAlign: "center",
     marginBottom: Spacing.md,
     letterSpacing: 0.3,
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   carouselSubtitle: {
     fontFamily: "Poppins_400Regular",
     fontSize: 16,
-    color: "rgba(255,255,255,0.85)",
+    color: BRAND_COLORS.textSecondary,
     textAlign: "center",
     lineHeight: 24,
     paddingHorizontal: Spacing.lg,

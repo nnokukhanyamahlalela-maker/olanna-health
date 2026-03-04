@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontFamily: "Poppins_500Medium",
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
+    color: BRAND_COLORS.textSecondary,
   },
   disabled: {
     opacity: 0.5,

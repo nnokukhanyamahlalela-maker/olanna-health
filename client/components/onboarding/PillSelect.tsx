@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   pillText: {
     fontFamily: "Poppins_500Medium",
     fontSize: 15,
-    color: BRAND_COLORS.white,
+    color: BRAND_COLORS.textPrimary,
   },
   pillTextSelected: {
     color: BRAND_COLORS.hotPink,
