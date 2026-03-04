@@ -277,18 +277,18 @@ export default function CheckInScreen() {
     >
       <GlassSurface borderRadius={CardSpacing.radius} padding={CardSpacing.padding}>
         <View style={styles.categoryHeader}>
-          <View style={[styles.categoryIcon, { backgroundColor: `${theme.primary}20` }]}>
-            <Feather name={category.icon as any} size={18} color={theme.primary} />
+          <View style={[styles.categoryIcon, { backgroundColor: "rgba(194,24,91,0.12)" }]}>
+            <Feather name={category.icon as any} size={18} color="#C2185B" />
           </View>
           <ThemedText type="h4" style={{ flex: 1, color: theme.text }}>{category.name}</ThemedText>
           {category.isPCOS ? (
-            <View style={[styles.badge, { backgroundColor: `${theme.primary}20` }]}>
-              <ThemedText type="caption" style={{ color: theme.primary }}>PCOS</ThemedText>
+            <View style={[styles.badge, { backgroundColor: "rgba(194,24,91,0.12)" }]}>
+              <ThemedText type="caption" style={{ color: "#C2185B" }}>PCOS</ThemedText>
             </View>
           ) : null}
           {category.isEndometriosis ? (
-            <View style={[styles.badge, { backgroundColor: `${theme.primary}20` }]}>
-              <ThemedText type="caption" style={{ color: theme.primary }}>Endo</ThemedText>
+            <View style={[styles.badge, { backgroundColor: "rgba(123,94,167,0.12)" }]}>
+              <ThemedText type="caption" style={{ color: "#7B5EA7" }}>Endo</ThemedText>
             </View>
           ) : null}
         </View>
@@ -304,7 +304,7 @@ export default function CheckInScreen() {
                 icon={symptom.icon as any}
                 selected={isSelected}
                 severity={log?.severity}
-                color={theme.primary}
+                color="#C2185B"
                 isFavorite={favorites.includes(symptom.id)}
                 onPress={() => handleSymptomPress(category, symptom)}
                 onLongPress={() => handleSymptomLongPress(symptom)}
@@ -332,8 +332,8 @@ export default function CheckInScreen() {
         <View style={styles.headerRight}>
           <GlassSurface borderRadius={BorderRadius.full} padding={0} noPadding>
             <View style={styles.progressBadge}>
-              <Feather name="check-circle" size={16} color={theme.primary} />
-              <ThemedText type="small" style={{ color: theme.primary, fontWeight: '600' }}>
+              <Feather name="check-circle" size={16} color="#C2185B" />
+              <ThemedText type="small" style={{ color: "#C2185B", fontWeight: '600' }}>
                 {loggedCount} logged
               </ThemedText>
             </View>
@@ -355,24 +355,24 @@ export default function CheckInScreen() {
           borderRadius={PillSpacing.radius}
           padding={0}
           noPadding
-          style={viewMode === 'categories' ? { borderColor: `${theme.primary}40` } : undefined}
+          style={viewMode === 'categories' ? { borderColor: "rgba(194,24,91,0.25)" } : undefined}
         >
           <Pressable
             onPress={() => setViewMode('categories')}
             style={[
               styles.viewTab,
-              viewMode === 'categories' ? { backgroundColor: `${theme.primary}18` } : undefined,
+              viewMode === 'categories' ? { backgroundColor: "rgba(194,24,91,0.10)" } : undefined,
             ]}
             testID="tab-categories"
           >
             <Feather
               name="grid"
               size={16}
-              color={viewMode === 'categories' ? theme.primary : theme.textSecondary}
+              color={viewMode === 'categories' ? "#C2185B" : theme.textSecondary}
             />
             <ThemedText
               type="small"
-              style={{ color: viewMode === 'categories' ? theme.primary : theme.textSecondary }}
+              style={{ color: viewMode === 'categories' ? "#C2185B" : theme.textSecondary }}
             >
               Symptoms
             </ThemedText>
@@ -382,24 +382,24 @@ export default function CheckInScreen() {
           borderRadius={PillSpacing.radius}
           padding={0}
           noPadding
-          style={viewMode === 'bodymap' ? { borderColor: `${theme.primary}40` } : undefined}
+          style={viewMode === 'bodymap' ? { borderColor: "rgba(194,24,91,0.25)" } : undefined}
         >
           <Pressable
             onPress={() => setViewMode('bodymap')}
             style={[
               styles.viewTab,
-              viewMode === 'bodymap' ? { backgroundColor: `${theme.primary}18` } : undefined,
+              viewMode === 'bodymap' ? { backgroundColor: "rgba(194,24,91,0.10)" } : undefined,
             ]}
             testID="tab-bodymap"
           >
             <Feather
               name="user"
               size={16}
-              color={viewMode === 'bodymap' ? theme.primary : theme.textSecondary}
+              color={viewMode === 'bodymap' ? "#C2185B" : theme.textSecondary}
             />
             <ThemedText
               type="small"
-              style={{ color: viewMode === 'bodymap' ? theme.primary : theme.textSecondary }}
+              style={{ color: viewMode === 'bodymap' ? "#C2185B" : theme.textSecondary }}
             >
               Body Map
             </ThemedText>
@@ -476,7 +476,7 @@ export default function CheckInScreen() {
             testID="save-checkin"
             style={styles.saveButton}
           >
-            <ThemedText style={[styles.saveButtonText, { color: theme.primary }]}>SAVE TODAY'S CHECK-IN</ThemedText>
+            <ThemedText style={[styles.saveButtonText, { color: "#C2185B" }]}>SAVE TODAY'S CHECK-IN</ThemedText>
           </Pressable>
         </GlassSurface>
       </View>
@@ -601,7 +601,7 @@ export default function CheckInScreen() {
                             </View>
                           </View>
                           <Pressable onPress={() => toggleHideSymptom(symptom.id)} testID={`restore-${symptom.id}`}>
-                            <Feather name="eye" size={20} color={theme.primary} />
+                            <Feather name="eye" size={20} color="#C2185B" />
                           </Pressable>
                         </View>
                       ))
@@ -652,10 +652,10 @@ export default function CheckInScreen() {
                   <ThemedText type="h4">Custom Symptoms ({customSymptoms.length})</ThemedText>
                   <Pressable
                     onPress={() => setShowAddCustom(!showAddCustom)}
-                    style={[styles.addButton, { backgroundColor: `${theme.primary}15` }]}
+                    style={[styles.addButton, { backgroundColor: "rgba(194,24,91,0.10)" }]}
                     testID="add-custom-symptom"
                   >
-                    <Feather name={showAddCustom ? 'minus' : 'plus'} size={18} color={theme.primary} />
+                    <Feather name={showAddCustom ? 'minus' : 'plus'} size={18} color="#C2185B" />
                   </Pressable>
                 </View>
                 {showAddCustom ? (
@@ -691,7 +691,7 @@ export default function CheckInScreen() {
                     </ScrollView>
                     <Pressable
                       onPress={handleAddCustomSymptom}
-                      style={[styles.addCustomButton, { backgroundColor: theme.primary }]}
+                      style={[styles.addCustomButton, { backgroundColor: "#C2185B" }]}
                       testID="save-custom-symptom"
                     >
                       <ThemedText type="small" style={{ color: theme.buttonText, fontWeight: '600' }}>Add Symptom</ThemedText>
@@ -708,7 +708,7 @@ export default function CheckInScreen() {
                   customSymptoms.map(symptom => (
                     <View key={symptom.id} style={[styles.customizeItem, { borderColor: theme.border }]}>
                       <View style={styles.customizeItemLeft}>
-                        <Feather name="plus" size={18} color={theme.primary} />
+                        <Feather name="plus" size={18} color="#C2185B" />
                         <View>
                           <ThemedText>{symptom.name}</ThemedText>
                           <ThemedText type="caption" style={{ color: theme.textSecondary }}>Custom</ThemedText>

@@ -32,7 +32,7 @@ interface MenuItemProps {
 }
 
 function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = false, theme, isDark = false }: MenuItemProps) {
-  const iconColor = color || theme.primary;
+  const iconColor = color || "#C2185B";
 
   return (
     <Pressable
@@ -43,10 +43,10 @@ function MenuItem({ icon, label, onPress, color, showChevron = true, isLast = fa
         isLast ? null : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border },
       ]}
     >
-      <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.25)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.40)" }]}>
+      <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(42,23,48,0.35)" : "rgba(255,255,255,0.45)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.50)" }]}>
         <Feather name={icon} size={18} color={iconColor} />
       </View>
-      <ThemedText type="body" style={[styles.menuLabel, { color: color || theme.textSecondary }]}>
+      <ThemedText type="body" style={[styles.menuLabel, { color: theme.text }]}>
         {label}
       </ThemedText>
       {showChevron ? (
@@ -164,7 +164,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="message-circle"
             label="AI Health Assistant"
-            color={theme.primary}
+            color="#C2185B"
             onPress={() => navigation.navigate("AIChat")}
             theme={theme}
             isDark={isDark}
@@ -172,7 +172,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="users"
             label="Community"
-            color={theme.secondary}
+            color="#6A5B7B"
             onPress={() => {}}
             isLast
             theme={theme}
@@ -189,6 +189,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="heart"
             label="Partner Mode"
+            color="#C2185B"
             onPress={() => navigation.navigate("PartnerSettings")}
             theme={theme}
             isDark={isDark}
@@ -196,6 +197,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="users"
             label="Partner Dashboard"
+            color="#6A5B7B"
             onPress={() => navigation.navigate("PartnerDashboard")}
             theme={theme}
             isDark={isDark}
@@ -203,6 +205,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="sun"
             label="Appearance"
+            color="#B8860B"
             onPress={() => navigation.navigate("Appearance")}
             theme={theme}
             isDark={isDark}
@@ -210,6 +213,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="bell"
             label="Notifications"
+            color="#D4764E"
             onPress={() => {}}
             theme={theme}
             isDark={isDark}
@@ -217,6 +221,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="lock"
             label="Privacy & Data"
+            color="#7B5EA7"
             onPress={() => navigation.navigate("PrivacySettings")}
             theme={theme}
             isDark={isDark}
@@ -224,6 +229,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="download"
             label="Export Data"
+            color="#5A8A6A"
             onPress={() => {}}
             theme={theme}
             isDark={isDark}
@@ -231,6 +237,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="help-circle"
             label="Help & Support"
+            color="#6A7B8A"
             onPress={() => {}}
             isLast
             theme={theme}
@@ -247,6 +254,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="info"
             label="About Olanna Health"
+            color="#C2185B"
             onPress={() => {}}
             theme={theme}
             isDark={isDark}
@@ -254,6 +262,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="file-text"
             label="Terms of Service"
+            color="#6A5B7B"
             onPress={() => {}}
             theme={theme}
             isDark={isDark}
@@ -261,6 +270,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="shield"
             label="Privacy Policy"
+            color="#7B5EA7"
             onPress={() => {}}
             isLast
             theme={theme}
