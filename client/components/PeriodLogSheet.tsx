@@ -31,7 +31,7 @@ const BRAND_PINK = "#E83E8C";
 type FlowLevel = "spotting" | "light" | "medium" | "heavy";
 
 interface FlowOption {
-  value: FlowLevel | null;
+  value: FlowLevel;
   label: string;
   icon: keyof typeof Feather.glyphMap;
   color: string;
@@ -39,7 +39,6 @@ interface FlowOption {
 }
 
 const FLOW_OPTIONS: FlowOption[] = [
-  { value: null, label: "None", icon: "minus", color: "#AAAAAA", droplets: 0 },
   { value: "spotting", label: "Spotting", icon: "droplet", color: "#F5A9C0", droplets: 1 },
   { value: "light", label: "Light", icon: "droplet", color: "#E87DA0", droplets: 2 },
   { value: "medium", label: "Medium", icon: "droplet", color: "#D45680", droplets: 3 },
@@ -96,7 +95,7 @@ export function PeriodLogSheet({
   }, [visible, existingLog]);
 
   const handleSave = async () => {
-    if (saving) return;
+    if (saving || !flow) return;
     setSaving(true);
     try {
       const log: DailyLog = {
@@ -206,7 +205,7 @@ export function PeriodLogSheet({
                       styles.flowPill,
                       {
                         backgroundColor: selected
-                          ? opt.color + (opt.value ? "25" : "15")
+                          ? opt.color + "25"
                           : (isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"),
                         borderColor: selected ? opt.color : "transparent",
                         borderWidth: selected ? 2 : 1,
@@ -297,10 +296,10 @@ export function PeriodLogSheet({
             <Pressable
               testID="button-save-period"
               onPress={handleSave}
-              disabled={saving}
+              disabled={saving || !flow}
               style={({ pressed }) => [
                 styles.saveButton,
-                { opacity: pressed || saving ? 0.8 : 1 },
+                { opacity: pressed || saving || !flow ? 0.5 : 1 },
               ]}
             >
               <Feather name="check" size={18} color="#FFFFFF" />
@@ -308,6 +307,11 @@ export function PeriodLogSheet({
                 {saving ? "Saving..." : "Save"}
               </ThemedText>
             </Pressable>
+            {!flow ? (
+              <ThemedText style={[styles.flowHint, { color: theme.textSecondary }]}>
+                Select a flow level to log your period
+              </ThemedText>
+            ) : null}
           </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -412,5 +416,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.heading,
     fontSize: 16,
     color: "#FFFFFF",
+  },
+  flowHint: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: 10,
   },
 });

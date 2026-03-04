@@ -508,26 +508,28 @@ export default function CalendarScreen() {
                 </View>
               </>
             ) : (
-              <View style={styles.decodeHeader}>
-                <View
-                  style={[
-                    styles.decodeBadge,
-                    { backgroundColor: phaseTokens.menstrual.softBg },
-                  ]}
-                >
-                  <Feather name="calendar" size={12} color={phaseTokens.menstrual.solid} />
-                  <Text
+              <View style={styles.decodePrompt}>
+                <View style={styles.decodePromptRow}>
+                  <View
                     style={[
-                      styles.decodeBadgeText,
-                      { color: phaseTokens.menstrual.solid, marginLeft: 4 },
+                      styles.decodeBadge,
+                      { backgroundColor: phaseTokens.menstrual.softBg, flexDirection: "row", alignItems: "center" },
                     ]}
                   >
-                    {new Date((selectedDate || todayKey) + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "long" })}
+                    <Feather name="calendar" size={12} color={phaseTokens.menstrual.solid} />
+                    <Text
+                      style={[
+                        styles.decodeBadgeText,
+                        { color: phaseTokens.menstrual.solid, marginLeft: 4 },
+                      ]}
+                    >
+                      {new Date((selectedDate || todayKey) + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "long" })}
+                    </Text>
+                  </View>
+                  <Text style={[styles.decodeBody, { color: subtextColor, flex: 1, marginBottom: 0 }]}>
+                    Log your period to see cycle phase insights and personalised tips for this day.
                   </Text>
                 </View>
-                <Text style={[styles.decodeBody, { color: subtextColor, marginTop: 8 }]}>
-                  Log your period to see cycle phase insights and personalised tips for this day.
-                </Text>
               </View>
             )}
 
@@ -820,6 +822,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
+  },
+  decodePrompt: {
+    marginBottom: 4,
+  },
+  decodePromptRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
   },
   decodeHeader: {
     flexDirection: "row",
