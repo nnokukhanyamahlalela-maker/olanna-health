@@ -117,17 +117,36 @@ export function PeriodLogSheet({
           storage.getDailyLogs(),
           storage.getUserProfile(),
         ]);
-        const isNewPeriodStart = detectPeriodStart(
-          date,
-          allLogs,
-          profile?.lastPeriodStart
-        );
 
-        if (isNewPeriodStart && profile) {
-          const updated = { ...profile, lastPeriodStart: date };
-          await storage.setUserProfile(updated);
-          const cycleData = calculateCycleData(updated);
+        if (!profile) {
+          const newProfile = {
+            id: generateId(),
+            name: "",
+            dateOfBirth: "",
+            cycleLength: 28,
+            periodLength: 5,
+            lastPeriodStart: date,
+            healthGoals: [],
+            hasPCOS: false,
+            hasEndometriosis: false,
+            createdAt: new Date().toISOString(),
+          };
+          await storage.setUserProfile(newProfile);
+          const cycleData = calculateCycleData(newProfile);
           await storage.setCycleData(cycleData);
+        } else {
+          const isNewPeriodStart = detectPeriodStart(
+            date,
+            allLogs,
+            profile.lastPeriodStart
+          );
+
+          if (isNewPeriodStart) {
+            const updated = { ...profile, lastPeriodStart: date };
+            await storage.setUserProfile(updated);
+            const cycleData = calculateCycleData(updated);
+            await storage.setCycleData(cycleData);
+          }
         }
       }
 

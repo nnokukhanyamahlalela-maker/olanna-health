@@ -192,13 +192,14 @@ export default function CalendarScreen() {
   }, [viewYear, viewMonth, profile, getDayInCycle, todayKey]);
 
   const selectedDayInfo = useMemo(() => {
-    if (!selectedDate || !profile) return null;
+    if (!selectedDate) return null;
+    if (!profile) return { dayInCycle: 0, cycleLength: 28, phase: "follicular" as Phase, hasProfile: false };
     const date = new Date(selectedDate + "T12:00:00");
     const dayInCycle = getDayInCycle(date);
-    if (dayInCycle <= 0) return null;
+    if (dayInCycle <= 0) return { dayInCycle: 0, cycleLength: profile.cycleLength, phase: "follicular" as Phase, hasProfile: true };
     const cycleLength = profile.cycleLength;
     const p = getPhaseForDay(dayInCycle, cycleLength);
-    return { dayInCycle, cycleLength, phase: p };
+    return { dayInCycle, cycleLength, phase: p, hasProfile: true };
   }, [selectedDate, profile, getDayInCycle]);
 
   const selectedLog = selectedDate
@@ -424,61 +425,87 @@ export default function CalendarScreen() {
         {/* Daily Cycle Decode */}
         {selectedDayInfo ? (
           <GlassSurface style={styles.decodeCard} noPadding>
-            <View style={styles.decodeHeader}>
-              <View
-                style={[
-                  styles.decodeBadge,
-                  {
-                    backgroundColor:
-                      phaseConfig[selectedDayInfo.phase].softBg,
-                  },
-                ]}
-              >
-                <Text
+            {selectedDayInfo.dayInCycle > 0 ? (
+              <>
+                <View style={styles.decodeHeader}>
+                  <View
+                    style={[
+                      styles.decodeBadge,
+                      {
+                        backgroundColor:
+                          phaseConfig[selectedDayInfo.phase].softBg,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.decodeBadgeText,
+                        { color: phaseConfig[selectedDayInfo.phase].labelColor },
+                      ]}
+                    >
+                      Day {selectedDayInfo.dayInCycle}
+                    </Text>
+                  </View>
+                  <Text style={[styles.decodePhase, { color: phaseConfig[selectedDayInfo.phase].labelColor }]}>
+                    {PHASE_DECODE[selectedDayInfo.phase].title}
+                  </Text>
+                </View>
+
+                <Text style={[styles.decodeBody, { color: textColor }]}>
+                  {PHASE_DECODE[selectedDayInfo.phase].body}
+                </Text>
+
+                <View
                   style={[
-                    styles.decodeBadgeText,
-                    { color: phaseConfig[selectedDayInfo.phase].labelColor },
+                    styles.decodeTipBox,
+                    {
+                      backgroundColor:
+                        phaseConfig[selectedDayInfo.phase].softBg,
+                    },
                   ]}
                 >
-                  Day {selectedDayInfo.dayInCycle}
+                  <Feather
+                    name="zap"
+                    size={14}
+                    color={phaseConfig[selectedDayInfo.phase].labelColor}
+                  />
+                  <Text
+                    style={[
+                      styles.decodeTipText,
+                      {
+                        color: isDark
+                          ? "#FFFFFF"
+                          : neutral.textPrimary,
+                      },
+                    ]}
+                  >
+                    {PHASE_DECODE[selectedDayInfo.phase].tip}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View style={styles.decodeHeader}>
+                <View
+                  style={[
+                    styles.decodeBadge,
+                    { backgroundColor: phaseTokens.menstrual.softBg },
+                  ]}
+                >
+                  <Feather name="calendar" size={12} color={phaseTokens.menstrual.solid} />
+                  <Text
+                    style={[
+                      styles.decodeBadgeText,
+                      { color: phaseTokens.menstrual.solid, marginLeft: 4 },
+                    ]}
+                  >
+                    {new Date((selectedDate || todayKey) + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "long" })}
+                  </Text>
+                </View>
+                <Text style={[styles.decodeBody, { color: subtextColor, marginTop: 8 }]}>
+                  Log your period to see cycle phase insights and personalised tips for this day.
                 </Text>
               </View>
-              <Text style={[styles.decodePhase, { color: phaseConfig[selectedDayInfo.phase].labelColor }]}>
-                {PHASE_DECODE[selectedDayInfo.phase].title}
-              </Text>
-            </View>
-
-            <Text style={[styles.decodeBody, { color: textColor }]}>
-              {PHASE_DECODE[selectedDayInfo.phase].body}
-            </Text>
-
-            <View
-              style={[
-                styles.decodeTipBox,
-                {
-                  backgroundColor:
-                    phaseConfig[selectedDayInfo.phase].softBg,
-                },
-              ]}
-            >
-              <Feather
-                name="zap"
-                size={14}
-                color={phaseConfig[selectedDayInfo.phase].labelColor}
-              />
-              <Text
-                style={[
-                  styles.decodeTipText,
-                  {
-                    color: isDark
-                      ? "#FFFFFF"
-                      : neutral.textPrimary,
-                  },
-                ]}
-              >
-                {PHASE_DECODE[selectedDayInfo.phase].tip}
-              </Text>
-            </View>
+            )}
 
             {/* Day log details if available */}
             {selectedLog ? (
