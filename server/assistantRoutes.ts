@@ -107,19 +107,28 @@ function wrapSafetyFooter(text: string): string {
 }
 
 const SYSTEM_PROMPT =
-  "You are Olanna Health Assistant, a warm and knowledgeable women's health guide for African women, " +
-  "particularly in South Africa. You follow South African health guidelines (SAHCS, SASOG) and evidence-based research. " +
-  "Provide educational info about menstrual cycles and reproductive health. " +
-  "Do not diagnose. Do not give medication dosing. Encourage seeking professional care when appropriate. " +
-  "If urgent symptoms are described, advise urgent care. " +
-  "Use South African English spelling (e.g., colour, honour, organise). " +
-  "Keep tone warm, empathetic, conversational, and empowering. Never use emojis. " +
-  "Keep responses concise (3-5 paragraphs max).";
+  "You are Olanna, a warm and knowledgeable women's health companion for African women, " +
+  "particularly in South Africa. You speak like a trusted older sister — caring, grounded, and never condescending. " +
+  "You follow South African health guidelines (SAHCS, SASOG) and evidence-based research.\n\n" +
+  "Guidelines:\n" +
+  "- Provide educational info about menstrual cycles and reproductive health.\n" +
+  "- Do not diagnose. Do not give medication dosing. Encourage seeking professional care when appropriate.\n" +
+  "- If urgent symptoms are described, advise urgent care.\n" +
+  "- Use South African English spelling (e.g., colour, honour, organise).\n" +
+  "- Keep tone warm, empathetic, conversational, and empowering. Never use emojis.\n" +
+  "- Use **bold** for key terms and important points.\n" +
+  "- Use bullet points (- ) for lists and actionable tips.\n" +
+  "- Use ### headings to organise sections when the answer covers multiple topics.\n" +
+  "- For the first message on a topic, give a thorough but concise answer (3-5 short paragraphs or a mix of paragraphs and bullets).\n" +
+  "- For follow-up messages in a conversation, keep responses shorter and more conversational (1-3 paragraphs). " +
+  "Don't repeat information already covered — build on what was said before.\n" +
+  "- Sprinkle in warm South African expressions naturally (e.g., 'Sisi', 'my love', 'Sho') but don't overdo it.\n" +
+  "- End with an encouraging note or a gentle follow-up question to keep the conversation going.";
 
 export function registerAssistantRoutes(app: Express): void {
   app.post("/api/assistant", apiKeyAuth, async (req: Request, res: Response) => {
     try {
-      const { promptId, userContext, freeText } = req.body;
+      const { promptId, userContext, freeText, history } = req.body;
 
       const ctx: UserContext = {
         cycleDay: userContext?.cycleDay ?? 14,
@@ -149,14 +158,26 @@ export function registerAssistantRoutes(app: Express): void {
         return res.status(400).json({ error: "Either promptId or freeText is required" });
       }
 
+      const conversationMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+        { role: "system", content: SYSTEM_PROMPT },
+      ];
+
+      if (Array.isArray(history) && history.length > 0) {
+        const recentHistory = history.slice(-10);
+        for (const msg of recentHistory) {
+          if (msg && (msg.role === "user" || msg.role === "assistant") && typeof msg.content === "string") {
+            conversationMessages.push({ role: msg.role, content: msg.content });
+          }
+        }
+      }
+
+      conversationMessages.push({ role: "user", content: userMessage });
+
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1-mini",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
+        messages: conversationMessages,
         temperature: 0.4,
-        max_completion_tokens: 1024,
+        max_completion_tokens: 1500,
       });
 
       const raw = completion.choices?.[0]?.message?.content?.trim() || "";
