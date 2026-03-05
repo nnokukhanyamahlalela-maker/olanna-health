@@ -12,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { storage } from "@/lib/storage";
 
 const splashGradient = require("@/assets/images/splash-gradient.png");
 const splashBrand = require("@/assets/images/splash-brand.png");
@@ -29,16 +30,45 @@ export default function IntroLogo() {
   const navigation = useNavigation<NavigationProp>();
   const hasNavigated = useRef(false);
   const [phase, setPhase] = useState<SplashPhase>("gradient");
+  const destinationRef = useRef<"Main" | "Onboarding">("Onboarding");
+  const storageChecked = useRef(false);
+  const pendingNavigate = useRef(false);
 
   const gradientOpacity = useSharedValue(1);
   const brandOpacity = useSharedValue(0);
   const videoOpacity = useSharedValue(0);
 
-  const navigate = useCallback(() => {
+  const doNavigate = useCallback(() => {
     if (hasNavigated.current) return;
     hasNavigated.current = true;
-    navigation.replace("Onboarding");
+    navigation.replace(destinationRef.current);
   }, [navigation]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [isOnboarded, profile] = await Promise.all([
+          storage.isOnboardingComplete(),
+          storage.getUserProfile(),
+        ]);
+        if (isOnboarded && profile) {
+          destinationRef.current = "Main";
+        }
+      } catch {}
+      storageChecked.current = true;
+      if (pendingNavigate.current) {
+        doNavigate();
+      }
+    })();
+  }, [doNavigate]);
+
+  const navigate = useCallback(() => {
+    if (storageChecked.current) {
+      doNavigate();
+    } else {
+      pendingNavigate.current = true;
+    }
+  }, [doNavigate]);
 
   const player = useVideoPlayer(splashVideo, (p) => {
     p.loop = false;

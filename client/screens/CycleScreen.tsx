@@ -37,10 +37,11 @@ import {
   PHASE_ORDER,
   phaseConfig,
 } from "@/constants/phaseConfig";
-import { Fonts } from "@/constants/theme";
+import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
 import { storage, calculateCycleData } from "@/lib/storage";
+import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -445,6 +446,58 @@ export function CycleScreen() {
           selectedDay={selectedDay}
           onDaySelect={setSelectedDay}
         />
+
+        <View style={styles.insightsSection}>
+          <Text style={styles.insightsTitle}>Phase Insights</Text>
+
+          <View style={styles.insightCard}>
+            <View style={styles.insightHeader}>
+              <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
+                <Feather name="heart" size={16} color={phaseConfig[currentPhase].labelColor} />
+              </View>
+              <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>Vibes</Text>
+            </View>
+            <Text style={styles.insightBody}>{PHASE_VIBES[currentPhase as CyclePhase]}</Text>
+          </View>
+
+          <View style={styles.insightCard}>
+            <View style={styles.insightHeader}>
+              <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
+                <Feather name="activity" size={16} color={phaseConfig[currentPhase].labelColor} />
+              </View>
+              <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>
+                {PHASE_MOVEMENT[currentPhase as CyclePhase].title}
+              </Text>
+            </View>
+            <Text style={styles.insightBody}>{PHASE_MOVEMENT[currentPhase as CyclePhase].body}</Text>
+          </View>
+
+          <View style={styles.insightCard}>
+            <View style={styles.insightHeader}>
+              <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
+                <Feather name="coffee" size={16} color={phaseConfig[currentPhase].labelColor} />
+              </View>
+              <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>Foods for You</Text>
+            </View>
+            <View style={styles.foodChips}>
+              {PHASE_FOODS[currentPhase as CyclePhase].map((food, i) => (
+                <View key={i} style={[styles.foodChip, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
+                  <Text style={[styles.foodChipText, { color: phaseConfig[currentPhase].labelColor }]}>{food}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.insightCard}>
+            <View style={styles.insightHeader}>
+              <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
+                <Feather name="sun" size={16} color={phaseConfig[currentPhase].labelColor} />
+              </View>
+              <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>Self-Care</Text>
+            </View>
+            <Text style={styles.insightBody}>{PHASE_SELFCARE[currentPhase as CyclePhase]}</Text>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -582,6 +635,61 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: 13,
     color: neutral.textSecondary,
+  },
+  insightsSection: {
+    marginTop: 28,
+    gap: 12,
+  },
+  insightsTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: 20,
+    color: neutral.textPrimary,
+    letterSpacing: 0.2,
+    marginBottom: 4,
+  },
+  insightCard: {
+    backgroundColor: "rgba(255,255,255,0.65)",
+    borderRadius: BorderRadius.md,
+    padding: 16,
+    gap: 10,
+  },
+  insightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  insightIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  insightLabel: {
+    fontFamily: Fonts.heading,
+    fontSize: 15,
+    letterSpacing: 0.2,
+  },
+  insightBody: {
+    fontFamily: Fonts.body,
+    fontSize: 14,
+    color: neutral.textSecondary,
+    lineHeight: 21,
+  },
+  foodChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  foodChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  foodChipText: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    fontWeight: "500",
   },
 });
 

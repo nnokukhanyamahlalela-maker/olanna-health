@@ -20,14 +20,28 @@ export interface DailyDecodeOutput {
   closingLine: string;
 }
 
-const PHASE_FOODS: Record<CyclePhase, string[]> = {
+export const PHASE_FOODS: Record<CyclePhase, string[]> = {
   follicular: ['eggs', 'spinach', 'oats', 'apples', 'yogurt'],
   ovulation: ['leafy greens', 'berries', 'fish or tofu', 'quinoa', 'lemon water'],
   luteal: ['sweet potatoes', 'brown rice', 'chicken', 'bananas', 'dark chocolate'],
   menstrual: ['soups', 'lentils', 'red meat or beans', 'toast', 'herbal tea'],
 };
 
-const PHASE_VIBES: Record<CyclePhase, string> = {
+export const PHASE_MOVEMENT: Record<CyclePhase, { title: string; body: string }> = {
+  menstrual: { title: "Rest and restore", body: "A gentle walk or light stretching is perfect. Your body is doing important work — honour that." },
+  follicular: { title: "Build momentum", body: "Your energy is rising. Try something new — a dance class, a run, or strength training." },
+  ovulation: { title: "Go for it", body: "You are at peak energy. High-intensity workouts, group classes, and cardio feel amazing right now." },
+  luteal: { title: "Ease into it", body: "Yoga, pilates, or a calm walk suit this phase. Listen to your body and avoid overexertion." },
+};
+
+export const PHASE_SELFCARE: Record<CyclePhase, string> = {
+  menstrual: "A warm bath, a cosy blanket, and permission to do nothing. Your body is renewing itself.",
+  follicular: "Try something creative — journalling, a new recipe, or rearranging your space. Fresh energy loves fresh starts.",
+  ovulation: "Connect with someone you love. Your social energy is high and conversations flow naturally.",
+  luteal: "Set boundaries guilt-free. A quiet evening with tea and a good book is exactly what you need.",
+};
+
+export const PHASE_VIBES: Record<CyclePhase, string> = {
   follicular: "Your energy is building today, and I can feel it. This is your time to lean into new ideas and fresh starts.",
   ovulation: "You're in your radiant phase right now. Your body is feeling strong and social energy is high.",
   luteal: "Things might feel a bit slower today, and that's totally okay. Your body is asking for a little more gentleness.",
