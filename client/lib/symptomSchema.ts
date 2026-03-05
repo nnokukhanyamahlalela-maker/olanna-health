@@ -86,24 +86,40 @@ export const PAIN_DURATIONS = [
   'multiple days',
 ] as const;
 
-export const BODY_REGIONS = [
-  { id: 'head', name: 'Head', x: 50, y: 18 },
-  { id: 'neck', name: 'Neck', x: 50, y: 35 },
-  { id: 'chest', name: 'Chest', x: 50, y: 50 },
-  { id: 'left-breast', name: 'Left Breast', x: 36, y: 55 },
-  { id: 'right-breast', name: 'Right Breast', x: 64, y: 55 },
-  { id: 'upper-abdomen', name: 'Upper Abdomen', x: 50, y: 65 },
-  { id: 'lower-abdomen', name: 'Lower Abdomen', x: 50, y: 78 },
-  { id: 'left-ovary', name: 'Left Ovary', x: 40, y: 82 },
-  { id: 'right-ovary', name: 'Right Ovary', x: 60, y: 82 },
-  { id: 'pelvic', name: 'Pelvic Area', x: 50, y: 88 },
-  { id: 'lower-back', name: 'Lower Back', x: 50, y: 75 },
-  { id: 'upper-back', name: 'Upper Back', x: 50, y: 58 },
-  { id: 'left-hip', name: 'Left Hip', x: 33, y: 92 },
-  { id: 'right-hip', name: 'Right Hip', x: 67, y: 92 },
-  { id: 'left-leg', name: 'Left Leg', x: 40, y: 115 },
-  { id: 'right-leg', name: 'Right Leg', x: 60, y: 115 },
-  { id: 'rectum', name: 'Rectal Area', x: 50, y: 94 },
+export type BodyView = 'front' | 'back';
+
+export interface BodyRegion {
+  id: string;
+  name: string;
+  view: BodyView;
+  zone: { x: number; y: number; w: number; h: number };
+  labelSide: 'left' | 'right' | 'center';
+}
+
+export const BODY_REGIONS: readonly BodyRegion[] = [
+  { id: 'head', name: 'Head', view: 'front', zone: { x: 38, y: 2, w: 24, h: 14 }, labelSide: 'right' },
+  { id: 'neck', name: 'Neck', view: 'front', zone: { x: 42, y: 17, w: 16, h: 8 }, labelSide: 'left' },
+  { id: 'chest', name: 'Chest', view: 'front', zone: { x: 30, y: 26, w: 40, h: 10 }, labelSide: 'center' },
+  { id: 'left-breast', name: 'Left Breast', view: 'front', zone: { x: 30, y: 28, w: 18, h: 12 }, labelSide: 'left' },
+  { id: 'right-breast', name: 'Right Breast', view: 'front', zone: { x: 52, y: 28, w: 18, h: 12 }, labelSide: 'right' },
+  { id: 'upper-abdomen', name: 'Upper Abdomen', view: 'front', zone: { x: 33, y: 41, w: 34, h: 10 }, labelSide: 'center' },
+  { id: 'lower-abdomen', name: 'Lower Abdomen', view: 'front', zone: { x: 33, y: 52, w: 34, h: 10 }, labelSide: 'center' },
+  { id: 'left-ovary', name: 'Left Ovary', view: 'front', zone: { x: 33, y: 58, w: 14, h: 8 }, labelSide: 'left' },
+  { id: 'right-ovary', name: 'Right Ovary', view: 'front', zone: { x: 53, y: 58, w: 14, h: 8 }, labelSide: 'right' },
+  { id: 'pelvic', name: 'Pelvic Area', view: 'front', zone: { x: 35, y: 63, w: 30, h: 8 }, labelSide: 'center' },
+  { id: 'left-hip', name: 'Left Hip', view: 'front', zone: { x: 22, y: 63, w: 12, h: 10 }, labelSide: 'left' },
+  { id: 'right-hip', name: 'Right Hip', view: 'front', zone: { x: 66, y: 63, w: 12, h: 10 }, labelSide: 'right' },
+  { id: 'left-leg', name: 'Left Leg', view: 'front', zone: { x: 32, y: 74, w: 16, h: 22 }, labelSide: 'left' },
+  { id: 'right-leg', name: 'Right Leg', view: 'front', zone: { x: 52, y: 74, w: 16, h: 22 }, labelSide: 'right' },
+  { id: 'head-back', name: 'Head (Back)', view: 'back', zone: { x: 38, y: 2, w: 24, h: 14 }, labelSide: 'right' },
+  { id: 'neck-back', name: 'Neck', view: 'back', zone: { x: 42, y: 17, w: 16, h: 8 }, labelSide: 'left' },
+  { id: 'upper-back', name: 'Upper Back', view: 'back', zone: { x: 30, y: 26, w: 40, h: 18 }, labelSide: 'center' },
+  { id: 'lower-back', name: 'Lower Back', view: 'back', zone: { x: 33, y: 45, w: 34, h: 16 }, labelSide: 'center' },
+  { id: 'left-hip-back', name: 'Left Hip', view: 'back', zone: { x: 22, y: 62, w: 14, h: 10 }, labelSide: 'left' },
+  { id: 'right-hip-back', name: 'Right Hip', view: 'back', zone: { x: 64, y: 62, w: 14, h: 10 }, labelSide: 'right' },
+  { id: 'rectum', name: 'Rectal Area', view: 'back', zone: { x: 40, y: 62, w: 20, h: 10 }, labelSide: 'center' },
+  { id: 'left-leg-back', name: 'Left Leg', view: 'back', zone: { x: 32, y: 74, w: 16, h: 22 }, labelSide: 'left' },
+  { id: 'right-leg-back', name: 'Right Leg', view: 'back', zone: { x: 52, y: 74, w: 16, h: 22 }, labelSide: 'right' },
 ] as const;
 
 export const SYMPTOM_CATEGORIES: SymptomCategory[] = [

@@ -234,6 +234,10 @@ export default function CheckInScreen() {
     setPainPoints([...painPoints, newPainPoint]);
   };
 
+  const handleRemovePainPoint = (painPointId: string) => {
+    setPainPoints(prev => prev.filter(p => p.id !== painPointId));
+  };
+
   const handleSaveCheckIn = async () => {
     try {
       const symptoms = Array.from(selectedSymptoms.values());
@@ -463,6 +467,7 @@ export default function CheckInScreen() {
             <BodyMap
               painPoints={painPoints}
               onAddPainPoint={handleAddPainPoint}
+              onRemovePainPoint={handleRemovePainPoint}
               date={today}
             />
           </View>
