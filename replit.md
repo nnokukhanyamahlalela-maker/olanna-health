@@ -29,7 +29,8 @@ Key features and architectural decisions include:
 - **Onboarding**: A conversational 8-step onboarding flow with a state machine, including intro splashes, name input, profile setup, goal selection, and a feature carousel. It uses a warm gradient palette and iOS-style glass cards.
 - **Goals-Based Personalization**: User-selected health goals from onboarding drive personalized content ordering and prioritization across the application.
 - **Security**: Features encrypted local storage for sensitive data (`expo-secure-store`), API rate limiting, input validation, HTTPS enforcement, and a PostgreSQL database with Drizzle ORM.
-- **Privacy**: Includes a comprehensive privacy statement, device-scoped product logs, and a privacy-first Partner Mode with strict allowlists, invite codes, and an audit log for sharing cycle snapshots.
+- **Privacy**: Includes a comprehensive privacy policy, device-scoped product logs, and a privacy-first Partner Mode with strict allowlists, invite codes, and an audit log for sharing cycle snapshots.
+- **About & Legal**: Dedicated About Olanna Health, Terms of Service, and Privacy Policy screens accessible from Profile → About section. All legal content reflects current app features (no AI assistant references). Terms reference South African law (POPIA, Consumer Protection Act). Contact: admin@olanna.health.
 
 ## External Dependencies
 - **React Native**: Frontend framework.

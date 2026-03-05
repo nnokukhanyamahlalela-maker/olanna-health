@@ -106,9 +106,8 @@ export default function PrivacyStatementScreen() {
 
         <PolicySection icon="server" title="What Goes to Our Server" delay={200}>
           <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
-            Only two features communicate with our server, and both are optional:
+            Very little data leaves your device. The only feature that communicates with our server is optional:
           </ThemedText>
-          <BulletPoint text="AI Health Assistant: Your chat messages are sent to generate responses, but are not used for training or sold to third parties" />
           <BulletPoint text="Partner Mode: If you opt in, a limited cycle snapshot is shared with your linked partner. You control exactly what is shared and can revoke access instantly" />
         </PolicySection>
 

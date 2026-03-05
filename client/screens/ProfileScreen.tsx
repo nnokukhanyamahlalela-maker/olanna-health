@@ -247,7 +247,7 @@ export default function ProfileScreen() {
             icon="info"
             label="About Olanna Health"
             color="#C2185B"
-            onPress={() => {}}
+            onPress={() => navigation.navigate("About")}
             theme={theme}
             isDark={isDark}
           />
@@ -255,7 +255,7 @@ export default function ProfileScreen() {
             icon="file-text"
             label="Terms of Service"
             color="#6A5B7B"
-            onPress={() => {}}
+            onPress={() => navigation.navigate("TermsOfService")}
             theme={theme}
             isDark={isDark}
           />
@@ -263,7 +263,7 @@ export default function ProfileScreen() {
             icon="shield"
             label="Privacy Policy"
             color="#7B5EA7"
-            onPress={() => {}}
+            onPress={() => navigation.navigate("PrivacyStatement")}
             isLast
             theme={theme}
             isDark={isDark}

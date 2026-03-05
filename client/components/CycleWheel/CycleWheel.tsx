@@ -26,7 +26,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { Phase, phaseConfig } from "@/constants/phaseConfig";
+import { Phase, phaseConfig, getPhaseBoundaries } from "@/constants/phaseConfig";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -34,6 +34,7 @@ interface CycleWheelProps {
   phase: Phase;
   currentDay: number;
   cycleLength: number;
+  periodLength?: number;
   size?: number;
   children?: React.ReactNode;
   onDayChange?: (day: number) => void;
@@ -73,6 +74,7 @@ export function CycleWheel({
   phase,
   currentDay,
   cycleLength,
+  periodLength = 5,
   size: propSize,
   children,
   onDayChange,
@@ -89,9 +91,10 @@ export function CycleWheel({
   const todayAngle = ((currentDay - 1) / cycleLength) * 360;
   const todayPos = polarToCartesian(cx, cy, radius, todayAngle);
 
-  const menstrualEnd = 0.18;
-  const follicularEnd = 0.46;
-  const ovulationEnd = 0.54;
+  const bounds = getPhaseBoundaries(cycleLength, periodLength);
+  const menstrualEnd = bounds.menstrualEnd / cycleLength;
+  const follicularEnd = bounds.follicularEnd / cycleLength;
+  const ovulationEnd = bounds.ovulationEnd / cycleLength;
 
   const transitionAngles = [
     menstrualEnd * 360,

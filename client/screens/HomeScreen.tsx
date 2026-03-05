@@ -252,6 +252,7 @@ export default function HomeScreen() {
                 phase={activePhase}
                 currentDay={currentDay}
                 cycleLength={cycleData.cycleLength}
+                periodLength={pLen}
                 onDayChange={handleWheelDayChange}
                 interactive={true}
               >

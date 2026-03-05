@@ -20,6 +20,8 @@ import ProfileScreen from "@/screens/ProfileScreen";
 import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
 import AppearanceScreen from "@/screens/AppearanceScreen";
+import TermsOfServiceScreen from "@/screens/TermsOfServiceScreen";
+import AboutScreen from "@/screens/AboutScreen";
 
 import CheckInSheet from "@/screens/CheckInSheet";
 import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
@@ -52,6 +54,8 @@ export type RootStackParamList = {
   CycleCalculator: undefined;
   DailyDecode: { decode: DailyDecodeOutput };
   Appearance: undefined;
+  TermsOfService: undefined;
+  About: undefined;
 
   CheckInSheet: undefined;
   ProductSafety: undefined;
@@ -236,6 +240,20 @@ export default function RootStackNavigator() {
         component={PMSCheckerScreen}
         options={{
           headerTitle: "PMS Symptom Checker",
+        }}
+      />
+      <Stack.Screen
+        name="TermsOfService"
+        component={TermsOfServiceScreen}
+        options={{
+          headerTitle: "Terms of Service",
+        }}
+      />
+      <Stack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          headerTitle: "About",
         }}
       />
       <Stack.Screen
