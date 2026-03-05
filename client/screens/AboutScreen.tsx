@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Image, Dimensions } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -10,33 +10,6 @@ import { AppGradient } from "@/components/AppGradient";
 import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-interface FeatureItemProps {
-  icon: keyof typeof Feather.glyphMap;
-  title: string;
-  description: string;
-  color: string;
-}
-
-function FeatureItem({ icon, title, description, color }: FeatureItemProps) {
-  const { theme } = useTheme();
-
-  return (
-    <View style={styles.featureRow}>
-      <View style={[styles.featureIcon, { backgroundColor: color + "15" }]}>
-        <Feather name={icon} size={18} color={color} />
-      </View>
-      <View style={styles.featureContent}>
-        <ThemedText type="body" style={{ fontWeight: "600" }}>{title}</ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 20 }}>
-          {description}
-        </ThemedText>
-      </View>
-    </View>
-  );
-}
 
 export default function AboutScreen() {
   const { theme } = useTheme();
@@ -69,93 +42,40 @@ export default function AboutScreen() {
 
         <Animated.View entering={FadeInDown.duration(300).delay(100)}>
           <GlassSurface style={styles.sectionCard}>
-            <ThemedText type="h4" style={styles.sectionTitle}>Our Mission</ThemedText>
             <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
-              Olanna Health is a femtech wellness application created for African women, with a particular focus on South Africa. We believe every woman deserves access to accurate, culturally relevant health information and tools to understand her body.
+              Olanna Health is a women's health and menstrual wellness app designed to help you understand your body, your cycle, and your health with clarity and confidence.
             </ThemedText>
             <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
-              Our app combines evidence-based reproductive health tracking with a privacy-first approach, empowering you to take control of your cycle, symptoms, and overall wellness.
+              Our mission is to make reproductive health knowledge more accessible, empowering women to track their cycles, recognize patterns, and better understand the signals their bodies send throughout each phase of the menstrual cycle.
             </ThemedText>
           </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(300).delay(200)}>
           <GlassSurface style={styles.sectionCard}>
-            <ThemedText type="h4" style={styles.sectionTitle}>What Olanna Offers</ThemedText>
-            <View style={styles.featureList}>
-              <FeatureItem
-                icon="sun"
-                title="Cycle Tracking"
-                description="Track your menstrual cycle with our interactive lotus wheel. Log periods, predict phases, and understand your body's rhythms."
-                color="#C2185B"
-              />
-              <FeatureItem
-                icon="calendar"
-                title="Smart Calendar"
-                description="View your cycle on a beautiful calendar with phase-coloured days, fertile window highlights, and daily cycle insights."
-                color="#B8860B"
-              />
-              <FeatureItem
-                icon="edit-3"
-                title="Daily Check-ins"
-                description="Log symptoms, mood, energy, and flow with over 200 trackable symptoms across 15 categories."
-                color="#7B5EA7"
-              />
-              <FeatureItem
-                icon="activity"
-                title="Health Tools"
-                description="PMS Symptom Checker and Cycle Length Calculator to help you understand your patterns and plan ahead."
-                color="#D4764E"
-              />
-              <FeatureItem
-                icon="book-open"
-                title="Health Education"
-                description="Evidence-based articles on periods, PCOS, endometriosis, and reproductive health, grounded in South African health guidelines."
-                color="#5A8A6A"
-              />
-              <FeatureItem
-                icon="users"
-                title="Partner Mode"
-                description="Optionally share cycle information with a partner through secure, privacy-first sharing with full control over what is visible."
-                color="#6A5B7B"
-              />
-            </View>
+            <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
+              Olanna Health combines thoughtful design with evidence-informed health insights to support your wellbeing. Whether you are tracking your period, noticing symptoms, understanding hormonal changes, or learning more about conditions such as PCOS or endometriosis, Olanna Health helps you build a deeper relationship with your body.
+            </ThemedText>
           </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(300).delay(300)}>
           <GlassSurface style={styles.sectionCard}>
-            <ThemedText type="h4" style={styles.sectionTitle}>Our Approach</ThemedText>
-            <View style={styles.approachList}>
-              <View style={styles.approachItem}>
-                <Feather name="shield" size={16} color="#7B5EA7" />
-                <ThemedText type="body" style={[styles.approachText, { color: theme.textSecondary }]}>
-                  Privacy-first: Your health data stays on your device
-                </ThemedText>
-              </View>
-              <View style={styles.approachItem}>
-                <Feather name="check-circle" size={16} color="#5A8A6A" />
-                <ThemedText type="body" style={[styles.approachText, { color: theme.textSecondary }]}>
-                  Evidence-based: Following SAHCS and SASOG guidelines
-                </ThemedText>
-              </View>
-              <View style={styles.approachItem}>
-                <Feather name="heart" size={16} color="#C2185B" />
-                <ThemedText type="body" style={[styles.approachText, { color: theme.textSecondary }]}>
-                  Culturally grounded: Designed by and for African women
-                </ThemedText>
-              </View>
-              <View style={styles.approachItem}>
-                <Feather name="lock" size={16} color="#B8860B" />
-                <ThemedText type="body" style={[styles.approachText, { color: theme.textSecondary }]}>
-                  POPIA compliant: Respecting South African data protection law
-                </ThemedText>
-              </View>
-            </View>
+            <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
+              Inspired by the lotus flower, our cycle model reflects the natural rhythm of renewal and transformation throughout the menstrual cycle. Each phase represents a different aspect of wellbeing — from rest and reflection to growth, energy, and expression.
+            </ThemedText>
           </GlassSurface>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(300).delay(400)}>
+          <GlassSurface style={styles.sectionCard}>
+            <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
+              Olanna Health was created to support women in making informed health decisions, cultivating body awareness, and embracing the natural rhythm of their cycle.
+            </ThemedText>
+          </GlassSurface>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.duration(300).delay(500)}>
           <GlassSurface style={styles.contactCard}>
             <Feather name="mail" size={20} color="#C2185B" />
             <View style={styles.contactContent}>
@@ -167,7 +87,7 @@ export default function AboutScreen() {
           </GlassSurface>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(300).delay(450)}>
+        <Animated.View entering={FadeInDown.duration(300).delay(550)}>
           <ThemedText type="small" style={[styles.versionText, { color: theme.textSecondary }]}>
             Version 1.0.0
           </ThemedText>
@@ -211,44 +131,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.md,
   },
-  sectionTitle: {
-    marginBottom: Spacing.md,
-  },
   bodyText: {
     lineHeight: 22,
     marginBottom: Spacing.sm,
-  },
-  featureList: {
-    gap: Spacing.lg,
-  },
-  featureRow: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    alignItems: "flex-start",
-  },
-  featureIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
-  },
-  featureContent: {
-    flex: 1,
-    gap: 2,
-  },
-  approachList: {
-    gap: Spacing.md,
-  },
-  approachItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  approachText: {
-    flex: 1,
-    lineHeight: 22,
   },
   contactCard: {
     flexDirection: "row",
