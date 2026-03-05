@@ -27,7 +27,7 @@ import { PhaseLotus } from "@/components/CycleWheel/PhaseLotus";
 import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
-import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
+import { storage, CycleData, UserProfile, calculateCycleDataWithLogs } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -139,11 +139,14 @@ export default function HomeScreen() {
   const loadData = async () => {
     console.log("[HomeScreen] Starting loadData...");
     try {
-      const userProfile = await storage.getUserProfile();
+      const [userProfile, logs] = await Promise.all([
+        storage.getUserProfile(),
+        storage.getDailyLogs(),
+      ]);
       console.log("[HomeScreen] Got profile:", userProfile ? "yes" : "no");
       setProfile(userProfile);
       if (userProfile) {
-        const cycle = calculateCycleData(userProfile);
+        const cycle = calculateCycleDataWithLogs(userProfile, logs);
         console.log("[HomeScreen] Calculated cycle data");
         setCycleData(cycle);
       }

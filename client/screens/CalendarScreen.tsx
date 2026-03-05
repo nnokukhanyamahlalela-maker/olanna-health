@@ -21,7 +21,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
-import { storage, DailyLog, UserProfile } from "@/lib/storage";
+import { storage, DailyLog, UserProfile, getEffectiveLastPeriodStart } from "@/lib/storage";
 import { getPhaseForDay, phaseConfig, Phase } from "@/constants/phaseConfig";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
@@ -134,16 +134,21 @@ export default function CalendarScreen() {
     setViewYear(newYear);
   };
 
+  const effectiveStart = useMemo(() => {
+    if (!profile) return null;
+    return getEffectiveLastPeriodStart(profile, dailyLogs);
+  }, [profile, dailyLogs]);
+
   const getDayInCycle = useCallback(
     (date: Date): number => {
-      if (!profile) return -1;
-      const lastPeriodStart = new Date(profile.lastPeriodStart);
+      if (!profile || !effectiveStart) return -1;
+      const lastPeriodStart = new Date(effectiveStart);
       const diffTime = date.getTime() - lastPeriodStart.getTime();
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       if (diffDays < 0) return -1;
       return (diffDays % profile.cycleLength) + 1;
     },
-    [profile]
+    [profile, effectiveStart]
   );
 
   const flowLogDates = useMemo(() => {

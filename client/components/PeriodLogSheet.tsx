@@ -24,6 +24,7 @@ import {
   generateId,
   calculateCycleData,
   detectPeriodStart,
+  getEffectiveLastPeriodStart,
 } from "@/lib/storage";
 
 const BRAND_PINK = "#E83E8C";
@@ -146,6 +147,14 @@ export function PeriodLogSheet({
             await storage.setUserProfile(updated);
             const cycleData = calculateCycleData(updated);
             await storage.setCycleData(cycleData);
+          } else {
+            const effective = getEffectiveLastPeriodStart(profile, allLogs);
+            if (effective !== profile.lastPeriodStart) {
+              const updated = { ...profile, lastPeriodStart: effective };
+              await storage.setUserProfile(updated);
+              const cycleData = calculateCycleData(updated);
+              await storage.setCycleData(cycleData);
+            }
           }
         }
       }

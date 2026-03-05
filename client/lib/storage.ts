@@ -191,6 +191,43 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+export function getEffectiveLastPeriodStart(
+  profile: UserProfile,
+  dailyLogs: DailyLog[]
+): string {
+  const logsWithFlow = dailyLogs
+    .filter((l) => l.flow)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  if (logsWithFlow.length === 0) return profile.lastPeriodStart;
+
+  let latestPeriodStart = logsWithFlow[0].date;
+  for (let i = 1; i < logsWithFlow.length; i++) {
+    const prev = new Date(logsWithFlow[i - 1].date + "T12:00:00");
+    const curr = new Date(logsWithFlow[i].date + "T12:00:00");
+    const gap = Math.round((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24));
+    if (gap <= 1) {
+      latestPeriodStart = logsWithFlow[i].date;
+    } else {
+      break;
+    }
+  }
+
+  if (latestPeriodStart > profile.lastPeriodStart) {
+    return latestPeriodStart;
+  }
+  return profile.lastPeriodStart;
+}
+
+export function calculateCycleDataWithLogs(
+  profile: UserProfile,
+  dailyLogs: DailyLog[]
+): CycleData {
+  const effectiveStart = getEffectiveLastPeriodStart(profile, dailyLogs);
+  const effectiveProfile = { ...profile, lastPeriodStart: effectiveStart };
+  return calculateCycleData(effectiveProfile);
+}
+
 export function detectPeriodStart(
   dateKey: string,
   dailyLogs: DailyLog[],

@@ -40,13 +40,13 @@ import {
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
-import { storage, calculateCycleData } from "@/lib/storage";
+import { storage, calculateCycleDataWithLogs } from "@/lib/storage";
 import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const DEFAULT_CYCLE_LENGTH = 28;
-const DEFAULT_CURRENT_DAY = 12;
+const DEFAULT_CURRENT_DAY = 1;
 
 const PHASE_CIRCLE_COLORS: Record<Phase, string> = {
   menstrual: "#F472B6",
@@ -389,9 +389,12 @@ export function CycleScreen() {
       let active = true;
       (async () => {
         try {
-          const profile = await storage.getUserProfile();
+          const [profile, logs] = await Promise.all([
+            storage.getUserProfile(),
+            storage.getDailyLogs(),
+          ]);
           if (!profile || !active) return;
-          const cycleData = calculateCycleData(profile);
+          const cycleData = calculateCycleDataWithLogs(profile, logs);
           setCycleLength(profile.cycleLength || DEFAULT_CYCLE_LENGTH);
           setPeriodLength(profile.periodLength || 5);
           const day = cycleData.currentDay || DEFAULT_CURRENT_DAY;
