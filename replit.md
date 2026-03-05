@@ -19,17 +19,16 @@ Key features and architectural decisions include:
 - **Health Modules**: Dedicated modules for conditions like PCOS and Endometriosis, offering symptom tracking and lifestyle management. Sexual health features include STI and cervical screening reminders based on SAHCS and SASOG guidelines.
 - **Health Tools**: Includes a PMS Symptom Checker with personalized results and lifestyle recommendations, and a Cycle Length Calculator for period, ovulation, and fertile window prediction.
 - **Educational Content**: An evidence-based education library with articles covering various health topics, featuring hero images and organized content.
-- **AI Health Assistant**: A conversational AI named "Olanna" supporting English and South African languages. It features conversation memory, markdown-formatted responses, a distinct glass UI for assistant messages, and a medical safety footer. It uses structured prompt templates and offers built-in prompt chips.
 - **Navigation**: Uses React Navigation with a 5-tab bottom navigation (Cycle, Calendar, Check-in, Health, Learn).
 - **Calendar Screen**: Custom-built calendar grid with phase-colored day backgrounds, filter options, a "Daily Cycle Decode" section, and "About Your Cycle" stats card, all within a glass card aesthetic.
-- **Design System**: A token-based color system in `client/constants/colors.ts` ensures consistent branding, phase-specific colors, and WCAG AA compliant readability. `AppGradient` is used for brand backgrounds. Phase boundaries are dynamically calculated in `getPhaseForDay(day, cycleLength, periodLength)` from `client/constants/phaseConfig.ts` — all screens (CycleScreen, CalendarScreen, HomeScreen, AIChatScreen) and `calculateCycleData()` in `storage.ts` use this single function for consistent phase determination based on the user's actual cycle and period lengths.
+- **Design System**: A token-based color system in `client/constants/colors.ts` ensures consistent branding, phase-specific colors, and WCAG AA compliant readability. `AppGradient` is used for brand backgrounds. Phase boundaries are dynamically calculated in `getPhaseForDay(day, cycleLength, periodLength)` from `client/constants/phaseConfig.ts` — all screens (CycleScreen, CalendarScreen, HomeScreen) and `calculateCycleData()` in `storage.ts` use this single function for consistent phase determination based on the user's actual cycle and period lengths.
 - **iOS Liquid Glass UI**: Utilizes a `GlassSurface` component for a frosted glass aesthetic across the app, supporting different tint levels and adapting for dark mode, providing a consistent modern look.
 - **Visualizations**: iOS-style cycle screen with an interactive circular cycle wheel, dynamic phase-specific lotus flower images, and a "Phase Explainer" card with educational content.
 - **Theming**: Comprehensive theme system supporting Light, Dark, and System modes, with persistence via AsyncStorage, ensuring WCAG AA compliant contrast.
 - **Symptom Tracking**: A robust system supporting 15 categories and over 200 symptoms, including a SeveritySlider, BodyMap, TagSelector, and customizable check-in screens.
 - **Onboarding**: A conversational 8-step onboarding flow with a state machine, including intro splashes, name input, profile setup, goal selection, and a feature carousel. It uses a warm gradient palette and iOS-style glass cards.
 - **Goals-Based Personalization**: User-selected health goals from onboarding drive personalized content ordering and prioritization across the application.
-- **Security**: Features encrypted local storage for sensitive data (`expo-secure-store`), API rate limiting, API key authentication for conversation endpoints, input validation, HTTPS enforcement, and a PostgreSQL database with Drizzle ORM.
+- **Security**: Features encrypted local storage for sensitive data (`expo-secure-store`), API rate limiting, input validation, HTTPS enforcement, and a PostgreSQL database with Drizzle ORM.
 - **Privacy**: Includes a comprehensive privacy statement, device-scoped product logs, and a privacy-first Partner Mode with strict allowlists, invite codes, and an audit log for sharing cycle snapshots.
 
 ## External Dependencies
@@ -39,5 +38,4 @@ Key features and architectural decisions include:
 - **TypeScript**: For server-side development.
 - **AsyncStorage**: For local data persistence.
 - **React Navigation**: For in-app navigation.
-- **OpenAI API (gpt-4.1-mini)**: For the AI Health Assistant.
 - **Feather Icons**: Icon library.

@@ -3,7 +3,6 @@ import { createServer, type Server } from "node:http";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import { registerProductLogRoutes } from "./productLogRoutes";
 import { registerPartnerRoutes } from "./partnerRoutes";
-import { registerAssistantRoutes } from "./assistantRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", (_req, res) => {
@@ -13,7 +12,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerProductLogRoutes(app);
   registerPartnerRoutes(app);
-  registerAssistantRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

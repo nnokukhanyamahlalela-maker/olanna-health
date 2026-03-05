@@ -162,14 +162,6 @@ export default function ProfileScreen() {
         </ThemedText>
         <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
-            icon="message-circle"
-            label="AI Health Assistant"
-            color="#C2185B"
-            onPress={() => navigation.navigate("AIChat")}
-            theme={theme}
-            isDark={isDark}
-          />
-          <MenuItem
             icon="users"
             label="Community"
             color="#6A5B7B"

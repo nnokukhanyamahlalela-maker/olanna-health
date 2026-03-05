@@ -20,7 +20,7 @@ import ProfileScreen from "@/screens/ProfileScreen";
 import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
 import AppearanceScreen from "@/screens/AppearanceScreen";
-import AIChatScreen from "@/screens/AIChatScreen";
+
 import CheckInSheet from "@/screens/CheckInSheet";
 import ProductSafetyScreen from "@/screens/ProductSafetyScreen";
 import LogProductScreen from "@/screens/LogProductScreen";
@@ -52,7 +52,7 @@ export type RootStackParamList = {
   CycleCalculator: undefined;
   DailyDecode: { decode: DailyDecodeOutput };
   Appearance: undefined;
-  AIChat: undefined;
+
   CheckInSheet: undefined;
   ProductSafety: undefined;
   LogProduct: undefined;
@@ -187,13 +187,6 @@ export default function RootStackNavigator() {
         component={AppearanceScreen}
         options={{
           headerTitle: "Appearance",
-        }}
-      />
-      <Stack.Screen
-        name="AIChat"
-        component={AIChatScreen}
-        options={{
-          headerTitle: "Health Assistant",
         }}
       />
       <Stack.Screen
