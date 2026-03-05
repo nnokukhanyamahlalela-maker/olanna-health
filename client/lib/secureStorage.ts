@@ -197,6 +197,20 @@ export const secureStorage = {
     }
   },
 
+  async removeDailyLog(date: string): Promise<void> {
+    try {
+      const logs = await this.getDailyLogs();
+      const filtered = logs.filter((l: any) => l.date !== date);
+      await secureSet("daily_logs", JSON.stringify(filtered));
+    } catch {
+      const fallbackKey = SECURE_PREFIX + "daily_logs";
+      const existing = await AsyncStorage.getItem(fallbackKey);
+      const logs = existing ? JSON.parse(existing) : [];
+      const filtered = logs.filter((l: any) => l.date !== date);
+      await AsyncStorage.setItem(fallbackKey, JSON.stringify(filtered));
+    }
+  },
+
   async clearAllSecureData(): Promise<void> {
     const keys = ["user_profile", "cycle_data", "daily_logs"];
     for (const key of keys) {

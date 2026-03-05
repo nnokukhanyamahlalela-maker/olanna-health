@@ -95,6 +95,10 @@ export const storage = {
     await secureStorage.addDailyLog(log);
   },
 
+  async removeDailyLog(date: string): Promise<void> {
+    await secureStorage.removeDailyLog(date);
+  },
+
   async getScreenings(): Promise<Screening[]> {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SCREENINGS);

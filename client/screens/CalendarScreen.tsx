@@ -724,6 +724,10 @@ export default function CalendarScreen() {
           loadData();
         }}
         onDismiss={() => setPeriodSheetVisible(false)}
+        onDelete={() => {
+          setPeriodSheetVisible(false);
+          loadData();
+        }}
       />
     </AppGradient>
   );

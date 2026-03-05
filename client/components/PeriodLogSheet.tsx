@@ -70,6 +70,7 @@ interface PeriodLogSheetProps {
   existingLog: DailyLog | null;
   onSave: () => void;
   onDismiss: () => void;
+  onDelete?: () => void;
 }
 
 export function PeriodLogSheet({
@@ -78,6 +79,7 @@ export function PeriodLogSheet({
   existingLog,
   onSave,
   onDismiss,
+  onDelete,
 }: PeriodLogSheetProps) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -96,6 +98,32 @@ export function PeriodLogSheet({
 
   const isEditing = !!existingLog;
   const canSave = flow || mood || notes.trim();
+
+  const handleDelete = async () => {
+    if (saving || !isEditing) return;
+    setSaving(true);
+    try {
+      await storage.removeDailyLog(date);
+      const [allLogs, profile] = await Promise.all([
+        storage.getDailyLogs(),
+        storage.getUserProfile(),
+      ]);
+      if (profile) {
+        const effective = getEffectiveLastPeriodStart(profile, allLogs);
+        if (effective !== profile.lastPeriodStart) {
+          const updated = { ...profile, lastPeriodStart: effective };
+          await storage.setUserProfile(updated);
+          const cycleData = calculateCycleData(updated);
+          await storage.setCycleData(cycleData);
+        }
+      }
+      onDelete ? onDelete() : onSave();
+    } catch (err) {
+      console.error("[PeriodLog] Delete error:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     if (saving || !canSave) return;
@@ -211,7 +239,7 @@ export function PeriodLogSheet({
                     testID={`flow-${opt.value || "none"}`}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setFlow(opt.value);
+                      setFlow(prev => prev === opt.value ? null : opt.value);
                     }}
                     style={[
                       styles.flowPill,
@@ -324,6 +352,22 @@ export function PeriodLogSheet({
                 Select a flow level or mood to log
               </ThemedText>
             ) : null}
+            {isEditing ? (
+              <Pressable
+                testID="button-delete-period"
+                onPress={handleDelete}
+                disabled={saving}
+                style={({ pressed }) => [
+                  styles.deleteButton,
+                  { opacity: pressed || saving ? 0.5 : 1 },
+                ]}
+              >
+                <Feather name="trash-2" size={16} color={theme.error || "#F44336"} />
+                <ThemedText style={[styles.deleteButtonText, { color: theme.error || "#F44336" }]}>
+                  Remove this entry
+                </ThemedText>
+              </Pressable>
+            ) : null}
           </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -434,5 +478,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     marginTop: 10,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    marginTop: 12,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: "rgba(244,67,54,0.3)",
+  },
+  deleteButtonText: {
+    fontFamily: Fonts.body,
+    fontSize: 14,
   },
 });

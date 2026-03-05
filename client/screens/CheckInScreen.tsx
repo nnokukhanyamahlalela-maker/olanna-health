@@ -552,6 +552,23 @@ export default function CheckInScreen() {
                 </Button>
               </View>
             </View>
+            {currentSymptom && selectedCategory && selectedSymptoms.has(`${selectedCategory.id}-${currentSymptom.id}`) ? (
+              <Pressable
+                onPress={() => {
+                  const key = `${selectedCategory!.id}-${currentSymptom!.id}`;
+                  const newMap = new Map(selectedSymptoms);
+                  newMap.delete(key);
+                  setSelectedSymptoms(newMap);
+                  setShowDetailModal(false);
+                  setCurrentSymptom(null);
+                }}
+                style={[styles.removeSymptomButton, { borderColor: theme.error || '#F44336' }]}
+                testID="remove-symptom"
+              >
+                <Feather name="x-circle" size={16} color={theme.error || '#F44336'} />
+                <ThemedText type="small" style={{ color: theme.error || '#F44336' }}>Clear this one</ThemedText>
+              </Pressable>
+            ) : null}
           </ThemedView>
         </View>
       </Modal>
@@ -913,6 +930,16 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+  },
+  removeSymptomButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.sm,
     borderWidth: 1,
     borderRadius: BorderRadius.md,
   },
