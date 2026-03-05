@@ -49,7 +49,6 @@ const FLOW_OPTIONS: FlowOption[] = [
 const MOOD_OPTIONS = [
   { value: "happy", label: "Happy", icon: "smile" as const },
   { value: "calm", label: "Calm", icon: "sun" as const },
-  { value: "tired", label: "Tired", icon: "moon" as const },
   { value: "anxious", label: "Anxious", icon: "alert-circle" as const },
   { value: "sad", label: "Sad", icon: "cloud" as const },
   { value: "irritable", label: "Irritable", icon: "zap" as const },
@@ -95,8 +94,11 @@ export function PeriodLogSheet({
     }
   }, [visible, existingLog]);
 
+  const isEditing = !!existingLog;
+  const canSave = flow || mood || notes.trim();
+
   const handleSave = async () => {
-    if (saving || !flow) return;
+    if (saving || !canSave) return;
     setSaving(true);
     try {
       const log: DailyLog = {
@@ -306,20 +308,20 @@ export function PeriodLogSheet({
             <Pressable
               testID="button-save-period"
               onPress={handleSave}
-              disabled={saving || !flow}
+              disabled={saving || !canSave}
               style={({ pressed }) => [
                 styles.saveButton,
-                { opacity: pressed || saving || !flow ? 0.5 : 1 },
+                { opacity: pressed || saving || !canSave ? 0.5 : 1 },
               ]}
             >
               <Feather name="check" size={18} color="#FFFFFF" />
               <ThemedText style={styles.saveButtonText}>
-                {saving ? "Saving..." : "Save"}
+                {saving ? "Saving..." : isEditing ? "Update" : "Save"}
               </ThemedText>
             </Pressable>
-            {!flow ? (
+            {!canSave ? (
               <ThemedText style={[styles.flowHint, { color: theme.textSecondary }]}>
-                Select a flow level to log your period
+                Select a flow level or mood to log
               </ThemedText>
             ) : null}
           </ScrollView>
