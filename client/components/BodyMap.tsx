@@ -13,9 +13,9 @@ import { BODY_REGIONS, PAIN_TYPES, PAIN_DURATIONS, BodyPainPoint, BodyView, Body
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const MAP_WIDTH = Math.min(SCREEN_WIDTH - 48, 340);
-const MAP_HEIGHT = MAP_WIDTH * 1.45;
 const SVG_VB_W = 100;
-const SVG_VB_H = 100;
+const SVG_VB_H = 145;
+const MAP_HEIGHT = MAP_WIDTH * (SVG_VB_H / SVG_VB_W);
 
 interface BodyMapProps {
   painPoints: BodyPainPoint[];
@@ -25,15 +25,18 @@ interface BodyMapProps {
 }
 
 const FRONT_BODY = `
-  M50 3 C57 3 62 7 62 14 C62 20 57 23 50 23 C43 23 38 20 38 14 C38 7 43 3 50 3
-  M50 23 L50 25 C50 25 38 27 33 35 C28 43 30 55 32 62 L32 63 L35 63 L35 73 L37 96 L46 96 L46 73 L54 73 L54 96 L63 96 L65 73 L65 63 L68 63 L68 62 C70 55 72 43 67 35 C62 27 50 25 50 25
+  M50 4 C57 4 62 10 62 20 C62 29 57 33 50 33 C43 33 38 29 38 20 C38 10 43 4 50 4
+  M50 33 L50 36 C50 36 38 39 33 51 C28 62 30 80 32 90 L32 91 L35 91 L35 106 L37 139 L46 139 L46 106 L54 106 L54 139 L63 139 L65 106 L65 91 L68 91 L68 90 C70 80 72 62 67 51 C62 39 50 36 50 36
 `;
 
 const BACK_BODY = `
-  M50 3 C57 3 62 7 62 14 C62 20 57 23 50 23 C43 23 38 20 38 14 C38 7 43 3 50 3
-  M50 23 L50 25 C50 25 38 27 33 35 C28 43 30 55 32 62 L32 63 L35 63 L35 73 L37 96 L46 96 L46 73 L54 73 L54 96 L63 96 L65 73 L65 63 L68 63 L68 62 C70 55 72 43 67 35 C62 27 50 25 50 25
-  M40 30 L60 30 M40 45 L60 45
+  M50 4 C57 4 62 10 62 20 C62 29 57 33 50 33 C43 33 38 29 38 20 C38 10 43 4 50 4
+  M50 33 L50 36 C50 36 38 39 33 51 C28 62 30 80 32 90 L32 91 L35 91 L35 106 L37 139 L46 139 L46 106 L54 106 L54 139 L63 139 L65 106 L65 91 L68 91 L68 90 C70 80 72 62 67 51 C62 39 50 36 50 36
+  M40 44 L60 44 M40 65 L60 65
 `;
+
+const LABEL_FONT = 3.2;
+const SEVERITY_FONT = 4;
 
 function getSeverityColor(severity: number, opacity = 1): string {
   if (severity <= 3) return `rgba(76, 175, 80, ${opacity})`;
@@ -123,15 +126,15 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
   };
 
   const bodyOutline = activeView === 'front' ? FRONT_BODY : BACK_BODY;
-  const outlineColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)';
-  const fillColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+  const outlineColor = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)';
+  const fillColor = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
   const zoneDefaultBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
   const zoneBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
-  const labelColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)';
+  const labelColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)';
 
   return (
     <View style={styles.container}>
-      <View style={styles.viewToggle}>
+      <View style={[styles.viewToggle, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
         <Pressable
           onPress={() => setActiveView('front')}
           style={[
@@ -183,10 +186,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
             const pain = getRegionPain(region.id);
             const { x, y, w, h } = region.zone;
             const bg = pain ? getSeverityColor(pain.severity, 0.25) : zoneDefaultBg;
-            const border = pain ? getSeverityColor(pain.severity, 0.5) : zoneBorder;
-            const labelX = region.labelSide === 'left' ? x - 1 : region.labelSide === 'right' ? x + w + 1 : x + w / 2;
-            const labelAnchor = region.labelSide === 'left' ? 'end' : region.labelSide === 'right' ? 'start' : 'middle';
-            const labelY = y + h / 2 + 1;
+            const border = pain ? getSeverityColor(pain.severity, 0.6) : zoneBorder;
 
             return (
               <React.Fragment key={region.id}>
@@ -195,18 +195,18 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                   y={y}
                   width={w}
                   height={h}
-                  rx={1.5}
-                  ry={1.5}
+                  rx={2}
+                  ry={2}
                   fill={bg}
                   stroke={border}
-                  strokeWidth={pain ? 0.5 : 0.3}
+                  strokeWidth={pain ? 0.6 : 0.3}
                 />
                 {pain ? (
                   <SvgText
                     x={x + w / 2}
-                    y={y + h / 2 + 1.2}
+                    y={y + h / 2 + SEVERITY_FONT * 0.35}
                     textAnchor="middle"
-                    fontSize={3.5}
+                    fontSize={SEVERITY_FONT}
                     fontWeight="700"
                     fill={getSeverityColor(pain.severity, 1)}
                   >
@@ -214,11 +214,12 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                   </SvgText>
                 ) : null}
                 <SvgText
-                  x={labelX}
-                  y={labelY}
-                  textAnchor={labelAnchor}
-                  fontSize={2.2}
-                  fill={labelColor}
+                  x={region.labelSide === 'left' ? x - 1.5 : region.labelSide === 'right' ? x + w + 1.5 : x + w / 2}
+                  y={y + h / 2 + LABEL_FONT * 0.35}
+                  textAnchor={region.labelSide === 'left' ? 'end' : region.labelSide === 'right' ? 'start' : 'middle'}
+                  fontSize={LABEL_FONT}
+                  fill={pain ? getSeverityColor(pain.severity, 0.8) : labelColor}
+                  fontWeight={pain ? '600' : '400'}
                 >
                   {region.name}
                 </SvgText>
@@ -230,12 +231,12 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
         <View style={styles.touchOverlay}>
           {visibleRegions.map((region) => {
             const { x, y, w, h } = region.zone;
-            const pxX = (x / SVG_VB_W) * MAP_WIDTH;
-            const pxY = (y / SVG_VB_H) * MAP_HEIGHT;
-            const pxW = Math.max((w / SVG_VB_W) * MAP_WIDTH, 44);
-            const pxH = Math.max((h / SVG_VB_H) * MAP_HEIGHT, 44);
-            const offsetX = pxW > (w / SVG_VB_W) * MAP_WIDTH ? ((pxW - (w / SVG_VB_W) * MAP_WIDTH) / 2) : 0;
-            const offsetY = pxH > (h / SVG_VB_H) * MAP_HEIGHT ? ((pxH - (h / SVG_VB_H) * MAP_HEIGHT) / 2) : 0;
+            const rawW = (w / SVG_VB_W) * MAP_WIDTH;
+            const rawH = (h / SVG_VB_H) * MAP_HEIGHT;
+            const pxW = Math.max(rawW, 44);
+            const pxH = Math.max(rawH, 44);
+            const pxX = (x / SVG_VB_W) * MAP_WIDTH - (pxW - rawW) / 2;
+            const pxY = (y / SVG_VB_H) * MAP_HEIGHT - (pxH - rawH) / 2;
 
             return (
               <Pressable
@@ -244,8 +245,8 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                 style={[
                   styles.touchZone,
                   {
-                    left: pxX - offsetX,
-                    top: pxY - offsetY,
+                    left: pxX,
+                    top: pxY,
                     width: pxW,
                     height: pxH,
                   },
@@ -261,7 +262,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
         {painPoints.length > 0 ? (
           <View style={styles.summaryList}>
             <ThemedText type="small" style={[styles.summaryTitle, { color: theme.textSecondary }]}>
-              Logged Pain Points
+              The body report
             </ThemedText>
             {painPoints.map((point) => {
               const region = BODY_REGIONS.find(r => r.id === point.region);
@@ -293,10 +294,25 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                 </Pressable>
               );
             })}
+
+            <View style={styles.severityLegend}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: 'rgba(76, 175, 80, 1)' }]} />
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>Mild</ThemedText>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: 'rgba(255, 152, 0, 1)' }]} />
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>Moderate</ThemedText>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: 'rgba(244, 67, 54, 1)' }]} />
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>Severe</ThemedText>
+              </View>
+            </View>
           </View>
         ) : (
-          <ThemedText type="caption" style={{ color: theme.textSecondary, textAlign: 'center' }}>
-            Tap a region on the body to log pain
+          <ThemedText type="caption" style={{ color: theme.textSecondary, textAlign: 'center', lineHeight: 20 }}>
+            Your body has opinions — tap a spot to start listening
           </ThemedText>
         )}
       </View>
@@ -328,7 +344,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
 
             <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
               <ThemedText type="small" style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                Pain Type
+                What kind of feeling is it?
               </ThemedText>
               <View style={styles.optionGrid}>
                 {PAIN_TYPES.map((type) => (
@@ -364,7 +380,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
               </View>
 
               <ThemedText type="small" style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                Severity
+                On a scale of "meh" to "send help"
               </ThemedText>
               <SeveritySlider
                 value={severity}
@@ -373,7 +389,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
               />
 
               <ThemedText type="small" style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                Duration
+                How long has this been going?
               </ThemedText>
               <View style={styles.optionGrid}>
                 {PAIN_DURATIONS.map((dur) => (
@@ -416,7 +432,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                 style={styles.saveButton}
                 testID="save-pain-point"
               >
-                {getRegionPain(selectedRegion?.id || '') ? 'Update Pain Point' : 'Save Pain Point'}
+                {getRegionPain(selectedRegion?.id || '') ? 'Update, noted' : 'Noted, queen'}
               </Button>
 
               {getRegionPain(selectedRegion?.id || '') && onRemovePainPoint ? (
@@ -427,7 +443,7 @@ export function BodyMap({ painPoints, onAddPainPoint, onRemovePainPoint, date }:
                 >
                   <Feather name="trash-2" size={16} color={theme.error || '#F44336'} />
                   <ThemedText type="small" style={{ color: theme.error || '#F44336' }}>
-                    Remove Pain Point
+                    Nevermind, clear this
                   </ThemedText>
                 </Pressable>
               ) : null}
@@ -447,7 +463,6 @@ const styles = StyleSheet.create({
   viewToggle: {
     flexDirection: 'row',
     gap: 2,
-    backgroundColor: 'rgba(0,0,0,0.06)',
     borderRadius: 12,
     padding: 2,
     marginBottom: Spacing.lg,
@@ -520,6 +535,23 @@ const styles = StyleSheet.create({
   summaryInfo: {
     flex: 1,
     gap: 2,
+  },
+  severityLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 8,
+    paddingTop: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   modalOverlay: {
     flex: 1,

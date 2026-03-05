@@ -414,7 +414,7 @@ export default function CheckInScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 110 }, // QA: Consistent bottom padding for glass tab bar
+          { paddingBottom: insets.bottom + TabBarSpacing.totalHeight + 100 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -462,7 +462,7 @@ export default function CheckInScreen() {
               Pain Mapping
             </ThemedText>
             <ThemedText type="small" style={[styles.bodyMapSubtitle, { color: theme.textSecondary }]}>
-              Track where you feel pain and discomfort
+              Show us where it hurts, we're listening
             </ThemedText>
             <BodyMap
               painPoints={painPoints}
