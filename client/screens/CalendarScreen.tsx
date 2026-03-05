@@ -165,6 +165,7 @@ export default function CalendarScreen() {
 
     const cycleLength = profile?.cycleLength || 28;
     const periodLength = profile?.periodLength || 5;
+    const ovulationDay = cycleLength - 14;
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(viewYear, viewMonth, d);
@@ -173,7 +174,6 @@ export default function CalendarScreen() {
       const hasFlowLog = flowLogDates.has(dateKey);
 
       const isPeriod = hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
-      const ovulationDay = cycleLength - 14;
       const isFertile =
         dayInCycle > 0 &&
         dayInCycle >= ovulationDay - 5 &&
@@ -186,7 +186,7 @@ export default function CalendarScreen() {
       const isToday = dateKey === todayKey;
       const phase =
         hasFlowLog ? "menstrual" :
-        dayInCycle > 0 ? getPhaseForDay(dayInCycle, cycleLength) : "follicular";
+        dayInCycle > 0 ? getPhaseForDay(dayInCycle, cycleLength, periodLength) : "follicular";
 
       cells.push({
         day: d,
@@ -219,7 +219,8 @@ export default function CalendarScreen() {
       return { dayInCycle: 0, cycleLength: profile.cycleLength, phase: "follicular" as Phase, hasProfile: true };
     }
     const cycleLength = profile.cycleLength;
-    const p = hasFlow ? "menstrual" : getPhaseForDay(dayInCycle, cycleLength);
+    const pLength = profile.periodLength || 5;
+    const p = hasFlow ? "menstrual" : getPhaseForDay(dayInCycle, cycleLength, pLength);
     return { dayInCycle, cycleLength, phase: p as Phase, hasProfile: true };
   }, [selectedDate, profile, getDayInCycle, flowLogDates]);
 

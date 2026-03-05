@@ -112,7 +112,8 @@ async function buildUserContext(): Promise<UserContext> {
       cycleDay = cycleData.currentDay;
     }
 
-    const phase = getPhaseForDay(cycleDay, cycleLength);
+    const periodLen = profile?.periodLength || 5;
+    const phase = getPhaseForDay(cycleDay, cycleLength, periodLen);
     const phaseLabels: Record<string, string> = {
       menstrual: "Menstrual",
       follicular: "Follicular",

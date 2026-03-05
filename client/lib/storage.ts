@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
+import { getPhaseForDay } from "@/constants/phaseConfig";
 
 const STORAGE_KEYS = {
   USER_PROFILE: "@olanna_user_profile",
@@ -170,16 +171,7 @@ export function calculateCycleData(profile: UserProfile): CycleData {
   const fertileWindowEnd = new Date(ovulationDate);
   fertileWindowEnd.setDate(fertileWindowEnd.getDate() + 1);
 
-  let phase: CycleData["phase"];
-  if (currentDay <= profile.periodLength) {
-    phase = "menstrual";
-  } else if (currentDay <= profile.cycleLength - 14) {
-    phase = "follicular";
-  } else if (currentDay <= profile.cycleLength - 12) {
-    phase = "ovulation";
-  } else {
-    phase = "luteal";
-  }
+  const phase = getPhaseForDay(currentDay, profile.cycleLength, profile.periodLength) as CycleData["phase"];
 
   return {
     currentDay,

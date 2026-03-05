@@ -183,11 +183,13 @@ function CenterLotusInWheel({
 
 function InteractiveCycleWheel({
   cycleLength,
+  periodLength,
   currentDay,
   selectedDay,
   onDaySelect,
 }: {
   cycleLength: number;
+  periodLength: number;
   currentDay: number;
   selectedDay: number;
   onDaySelect: (day: number) => void;
@@ -256,7 +258,7 @@ function InteractiveCycleWheel({
     transform: [{ scale: scale.value }],
   }));
 
-  const selectedPhase = getPhaseForDay(selectedDay, cycleLength);
+  const selectedPhase = getPhaseForDay(selectedDay, cycleLength, periodLength);
   const config = phaseConfig[selectedPhase];
   const phaseWashColor = getPhaseColors(selectedPhase).softBg;
   const lotusCircleColor = PHASE_CIRCLE_COLORS[selectedPhase];
@@ -268,7 +270,7 @@ function InteractiveCycleWheel({
   for (let d = 1; d <= cycleLength; d++) {
     const startAngle = ((d - 1) / cycleLength) * 360 + gapDeg / 2;
     const endAngle = startAngle + segmentAngle;
-    const dayPhase = getPhaseForDay(d, cycleLength);
+    const dayPhase = getPhaseForDay(d, cycleLength, periodLength);
     const pName = toPhaseName(dayPhase);
     const gradId = `grad-${pName}`;
 
@@ -377,6 +379,7 @@ export function CycleScreen() {
   const navigation = useNavigation();
 
   const [cycleLength, setCycleLength] = useState(DEFAULT_CYCLE_LENGTH);
+  const [periodLength, setPeriodLength] = useState(5);
   const [currentDay, setCurrentDay] = useState(DEFAULT_CURRENT_DAY);
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
 
@@ -389,6 +392,7 @@ export function CycleScreen() {
           if (!profile || !active) return;
           const cycleData = calculateCycleData(profile);
           setCycleLength(profile.cycleLength || DEFAULT_CYCLE_LENGTH);
+          setPeriodLength(profile.periodLength || 5);
           const day = cycleData.currentDay || DEFAULT_CURRENT_DAY;
           setCurrentDay(day);
           setSelectedDay(day);
@@ -398,7 +402,7 @@ export function CycleScreen() {
     }, [])
   );
 
-  const currentPhase = getPhaseForDay(selectedDay, cycleLength);
+  const currentPhase = getPhaseForDay(selectedDay, cycleLength, periodLength);
 
   return (
     <View style={styles.root}>
@@ -436,6 +440,7 @@ export function CycleScreen() {
 
         <InteractiveCycleWheel
           cycleLength={cycleLength}
+          periodLength={periodLength}
           currentDay={currentDay}
           selectedDay={selectedDay}
           onDaySelect={setSelectedDay}

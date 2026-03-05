@@ -27,6 +27,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface LotusCycleWheelProps {
   cycleLength?: number;
+  periodLength?: number;
   currentDay?: number;
   selectedDay: number;
   onDaySelect: (day: number) => void;
@@ -81,6 +82,7 @@ const LOTUS_PHASE_IMAGES: Record<LotusVariant, any> = {
 
 export function LotusCycleWheel({
   cycleLength = 28,
+  periodLength = 5,
   currentDay = 22,
   selectedDay,
   onDaySelect,
@@ -149,7 +151,7 @@ export function LotusCycleWheel({
     transform: [{ scale: scale.value }],
   }));
 
-  const selectedPhase = getPhaseForDay(selectedDay, cycleLength);
+  const selectedPhase = getPhaseForDay(selectedDay, cycleLength, periodLength);
   const config = phaseConfig[selectedPhase];
   const phaseWashColor = getPhaseColors(selectedPhase).softBg;
   const lotusSize = (outerRadius - strokeWidth) * 1.4;
@@ -161,7 +163,7 @@ export function LotusCycleWheel({
   for (let d = 1; d <= cycleLength; d++) {
     const startAngle = ((d - 1) / cycleLength) * 360 + gapDeg / 2;
     const endAngle = startAngle + segmentAngle;
-    const dayPhase = getPhaseForDay(d, cycleLength);
+    const dayPhase = getPhaseForDay(d, cycleLength, periodLength);
     const pName = toPhaseName(dayPhase);
     const gradId = `grad-${pName}`;
 

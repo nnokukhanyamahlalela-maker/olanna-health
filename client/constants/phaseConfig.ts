@@ -73,19 +73,32 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
 
 export const PHASE_ORDER: Phase[] = ["menstrual", "follicular", "ovulation", "luteal"];
 
-export function getPhaseForDay(day: number, cycleLength: number = 28): Phase {
+export function getPhaseBoundaries(cycleLength: number = 28, periodLength: number = 5) {
+  const clampedPeriod = Math.min(periodLength, Math.floor(cycleLength * 0.3));
+  const ovulationDay = Math.max(clampedPeriod + 2, cycleLength - 14);
+  const menstrualEnd = clampedPeriod;
+  const follicularEnd = Math.max(menstrualEnd + 1, ovulationDay - 2);
+  const ovulationEnd = Math.min(cycleLength - 1, ovulationDay + 1);
+  return {
+    menstrualEnd,
+    follicularEnd,
+    ovulationEnd,
+    lutealEnd: cycleLength,
+  };
+}
+
+export function getPhaseForDay(day: number, cycleLength: number = 28, periodLength: number = 5): Phase {
   const normalized = ((day - 1) % cycleLength) + 1;
-  for (const phase of PHASE_ORDER) {
-    const config = phaseConfig[phase];
-    if (normalized >= config.startDay && normalized <= config.endDay) {
-      return phase;
-    }
-  }
+  const bounds = getPhaseBoundaries(cycleLength, periodLength);
+
+  if (normalized <= bounds.menstrualEnd) return "menstrual";
+  if (normalized <= bounds.follicularEnd) return "follicular";
+  if (normalized <= bounds.ovulationEnd) return "ovulation";
   return "luteal";
 }
 
-export function getPhaseColor(day: number, cycleLength: number = 28): string {
-  const phase = getPhaseForDay(day, cycleLength);
+export function getPhaseColor(day: number, cycleLength: number = 28, periodLength: number = 5): string {
+  const phase = getPhaseForDay(day, cycleLength, periodLength);
   return phaseConfig[phase].color;
 }
 
@@ -98,11 +111,11 @@ export function getDaysUntilPeriod(selectedDay: number, cycleLength: number): nu
   return cycleLength - selectedDay;
 }
 
-export function getStatusText(selectedDay: number, cycleLength: number): string {
+export function getStatusText(selectedDay: number, cycleLength: number, periodLength: number = 5): string {
   const daysUntil = getDaysUntilPeriod(selectedDay, cycleLength);
   if (daysUntil === 0) return "Period is expected today";
   if (daysUntil <= 2) return "Period starting soon";
-  const phase = getPhaseForDay(selectedDay, cycleLength);
+  const phase = getPhaseForDay(selectedDay, cycleLength, periodLength);
   if (phase === "menstrual") return "Currently in your period";
   return `Period starts in ${daysUntil} days`;
 }

@@ -25,7 +25,7 @@ import { AppGradient } from "@/components/AppGradient";
 import { CycleWheel } from "@/components/CycleWheel/CycleWheel";
 import { PhaseLotus } from "@/components/CycleWheel/PhaseLotus";
 import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
-import { Phase, phaseConfig } from "@/constants/phaseConfig";
+import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile, calculateCycleData } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -121,16 +121,6 @@ function getDayForPhase(phase: Phase, cycleLength: number): number {
   }
 }
 
-function getPhaseForDay(day: number, cycleLength: number): Phase {
-  const menstrualEnd = Math.round(cycleLength * 0.18);
-  const follicularEnd = Math.round(cycleLength * 0.46);
-  const ovulationEnd = Math.round(cycleLength * 0.54);
-  
-  if (day <= menstrualEnd) return "menstrual";
-  if (day <= follicularEnd) return "follicular";
-  if (day <= ovulationEnd) return "ovulation";
-  return "luteal";
-}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -213,8 +203,9 @@ export default function HomeScreen() {
   }
 
   const currentDay = wheelDay ?? cycleData.currentDay;
+  const pLen = profile?.periodLength || 5;
   const activePhase = wheelDay 
-    ? getPhaseForDay(wheelDay, cycleData.cycleLength) 
+    ? getPhaseForDay(wheelDay, cycleData.cycleLength, pLen) 
     : (cycleData.phase as Phase);
   const config = phaseConfig[activePhase];
 
