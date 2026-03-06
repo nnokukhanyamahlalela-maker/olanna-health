@@ -94,8 +94,31 @@ export function ScreenshotImport({
       const asset = result.assets[0];
       if (!asset?.uri) return;
 
-      setPreviewUri(asset.uri);
-      await analyzeImage(asset.uri);
+      const mimeType = asset.mimeType || "";
+      const uri = asset.uri;
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+      if (mimeType && !allowedTypes.includes(mimeType)) {
+        setErrorMessage(
+          "Please upload a JPG, PNG, or WEBP image. Other formats are not supported."
+        );
+        setNeedsSettings(false);
+        setState("error");
+        return;
+      }
+
+      const ext = uri.split(".").pop()?.toLowerCase() || "";
+      const allowedExts = ["jpg", "jpeg", "png", "webp"];
+      if (!mimeType && ext && !allowedExts.includes(ext)) {
+        setErrorMessage(
+          "Please upload a JPG, PNG, or WEBP image. Other formats are not supported."
+        );
+        setNeedsSettings(false);
+        setState("error");
+        return;
+      }
+
+      setPreviewUri(uri);
+      await analyzeImage(uri);
     } catch {
       setErrorMessage(
         "Something went wrong selecting your image. Please try again."
@@ -143,10 +166,12 @@ export function ScreenshotImport({
       let msg =
         "We couldn't read cycle data from this screenshot. Try a clearer image, or enter your details manually.";
       try {
-        const parsed = JSON.parse(
-          err.message?.replace(/^\d+:\s*/, "") || "{}"
-        );
-        if (parsed.message) msg = parsed.message;
+        const raw = err.message || "";
+        const jsonStart = raw.indexOf("{");
+        if (jsonStart !== -1) {
+          const parsed = JSON.parse(raw.substring(jsonStart));
+          if (parsed.message) msg = parsed.message;
+        }
       } catch {}
 
       setErrorMessage(msg);
