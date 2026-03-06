@@ -1,0 +1,126 @@
+Build and integrate a new onboarding/input feature in my Olanna Health app that allows a user to upload a screenshot of their cycle history from another period-tracking platform so Olanna can extract data and make period predictions.
+
+Context:
+Olanna currently gathers the following cycle details manually on the “Tell me about your cycle” screen:
+- Cycle regularity: Regular (21–35 days), Irregular, or I’m not sure
+- Last period start date
+- Average cycle length in days
+
+I want to expand this flow so users can either:
+1. Enter these details manually, or
+2. Upload a screenshot from another app showing their recent cycle history/calendar/logs
+
+Goal:
+After upload, Olanna should analyze the screenshot, extract useful cycle data, present the extracted information back to the user for confirmation/editing, and then use the confirmed data to predict the next expected period and related cycle insights.
+
+Please implement the following:
+
+1. Add a new upload option on the cycle onboarding screen
+- Add a clear CTA such as:
+  - “Upload cycle screenshot”
+  - “Import from another app”
+- Keep the current manual fields visible or accessible.
+- Let the user choose between manual entry and screenshot upload, or use both.
+
+2. Create the screenshot upload flow
+- Support image upload from phone or desktop.
+- Accept common image formats like JPG, JPEG, PNG, and WEBP.
+- Show upload state, success state, and error state.
+- Add helper text like:
+  “Upload a screenshot of your recent cycle history from another app. Olanna will extract dates and cycle patterns for your review.”
+- Add privacy reassurance text:
+  “Your screenshot is only used to help estimate your cycle information.”
+
+3. Extract structured cycle data from the screenshot
+Build logic that analyzes the uploaded screenshot and attempts to identify:
+- Last period start date
+- Previous period start dates if visible
+- Average cycle length
+- Period duration if visible
+- Whether the cycle appears regular or irregular
+- Any additional useful history visible in the screenshot, such as multiple logged cycles
+
+Important:
+- Do not auto-save extracted results without user confirmation.
+- If OCR/vision confidence is low, mark fields as “Needs review.”
+- If multiple possible dates are found, show the best guess plus alternatives if possible.
+- If some fields cannot be extracted, leave them blank and let the user fill them in manually.
+
+4. Add a review-and-confirmation screen
+After analysis, show a clean confirmation UI with editable fields:
+- Cycle regularity
+- Last period start date
+- Average cycle length
+- Period duration
+- Number of previous cycles detected
+- Optional notes: “Imported from screenshot”
+
+The user must be able to:
+- Edit any extracted field
+- Delete and re-upload the screenshot
+- Continue with the confirmed values
+
+5. Prediction logic
+Once the user confirms the data:
+- Predict the next expected period start date
+- Estimate current cycle day
+- Estimate fertile window and ovulation only if enough data exists
+- If the cycle is irregular or data is insufficient, show a softer prediction message such as:
+  “This is an estimate based on limited cycle history.”
+- Avoid presenting predictions as medical certainty
+
+6. UX and product behavior
+- Match the existing Olanna visual style: soft, premium, feminine, minimal, and iOS-inspired
+- Keep forms rounded and elegant
+- Maintain accessible spacing, contrast, and readable labels
+- Make the upload/import experience feel trustworthy and simple
+- If screenshot analysis fails, allow the user to continue with manual entry without losing progress
+
+7. Technical implementation
+Please:
+- Create the frontend UI components for upload, processing, review, and confirmation
+- Create backend or app-side logic for image processing / OCR-ready extraction pipeline
+- Structure the extracted data into a reusable object, for example:
+  {
+    regularity: "",
+    lastPeriodStartDate: "",
+    averageCycleLength: null,
+    periodDuration: null,
+    previousPeriodDates: [],
+    confidence: {
+      regularity: 0,
+      lastPeriodStartDate: 0,
+      averageCycleLength: 0
+    },
+    source: "screenshot_upload"
+  }
+- Add placeholder/mock extraction logic if full OCR or vision parsing is not yet available, but structure the code so a real OCR/AI service can be plugged in later
+- Include validation and error handling for invalid uploads and incomplete extracted data
+
+8. Edge cases
+Handle:
+- Blurry screenshots
+- Screenshots with partial data
+- Different date formats
+- Screenshots from dark mode or light mode
+- Multiple months visible
+- Conflicting dates
+- No readable cycle data found
+
+9. Deliverables
+Please generate:
+- Updated screen UI
+- Upload/import component
+- Review extracted data screen
+- Prediction handoff logic
+- Clean, modular code
+- Comments showing where to connect real OCR/vision services later
+
+10. Product copy suggestions
+Use gentle, clear copy such as:
+- “Import your cycle history”
+- “Upload a screenshot from another app to help Olanna understand your cycle”
+- “We found some cycle details. Please review them before continuing.”
+- “Your predictions are based on the information you confirm.”
+
+Make the solution production-minded, clean, and extensible.

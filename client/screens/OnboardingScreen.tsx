@@ -36,7 +36,10 @@ import {
   PillSelect,
   AnimatedHeading,
   AnimatedSubtext,
+  ScreenshotImport,
+  CycleReviewScreen,
 } from "@/components/onboarding";
+import type { ExtractedCycleData } from "@/components/onboarding";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { 
   OnboardingData, 
@@ -198,6 +201,8 @@ function GreetingScreen({ name, onComplete }: { name: string; onComplete: () => 
   );
 }
 
+type ProfileMode = "manual" | "import" | "review";
+
 function ProfileScreen({ 
   data,
   setData,
@@ -213,6 +218,8 @@ function ProfileScreen({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [lastPeriodDate, setLastPeriodDate] = useState(new Date());
   const [showPeriodPicker, setShowPeriodPicker] = useState(false);
+  const [mode, setMode] = useState<ProfileMode>("manual");
+  const [extractedData, setExtractedData] = useState<ExtractedCycleData | null>(null);
   const formOpacity = useSharedValue(0);
 
   useEffect(() => {
@@ -234,6 +241,45 @@ function ProfileScreen({
       day: "numeric",
     });
   };
+
+  const handleDataExtracted = (extracted: ExtractedCycleData) => {
+    setExtractedData(extracted);
+    setMode("review");
+  };
+
+  const handleReviewConfirm = (confirmed: {
+    regularity: CycleRegularity | undefined;
+    lastPeriodStartDate: string;
+    averageCycleLength: number | undefined;
+    periodDuration: number | undefined;
+    previousPeriodDatesCount: number;
+  }) => {
+    setData({
+      ...data,
+      cycleRegularity: confirmed.regularity,
+      lastPeriodStart: confirmed.lastPeriodStartDate || undefined,
+      avgCycleLength: confirmed.averageCycleLength,
+      periodLength: confirmed.periodDuration,
+      dataSource: "screenshot_upload",
+    });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onComplete();
+  };
+
+  if (mode === "review" && extractedData) {
+    return (
+      <GradientBackground>
+        <CycleReviewScreen
+          data={extractedData}
+          onConfirm={handleReviewConfirm}
+          onReupload={() => {
+            setExtractedData(null);
+            setMode("import");
+          }}
+        />
+      </GradientBackground>
+    );
+  }
 
   return (
     <GradientBackground>
@@ -260,73 +306,139 @@ function ProfileScreen({
         </View>
 
         <Animated.View style={[styles.formSection, formStyle]}>
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>How regular is your cycle?</ThemedText>
-            <PillSelect
-              options={CYCLE_REGULARITY_OPTIONS}
-              selected={data.cycleRegularity ? [data.cycleRegularity] : []}
-              onToggle={(id) => handleRegularityChange(id as CycleRegularity)}
-              multiSelect={false}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>When did your last period start?</ThemedText>
+          <View style={styles.modeToggle}>
             <Pressable
-              onPress={() => setShowPeriodPicker(true)}
-              style={styles.dateButton}
-              accessibilityRole="button"
-              accessibilityLabel="Select last period date"
+              onPress={() => setMode("manual")}
+              style={[
+                styles.modeTab,
+                mode === "manual" ? styles.modeTabActive : undefined,
+              ]}
+              testID="mode-manual"
             >
-              <ThemedText style={styles.dateText}>{formatDate(lastPeriodDate)}</ThemedText>
-              <Feather name="calendar" size={20} color={BRAND_COLORS.textSecondary} />
-            </Pressable>
-            {showPeriodPicker ? (
-              <DateTimePicker
-                value={lastPeriodDate}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={(event, date) => {
-                  setShowPeriodPicker(Platform.OS === "ios");
-                  if (date) {
-                    setLastPeriodDate(date);
-                    setData({ ...data, lastPeriodStart: date.toISOString().split("T")[0] });
-                  }
-                }}
-                maximumDate={new Date()}
-                textColor={BRAND_COLORS.textPrimary}
+              <Feather
+                name="edit-3"
+                size={16}
+                color={mode === "manual" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary}
               />
-            ) : null}
+              <ThemedText
+                style={[
+                  styles.modeTabText,
+                  { color: mode === "manual" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary },
+                ]}
+              >
+                Enter manually
+              </ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={() => setMode("import")}
+              style={[
+                styles.modeTab,
+                mode === "import" ? styles.modeTabActive : undefined,
+              ]}
+              testID="mode-import"
+            >
+              <Feather
+                name="upload"
+                size={16}
+                color={mode === "import" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary}
+              />
+              <ThemedText
+                style={[
+                  styles.modeTabText,
+                  { color: mode === "import" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary },
+                ]}
+              >
+                Import from app
+              </ThemedText>
+            </Pressable>
           </View>
 
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>Average cycle length (days)</ThemedText>
-            <OnboardingGlassCard>
-              <TextInput
-                style={styles.glassInputSmall}
-                placeholder="28"
-                placeholderTextColor="rgba(45,31,43,0.4)"
-                value={data.avgCycleLength?.toString() || ""}
-                onChangeText={(text) => setData({ ...data, avgCycleLength: parseInt(text) || undefined })}
-                keyboardType="number-pad"
-                maxLength={2}
-                accessibilityLabel="Enter average cycle length"
-              />
-            </OnboardingGlassCard>
-          </View>
+          {mode === "manual" ? (
+            <>
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>How regular is your cycle?</ThemedText>
+                <PillSelect
+                  options={CYCLE_REGULARITY_OPTIONS}
+                  selected={data.cycleRegularity ? [data.cycleRegularity] : []}
+                  onToggle={(id) => handleRegularityChange(id as CycleRegularity)}
+                  multiSelect={false}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>When did your last period start?</ThemedText>
+                <Pressable
+                  onPress={() => setShowPeriodPicker(true)}
+                  style={styles.dateButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="Select last period date"
+                >
+                  <ThemedText style={styles.dateText}>{formatDate(lastPeriodDate)}</ThemedText>
+                  <Feather name="calendar" size={20} color={BRAND_COLORS.textSecondary} />
+                </Pressable>
+                {showPeriodPicker ? (
+                  <DateTimePicker
+                    value={lastPeriodDate}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={(event, date) => {
+                      setShowPeriodPicker(Platform.OS === "ios");
+                      if (date) {
+                        setLastPeriodDate(date);
+                        setData({ ...data, lastPeriodStart: date.toISOString().split("T")[0] });
+                      }
+                    }}
+                    maximumDate={new Date()}
+                    textColor={BRAND_COLORS.textPrimary}
+                  />
+                ) : null}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Average cycle length (days)</ThemedText>
+                <OnboardingGlassCard>
+                  <TextInput
+                    style={styles.glassInputSmall}
+                    placeholder="28"
+                    placeholderTextColor="rgba(45,31,43,0.4)"
+                    value={data.avgCycleLength?.toString() || ""}
+                    onChangeText={(text) => setData({ ...data, avgCycleLength: parseInt(text) || undefined })}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    accessibilityLabel="Enter average cycle length"
+                  />
+                </OnboardingGlassCard>
+              </View>
+            </>
+          ) : (
+            <ScreenshotImport
+              onDataExtracted={handleDataExtracted}
+              onManualEntry={() => setMode("manual")}
+            />
+          )}
         </Animated.View>
 
         <View style={styles.bottomActionsScrollable}>
-          <PrimaryButton 
-            label="Continue" 
-            onPress={onComplete} 
-            icon="arrow-right"
-          />
-          <PrimaryButton 
-            label="Skip for now" 
-            onPress={onComplete} 
-            variant="secondary"
-          />
+          {mode === "manual" ? (
+            <>
+              <PrimaryButton 
+                label="Continue" 
+                onPress={onComplete} 
+                icon="arrow-right"
+              />
+              <PrimaryButton 
+                label="Skip for now" 
+                onPress={onComplete} 
+                variant="secondary"
+              />
+            </>
+          ) : (
+            <PrimaryButton 
+              label="Skip for now" 
+              onPress={onComplete} 
+              variant="secondary"
+            />
+          )}
         </View>
       </ScrollView>
     </GradientBackground>
@@ -553,7 +665,7 @@ export default function OnboardingScreen() {
         name: onboardingData.name.trim(),
         dateOfBirth: onboardingData.dob || new Date(2000, 0, 1).toISOString().split("T")[0],
         cycleLength: onboardingData.avgCycleLength || 28,
-        periodLength: 5,
+        periodLength: onboardingData.periodLength || 5,
         lastPeriodStart: onboardingData.lastPeriodStart || new Date().toISOString().split("T")[0],
         healthGoals: onboardingData.goals,
         hasPCOS: onboardingData.goals.includes("manage_pcos"),
@@ -699,6 +811,31 @@ const styles = StyleSheet.create({
   },
   formSection: {
     gap: Spacing.lg,
+  },
+  modeToggle: {
+    flexDirection: "row",
+    backgroundColor: BRAND_COLORS.glassWhite,
+    borderRadius: BorderRadius.xl,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: BRAND_COLORS.glassBorder,
+  },
+  modeTab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.lg,
+  },
+  modeTabActive: {
+    backgroundColor: "rgba(255,255,255,0.85)",
+  },
+  modeTabText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 13,
+    letterSpacing: 0.2,
   },
   inputGroup: {
     marginBottom: Spacing.md,

@@ -17,6 +17,8 @@ export interface OnboardingData {
   cycleRegularity?: CycleRegularity;
   lastPeriodStart?: string;
   avgCycleLength?: number;
+  periodLength?: number;
+  dataSource?: "manual" | "screenshot_upload";
   goals: Goal[];
 }
 
