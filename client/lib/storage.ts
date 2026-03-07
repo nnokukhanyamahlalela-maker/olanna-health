@@ -49,7 +49,7 @@ export interface CycleData {
   ovulationDate: string;
   fertileWindowStart: string;
   fertileWindowEnd: string;
-  phase: "menstrual" | "follicular" | "ovulation" | "luteal";
+  phase: "menstrual" | "follicular" | "ovulation" | "luteal" | "late";
   cycles: {
     startDate: string;
     endDate: string;
@@ -229,7 +229,31 @@ export function calculateCycleDataWithLogs(
 ): CycleData {
   const effectiveStart = getEffectiveLastPeriodStart(profile, dailyLogs);
   const effectiveProfile = { ...profile, lastPeriodStart: effectiveStart };
-  return calculateCycleData(effectiveProfile);
+  const data = calculateCycleData(effectiveProfile);
+
+  const lastStart = new Date(effectiveStart + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const rawDaysSince = Math.floor(
+    (today.getTime() - lastStart.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (rawDaysSince > effectiveProfile.cycleLength) {
+    const predictedNextStart = new Date(lastStart);
+    predictedNextStart.setDate(predictedNextStart.getDate() + effectiveProfile.cycleLength);
+    const hasNewPeriod = dailyLogs.some((l) => {
+      if (!l.flow) return false;
+      const logDate = new Date(l.date + "T00:00:00");
+      return logDate >= predictedNextStart;
+    });
+
+    if (!hasNewPeriod) {
+      data.phase = "late";
+      data.currentDay = rawDaysSince + 1;
+    }
+  }
+
+  return data;
 }
 
 export function detectPeriodStart(

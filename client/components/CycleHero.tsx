@@ -32,6 +32,7 @@ const PHASE_RANGES: Record<CyclePhase, { start: number; end: number }> = {
   follicular: { start: 0.18, end: 0.46 },
   ovulation: { start: 0.46, end: 0.54 },
   luteal: { start: 0.54, end: 1 },
+  late: { start: 0.96, end: 1 },
 };
 
 function polarToCartesian(

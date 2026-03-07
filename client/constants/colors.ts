@@ -81,6 +81,7 @@ const phaseKeyMap: Record<Phase, PhaseColorKey> = {
   follicular: "follicular",
   ovulation: "ovulatory",
   luteal: "luteal",
+  late: "luteal",
 };
 
 export function getPhaseColors(p: Phase) {

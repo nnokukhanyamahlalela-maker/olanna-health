@@ -118,6 +118,7 @@ function getDayForPhase(phase: Phase, cycleLength: number): number {
     case "follicular": return 10;
     case "ovulation": return 14;
     case "luteal": return 21;
+    case "late": return cycleLength;
   }
 }
 
@@ -205,10 +206,12 @@ export default function HomeScreen() {
     );
   }
 
-  const currentDay = wheelDay ?? cycleData.currentDay;
+  const isLate = cycleData.phase === "late";
+  const rawCurrentDay = wheelDay ?? cycleData.currentDay;
+  const currentDay = Math.min(rawCurrentDay, cycleData.cycleLength);
   const pLen = profile?.periodLength || 5;
-  const activePhase = wheelDay 
-    ? getPhaseForDay(wheelDay, cycleData.cycleLength, pLen) 
+  const activePhase: Phase = wheelDay 
+    ? getPhaseForDay(wheelDay > cycleData.cycleLength ? cycleData.cycleLength : wheelDay, cycleData.cycleLength, pLen) 
     : (cycleData.phase as Phase);
   const config = phaseConfig[activePhase];
 
@@ -274,14 +277,17 @@ export default function HomeScreen() {
 
               {/* Day Counter at bottom */}
               <ThemedText style={styles.dayCounterText}>
-                Day {currentDay} of {cycleData.cycleLength}
+                {isLate && wheelDay === null
+                  ? `Day ${cycleData.cycleLength} + ${cycleData.currentDay - cycleData.cycleLength} late`
+                  : `Day ${currentDay} of ${cycleData.cycleLength}`
+                }
               </ThemedText>
             </View>
           </BlurView>
         </View>
 
         {/* Phase Explainer */}
-        <PhaseExplainerCard phaseId={activePhase === "ovulation" ? "ovulatory" : activePhase} />
+        <PhaseExplainerCard phaseId={activePhase === "ovulation" ? "ovulatory" : activePhase === "late" ? "luteal" : activePhase} />
 
         {/* Reset to Today Button - shown when exploring different days */}
         {wheelDay !== null && wheelDay !== cycleData.currentDay ? (

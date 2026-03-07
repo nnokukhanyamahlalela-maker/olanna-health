@@ -15,7 +15,7 @@ import { PhaseColors } from "@/constants/theme";
 const TRANSITION_DURATION = 350;
 const PULSE_DURATION = 3000;
 
-export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal";
+export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal" | "late";
 
 interface LotusProps {
   phase: CyclePhase;
@@ -52,6 +52,11 @@ export const PHASE_INFO = {
     subtitle: "This is the refinement phase.",
     description: "A time to complete projects and turn inward.",
   },
+  late: {
+    title: "Awaiting Your Cycle",
+    subtitle: "Your period may be on its way.",
+    description: "Your period is later than expected. Log your period when it arrives.",
+  },
 };
 
 export const PHASE_COLORS = {
@@ -59,6 +64,7 @@ export const PHASE_COLORS = {
   follicular: PhaseColors.follicular.primary,
   ovulation: PhaseColors.ovulation.primary,
   luteal: PhaseColors.luteal.primary,
+  late: PhaseColors.luteal.primary,
 };
 
 export const PHASE_BG_COLORS = {
@@ -66,6 +72,7 @@ export const PHASE_BG_COLORS = {
   follicular: PhaseColors.follicular.light,
   ovulation: PhaseColors.ovulation.light,
   luteal: PhaseColors.luteal.light,
+  late: PhaseColors.luteal.light,
 };
 
 export const PHASE_GRADIENTS = {
@@ -73,6 +80,7 @@ export const PHASE_GRADIENTS = {
   follicular: [PhaseColors.follicular.gradientStart, PhaseColors.follicular.gradientEnd],
   ovulation: [PhaseColors.ovulation.gradientStart, PhaseColors.ovulation.gradientEnd],
   luteal: [PhaseColors.luteal.gradientStart, PhaseColors.luteal.gradientEnd],
+  late: [PhaseColors.luteal.gradientStart, PhaseColors.luteal.gradientEnd],
 };
 
 export function Lotus({ 

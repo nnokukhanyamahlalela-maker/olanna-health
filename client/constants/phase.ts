@@ -8,6 +8,7 @@ const phaseToName: Record<Phase, PhaseName> = {
   follicular: "follicular",
   ovulation: "ovulatory",
   luteal: "luteal",
+  late: "luteal",
 };
 
 export function toPhaseName(p: Phase): PhaseName {

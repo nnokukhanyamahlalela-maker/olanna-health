@@ -1,6 +1,6 @@
 import { SymptomLog } from './symptomSchema';
 
-export type CyclePhase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal';
+export type CyclePhase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal' | 'late';
 
 export interface DailyDecodeInput {
   symptoms: SymptomLog[];
@@ -25,6 +25,7 @@ export const PHASE_FOODS: Record<CyclePhase, string[]> = {
   ovulation: ['leafy greens', 'berries', 'fish or tofu', 'quinoa', 'lemon water'],
   luteal: ['sweet potatoes', 'brown rice', 'chicken', 'bananas', 'dark chocolate'],
   menstrual: ['soups', 'lentils', 'red meat or beans', 'toast', 'herbal tea'],
+  late: ['magnesium-rich foods', 'dark leafy greens', 'salmon', 'avocado', 'chamomile tea'],
 };
 
 export const PHASE_MOVEMENT: Record<CyclePhase, { title: string; body: string }> = {
@@ -32,6 +33,7 @@ export const PHASE_MOVEMENT: Record<CyclePhase, { title: string; body: string }>
   follicular: { title: "Build momentum", body: "Your energy is rising. Try something new — a dance class, a run, or strength training." },
   ovulation: { title: "Go for it", body: "You are at peak energy. High-intensity workouts, group classes, and cardio feel amazing right now." },
   luteal: { title: "Ease into it", body: "Yoga, pilates, or a calm walk suit this phase. Listen to your body and avoid overexertion." },
+  late: { title: "Be gentle with yourself", body: "Light movement like walking or stretching can help. Your body may need extra care right now." },
 };
 
 export const PHASE_SELFCARE: Record<CyclePhase, string> = {
@@ -39,6 +41,7 @@ export const PHASE_SELFCARE: Record<CyclePhase, string> = {
   follicular: "Try something creative — journalling, a new recipe, or rearranging your space. Fresh energy loves fresh starts.",
   ovulation: "Connect with someone you love. Your social energy is high and conversations flow naturally.",
   luteal: "Set boundaries guilt-free. A quiet evening with tea and a good book is exactly what you need.",
+  late: "Take it easy and listen to your body. A late period is common and not always a cause for concern.",
 };
 
 export const PHASE_VIBES: Record<CyclePhase, string> = {
@@ -46,6 +49,7 @@ export const PHASE_VIBES: Record<CyclePhase, string> = {
   ovulation: "You're in your radiant phase right now. Your body is feeling strong and social energy is high.",
   luteal: "Things might feel a bit slower today, and that's totally okay. Your body is asking for a little more gentleness.",
   menstrual: "Rest mode is activated, and I'm here for it. Your body is doing important work right now.",
+  late: "Your period is taking its time, and that's okay. Stress, sleep, and diet can all play a role.",
 };
 
 const CLOSING_LINES = [

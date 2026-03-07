@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import Svg, { Path, Circle, Line, G, Text as SvgText } from "react-native-svg";
 
-import { Lotus } from "./Lotus";
+import { Lotus, CyclePhase } from "./Lotus";
 import { ThemedText } from "./ThemedText";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
 
@@ -15,7 +15,7 @@ const DUSTY_ROSE = "#D4A99A";
 interface PeriodWheelProps {
   currentDay: number;
   cycleLength: number;
-  phase: "menstrual" | "follicular" | "ovulation" | "luteal";
+  phase: CyclePhase;
   daysUntilPeriod: number;
   fertileWindow?: boolean;
 }
@@ -37,6 +37,8 @@ function getPhaseLabel(phase: string): string {
       return "Fertile Window";
     case "luteal":
       return "Luteal Phase";
+    case "late":
+      return "Awaiting Your Cycle";
     default:
       return "";
   }

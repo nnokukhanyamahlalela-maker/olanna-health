@@ -1,6 +1,6 @@
 import { phase as phaseTokens, neutral } from "@/constants/colors";
 
-export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal";
+export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal" | "late";
 
 export interface PhaseConfig {
   label: string;
@@ -8,7 +8,7 @@ export interface PhaseConfig {
   tagline: string;
   color: string;
   softBg: string;
-  lotusVariant: "bud" | "rising" | "bloom" | "closing";
+  lotusVariant: "bud" | "rising" | "bloom" | "closing" | "waiting";
   accentColor: string;
   labelColor: string;
   iconName: string;
@@ -69,6 +69,19 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     startDay: 17,
     endDay: 28,
   },
+  late: {
+    label: "Late",
+    subtitle: "Awaiting Your Cycle",
+    tagline: "Awaiting Your Cycle",
+    color: phaseTokens.luteal.solid,
+    softBg: phaseTokens.luteal.softBg,
+    lotusVariant: "waiting",
+    accentColor: phaseTokens.luteal.gradientMid,
+    labelColor: phaseTokens.luteal.gradientStart,
+    iconName: "clock",
+    startDay: 0,
+    endDay: 0,
+  },
 };
 
 export const PHASE_ORDER: Phase[] = ["menstrual", "follicular", "ovulation", "luteal"];
@@ -111,7 +124,12 @@ export function getDaysUntilPeriod(selectedDay: number, cycleLength: number): nu
   return cycleLength - selectedDay;
 }
 
-export function getStatusText(selectedDay: number, cycleLength: number, periodLength: number = 5): string {
+export function getStatusText(selectedDay: number, cycleLength: number, periodLength: number = 5, isLate: boolean = false): string {
+  if (isLate) {
+    const daysLate = selectedDay - cycleLength;
+    if (daysLate <= 1) return "Period expected today";
+    return `Period is ${daysLate} days late`;
+  }
   const daysUntil = getDaysUntilPeriod(selectedDay, cycleLength);
   if (daysUntil === 0) return "Period is expected today";
   if (daysUntil <= 2) return "Period starting soon";

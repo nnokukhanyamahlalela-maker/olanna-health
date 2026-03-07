@@ -53,6 +53,7 @@ const PHASE_CIRCLE_COLORS: Record<Phase, string> = {
   follicular: "#F9C8E0",
   ovulation: "#F59E0B",
   luteal: "#D8B4FE",
+  late: "#D8B4FE",
 };
 
 const PHASE_LABEL_COLORS: Record<Phase, string> = {
@@ -60,15 +61,17 @@ const PHASE_LABEL_COLORS: Record<Phase, string> = {
   follicular: "#8E4470",
   ovulation: "#B8730A",
   luteal: "#7B1FA2",
+  late: "#7B1FA2",
 };
 
-type LotusVariant = "bud" | "rising" | "bloom" | "closing";
+type LotusVariant = "bud" | "rising" | "bloom" | "closing" | "waiting";
 
 const LOTUS_IMAGES: Record<LotusVariant, any> = {
   bud: require("@/assets/images/lotus-menstrual.png"),
   rising: require("@/assets/images/lotus-follicular.png"),
   bloom: require("@/assets/images/lotus-ovulation.png"),
   closing: require("@/assets/images/lotus-luteal.png"),
+  waiting: require("@/assets/images/lotus-luteal.png"),
 };
 
 function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) {
@@ -188,12 +191,16 @@ function InteractiveCycleWheel({
   currentDay,
   selectedDay,
   onDaySelect,
+  isLate = false,
+  daysLate = 0,
 }: {
   cycleLength: number;
   periodLength: number;
   currentDay: number;
   selectedDay: number;
   onDaySelect: (day: number) => void;
+  isLate?: boolean;
+  daysLate?: number;
 }) {
   const size = Math.min(SCREEN_WIDTH - 40, 340);
   const strokeWidth = 24;
@@ -259,7 +266,9 @@ function InteractiveCycleWheel({
     transform: [{ scale: scale.value }],
   }));
 
-  const selectedPhase = getPhaseForDay(selectedDay, cycleLength, periodLength);
+  const selectedPhase: Phase = (isLate && selectedDay === currentDay)
+    ? "late"
+    : getPhaseForDay(selectedDay, cycleLength, periodLength);
   const config = phaseConfig[selectedPhase];
   const phaseWashColor = getPhaseColors(selectedPhase).softBg;
   const lotusCircleColor = PHASE_CIRCLE_COLORS[selectedPhase];
@@ -357,7 +366,10 @@ function InteractiveCycleWheel({
         </View>
 
         <Text style={styles.dayText}>
-          Day {selectedDay} of {cycleLength}
+          {isLate && selectedDay === currentDay
+            ? `Day ${cycleLength} + ${daysLate} late`
+            : `Day ${selectedDay} of ${cycleLength}`
+          }
         </Text>
 
         {selectedDay !== currentDay ? (
@@ -383,6 +395,7 @@ export function CycleScreen() {
   const [periodLength, setPeriodLength] = useState(5);
   const [currentDay, setCurrentDay] = useState(DEFAULT_CURRENT_DAY);
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
+  const [isLate, setIsLate] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -400,13 +413,19 @@ export function CycleScreen() {
           const day = cycleData.currentDay || DEFAULT_CURRENT_DAY;
           setCurrentDay(day);
           setSelectedDay(day);
+          setIsLate(cycleData.phase === "late");
         } catch {}
       })();
       return () => { active = false; };
     }, [])
   );
 
-  const currentPhase = getPhaseForDay(selectedDay, cycleLength, periodLength);
+  const clampedSelectedDay = Math.min(selectedDay, cycleLength);
+  const clampedCurrentDay = Math.min(currentDay, cycleLength);
+  const isViewingToday = clampedSelectedDay === clampedCurrentDay;
+  const currentPhase: Phase = (isLate && isViewingToday)
+    ? "late"
+    : getPhaseForDay(clampedSelectedDay, cycleLength, periodLength);
 
   return (
     <View style={styles.root}>
@@ -445,9 +464,11 @@ export function CycleScreen() {
         <InteractiveCycleWheel
           cycleLength={cycleLength}
           periodLength={periodLength}
-          currentDay={currentDay}
-          selectedDay={selectedDay}
+          currentDay={clampedCurrentDay}
+          selectedDay={clampedSelectedDay}
           onDaySelect={setSelectedDay}
+          isLate={isLate}
+          daysLate={isLate ? currentDay - cycleLength : 0}
         />
 
         <View style={styles.insightsSection}>

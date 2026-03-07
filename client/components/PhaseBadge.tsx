@@ -16,6 +16,7 @@ const POETIC_NAMES: Record<CyclePhase, string> = {
   follicular: "Rising Energy",
   ovulation: "Full Radiance",
   luteal: "Inner Reflection",
+  late: "Awaiting Your Cycle",
 };
 
 export function PhaseBadge({ phase, size = "medium" }: PhaseBadgeProps) {
