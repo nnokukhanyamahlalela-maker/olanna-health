@@ -52,10 +52,18 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
   }
 }`;
 
+function detectMimeType(base64: string): string {
+  const sig = base64.substring(0, 16);
+  if (sig.startsWith("/9j/")) return "image/jpeg";
+  if (sig.startsWith("iVBOR")) return "image/png";
+  if (sig.startsWith("UklGR")) return "image/webp";
+  return "image/jpeg";
+}
+
 export function registerCycleImportRoutes(app: Express): void {
   app.post("/api/cycle-import/analyze", async (req: Request, res: Response) => {
     try {
-      const { image } = req.body;
+      const { image, mimeType: clientMime } = req.body;
 
       if (!image || typeof image !== "string") {
         return res.status(400).json({
@@ -64,14 +72,14 @@ export function registerCycleImportRoutes(app: Express): void {
         });
       }
 
-      const base64Data = image.startsWith("data:")
-        ? image
-        : `data:image/jpeg;base64,${image}`;
-
-      const maxSizeBytes = 10 * 1024 * 1024;
       const rawBase64 = image.startsWith("data:")
         ? image.split(",")[1] || ""
         : image;
+
+      const detectedMime = clientMime || detectMimeType(rawBase64);
+      const base64Data = `data:${detectedMime};base64,${rawBase64}`;
+
+      const maxSizeBytes = 10 * 1024 * 1024;
       if (Buffer.byteLength(rawBase64, "base64") > maxSizeBytes) {
         return res.status(400).json({
           error: "Image too large",

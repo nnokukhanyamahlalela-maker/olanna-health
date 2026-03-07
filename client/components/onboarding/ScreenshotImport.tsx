@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   Linking,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { readAsStringAsync, EncodingType } from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
@@ -23,7 +24,6 @@ import { OnboardingGlassCard } from "@/components/onboarding/GlassCard";
 import { PrimaryButton } from "@/components/onboarding/PrimaryButton";
 import { BRAND_COLORS } from "@/constants/onboardingTokens";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { apiRequest } from "@/lib/query-client";
 
 export interface ExtractedCycleData {
   regularity: "regular" | "irregular" | "not_sure" | "";
@@ -127,16 +127,43 @@ export function ScreenshotImport({
     }
   };
 
+  const abortRef = useRef<AbortController | null>(null);
+
   const analyzeImage = async (uri: string) => {
     setState("loading");
     setErrorMessage("");
+    setNeedsSettings(false);
+
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
+      let processedUri = uri;
+      let mimeType = "image/jpeg";
+
+      if (Platform.OS !== "web") {
+        try {
+          const manipulated = await manipulateAsync(
+            uri,
+            [{ resize: { width: 1200 } }],
+            { compress: 0.7, format: SaveFormat.JPEG }
+          );
+          processedUri = manipulated.uri;
+          mimeType = "image/jpeg";
+        } catch {
+          processedUri = uri;
+        }
+      }
+
       let base64: string;
 
       if (Platform.OS === "web") {
-        const response = await fetch(uri);
+        const response = await fetch(processedUri);
         const blob = await response.blob();
+        mimeType = blob.type || "image/jpeg";
         base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -147,32 +174,46 @@ export function ScreenshotImport({
           reader.readAsDataURL(blob);
         });
       } else {
-        base64 = await readAsStringAsync(uri, {
+        base64 = await readAsStringAsync(processedUri, {
           encoding: EncodingType.Base64,
         });
       }
 
-      const res = await apiRequest("POST", "/api/cycle-import/analyze", {
-        image: base64,
+      const { getApiUrl } = await import("@/lib/query-client");
+      const apiUrl = getApiUrl();
+      const url = new URL("/api/cycle-import/analyze", apiUrl);
+
+      const res = await fetch(url.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64, mimeType }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errorBody = await res.json().catch(() => ({}));
+        throw new Error(
+          errorBody.message ||
+            "We couldn't read cycle data from this screenshot. Try a clearer image, or enter your details manually."
+        );
+      }
 
       const data: ExtractedCycleData = await res.json();
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onDataExtracted(data);
     } catch (err: any) {
+      clearTimeout(timeoutId);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-      let msg =
-        "We couldn't read cycle data from this screenshot. Try a clearer image, or enter your details manually.";
-      try {
-        const raw = err.message || "";
-        const jsonStart = raw.indexOf("{");
-        if (jsonStart !== -1) {
-          const parsed = JSON.parse(raw.substring(jsonStart));
-          if (parsed.message) msg = parsed.message;
-        }
-      } catch {}
+      let msg: string;
+      if (err.name === "AbortError") {
+        msg = "The analysis is taking too long. Please try a smaller or clearer screenshot, or enter your details manually.";
+      } else {
+        msg = err.message || "We couldn't read cycle data from this screenshot. Try a clearer image, or enter your details manually.";
+      }
 
       setErrorMessage(msg);
       setState("error");

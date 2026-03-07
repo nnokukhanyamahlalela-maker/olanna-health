@@ -54,6 +54,13 @@ function setupCors(app: express.Application) {
 }
 
 function setupBodyParsing(app: express.Application) {
+  app.use("/api/cycle-import", express.json({
+    limit: "15mb",
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }));
+
   app.use(
     express.json({
       verify: (req, _res, buf) => {
