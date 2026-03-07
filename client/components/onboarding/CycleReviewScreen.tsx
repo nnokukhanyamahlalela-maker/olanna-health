@@ -36,6 +36,8 @@ interface ConfirmedData {
   averageCycleLength: number | undefined;
   periodDuration: number | undefined;
   previousPeriodDatesCount: number;
+  periodDays: string[];
+  previousPeriodDates: string[];
 }
 
 interface CycleReviewScreenProps {
@@ -105,6 +107,8 @@ export function CycleReviewScreen({
       averageCycleLength: avgCycleLength ? parseInt(avgCycleLength) : undefined,
       periodDuration: periodDuration ? parseInt(periodDuration) : undefined,
       previousPeriodDatesCount: data.previousPeriodDates.length,
+      periodDays: data.periodDays || [],
+      previousPeriodDates: data.previousPeriodDates || [],
     });
   };
 

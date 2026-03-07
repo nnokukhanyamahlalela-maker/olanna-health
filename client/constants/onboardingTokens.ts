@@ -19,6 +19,8 @@ export interface OnboardingData {
   avgCycleLength?: number;
   periodLength?: number;
   dataSource?: "manual" | "screenshot_upload";
+  previousPeriodDates?: string[];
+  periodDays?: string[];
   goals: Goal[];
 }
 

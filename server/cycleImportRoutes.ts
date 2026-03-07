@@ -12,6 +12,7 @@ interface ExtractedCycleData {
   averageCycleLength: number | null;
   periodDuration: number | null;
   previousPeriodDates: string[];
+  periodDays: string[];
   confidence: {
     regularity: number;
     lastPeriodStartDate: number;
@@ -22,12 +23,20 @@ interface ExtractedCycleData {
 
 const EXTRACTION_PROMPT = `You are a medical data extraction assistant for a period tracking app called Olanna Health. Analyze this screenshot from another period-tracking app and extract cycle history data.
 
+RECOGNIZING POPULAR PERIOD-TRACKING APPS:
+- StarDust: Dark cosmic/purple UI with red or pink highlighted period days on a calendar grid, moon phase icons above dates
+- Flo: Pink/coral UI with circles marking period days, clean calendar layout with colored dots
+- Lively: Colorful calendar with highlighted period ranges, often shows cycle day numbers
+- Harmony: Calendar view with colored bars or highlights spanning period days
+- Other apps: Look for highlighted/colored date ranges, flow indicators, or period markers on any calendar view
+
 Extract the following information if visible:
 1. The most recent period start date
 2. Any previous period start dates visible
 3. Average cycle length (days between period starts)
 4. Period duration (how many days each period lasted)
 5. Whether the cycle appears regular (21-35 days, consistent) or irregular
+6. ALL individual dates that appear as period/bleeding days (highlighted, colored, or marked as period days on the calendar)
 
 IMPORTANT RULES:
 - Dates should be in ISO format (YYYY-MM-DD)
@@ -37,6 +46,8 @@ IMPORTANT RULES:
 - For confidence, use 0.0 to 1.0 where 1.0 means very clear and certain
 - If the image is blurry, dark, or hard to read, lower confidence scores accordingly
 - If no cycle data is visible at all, set all fields to empty/null with 0 confidence
+- For periodDays: list EVERY individual date that is visually marked as a period/bleeding day (e.g., if Feb 2, 3, 4 are highlighted red, include all three dates)
+- periodDays should include dates from ALL visible periods, not just the most recent one
 
 Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 {
@@ -45,6 +56,7 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
   "averageCycleLength": number or null,
   "periodDuration": number or null,
   "previousPeriodDates": ["YYYY-MM-DD", ...] or [],
+  "periodDays": ["YYYY-MM-DD", ...] or [],
   "confidence": {
     "regularity": 0.0-1.0,
     "lastPeriodStartDate": 0.0-1.0,
@@ -127,7 +139,8 @@ export function registerCycleImportRoutes(app: Express): void {
       const hasAnyData =
         parsed.lastPeriodStartDate ||
         parsed.averageCycleLength ||
-        (parsed.previousPeriodDates && parsed.previousPeriodDates.length > 0);
+        (parsed.previousPeriodDates && parsed.previousPeriodDates.length > 0) ||
+        (parsed.periodDays && parsed.periodDays.length > 0);
 
       if (!hasAnyData) {
         return res.status(422).json({
@@ -150,6 +163,11 @@ export function registerCycleImportRoutes(app: Express): void {
             : null,
         previousPeriodDates: Array.isArray(parsed.previousPeriodDates)
           ? parsed.previousPeriodDates.filter(
+              (d: any) => typeof d === "string" && d.match(/^\d{4}-\d{2}-\d{2}$/)
+            )
+          : [],
+        periodDays: Array.isArray(parsed.periodDays)
+          ? parsed.periodDays.filter(
               (d: any) => typeof d === "string" && d.match(/^\d{4}-\d{2}-\d{2}$/)
             )
           : [],

@@ -51,7 +51,7 @@ import {
   BRAND_COLORS,
   CAROUSEL_SCREENS,
 } from "@/constants/onboardingTokens";
-import { storage, UserProfile, generateId } from "@/lib/storage";
+import { storage, UserProfile, DailyLog, generateId } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 
@@ -253,6 +253,8 @@ function ProfileScreen({
     averageCycleLength: number | undefined;
     periodDuration: number | undefined;
     previousPeriodDatesCount: number;
+    periodDays: string[];
+    previousPeriodDates: string[];
   }) => {
     setData({
       ...data,
@@ -261,6 +263,8 @@ function ProfileScreen({
       avgCycleLength: confirmed.averageCycleLength,
       periodLength: confirmed.periodDuration,
       dataSource: "screenshot_upload",
+      periodDays: confirmed.periodDays,
+      previousPeriodDates: confirmed.previousPeriodDates,
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onComplete();
@@ -637,6 +641,22 @@ function CarouselScreen({
   );
 }
 
+function findMostRecentPeriodStart(sortedDates: string[]): string | null {
+  if (sortedDates.length === 0) return null;
+  let currentStart = sortedDates[sortedDates.length - 1];
+  for (let i = sortedDates.length - 2; i >= 0; i--) {
+    const curr = new Date(sortedDates[i] + "T00:00:00");
+    const next = new Date(sortedDates[i + 1] + "T00:00:00");
+    const diffDays = (next.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
+    if (diffDays <= 1) {
+      currentStart = sortedDates[i];
+    } else {
+      break;
+    }
+  }
+  return currentStart;
+}
+
 export default function OnboardingScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [step, setStep] = useState<OnboardingStep>("intro");
@@ -660,13 +680,26 @@ export default function OnboardingScreen() {
   const handleComplete = async () => {
     setIsSaving(true);
     try {
+      const periodLength = onboardingData.periodLength || 5;
+      const importedPeriodDays = onboardingData.periodDays || [];
+
+      let lastPeriodStart = onboardingData.lastPeriodStart || "";
+      if (!lastPeriodStart && importedPeriodDays.length > 0) {
+        const sorted = [...importedPeriodDays].sort();
+        const mostRecentStart = findMostRecentPeriodStart(sorted);
+        lastPeriodStart = mostRecentStart || sorted[sorted.length - 1];
+      }
+      if (!lastPeriodStart) {
+        lastPeriodStart = new Date().toISOString().split("T")[0];
+      }
+
       const profile: UserProfile = {
         id: generateId(),
         name: onboardingData.name.trim(),
         dateOfBirth: onboardingData.dob || new Date(2000, 0, 1).toISOString().split("T")[0],
         cycleLength: onboardingData.avgCycleLength || 28,
-        periodLength: onboardingData.periodLength || 5,
-        lastPeriodStart: onboardingData.lastPeriodStart || new Date().toISOString().split("T")[0],
+        periodLength,
+        lastPeriodStart,
         healthGoals: onboardingData.goals,
         hasPCOS: onboardingData.goals.includes("manage_pcos"),
         hasEndometriosis: onboardingData.goals.includes("manage_endometriosis"),
@@ -675,6 +708,43 @@ export default function OnboardingScreen() {
       await storage.setUserProfile(profile);
       await storage.setOnboardingComplete(true);
       await storage.setPreference("useLotusView", "true");
+
+      const flowDatesToLog = new Set<string>();
+      const previousPeriodDates = onboardingData.previousPeriodDates || [];
+
+      if (importedPeriodDays.length > 0) {
+        importedPeriodDays.forEach((d) => flowDatesToLog.add(d));
+      } else {
+        const addPeriodRange = (startDate: string, duration: number) => {
+          const start = new Date(startDate + "T00:00:00");
+          if (isNaN(start.getTime())) return;
+          for (let i = 0; i < duration; i++) {
+            const day = new Date(start);
+            day.setDate(day.getDate() + i);
+            flowDatesToLog.add(day.toISOString().split("T")[0]);
+          }
+        };
+
+        addPeriodRange(lastPeriodStart, periodLength);
+
+        previousPeriodDates.forEach((d) => {
+          addPeriodRange(d, periodLength);
+        });
+      }
+
+      const now = new Date().toISOString();
+      const datesToLog = Array.from(flowDatesToLog);
+      for (const date of datesToLog) {
+        const log: DailyLog = {
+          id: generateId(),
+          date,
+          flow: "medium",
+          symptoms: [],
+          createdAt: now,
+        };
+        await storage.addDailyLog(log);
+      }
+
       navigation.reset({
         index: 0,
         routes: [{ name: "Main" }],

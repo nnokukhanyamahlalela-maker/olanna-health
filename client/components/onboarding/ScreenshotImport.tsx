@@ -31,6 +31,7 @@ export interface ExtractedCycleData {
   averageCycleLength: number | null;
   periodDuration: number | null;
   previousPeriodDates: string[];
+  periodDays: string[];
   confidence: {
     regularity: number;
     lastPeriodStartDate: number;
