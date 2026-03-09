@@ -2,22 +2,36 @@ import { Phase } from "@/constants/phaseConfig";
 
 export type { Phase };
 
+export type CyclePhase =
+  | "Menstrual"
+  | "Follicular"
+  | "Ovulatory"
+  | "Luteal";
+
 export interface CycleProfile {
-  lastPeriodStart: string;
-  cycleLength: number;
-  periodLength: number;
+  userId: string;
+  lastPeriodStartDate: string;
+  averageCycleLength: number;
+  averagePeriodLength: number;
+  onboardingSymptoms?: string[];
+  updatedAt: string;
 }
 
-export interface CycleStatus {
-  currentDay: number;
-  cycleLength: number;
-  periodLength: number;
-  lastPeriodStart: string;
-  nextPeriodStart: string;
-  ovulationDate: string;
+export interface CyclePrediction {
+  currentCycleDay: number;
+  currentPhase: CyclePhase;
+  effectiveLastPeriodStart: string;
+  nextPeriodStartDate: string;
   fertileWindowStart: string;
   fertileWindowEnd: string;
-  phase: Phase;
+  ovulationDate: string;
+  periodDates: string[];
+  phaseRanges: {
+    phase: CyclePhase;
+    start: string;
+    end: string;
+  }[];
+  isLate: boolean;
   daysLate: number;
 }
 
@@ -25,7 +39,7 @@ export interface CalendarDayMarker {
   day: number;
   dateKey: string;
   dayInCycle: number;
-  phase: Phase;
+  phase: CyclePhase;
   isPeriod: boolean;
   isFertile: boolean;
   isOvulation: boolean;
@@ -37,4 +51,27 @@ export interface CalendarDayMarker {
 export interface FlowLog {
   date: string;
   flow?: string | null;
+}
+
+const PHASE_TO_INTERNAL: Record<CyclePhase, Phase> = {
+  Menstrual: "menstrual",
+  Follicular: "follicular",
+  Ovulatory: "ovulation",
+  Luteal: "luteal",
+};
+
+const INTERNAL_TO_PHASE: Record<string, CyclePhase> = {
+  menstrual: "Menstrual",
+  follicular: "Follicular",
+  ovulation: "Ovulatory",
+  luteal: "Luteal",
+  late: "Luteal",
+};
+
+export function toInternalPhase(cp: CyclePhase): Phase {
+  return PHASE_TO_INTERNAL[cp];
+}
+
+export function toCyclePhase(p: Phase): CyclePhase {
+  return INTERNAL_TO_PHASE[p] ?? "Follicular";
 }

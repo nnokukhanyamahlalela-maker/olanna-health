@@ -26,6 +26,18 @@ import {
   calculateCycleDataWithLogs,
 } from "@/lib/storage";
 import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+import type { CycleProfile } from "@/types/cycle";
+import type { UserProfile } from "@/lib/storage";
+
+function profileToCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
 
 const BRAND_PINK = "#E83E8C";
 
@@ -109,7 +121,7 @@ export function PeriodLogSheet({
         storage.getUserProfile(),
       ]);
       if (profile) {
-        const effective = getEffectiveLastPeriodStart(profile, allLogs);
+        const effective = getEffectiveLastPeriodStart(profileToCycleProfile(profile), allLogs);
         if (effective !== profile.lastPeriodStart) {
           const updated = { ...profile, lastPeriodStart: effective };
           await storage.setUserProfile(updated);
@@ -178,7 +190,7 @@ export function PeriodLogSheet({
             const cycleData = calculateCycleDataWithLogs(updated, allLogs);
             await storage.setCycleData(cycleData);
           } else {
-            const effective = getEffectiveLastPeriodStart(profile, allLogs);
+            const effective = getEffectiveLastPeriodStart(profileToCycleProfile(profile), allLogs);
             if (effective !== profile.lastPeriodStart) {
               const updated = { ...profile, lastPeriodStart: effective };
               await storage.setUserProfile(updated);

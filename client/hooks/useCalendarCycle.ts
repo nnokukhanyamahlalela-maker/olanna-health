@@ -7,12 +7,23 @@ import {
   computePhase,
 } from "@/services/cycleCalculator";
 import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
-import type { CalendarDayMarker, Phase } from "@/types/cycle";
+import type { CalendarDayMarker, CyclePhase, CycleProfile } from "@/types/cycle";
+import { toCyclePhase } from "@/types/cycle";
+
+function toCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
 
 export interface SelectedDayInfo {
   dayInCycle: number;
   cycleLength: number;
-  phase: Phase;
+  phase: CyclePhase;
   hasProfile: boolean;
 }
 
@@ -67,7 +78,7 @@ export function useCalendarCycle(
 
   const markers = useMemo<CalendarDayMarker[]>(() => {
     if (!profile) return [];
-    return generateCalendarMarkers(viewYear, viewMonth, profile, dailyLogs);
+    return generateCalendarMarkers(viewYear, viewMonth, toCycleProfile(profile), dailyLogs);
   }, [viewYear, viewMonth, profile, dailyLogs]);
 
   const selectedDayInfo = useMemo<SelectedDayInfo | null>(() => {
@@ -78,12 +89,13 @@ export function useCalendarCycle(
       return {
         dayInCycle: hasFlow ? 1 : 0,
         cycleLength: 28,
-        phase: (hasFlow ? "menstrual" : "follicular") as Phase,
+        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
         hasProfile: false,
       };
     }
 
-    const effectiveStart = getEffectiveLastPeriodStart(profile, dailyLogs);
+    const cp = toCycleProfile(profile);
+    const effectiveStart = getEffectiveLastPeriodStart(cp, dailyLogs);
     const date = new Date(selectedDate + "T12:00:00");
     const dayInCycle = computeCycleDay(date, effectiveStart, profile.cycleLength);
 
@@ -91,16 +103,21 @@ export function useCalendarCycle(
       return {
         dayInCycle: hasFlow ? 1 : 0,
         cycleLength: profile.cycleLength,
-        phase: (hasFlow ? "menstrual" : "follicular") as Phase,
+        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
         hasProfile: true,
       };
     }
 
-    const phase = hasFlow
-      ? ("menstrual" as Phase)
+    const internalPhase = hasFlow
+      ? "menstrual" as const
       : computePhase(dayInCycle, profile.cycleLength, profile.periodLength || 5);
 
-    return { dayInCycle, cycleLength: profile.cycleLength, phase, hasProfile: true };
+    return {
+      dayInCycle,
+      cycleLength: profile.cycleLength,
+      phase: toCyclePhase(internalPhase),
+      hasProfile: true,
+    };
   }, [selectedDate, profile, dailyLogs, flowLogDates]);
 
   const selectedLog = useMemo(() => {

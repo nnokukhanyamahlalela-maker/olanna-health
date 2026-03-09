@@ -392,11 +392,11 @@ export function LotusCycleScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
 
-  const { cycleStatus } = useLotusCycle();
-  const cycleLength = cycleStatus?.cycleLength || DEFAULT_CYCLE_LENGTH;
-  const periodLength = cycleStatus?.periodLength || 5;
-  const currentDay = cycleStatus?.currentDay || DEFAULT_CURRENT_DAY;
-  const isLate = cycleStatus?.phase === "late";
+  const { cycleStatus, profile } = useLotusCycle();
+  const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
+  const periodLength = profile?.periodLength || 5;
+  const currentDay = cycleStatus?.currentCycleDay || DEFAULT_CURRENT_DAY;
+  const isLate = cycleStatus?.isLate || false;
 
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);

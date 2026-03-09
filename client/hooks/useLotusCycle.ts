@@ -1,11 +1,21 @@
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { storage, UserProfile, DailyLog } from "@/lib/storage";
-import { computeCycleStatus } from "@/services/cycleCalculator";
-import type { CycleStatus } from "@/types/cycle";
+import { computeCyclePrediction } from "@/services/cycleCalculator";
+import type { CyclePrediction, CycleProfile } from "@/types/cycle";
+
+function toCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
 
 export interface UseLotusCycleResult {
-  cycleStatus: CycleStatus | null;
+  cycleStatus: CyclePrediction | null;
   profile: UserProfile | null;
   dailyLogs: DailyLog[];
   isLoading: boolean;
@@ -15,7 +25,7 @@ export interface UseLotusCycleResult {
 export function useLotusCycle(): UseLotusCycleResult {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
-  const [cycleStatus, setCycleStatus] = useState<CycleStatus | null>(null);
+  const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -28,8 +38,8 @@ export function useLotusCycle(): UseLotusCycleResult {
       setDailyLogs(logs);
 
       if (userProfile) {
-        const status = computeCycleStatus(userProfile, logs);
-        setCycleStatus(status);
+        const prediction = computeCyclePrediction(toCycleProfile(userProfile), logs);
+        setCycleStatus(prediction);
       } else {
         setCycleStatus(null);
       }

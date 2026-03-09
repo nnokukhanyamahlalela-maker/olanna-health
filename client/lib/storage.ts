@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
-import { computeCycleStatus } from "@/services/cycleCalculator";
-import type { CycleStatus } from "@/types/cycle";
+import { computeCyclePrediction } from "@/services/cycleCalculator";
+import type { CyclePrediction, CycleProfile } from "@/types/cycle";
+import { toInternalPhase } from "@/types/cycle";
 
 const STORAGE_KEYS = {
   USER_PROFILE: "@olanna_user_profile",
@@ -201,26 +202,38 @@ export function generateId(): string {
  * Compute full cycle data from profile + daily logs.
  * Delegates to the cycle service for all calculations.
  */
+function userProfileToCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
+
 export function calculateCycleDataWithLogs(
   profile: UserProfile,
   dailyLogs: DailyLog[]
 ): CycleData {
-  const status = computeCycleStatus(profile, dailyLogs);
-  return cycleStatusToCycleData(status);
+  const prediction = computeCyclePrediction(userProfileToCycleProfile(profile), dailyLogs);
+  return cyclePredictionToCycleData(prediction, profile);
 }
 
-/** Convert a CycleStatus (from cycleService) to the legacy CycleData shape. */
-function cycleStatusToCycleData(s: CycleStatus): CycleData {
+function cyclePredictionToCycleData(p: CyclePrediction, profile: UserProfile): CycleData {
+  const internalPhase = p.isLate
+    ? ("late" as const)
+    : toInternalPhase(p.currentPhase);
   return {
-    currentDay: s.currentDay,
-    cycleLength: s.cycleLength,
-    periodLength: s.periodLength,
-    lastPeriodStart: s.lastPeriodStart,
-    nextPeriodStart: s.nextPeriodStart,
-    ovulationDate: s.ovulationDate,
-    fertileWindowStart: s.fertileWindowStart,
-    fertileWindowEnd: s.fertileWindowEnd,
-    phase: s.phase,
+    currentDay: p.currentCycleDay,
+    cycleLength: profile.cycleLength,
+    periodLength: profile.periodLength,
+    lastPeriodStart: p.effectiveLastPeriodStart,
+    nextPeriodStart: p.nextPeriodStartDate,
+    ovulationDate: p.ovulationDate,
+    fertileWindowStart: p.fertileWindowStart,
+    fertileWindowEnd: p.fertileWindowEnd,
+    phase: internalPhase,
     cycles: [],
   };
 }

@@ -23,6 +23,8 @@ import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 import { phaseConfig, Phase } from "@/constants/phaseConfig";
+import type { CyclePhase } from "@/types/cycle";
+import { toInternalPhase } from "@/types/cycle";
 import { useCalendarCycle } from "@/hooks/useCalendarCycle";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
@@ -61,36 +63,31 @@ interface DayCellInfo {
   isOvulation: boolean;
   isPMS: boolean;
   isToday: boolean;
-  phase: Phase;
+  phase: CyclePhase;
   dayInCycle: number;
   hasFlowLog: boolean;
 }
 
-const PHASE_DECODE: Record<Phase, { title: string; body: string; tip: string }> = {
-  menstrual: {
+const PHASE_DECODE: Record<CyclePhase, { title: string; body: string; tip: string }> = {
+  Menstrual: {
     title: "Menstrual Phase",
     body: "Your body is shedding the uterine lining. Hormone levels are at their lowest. You may feel tired or experience cramping. This is a time for rest and gentle self-care.",
     tip: "Warm drinks, light stretching, and extra sleep can ease discomfort.",
   },
-  follicular: {
+  Follicular: {
     title: "Follicular Phase",
     body: "Oestrogen is rising as your body prepares a new egg. Energy levels climb and mood tends to lift. Skin often looks clearer and you may feel more sociable and creative.",
     tip: "Great time for trying new activities, planning, and social events.",
   },
-  ovulation: {
+  Ovulatory: {
     title: "Ovulatory Phase",
     body: "An egg is released from the ovary. Oestrogen peaks and you may feel your most confident and energetic. This is your fertile window if you are trying to conceive.",
     tip: "Channel your peak energy into workouts, presentations, or big conversations.",
   },
-  luteal: {
+  Luteal: {
     title: "Luteal Phase",
     body: "Progesterone rises to prepare for possible pregnancy. You may notice PMS symptoms like bloating, mood shifts, or cravings as the phase progresses.",
     tip: "Prioritise comfort foods, journalling, and winding down routines.",
-  },
-  late: {
-    title: "Awaiting Your Cycle",
-    body: "Your expected period date has passed. This can happen for many reasons, including stress, changes in routine, or natural variation.",
-    tip: "Stay relaxed and continue logging. If you have concerns, consult a healthcare provider.",
   },
 };
 
@@ -379,63 +376,64 @@ export default function CalendarScreen() {
         {selectedDayInfo ? (
           <GlassSurface style={styles.decodeCard} noPadding>
             {selectedDayInfo.dayInCycle > 0 ? (
-              <>
-                <View style={styles.decodeHeader}>
-                  <View
-                    style={[
-                      styles.decodeBadge,
-                      {
-                        backgroundColor:
-                          phaseConfig[selectedDayInfo.phase].softBg,
-                      },
-                    ]}
-                  >
-                    <Text
+              (() => {
+                const ip = toInternalPhase(selectedDayInfo.phase);
+                const decode = PHASE_DECODE[selectedDayInfo.phase];
+                const pc = phaseConfig[ip];
+                return (
+                  <>
+                    <View style={styles.decodeHeader}>
+                      <View
+                        style={[
+                          styles.decodeBadge,
+                          { backgroundColor: pc.softBg },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.decodeBadgeText,
+                            { color: pc.labelColor },
+                          ]}
+                        >
+                          Day {selectedDayInfo.dayInCycle}
+                        </Text>
+                      </View>
+                      <Text style={[styles.decodePhase, { color: pc.labelColor }]}>
+                        {decode.title}
+                      </Text>
+                    </View>
+
+                    <Text style={[styles.decodeBody, { color: textColor }]}>
+                      {decode.body}
+                    </Text>
+
+                    <View
                       style={[
-                        styles.decodeBadgeText,
-                        { color: phaseConfig[selectedDayInfo.phase].labelColor },
+                        styles.decodeTipBox,
+                        { backgroundColor: pc.softBg },
                       ]}
                     >
-                      Day {selectedDayInfo.dayInCycle}
-                    </Text>
-                  </View>
-                  <Text style={[styles.decodePhase, { color: phaseConfig[selectedDayInfo.phase].labelColor }]}>
-                    {PHASE_DECODE[selectedDayInfo.phase].title}
-                  </Text>
-                </View>
-
-                <Text style={[styles.decodeBody, { color: textColor }]}>
-                  {PHASE_DECODE[selectedDayInfo.phase].body}
-                </Text>
-
-                <View
-                  style={[
-                    styles.decodeTipBox,
-                    {
-                      backgroundColor:
-                        phaseConfig[selectedDayInfo.phase].softBg,
-                    },
-                  ]}
-                >
-                  <Feather
-                    name="zap"
-                    size={14}
-                    color={phaseConfig[selectedDayInfo.phase].labelColor}
-                  />
-                  <Text
-                    style={[
-                      styles.decodeTipText,
-                      {
-                        color: isDark
-                          ? "#FFFFFF"
-                          : neutral.textPrimary,
-                      },
-                    ]}
-                  >
-                    {PHASE_DECODE[selectedDayInfo.phase].tip}
-                  </Text>
-                </View>
-              </>
+                      <Feather
+                        name="zap"
+                        size={14}
+                        color={pc.labelColor}
+                      />
+                      <Text
+                        style={[
+                          styles.decodeTipText,
+                          {
+                            color: isDark
+                              ? "#FFFFFF"
+                              : neutral.textPrimary,
+                          },
+                        ]}
+                      >
+                        {decode.tip}
+                      </Text>
+                    </View>
+                  </>
+                );
+              })()
             ) : (
               <View style={styles.decodePrompt}>
                 <View style={styles.decodePromptRow}>

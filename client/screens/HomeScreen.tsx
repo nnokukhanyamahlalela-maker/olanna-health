@@ -29,6 +29,7 @@ import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
+import { toInternalPhase } from "@/types/cycle";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -132,18 +133,17 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 
-  // Derive CycleData shape for backward-compatible usage below.
-  const cycleData: CycleData | null = cycleStatus
+  const cycleData: CycleData | null = cycleStatus && profile
     ? {
-        currentDay: cycleStatus.currentDay,
-        cycleLength: cycleStatus.cycleLength,
-        periodLength: cycleStatus.periodLength,
-        lastPeriodStart: cycleStatus.lastPeriodStart,
-        nextPeriodStart: cycleStatus.nextPeriodStart,
+        currentDay: cycleStatus.currentCycleDay,
+        cycleLength: profile.cycleLength,
+        periodLength: profile.periodLength,
+        lastPeriodStart: profile.lastPeriodStart,
+        nextPeriodStart: cycleStatus.nextPeriodStartDate,
         ovulationDate: cycleStatus.ovulationDate,
         fertileWindowStart: cycleStatus.fertileWindowStart,
         fertileWindowEnd: cycleStatus.fertileWindowEnd,
-        phase: cycleStatus.phase,
+        phase: cycleStatus.isLate ? "late" : toInternalPhase(cycleStatus.currentPhase),
         cycles: [],
       }
     : null;

@@ -12,7 +12,7 @@ export function getEffectiveLastPeriodStart(
     .filter((l) => l.flow)
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  if (logsWithFlow.length === 0) return profile.lastPeriodStart;
+  if (logsWithFlow.length === 0) return profile.lastPeriodStartDate;
 
   let streakStart = logsWithFlow[0].date;
   for (let i = 1; i < logsWithFlow.length; i++) {
@@ -28,7 +28,7 @@ export function getEffectiveLastPeriodStart(
     }
   }
 
-  return streakStart > profile.lastPeriodStart
+  return streakStart > profile.lastPeriodStartDate
     ? streakStart
-    : profile.lastPeriodStart;
+    : profile.lastPeriodStartDate;
 }
