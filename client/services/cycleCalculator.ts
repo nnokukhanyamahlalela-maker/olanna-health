@@ -21,14 +21,108 @@ function parseDate(s: string): Date {
   return new Date(s + "T00:00:00");
 }
 
-function daysBetween(a: Date, b: Date): number {
-  return Math.floor((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
 }
 
-function addDays(d: Date, n: number): Date {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
+function diffInDays(start: Date, end: Date): number {
+  const ms = end.getTime() - start.getTime();
+  return Math.floor(ms / (1000 * 60 * 60 * 24));
+}
+
+export function getCyclePhase(
+  cycleDay: number,
+  averageCycleLength: number,
+  averagePeriodLength: number
+): CyclePhase {
+  const ovulationDay = averageCycleLength - 14;
+
+  if (cycleDay <= averagePeriodLength) return "Menstrual";
+  if (cycleDay < ovulationDay - 4) return "Follicular";
+  if (cycleDay >= ovulationDay - 4 && cycleDay <= ovulationDay + 1)
+    return "Ovulatory";
+  return "Luteal";
+}
+
+export function generateCyclePrediction(
+  profile: CycleProfile,
+  todayInput?: Date
+): CyclePrediction {
+  const today = todayInput || new Date();
+  const lastPeriodStart = parseDate(profile.lastPeriodStartDate);
+
+  const daysSinceLastPeriod = diffInDays(lastPeriodStart, today);
+  const currentCycleDay =
+    ((daysSinceLastPeriod % profile.averageCycleLength) +
+      profile.averageCycleLength) %
+      profile.averageCycleLength +
+    1;
+
+  const currentPhase = getCyclePhase(
+    currentCycleDay,
+    profile.averageCycleLength,
+    profile.averagePeriodLength
+  );
+
+  const nextPeriodOffset = profile.averageCycleLength - (currentCycleDay - 1);
+  const nextPeriodStart = addDays(today, nextPeriodOffset);
+
+  const ovulationDay = profile.averageCycleLength - 14;
+  const fertileWindowStartDay = ovulationDay - 5;
+  const fertileWindowEndDay = ovulationDay;
+
+  const currentCycleStart = addDays(today, -(currentCycleDay - 1));
+  const ovulationDate = addDays(currentCycleStart, ovulationDay - 1);
+  const fertileWindowStart = addDays(
+    currentCycleStart,
+    fertileWindowStartDay - 1
+  );
+  const fertileWindowEnd = addDays(currentCycleStart, fertileWindowEndDay - 1);
+
+  const periodDates = Array.from(
+    { length: profile.averagePeriodLength },
+    (_, i) => toDateKey(addDays(nextPeriodStart, i))
+  );
+
+  const phaseRanges: CyclePrediction["phaseRanges"] = [
+    {
+      phase: "Menstrual",
+      start: toDateKey(currentCycleStart),
+      end: toDateKey(
+        addDays(currentCycleStart, profile.averagePeriodLength - 1)
+      ),
+    },
+    {
+      phase: "Follicular",
+      start: toDateKey(addDays(currentCycleStart, profile.averagePeriodLength)),
+      end: toDateKey(addDays(currentCycleStart, ovulationDay - 6)),
+    },
+    {
+      phase: "Ovulatory",
+      start: toDateKey(fertileWindowStart),
+      end: toDateKey(addDays(ovulationDate, 1)),
+    },
+    {
+      phase: "Luteal",
+      start: toDateKey(addDays(ovulationDate, 2)),
+      end: toDateKey(
+        addDays(currentCycleStart, profile.averageCycleLength - 1)
+      ),
+    },
+  ];
+
+  return {
+    currentCycleDay,
+    currentPhase,
+    nextPeriodStartDate: toDateKey(nextPeriodStart),
+    fertileWindowStart: toDateKey(fertileWindowStart),
+    fertileWindowEnd: toDateKey(fertileWindowEnd),
+    ovulationDate: toDateKey(ovulationDate),
+    periodDates,
+    phaseRanges,
+  };
 }
 
 export function computeCycleDay(
@@ -37,7 +131,7 @@ export function computeCycleDay(
   cycleLength: number
 ): number {
   const start = parseDate(lastPeriodStart);
-  const diff = daysBetween(date, start);
+  const diff = diffInDays(start, date);
   if (diff < 0) return -1;
   return (diff % cycleLength) + 1;
 }
@@ -46,7 +140,7 @@ export function computeRawDaysSince(
   date: Date,
   lastPeriodStart: string
 ): number {
-  return daysBetween(date, parseDate(lastPeriodStart));
+  return diffInDays(parseDate(lastPeriodStart), date);
 }
 
 export function computePhase(
@@ -57,154 +151,37 @@ export function computePhase(
   return getPhaseForDay(dayInCycle, cycleLength, periodLength);
 }
 
-export function predictNextPeriod(
-  lastPeriodStart: string,
-  cycleLength: number,
-  referenceDate?: Date
-): string {
-  const ref = referenceDate ?? new Date();
-  const next = parseDate(lastPeriodStart);
-  next.setDate(next.getDate() + cycleLength);
-  while (next < ref) {
-    next.setDate(next.getDate() + cycleLength);
-  }
-  return toDateKey(next);
-}
-
-export function predictFertileWindow(nextPeriodStart: string): {
-  ovulationDate: string;
-  fertileWindowStart: string;
-  fertileWindowEnd: string;
-} {
-  const ovulation = parseDate(nextPeriodStart);
-  ovulation.setDate(ovulation.getDate() - 14);
-
-  const fwStart = new Date(ovulation);
-  fwStart.setDate(fwStart.getDate() - 5);
-
-  const fwEnd = new Date(ovulation);
-  fwEnd.setDate(fwEnd.getDate() + 1);
-
-  return {
-    ovulationDate: toDateKey(ovulation),
-    fertileWindowStart: toDateKey(fwStart),
-    fertileWindowEnd: toDateKey(fwEnd),
-  };
-}
-
-function generatePeriodDates(
-  effectiveStart: string,
-  periodLength: number,
-  cycleLength: number
-): string[] {
-  const dates: string[] = [];
-  const start = parseDate(effectiveStart);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let cycleStart = new Date(start);
-  while (cycleStart <= addDays(today, cycleLength)) {
-    for (let d = 0; d < periodLength; d++) {
-      dates.push(toDateKey(addDays(cycleStart, d)));
-    }
-    cycleStart = addDays(cycleStart, cycleLength);
-  }
-
-  return dates;
-}
-
-function generatePhaseRanges(
-  effectiveStart: string,
-  cycleLength: number,
-  periodLength: number
-): { phase: CyclePhase; start: string; end: string }[] {
-  const ranges: { phase: CyclePhase; start: string; end: string }[] = [];
-  const origin = parseDate(effectiveStart);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let cycleStart = new Date(origin);
-  while (cycleStart <= addDays(today, cycleLength)) {
-    const menstrualEnd = periodLength;
-    const ovulationDay = Math.max(cycleLength - 14, menstrualEnd + 1);
-    const follicularEnd = ovulationDay - 1;
-    const ovulationEnd = ovulationDay;
-
-    ranges.push({
-      phase: "Menstrual",
-      start: toDateKey(cycleStart),
-      end: toDateKey(addDays(cycleStart, menstrualEnd - 1)),
-    });
-    if (follicularEnd > menstrualEnd) {
-      ranges.push({
-        phase: "Follicular",
-        start: toDateKey(addDays(cycleStart, menstrualEnd)),
-        end: toDateKey(addDays(cycleStart, follicularEnd - 1)),
-      });
-    }
-    ranges.push({
-      phase: "Ovulatory",
-      start: toDateKey(addDays(cycleStart, ovulationDay - 1)),
-      end: toDateKey(addDays(cycleStart, ovulationEnd - 1)),
-    });
-    if (cycleLength > ovulationEnd) {
-      ranges.push({
-        phase: "Luteal",
-        start: toDateKey(addDays(cycleStart, ovulationEnd)),
-        end: toDateKey(addDays(cycleStart, cycleLength - 1)),
-      });
-    }
-
-    cycleStart = addDays(cycleStart, cycleLength);
-  }
-
-  return ranges;
-}
-
-export function computeCyclePrediction(
+export function detectLatePhase(
   profile: CycleProfile,
   logs: FlowLog[]
-): CyclePrediction {
+): { isLate: boolean; daysLate: number; rawCurrentDay: number } {
   const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const { averageCycleLength, averagePeriodLength } = profile;
   const rawDays = computeRawDaysSince(today, effectiveStart);
-  const wrappedDay = (rawDays % averageCycleLength) + 1;
 
-  const nextPeriod = predictNextPeriod(effectiveStart, averageCycleLength, today);
-  const fertility = predictFertileWindow(nextPeriod);
-  const internalPhase = computePhase(wrappedDay, averageCycleLength, averagePeriodLength);
-
-  const prediction: CyclePrediction = {
-    currentCycleDay: wrappedDay,
-    currentPhase: toCyclePhase(internalPhase),
-    effectiveLastPeriodStart: effectiveStart,
-    nextPeriodStartDate: nextPeriod,
-    ...fertility,
-    periodDates: generatePeriodDates(effectiveStart, averagePeriodLength, averageCycleLength),
-    phaseRanges: generatePhaseRanges(effectiveStart, averageCycleLength, averagePeriodLength),
-    isLate: false,
-    daysLate: 0,
-  };
-
-  if (rawDays > averageCycleLength) {
-    const predictedNext = parseDate(effectiveStart);
-    predictedNext.setDate(predictedNext.getDate() + averageCycleLength);
-    const hasNewPeriod = logs.some((l) => {
-      if (!l.flow) return false;
-      return parseDate(l.date) >= predictedNext;
-    });
-
-    if (!hasNewPeriod) {
-      prediction.isLate = true;
-      prediction.currentCycleDay = rawDays + 1;
-      prediction.daysLate = rawDays - averageCycleLength;
-    }
+  if (rawDays <= profile.averageCycleLength) {
+    return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
   }
 
-  return prediction;
+  const predictedNext = addDays(
+    parseDate(effectiveStart),
+    profile.averageCycleLength
+  );
+  const hasNewPeriod = logs.some((l) => {
+    if (!l.flow) return false;
+    return parseDate(l.date) >= predictedNext;
+  });
+
+  if (!hasNewPeriod) {
+    return {
+      isLate: true,
+      daysLate: rawDays - profile.averageCycleLength,
+      rawCurrentDay: rawDays + 1,
+    };
+  }
+
+  return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
 }
 
 export function generateCalendarMarkers(
@@ -214,7 +191,10 @@ export function generateCalendarMarkers(
   logs: FlowLog[]
 ): CalendarDayMarker[] {
   const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
-  const { averageCycleLength: cycleLength, averagePeriodLength: periodLength } = profile;
+  const {
+    averageCycleLength: cycleLength,
+    averagePeriodLength: periodLength,
+  } = profile;
   const ovulationDay = Math.max(cycleLength - 14, 1);
 
   const flowDates = new Set(logs.filter((l) => l.flow).map((l) => l.date));
@@ -229,12 +209,13 @@ export function generateCalendarMarkers(
     const dayInCycle = computeCycleDay(date, effectiveStart, cycleLength);
     const hasFlowLog = flowDates.has(dateKey);
 
-    const isPeriod = hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
+    const isPeriod =
+      hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
 
     const isFertile =
       dayInCycle > 0 &&
       dayInCycle >= ovulationDay - 5 &&
-      dayInCycle <= ovulationDay + 1;
+      dayInCycle <= ovulationDay;
 
     const isOvulation = dayInCycle > 0 && dayInCycle === ovulationDay;
 

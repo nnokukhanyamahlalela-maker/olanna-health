@@ -20,7 +20,6 @@ export interface CycleProfile {
 export interface CyclePrediction {
   currentCycleDay: number;
   currentPhase: CyclePhase;
-  effectiveLastPeriodStart: string;
   nextPeriodStartDate: string;
   fertileWindowStart: string;
   fertileWindowEnd: string;
@@ -31,8 +30,6 @@ export interface CyclePrediction {
     start: string;
     end: string;
   }[];
-  isLate: boolean;
-  daysLate: number;
 }
 
 export interface CalendarDayMarker {

@@ -392,11 +392,10 @@ export function LotusCycleScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
 
-  const { cycleStatus, profile } = useLotusCycle();
+  const { cycleStatus, profile, isLate, daysLate } = useLotusCycle();
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
   const currentDay = cycleStatus?.currentCycleDay || DEFAULT_CURRENT_DAY;
-  const isLate = cycleStatus?.isLate || false;
 
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);
@@ -455,7 +454,7 @@ export function LotusCycleScreen() {
           selectedDay={clampedSelectedDay}
           onDaySelect={setSelectedDay}
           isLate={isLate}
-          daysLate={cycleStatus?.daysLate || 0}
+          daysLate={daysLate}
         />
 
         <View style={styles.insightsSection}>

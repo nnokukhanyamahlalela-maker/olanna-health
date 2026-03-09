@@ -1,7 +1,11 @@
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { storage, UserProfile, DailyLog } from "@/lib/storage";
-import { computeCyclePrediction } from "@/services/cycleCalculator";
+import {
+  generateCyclePrediction,
+  detectLatePhase,
+} from "@/services/cycleCalculator";
+import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
 import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 
 function toCycleProfile(p: UserProfile): CycleProfile {
@@ -18,6 +22,8 @@ export interface UseLotusCycleResult {
   cycleStatus: CyclePrediction | null;
   profile: UserProfile | null;
   dailyLogs: DailyLog[];
+  isLate: boolean;
+  daysLate: number;
   isLoading: boolean;
   refresh: () => Promise<void>;
 }
@@ -26,6 +32,8 @@ export function useLotusCycle(): UseLotusCycleResult {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
+  const [isLate, setIsLate] = useState(false);
+  const [daysLate, setDaysLate] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -38,10 +46,22 @@ export function useLotusCycle(): UseLotusCycleResult {
       setDailyLogs(logs);
 
       if (userProfile) {
-        const prediction = computeCyclePrediction(toCycleProfile(userProfile), logs);
+        const cp = toCycleProfile(userProfile);
+        const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
+        const effectiveProfile: CycleProfile = {
+          ...cp,
+          lastPeriodStartDate: effectiveStart,
+        };
+        const prediction = generateCyclePrediction(effectiveProfile);
         setCycleStatus(prediction);
+
+        const late = detectLatePhase(effectiveProfile, logs);
+        setIsLate(late.isLate);
+        setDaysLate(late.daysLate);
       } else {
         setCycleStatus(null);
+        setIsLate(false);
+        setDaysLate(0);
       }
     } catch (error) {
       console.error("[useLotusCycle] Failed to load:", error);
@@ -56,9 +76,19 @@ export function useLotusCycle(): UseLotusCycleResult {
       (async () => {
         await loadData();
       })();
-      return () => { active = false; };
+      return () => {
+        active = false;
+      };
     }, [loadData])
   );
 
-  return { cycleStatus, profile, dailyLogs, isLoading, refresh: loadData };
+  return {
+    cycleStatus,
+    profile,
+    dailyLogs,
+    isLate,
+    daysLate,
+    isLoading,
+    refresh: loadData,
+  };
 }

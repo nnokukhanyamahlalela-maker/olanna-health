@@ -129,7 +129,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
-  const { cycleStatus, profile, isLoading } = useLotusCycle();
+  const { cycleStatus, profile, isLoading, isLate, daysLate } = useLotusCycle();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 
@@ -143,7 +143,7 @@ export default function HomeScreen() {
         ovulationDate: cycleStatus.ovulationDate,
         fertileWindowStart: cycleStatus.fertileWindowStart,
         fertileWindowEnd: cycleStatus.fertileWindowEnd,
-        phase: cycleStatus.isLate ? "late" : toInternalPhase(cycleStatus.currentPhase),
+        phase: isLate ? "late" : toInternalPhase(cycleStatus.currentPhase),
         cycles: [],
       }
     : null;
@@ -181,7 +181,6 @@ export default function HomeScreen() {
     );
   }
 
-  const isLate = cycleData.phase === "late";
   const rawCurrentDay = wheelDay ?? cycleData.currentDay;
   const currentDay = Math.min(rawCurrentDay, cycleData.cycleLength);
   const pLen = profile?.periodLength || 5;
@@ -253,7 +252,7 @@ export default function HomeScreen() {
               {/* Day Counter at bottom */}
               <ThemedText style={styles.dayCounterText}>
                 {isLate && wheelDay === null
-                  ? `Day ${cycleData.cycleLength} + ${cycleStatus?.daysLate || 0} late`
+                  ? `Day ${cycleData.cycleLength} + ${daysLate} late`
                   : `Day ${currentDay} of ${cycleData.cycleLength}`
                 }
               </ThemedText>

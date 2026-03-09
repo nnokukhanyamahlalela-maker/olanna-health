@@ -1,7 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
-import { computeCyclePrediction } from "@/services/cycleCalculator";
+import {
+  generateCyclePrediction,
+  detectLatePhase,
+} from "@/services/cycleCalculator";
+import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
 import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
 
@@ -216,19 +220,31 @@ export function calculateCycleDataWithLogs(
   profile: UserProfile,
   dailyLogs: DailyLog[]
 ): CycleData {
-  const prediction = computeCyclePrediction(userProfileToCycleProfile(profile), dailyLogs);
-  return cyclePredictionToCycleData(prediction, profile);
+  const cp = userProfileToCycleProfile(profile);
+  const effectiveStart = getEffectiveLastPeriodStart(cp, dailyLogs);
+  const effectiveProfile: CycleProfile = {
+    ...cp,
+    lastPeriodStartDate: effectiveStart,
+  };
+  const prediction = generateCyclePrediction(effectiveProfile);
+  const late = detectLatePhase(effectiveProfile, dailyLogs);
+  return cyclePredictionToCycleData(prediction, profile, effectiveStart, late);
 }
 
-function cyclePredictionToCycleData(p: CyclePrediction, profile: UserProfile): CycleData {
-  const internalPhase = p.isLate
+function cyclePredictionToCycleData(
+  p: CyclePrediction,
+  profile: UserProfile,
+  effectiveStart: string,
+  late: { isLate: boolean; daysLate: number; rawCurrentDay: number }
+): CycleData {
+  const internalPhase = late.isLate
     ? ("late" as const)
     : toInternalPhase(p.currentPhase);
   return {
-    currentDay: p.currentCycleDay,
+    currentDay: late.isLate ? late.rawCurrentDay : p.currentCycleDay,
     cycleLength: profile.cycleLength,
     periodLength: profile.periodLength,
-    lastPeriodStart: p.effectiveLastPeriodStart,
+    lastPeriodStart: effectiveStart,
     nextPeriodStart: p.nextPeriodStartDate,
     ovulationDate: p.ovulationDate,
     fertileWindowStart: p.fertileWindowStart,
