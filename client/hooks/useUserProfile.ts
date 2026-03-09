@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { storage, UserProfile, CycleData, calculateCycleData } from "@/lib/storage";
+import { storage, UserProfile, CycleData, calculateCycleDataWithLogs } from "@/lib/storage";
 
 export function useUserProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -10,14 +10,15 @@ export function useUserProfile() {
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [userProfile, onboarded] = await Promise.all([
+      const [userProfile, onboarded, logs] = await Promise.all([
         storage.getUserProfile(),
         storage.isOnboardingComplete(),
+        storage.getDailyLogs(),
       ]);
       setProfile(userProfile);
       setIsOnboarded(onboarded);
       if (userProfile) {
-        const cycle = calculateCycleData(userProfile);
+        const cycle = calculateCycleDataWithLogs(userProfile, logs);
         setCycleData(cycle);
         await storage.setCycleData(cycle);
       }
@@ -35,7 +36,8 @@ export function useUserProfile() {
   const updateProfile = async (newProfile: UserProfile) => {
     await storage.setUserProfile(newProfile);
     setProfile(newProfile);
-    const cycle = calculateCycleData(newProfile);
+    const logs = await storage.getDailyLogs();
+    const cycle = calculateCycleDataWithLogs(newProfile, logs);
     setCycleData(cycle);
     await storage.setCycleData(cycle);
   };

@@ -22,10 +22,12 @@ import {
   DailyLog,
   storage,
   generateId,
-  calculateCycleData,
   detectPeriodStart,
-  getEffectiveLastPeriodStart,
+  calculateCycleDataWithLogs,
 } from "@/lib/storage";
+import {
+  getEffectiveLastPeriodStart,
+} from "@/lib/cycleService";
 
 const BRAND_PINK = "#E83E8C";
 
@@ -113,7 +115,7 @@ export function PeriodLogSheet({
         if (effective !== profile.lastPeriodStart) {
           const updated = { ...profile, lastPeriodStart: effective };
           await storage.setUserProfile(updated);
-          const cycleData = calculateCycleData(updated);
+          const cycleData = calculateCycleDataWithLogs(updated, allLogs);
           await storage.setCycleData(cycleData);
         }
       }
@@ -163,7 +165,7 @@ export function PeriodLogSheet({
             createdAt: new Date().toISOString(),
           };
           await storage.setUserProfile(newProfile);
-          const cycleData = calculateCycleData(newProfile);
+          const cycleData = calculateCycleDataWithLogs(newProfile, allLogs);
           await storage.setCycleData(cycleData);
         } else {
           const isNewPeriodStart = detectPeriodStart(
@@ -175,14 +177,14 @@ export function PeriodLogSheet({
           if (isNewPeriodStart) {
             const updated = { ...profile, lastPeriodStart: date };
             await storage.setUserProfile(updated);
-            const cycleData = calculateCycleData(updated);
+            const cycleData = calculateCycleDataWithLogs(updated, allLogs);
             await storage.setCycleData(cycleData);
           } else {
             const effective = getEffectiveLastPeriodStart(profile, allLogs);
             if (effective !== profile.lastPeriodStart) {
               const updated = { ...profile, lastPeriodStart: effective };
               await storage.setUserProfile(updated);
-              const cycleData = calculateCycleData(updated);
+              const cycleData = calculateCycleDataWithLogs(updated, allLogs);
               await storage.setCycleData(cycleData);
             }
           }

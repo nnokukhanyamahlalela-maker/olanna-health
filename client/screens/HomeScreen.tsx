@@ -10,10 +10,10 @@
  * Designed for iPhone sizes (390x844 style) with iOS glassmorphism.
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -27,7 +27,8 @@ import { PhaseLotus } from "@/components/CycleWheel/PhaseLotus";
 import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
-import { storage, CycleData, UserProfile, calculateCycleDataWithLogs } from "@/lib/storage";
+import { storage, CycleData, UserProfile } from "@/lib/storage";
+import { useCycleData } from "@/hooks/useCycleData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -127,55 +128,29 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [cycleData, setCycleData] = useState<CycleData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { cycleStatus, profile, isLoading } = useCycleData();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
+
+  // Derive CycleData shape for backward-compatible usage below.
+  const cycleData: CycleData | null = cycleStatus
+    ? {
+        currentDay: cycleStatus.currentDay,
+        cycleLength: cycleStatus.cycleLength,
+        periodLength: cycleStatus.periodLength,
+        lastPeriodStart: cycleStatus.lastPeriodStart,
+        nextPeriodStart: cycleStatus.nextPeriodStart,
+        ovulationDate: cycleStatus.ovulationDate,
+        fertileWindowStart: cycleStatus.fertileWindowStart,
+        fertileWindowEnd: cycleStatus.fertileWindowEnd,
+        phase: cycleStatus.phase,
+        cycles: [],
+      }
+    : null;
 
   const currentMonth = useMemo(() => {
     return selectedDate.toLocaleString("default", { month: "long", year: "numeric" });
   }, [selectedDate]);
-
-  const loadData = async () => {
-    console.log("[HomeScreen] Starting loadData...");
-    try {
-      const [userProfile, logs] = await Promise.all([
-        storage.getUserProfile(),
-        storage.getDailyLogs(),
-      ]);
-      console.log("[HomeScreen] Got profile:", userProfile ? "yes" : "no");
-      setProfile(userProfile);
-      if (userProfile) {
-        const cycle = calculateCycleDataWithLogs(userProfile, logs);
-        console.log("[HomeScreen] Calculated cycle data");
-        setCycleData(cycle);
-      }
-    } catch (error) {
-      console.error("[HomeScreen] Failed to load data:", error);
-    } finally {
-      console.log("[HomeScreen] Setting isLoading to false");
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-    
-    // Safety timeout - ensure loading never stays stuck
-    const timeout = setTimeout(() => {
-      console.log("[HomeScreen] Safety timeout triggered");
-      setIsLoading(false);
-    }, 5000);
-    
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      loadData();
-    }, [])
-  );
 
   if (isLoading) {
     return (
@@ -278,7 +253,7 @@ export default function HomeScreen() {
               {/* Day Counter at bottom */}
               <ThemedText style={styles.dayCounterText}>
                 {isLate && wheelDay === null
-                  ? `Day ${cycleData.cycleLength} + ${cycleData.currentDay - cycleData.cycleLength} late`
+                  ? `Day ${cycleData.cycleLength} + ${cycleStatus?.daysLate || 0} late`
                   : `Day ${currentDay} of ${cycleData.cycleLength}`
                 }
               </ThemedText>

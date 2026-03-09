@@ -8,13 +8,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { Phase, phaseConfig } from "@/constants/phaseConfig";
 
-type LotusVariant = "bud" | "rising" | "bloom" | "closing";
+type LotusVariant = "bud" | "rising" | "bloom" | "closing" | "waiting";
 
 const LOTUS_IMAGES: Record<LotusVariant, any> = {
   bud: require("@/assets/images/lotus-menstrual.png"),
   rising: require("@/assets/images/lotus-follicular.png"),
   bloom: require("@/assets/images/lotus-ovulation.png"),
   closing: require("@/assets/images/lotus-luteal.png"),
+  waiting: require("@/assets/images/lotus-luteal.png"),
 };
 
 interface PhaseLotusProps {

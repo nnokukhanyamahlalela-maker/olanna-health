@@ -17,7 +17,7 @@ import { Feather } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { RootStackParamList } from '@/navigation/RootStackNavigator';
 import { generateDailyDecode, CyclePhase } from '@/lib/dailyDecode';
-import { storage, calculateCycleData } from '@/lib/storage';
+import { storage, calculateCycleDataWithLogs } from '@/lib/storage';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -248,8 +248,11 @@ export default function CheckInScreen() {
         completedAt: Date.now(),
       });
 
-      const userProfile = await storage.getUserProfile();
-      const cycleData = userProfile ? calculateCycleData(userProfile) : null;
+      const [userProfile, logs] = await Promise.all([
+        storage.getUserProfile(),
+        storage.getDailyLogs(),
+      ]);
+      const cycleData = userProfile ? calculateCycleDataWithLogs(userProfile, logs) : null;
       
       const phase: CyclePhase = (cycleData?.phase as CyclePhase) || 'follicular';
       const hasPCOS = userProfile?.hasPCOS || false;

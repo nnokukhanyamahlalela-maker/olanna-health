@@ -1,6 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
+import {
+  computeCycleStatus,
+  CycleStatus,
+} from "./cycleService";
 
 const STORAGE_KEYS = {
   USER_PROFILE: "@olanna_user_profile",
@@ -195,65 +199,32 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-export function getEffectiveLastPeriodStart(
-  profile: UserProfile,
-  dailyLogs: DailyLog[]
-): string {
-  const logsWithFlow = dailyLogs
-    .filter((l) => l.flow)
-    .sort((a, b) => b.date.localeCompare(a.date));
-
-  if (logsWithFlow.length === 0) return profile.lastPeriodStart;
-
-  let latestPeriodStart = logsWithFlow[0].date;
-  for (let i = 1; i < logsWithFlow.length; i++) {
-    const prev = new Date(logsWithFlow[i - 1].date + "T12:00:00");
-    const curr = new Date(logsWithFlow[i].date + "T12:00:00");
-    const gap = Math.round((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24));
-    if (gap <= 1) {
-      latestPeriodStart = logsWithFlow[i].date;
-    } else {
-      break;
-    }
-  }
-
-  if (latestPeriodStart > profile.lastPeriodStart) {
-    return latestPeriodStart;
-  }
-  return profile.lastPeriodStart;
-}
-
+/**
+ * Compute full cycle data from profile + daily logs.
+ * Delegates to the cycle service for all calculations.
+ */
 export function calculateCycleDataWithLogs(
   profile: UserProfile,
   dailyLogs: DailyLog[]
 ): CycleData {
-  const effectiveStart = getEffectiveLastPeriodStart(profile, dailyLogs);
-  const effectiveProfile = { ...profile, lastPeriodStart: effectiveStart };
-  const data = calculateCycleData(effectiveProfile);
+  const status = computeCycleStatus(profile, dailyLogs);
+  return cycleStatusToCycleData(status);
+}
 
-  const lastStart = new Date(effectiveStart + "T00:00:00");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const rawDaysSince = Math.floor(
-    (today.getTime() - lastStart.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  if (rawDaysSince > effectiveProfile.cycleLength) {
-    const predictedNextStart = new Date(lastStart);
-    predictedNextStart.setDate(predictedNextStart.getDate() + effectiveProfile.cycleLength);
-    const hasNewPeriod = dailyLogs.some((l) => {
-      if (!l.flow) return false;
-      const logDate = new Date(l.date + "T00:00:00");
-      return logDate >= predictedNextStart;
-    });
-
-    if (!hasNewPeriod) {
-      data.phase = "late";
-      data.currentDay = rawDaysSince + 1;
-    }
-  }
-
-  return data;
+/** Convert a CycleStatus (from cycleService) to the legacy CycleData shape. */
+function cycleStatusToCycleData(s: CycleStatus): CycleData {
+  return {
+    currentDay: s.currentDay,
+    cycleLength: s.cycleLength,
+    periodLength: s.periodLength,
+    lastPeriodStart: s.lastPeriodStart,
+    nextPeriodStart: s.nextPeriodStart,
+    ovulationDate: s.ovulationDate,
+    fertileWindowStart: s.fertileWindowStart,
+    fertileWindowEnd: s.fertileWindowEnd,
+    phase: s.phase,
+    cycles: [],
+  };
 }
 
 export function detectPeriodStart(

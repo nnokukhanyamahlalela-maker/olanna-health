@@ -40,7 +40,8 @@ import {
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
-import { storage, calculateCycleDataWithLogs } from "@/lib/storage";
+import { storage } from "@/lib/storage";
+import { useCycleData } from "@/hooks/useCycleData";
 import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -391,34 +392,20 @@ export function CycleScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
 
-  const [cycleLength, setCycleLength] = useState(DEFAULT_CYCLE_LENGTH);
-  const [periodLength, setPeriodLength] = useState(5);
-  const [currentDay, setCurrentDay] = useState(DEFAULT_CURRENT_DAY);
-  const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
-  const [isLate, setIsLate] = useState(false);
+  const { cycleStatus } = useCycleData();
+  const cycleLength = cycleStatus?.cycleLength || DEFAULT_CYCLE_LENGTH;
+  const periodLength = cycleStatus?.periodLength || 5;
+  const currentDay = cycleStatus?.currentDay || DEFAULT_CURRENT_DAY;
+  const isLate = cycleStatus?.phase === "late";
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      (async () => {
-        try {
-          const [profile, logs] = await Promise.all([
-            storage.getUserProfile(),
-            storage.getDailyLogs(),
-          ]);
-          if (!profile || !active) return;
-          const cycleData = calculateCycleDataWithLogs(profile, logs);
-          setCycleLength(profile.cycleLength || DEFAULT_CYCLE_LENGTH);
-          setPeriodLength(profile.periodLength || 5);
-          const day = cycleData.currentDay || DEFAULT_CURRENT_DAY;
-          setCurrentDay(day);
-          setSelectedDay(day);
-          setIsLate(cycleData.phase === "late");
-        } catch {}
-      })();
-      return () => { active = false; };
-    }, [])
-  );
+  const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
+  const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);
+
+  // Sync selectedDay to currentDay whenever cycle data refreshes.
+  if (currentDay !== prevCurrentDayRef.current) {
+    prevCurrentDayRef.current = currentDay;
+    setSelectedDay(currentDay);
+  }
 
   const clampedSelectedDay = Math.min(selectedDay, cycleLength);
   const clampedCurrentDay = Math.min(currentDay, cycleLength);
@@ -468,7 +455,7 @@ export function CycleScreen() {
           selectedDay={clampedSelectedDay}
           onDaySelect={setSelectedDay}
           isLate={isLate}
-          daysLate={isLate ? currentDay - cycleLength : 0}
+          daysLate={cycleStatus?.daysLate || 0}
         />
 
         <View style={styles.insightsSection}>

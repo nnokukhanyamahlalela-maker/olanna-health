@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useFocusEffect } from "@react-navigation/native";
+
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
@@ -21,8 +21,9 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
-import { storage, DailyLog, UserProfile, getEffectiveLastPeriodStart } from "@/lib/storage";
-import { getPhaseForDay, phaseConfig, Phase } from "@/constants/phaseConfig";
+import { storage, DailyLog, UserProfile } from "@/lib/storage";
+import { phaseConfig, Phase } from "@/constants/phaseConfig";
+import { useCalendarData } from "@/hooks/useCalendarData";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -86,6 +87,11 @@ const PHASE_DECODE: Record<Phase, { title: string; body: string; tip: string }> 
     body: "Progesterone rises to prepare for possible pregnancy. You may notice PMS symptoms like bloating, mood shifts, or cravings as the phase progresses.",
     tip: "Prioritise comfort foods, journalling, and winding down routines.",
   },
+  late: {
+    title: "Awaiting Your Cycle",
+    body: "Your expected period date has passed. This can happen for many reasons, including stress, changes in routine, or natural variation.",
+    tip: "Stay relaxed and continue logging. If you have concerns, consult a healthcare provider.",
+  },
 };
 
 export default function CalendarScreen() {
@@ -99,26 +105,18 @@ export default function CalendarScreen() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(todayKey);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
 
-  const loadData = useCallback(async () => {
-    const [userProfile, logs] = await Promise.all([
-      storage.getUserProfile(),
-      storage.getDailyLogs(),
-    ]);
-    console.log("[Calendar] Loaded", logs.length, "daily logs, flow logs:", logs.filter((l: DailyLog) => l.flow).map((l: DailyLog) => l.date));
-    setProfile(userProfile);
-    setDailyLogs(logs);
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+  const {
+    markers: calendarMarkers,
+    selectedDayInfo,
+    selectedLog,
+    flowLogDates,
+    dailyLogs,
+    profile,
+    refresh: loadData,
+  } = useCalendarData(viewYear, viewMonth, selectedDate);
 
   const navigateMonth = (delta: number) => {
     let newMonth = viewMonth + delta;
@@ -134,104 +132,28 @@ export default function CalendarScreen() {
     setViewYear(newYear);
   };
 
-  const effectiveStart = useMemo(() => {
-    if (!profile) return null;
-    return getEffectiveLastPeriodStart(profile, dailyLogs);
-  }, [profile, dailyLogs]);
-
-  const getDayInCycle = useCallback(
-    (date: Date): number => {
-      if (!profile || !effectiveStart) return -1;
-      const lastPeriodStart = new Date(effectiveStart);
-      const diffTime = date.getTime() - lastPeriodStart.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays < 0) return -1;
-      return (diffDays % profile.cycleLength) + 1;
-    },
-    [profile, effectiveStart]
-  );
-
-  const flowLogDates = useMemo(() => {
-    const set = new Set<string>();
-    dailyLogs.forEach((log) => {
-      if (log.flow) set.add(log.date);
-    });
-    return set;
-  }, [dailyLogs]);
-
+  // Build the calendar grid cells from hook-provided markers,
+  // prepending null entries for weekday alignment.
   const calendarDays: (DayCellInfo | null)[] = useMemo(() => {
-    const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
     const cells: (DayCellInfo | null)[] = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      cells.push(null);
-    }
-
-    const cycleLength = profile?.cycleLength || 28;
-    const periodLength = profile?.periodLength || 5;
-    const ovulationDay = cycleLength - 14;
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(viewYear, viewMonth, d);
-      const dateKey = formatDateKey(date);
-      const dayInCycle = getDayInCycle(date);
-      const hasFlowLog = flowLogDates.has(dateKey);
-
-      const isPeriod = hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
-      const isFertile =
-        dayInCycle > 0 &&
-        dayInCycle >= ovulationDay - 5 &&
-        dayInCycle <= ovulationDay + 1;
-      const isOvulation = dayInCycle > 0 && dayInCycle === ovulationDay;
-      const isPMS =
-        dayInCycle > 0 &&
-        dayInCycle > cycleLength - 7 &&
-        dayInCycle <= cycleLength;
-      const isToday = dateKey === todayKey;
-      const phase =
-        hasFlowLog ? "menstrual" :
-        dayInCycle > 0 ? getPhaseForDay(dayInCycle, cycleLength, periodLength) : "follicular";
-
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (const m of calendarMarkers) {
       cells.push({
-        day: d,
-        dateKey,
-        isPeriod,
-        isFertile,
-        isOvulation,
-        isPMS,
-        isToday,
-        phase: phase as Phase,
-        dayInCycle,
-        hasFlowLog,
+        day: m.day,
+        dateKey: m.dateKey,
+        isPeriod: m.isPeriod,
+        isFertile: m.isFertile,
+        isOvulation: m.isOvulation,
+        isPMS: m.isPMS,
+        isToday: m.isToday,
+        phase: m.phase,
+        dayInCycle: m.dayInCycle,
+        hasFlowLog: m.hasFlowLog,
       });
     }
-
     return cells;
-  }, [viewYear, viewMonth, profile, getDayInCycle, todayKey, flowLogDates]);
-
-  const selectedDayInfo = useMemo(() => {
-    if (!selectedDate) return null;
-    const hasFlow = flowLogDates.has(selectedDate);
-    if (!profile) {
-      if (hasFlow) return { dayInCycle: 1, cycleLength: 28, phase: "menstrual" as Phase, hasProfile: false };
-      return { dayInCycle: 0, cycleLength: 28, phase: "follicular" as Phase, hasProfile: false };
-    }
-    const date = new Date(selectedDate + "T12:00:00");
-    const dayInCycle = getDayInCycle(date);
-    if (dayInCycle <= 0) {
-      if (hasFlow) return { dayInCycle: 1, cycleLength: profile.cycleLength, phase: "menstrual" as Phase, hasProfile: true };
-      return { dayInCycle: 0, cycleLength: profile.cycleLength, phase: "follicular" as Phase, hasProfile: true };
-    }
-    const cycleLength = profile.cycleLength;
-    const pLength = profile.periodLength || 5;
-    const p = hasFlow ? "menstrual" : getPhaseForDay(dayInCycle, cycleLength, pLength);
-    return { dayInCycle, cycleLength, phase: p as Phase, hasProfile: true };
-  }, [selectedDate, profile, getDayInCycle, flowLogDates]);
-
-  const selectedLog = selectedDate
-    ? dailyLogs.find((log) => log.date === selectedDate)
-    : null;
+  }, [viewYear, viewMonth, calendarMarkers]);
 
   const getDayBgColor = (info: DayCellInfo): string | undefined => {
     if (filter !== "all") {
