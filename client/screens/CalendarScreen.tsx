@@ -23,7 +23,7 @@ import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 import { phaseConfig, Phase } from "@/constants/phaseConfig";
-import { useCalendarData } from "@/hooks/useCalendarData";
+import { useCalendarCycle } from "@/hooks/useCalendarCycle";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -116,7 +116,7 @@ export default function CalendarScreen() {
     dailyLogs,
     profile,
     refresh: loadData,
-  } = useCalendarData(viewYear, viewMonth, selectedDate);
+  } = useCalendarCycle(viewYear, viewMonth, selectedDate);
 
   const navigateMonth = (delta: number) => {
     let newMonth = viewMonth + delta;

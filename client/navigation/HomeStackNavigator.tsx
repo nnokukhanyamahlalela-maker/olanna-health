@@ -1,6 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { CycleScreen } from "@/screens/CycleScreen";
+import { LotusCycleScreen } from "@/screens/LotusCycleScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type HomeStackParamList = {
@@ -16,7 +16,7 @@ export default function HomeStackNavigator() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
         name="Home"
-        component={CycleScreen}
+        component={LotusCycleScreen}
         options={{
           headerShown: false,
         }}

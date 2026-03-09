@@ -28,7 +28,7 @@ import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile } from "@/lib/storage";
-import { useCycleData } from "@/hooks/useCycleData";
+import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -128,7 +128,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
-  const { cycleStatus, profile, isLoading } = useCycleData();
+  const { cycleStatus, profile, isLoading } = useLotusCycle();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 

@@ -25,9 +25,7 @@ import {
   detectPeriodStart,
   calculateCycleDataWithLogs,
 } from "@/lib/storage";
-import {
-  getEffectiveLastPeriodStart,
-} from "@/lib/cycleService";
+import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
 
 const BRAND_PINK = "#E83E8C";
 

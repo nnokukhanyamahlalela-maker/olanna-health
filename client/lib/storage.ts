@@ -1,10 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
-import {
-  computeCycleStatus,
-  CycleStatus,
-} from "./cycleService";
+import { computeCycleStatus } from "@/services/cycleCalculator";
+import type { CycleStatus } from "@/types/cycle";
 
 const STORAGE_KEYS = {
   USER_PROFILE: "@olanna_user_profile",
