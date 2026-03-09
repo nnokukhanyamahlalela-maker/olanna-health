@@ -5,8 +5,8 @@ import {
   generateCalendarMarkers,
   computeCycleDay,
   computePhase,
-} from "@/services/cycleCalculator";
-import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+  getEffectiveLastPeriodStart,
+} from "@/utils/cycleUtils";
 import type { CalendarDayMarker, CyclePhase, CycleProfile } from "@/types/cycle";
 import { toCyclePhase } from "@/types/cycle";
 

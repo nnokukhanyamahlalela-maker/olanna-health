@@ -1,17 +1,24 @@
 export {
-  computeCycleDay,
-  computeRawDaysSince,
-  computePhase,
   getCyclePhase,
   generateCyclePrediction,
   generateCyclePrediction as computeCyclePrediction,
   generateCyclePrediction as computeCycleStatus,
-  detectLatePhase,
-  generateCalendarMarkers,
-  toDateKey,
 } from "@/services/cycleCalculator";
 
-export { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+export {
+  saveOnboardingCycleProfile,
+  getCycleProfile,
+} from "@/services/cycleProfileService";
+
+export {
+  getEffectiveLastPeriodStart,
+  detectLatePhase,
+  generateCalendarMarkers,
+  computeCycleDay,
+  computeRawDaysSince,
+  computePhase,
+  toDateKey,
+} from "@/utils/cycleUtils";
 
 export type {
   CyclePhase,

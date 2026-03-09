@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { storage, UserProfile, DailyLog } from "@/lib/storage";
+import { generateCyclePrediction } from "@/services/cycleCalculator";
 import {
-  generateCyclePrediction,
+  getEffectiveLastPeriodStart,
   detectLatePhase,
-} from "@/services/cycleCalculator";
-import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+} from "@/utils/cycleUtils";
 import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 
 function toCycleProfile(p: UserProfile): CycleProfile {

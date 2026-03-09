@@ -1,11 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
+import { generateCyclePrediction } from "@/services/cycleCalculator";
 import {
-  generateCyclePrediction,
+  getEffectiveLastPeriodStart,
   detectLatePhase,
-} from "@/services/cycleCalculator";
-import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+} from "@/utils/cycleUtils";
 import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
 

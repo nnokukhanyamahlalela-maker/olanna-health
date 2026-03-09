@@ -1,34 +1,19 @@
-import type { CycleProfile, FlowLog } from "@/types/cycle";
+import { CycleProfile } from "../types/cycle";
 
-function parseDate(s: string): Date {
-  return new Date(s + "T00:00:00");
+const cycleProfileStore = new Map<string, CycleProfile>();
+
+export async function saveOnboardingCycleProfile(
+  profile: Omit<CycleProfile, "updatedAt">
+): Promise<CycleProfile> {
+  const savedProfile: CycleProfile = {
+    ...profile,
+    updatedAt: new Date().toISOString(),
+  };
+
+  cycleProfileStore.set(profile.userId, savedProfile);
+  return savedProfile;
 }
 
-export function getEffectiveLastPeriodStart(
-  profile: CycleProfile,
-  logs: FlowLog[]
-): string {
-  const logsWithFlow = logs
-    .filter((l) => l.flow)
-    .sort((a, b) => b.date.localeCompare(a.date));
-
-  if (logsWithFlow.length === 0) return profile.lastPeriodStartDate;
-
-  let streakStart = logsWithFlow[0].date;
-  for (let i = 1; i < logsWithFlow.length; i++) {
-    const prev = parseDate(logsWithFlow[i - 1].date);
-    const curr = parseDate(logsWithFlow[i].date);
-    const gap = Math.round(
-      (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (gap <= 1) {
-      streakStart = logsWithFlow[i].date;
-    } else {
-      break;
-    }
-  }
-
-  return streakStart > profile.lastPeriodStartDate
-    ? streakStart
-    : profile.lastPeriodStartDate;
+export async function getCycleProfile(userId: string): Promise<CycleProfile | null> {
+  return cycleProfileStore.get(userId) || null;
 }

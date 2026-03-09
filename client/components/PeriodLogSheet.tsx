@@ -25,7 +25,7 @@ import {
   detectPeriodStart,
   calculateCycleDataWithLogs,
 } from "@/lib/storage";
-import { getEffectiveLastPeriodStart } from "@/services/cycleProfileService";
+import { getEffectiveLastPeriodStart } from "@/utils/cycleUtils";
 import type { CycleProfile } from "@/types/cycle";
 import type { UserProfile } from "@/lib/storage";
 
