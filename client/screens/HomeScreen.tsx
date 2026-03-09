@@ -10,10 +10,10 @@
  * Designed for iPhone sizes (390x844 style) with iOS glassmorphism.
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -28,9 +28,21 @@ import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile } from "@/lib/storage";
-import { useLotusCycle } from "@/hooks/useLotusCycle";
+import { generateCyclePrediction } from "@/services/cycleCalculator";
+import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
+import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+function toCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -129,9 +141,43 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
-  const { cycleStatus, profile, isLoading, isLate, daysLate } = useLotusCycle();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
+  const [isLate, setIsLate] = useState(false);
+  const [daysLate, setDaysLate] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const [userProfile, logs] = await Promise.all([
+            storage.getUserProfile(),
+            storage.getDailyLogs(),
+          ]);
+          if (!active) return;
+          setProfile(userProfile);
+          if (userProfile) {
+            const cp = toCycleProfile(userProfile);
+            const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
+            const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
+            setCycleStatus(generateCyclePrediction(effectiveProfile));
+            const late = detectLatePhase(effectiveProfile, logs);
+            setIsLate(late.isLate);
+            setDaysLate(late.daysLate);
+          }
+        } catch (e) {
+          console.error("[HomeScreen] load error:", e);
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+      return () => { active = false; };
+    }, [])
+  );
 
   const cycleData: CycleData | null = cycleStatus && profile
     ? {

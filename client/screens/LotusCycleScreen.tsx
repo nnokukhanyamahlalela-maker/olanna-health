@@ -40,9 +40,21 @@ import {
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
-import { storage } from "@/lib/storage";
-import { useLotusCycle } from "@/hooks/useLotusCycle";
+import { storage, UserProfile, DailyLog } from "@/lib/storage";
+import { generateCyclePrediction } from "@/services/cycleCalculator";
+import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
+import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
+
+function toCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -392,7 +404,39 @@ export function LotusCycleScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
 
-  const { cycleStatus, profile, isLate, daysLate } = useLotusCycle();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
+  const [isLate, setIsLate] = useState(false);
+  const [daysLate, setDaysLate] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const [userProfile, logs] = await Promise.all([
+            storage.getUserProfile(),
+            storage.getDailyLogs(),
+          ]);
+          if (!active) return;
+          setProfile(userProfile);
+          if (userProfile) {
+            const cp = toCycleProfile(userProfile);
+            const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
+            const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
+            setCycleStatus(generateCyclePrediction(effectiveProfile));
+            const late = detectLatePhase(effectiveProfile, logs);
+            setIsLate(late.isLate);
+            setDaysLate(late.daysLate);
+          }
+        } catch (e) {
+          console.error("[LotusCycleScreen] load error:", e);
+        }
+      })();
+      return () => { active = false; };
+    }, [])
+  );
+
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
   const currentDay = cycleStatus?.currentCycleDay || DEFAULT_CURRENT_DAY;
