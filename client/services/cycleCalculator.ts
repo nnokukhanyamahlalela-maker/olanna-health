@@ -122,7 +122,7 @@ export function generateCyclePrediction(params: {
     helperText = "Your next cycle begins once bleeding starts.";
   }
 
-  if (isLate) {
+  if (isLate && daysLate >= 5) {
     uiLabel = "Late Luteal Phase";
     message = "Your cycle is taking a little longer this month.";
     helperText = "You remain in the luteal phase until a new bleed is logged.";
