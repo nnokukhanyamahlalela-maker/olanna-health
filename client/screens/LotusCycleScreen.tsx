@@ -90,7 +90,7 @@ export default function LotusCycleScreen({ navigation }: any) {
 
         <Pressable
           style={[styles.button, { marginTop: 18 }]}
-          onPress={() => navigation.navigate("Main", { screen: "Calendar" })}
+          onPress={() => navigation.navigate("Main", { screen: "CalendarTab" })}
           testID="button-open-calendar"
         >
           <Text style={styles.buttonText}>Open Cycle Calendar</Text>

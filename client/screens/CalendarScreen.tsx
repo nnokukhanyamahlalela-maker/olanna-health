@@ -81,7 +81,7 @@ export default function CalendarScreen({ navigation }: any) {
 
         <Pressable
           style={[styles.button, { marginTop: 18 }]}
-          onPress={() => navigation.navigate("Main", { screen: "Cycle" })}
+          onPress={() => navigation.navigate("Main", { screen: "HomeTab" })}
           testID="button-back-lotus"
         >
           <Text style={styles.buttonText}>Back to Lotus Cycle</Text>

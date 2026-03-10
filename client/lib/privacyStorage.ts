@@ -80,7 +80,7 @@ export const privacyStorage = {
     try {
       const exportJson = await this.exportAllData();
       const fileName = `olanna_health_export_${new Date().toISOString().split("T")[0]}.json`;
-      const filePath = `${FileSystem.documentDirectory}${fileName}`;
+      const filePath = `${(FileSystem as any).documentDirectory}${fileName}`;
       
       await FileSystem.writeAsStringAsync(filePath, exportJson);
       

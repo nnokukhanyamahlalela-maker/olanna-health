@@ -280,7 +280,7 @@ export default function ProductInsightsScreen() {
         showToast("Export ready");
       } else {
         const file = new ExpoFile(Paths.cache, "product-logs.csv");
-        file.text = csvText;
+        (file as any).text = csvText;
         const filePath = file.uri;
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {

@@ -41,7 +41,7 @@ export default function IntroLogo() {
   const doNavigate = useCallback(() => {
     if (hasNavigated.current) return;
     hasNavigated.current = true;
-    navigation.replace(destinationRef.current);
+    navigation.replace(destinationRef.current as any);
   }, [navigation]);
 
   useEffect(() => {

@@ -20,6 +20,7 @@ export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal" | "
 interface LotusProps {
   phase: CyclePhase;
   size?: number;
+  color?: string;
   strokeColor?: string;
   strokeWidth?: number;
   showBackground?: boolean;

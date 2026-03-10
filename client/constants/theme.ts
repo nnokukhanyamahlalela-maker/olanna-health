@@ -18,6 +18,7 @@ export const BorderRadius = {
   md: 8,
   lg: 16,
   xl: 24,
+  pill: 999,
   full: 999,
 } as const;
 
@@ -26,11 +27,13 @@ export const Fonts = {
   headingMedium: "DMSans_500Medium",
   headingLight: "DMSans_400Regular",
   body: "DMSans_400Regular",
+  bodyMedium: "DMSans_500Medium",
   bodyLight: "DMSans_300Light",
   bodySemibold: "DMSans_500Medium",
   numeric: "DMSans_500Medium",
   numericBold: "DMSans_700Bold",
   light: "DMSans_300Light",
+  mono: "DMSans_400Regular",
 } as const;
 
 export const Typography = {

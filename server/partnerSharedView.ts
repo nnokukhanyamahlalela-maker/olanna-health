@@ -61,13 +61,16 @@ export function generateSharedView(
   }
 
   if (settings.shareNextPeriodWindow) {
-    result.nextPeriodWindow = widenDateWindow(
+    const window = widenDateWindow(
       snapshot.nextPeriodFrom,
       snapshot.nextPeriodTo,
       settings.precisionLevel
     );
-    if (result.nextPeriodWindow && snapshot.nextPeriodConfidence) {
-      (result.nextPeriodWindow as any).confidence = snapshot.nextPeriodConfidence;
+    if (window) {
+      result.nextPeriodWindow = {
+        ...window,
+        confidence: snapshot.nextPeriodConfidence || "",
+      };
     }
   }
 

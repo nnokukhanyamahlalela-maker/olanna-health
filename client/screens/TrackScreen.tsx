@@ -188,7 +188,7 @@ export default function TrackScreen() {
           <ThemedText type="h4" style={styles.sectionTitle}>
             Flow
           </ThemedText>
-          <FlowSelector value={flow || null} onChange={setFlow} />
+          <FlowSelector value={flow || null} onChange={setFlow as any} />
         </View>
 
         <View style={styles.section}>

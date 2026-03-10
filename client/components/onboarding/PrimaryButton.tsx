@@ -19,6 +19,7 @@ interface PrimaryButtonProps {
   loading?: boolean;
   icon?: keyof typeof Feather.glyphMap;
   variant?: "primary" | "secondary";
+  testID?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

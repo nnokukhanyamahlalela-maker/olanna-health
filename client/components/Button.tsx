@@ -18,6 +18,7 @@ interface ButtonProps {
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
   testID?: string;
+  variant?: string;
 }
 
 const springConfig: WithSpringConfig = {
