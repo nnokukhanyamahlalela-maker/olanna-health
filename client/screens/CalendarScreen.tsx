@@ -830,10 +830,11 @@ const styles = StyleSheet.create({
   dayGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-around",
   },
   dayCell: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
+    width: DAY_SIZE,
+    height: DAY_SIZE,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 2,
