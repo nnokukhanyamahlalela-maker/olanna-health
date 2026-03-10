@@ -3,13 +3,18 @@ export {
   generateCyclePrediction,
   generateCyclePrediction as computeCyclePrediction,
   generateCyclePrediction as computeCycleStatus,
+  getLotusPhaseContent,
 } from "@/services/cycleCalculator";
 
+export type { LotusPhaseContent } from "@/services/cycleCalculator";
+
 export {
-  saveOnboardingCycleProfile,
+  saveCycleProfile,
   getCycleProfile,
-  invalidateCycleProfileCache,
-} from "@/services/cycleProfileService";
+  saveCycleLog,
+  getCycleLogs,
+  getEffectiveLastPeriodStartDate,
+} from "@/services/cycleStorage";
 
 export {
   getEffectiveLastPeriodStart,

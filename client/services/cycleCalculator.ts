@@ -1,11 +1,9 @@
-// src/services/cycleCalculator.ts
-
 import { CyclePhase, CyclePrediction, CycleProfile } from "../types/cycle";
 
 function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
 function formatDate(date: Date): string {
@@ -13,8 +11,8 @@ function formatDate(date: Date): string {
 }
 
 function diffInDays(start: Date, end: Date): number {
-  const ms = end.getTime() - start.getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
+  const milliseconds = end.getTime() - start.getTime();
+  return Math.floor(milliseconds / (1000 * 60 * 60 * 24));
 }
 
 export function getCyclePhase(
@@ -28,6 +26,41 @@ export function getCyclePhase(
   if (cycleDay < ovulationDay - 4) return "Follicular";
   if (cycleDay <= ovulationDay + 1) return "Ovulatory";
   return "Luteal";
+}
+
+export interface LotusPhaseContent {
+  title: string;
+  subtitle: string;
+}
+
+export function getLotusPhaseContent(phase: CyclePhase): LotusPhaseContent {
+  switch (phase) {
+    case "Menstrual":
+      return {
+        title: "Rest & Release",
+        subtitle: "A softer time to slow down, replenish, and listen inward.",
+      };
+    case "Follicular":
+      return {
+        title: "Growth & Renewal",
+        subtitle: "Energy begins to rise. A beautiful time for fresh starts.",
+      };
+    case "Ovulatory":
+      return {
+        title: "Radiance & Expression",
+        subtitle: "You may feel more open, vibrant, and connected.",
+      };
+    case "Luteal":
+      return {
+        title: "Boundaries & Reflection",
+        subtitle: "Come back to yourself. Protect your energy and create space.",
+      };
+    default:
+      return {
+        title: "Your Lotus Cycle",
+        subtitle: "A gentle view of where you are in your cycle.",
+      };
+  }
 }
 
 export function generateCyclePrediction(params: {
@@ -63,28 +96,29 @@ export function generateCyclePrediction(params: {
   const fertileWindowStart = addDays(currentCycleStart, fertileWindowStartDay - 1);
   const fertileWindowEnd = addDays(currentCycleStart, fertileWindowEndDay - 1);
 
-  const periodDates = Array.from({ length: profile.averagePeriodLength }, (_, i) =>
-    formatDate(addDays(nextPeriodStart, i))
+  const periodDates = Array.from(
+    { length: profile.averagePeriodLength },
+    (_, index) => formatDate(addDays(nextPeriodStart, index))
   );
 
-  const phaseRanges = [
+  const phaseRanges: { phase: CyclePhase; start: string; end: string }[] = [
     {
-      phase: "Menstrual" as CyclePhase,
+      phase: "Menstrual",
       start: formatDate(currentCycleStart),
       end: formatDate(addDays(currentCycleStart, profile.averagePeriodLength - 1)),
     },
     {
-      phase: "Follicular" as CyclePhase,
+      phase: "Follicular",
       start: formatDate(addDays(currentCycleStart, profile.averagePeriodLength)),
       end: formatDate(addDays(currentCycleStart, ovulationDay - 6)),
     },
     {
-      phase: "Ovulatory" as CyclePhase,
+      phase: "Ovulatory",
       start: formatDate(fertileWindowStart),
       end: formatDate(addDays(ovulationDate, 1)),
     },
     {
-      phase: "Luteal" as CyclePhase,
+      phase: "Luteal",
       start: formatDate(addDays(ovulationDate, 2)),
       end: formatDate(addDays(currentCycleStart, profile.averageCycleLength - 1)),
     },
