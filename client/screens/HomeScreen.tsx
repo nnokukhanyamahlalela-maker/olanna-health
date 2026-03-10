@@ -148,9 +148,7 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 
-  // useLotusCycle reads from cycleProfileService (onboarding baseline)
-  // and returns a CyclePrediction. Re-runs on every screen focus.
-  const { data, loading: hookLoading } = useLotusCycle(profile?.id || "");
+  const { prediction: data, loading: hookLoading } = useLotusCycle();
 
   // Load profile and logs for late detection (separate from the hook's prediction)
   useFocusEffect(
