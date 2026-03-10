@@ -408,8 +408,14 @@ export function LotusCycleScreen() {
   const [isLate, setIsLate] = useState(false);
   const [daysLate, setDaysLate] = useState(0);
 
+  // useLotusCycle reads from cycleProfileService (populated during onboarding)
+  // and generates a CyclePrediction with current day, phase, next period, etc.
+  // It re-runs on every screen focus via useFocusEffect internally.
   const { data, loading } = useLotusCycle(profile?.id || "");
 
+  // Load the UserProfile and daily logs separately for late detection.
+  // The hook handles prediction; this handles the "late" state which requires
+  // comparing raw days elapsed against the cycle length + checking for new logs.
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -422,9 +428,12 @@ export function LotusCycleScreen() {
           if (!active) return;
           setProfile(userProfile);
           if (userProfile) {
+            // Convert UserProfile to CycleProfile for utility functions
             const cp = toCycleProfile(userProfile);
+            // Get effective start (onboarding baseline vs logged data)
             const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
             const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
+            // Check if cycle is past expected length with no new period logged
             const late = detectLatePhase(effectiveProfile, logs);
             setIsLate(late.isLate);
             setDaysLate(late.daysLate);

@@ -23,7 +23,7 @@ import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
-import { useCalendarCycle } from "@/hooks/useCalendarCycle";
+
 import { phaseConfig, Phase } from "@/constants/phaseConfig";
 import type { CyclePhase, CycleProfile } from "@/types/cycle";
 import { toInternalPhase, toCyclePhase } from "@/types/cycle";
@@ -132,8 +132,16 @@ export default function CalendarScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
 
-  const { markedDates, loading: hookLoading } = useCalendarCycle(profile?.id || "");
+  // CalendarScreen uses generateCalendarMarkers() directly (below) rather than
+  // useCalendarCycle, because it needs the full CalendarDayMarker[] array with
+  // isPeriod/isFertile/isPMS/hasFlowLog flags for its custom grid rendering.
+  // The useCalendarCycle hook provides a simpler markedDates record suitable
+  // for third-party calendar components.
+  //
+  // Both paths read from the same onboarding baseline (cycleProfileService)
+  // and apply getEffectiveLastPeriodStart to allow logged data to override.
 
+  // Load profile and logs for the calendar grid markers and daily decode
   const loadData = useCallback(async () => {
     try {
       const [userProfile, logs] = await Promise.all([

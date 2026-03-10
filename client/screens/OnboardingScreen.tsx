@@ -678,12 +678,27 @@ export default function OnboardingScreen() {
     }));
   };
 
+  // --- Onboarding Save Handler ---
+  // This function establishes the user's baseline cycle profile,
+  // which becomes the single source of truth for cycle predictions
+  // until the user logs actual period data.
+  //
+  // Save order matters:
+  //   1. Persist UserProfile to secure storage (the canonical data store)
+  //   2. Populate cycleProfileService in-memory cache (for immediate screen reads)
+  //   3. Mark onboarding as complete
+  //   4. Create historical flow logs from onboarding data
+  //
+  // After navigation to the Main screen, useLotusCycle and useCalendarCycle
+  // will read from the cycleProfileService cache and display the correct
+  // phase and predictions immediately.
   const handleComplete = async () => {
     setIsSaving(true);
     try {
       const periodLength = onboardingData.periodLength || 5;
       const importedPeriodDays = onboardingData.periodDays || [];
 
+      // Determine lastPeriodStart from user input, imported data, or fallback to today
       let lastPeriodStart = onboardingData.lastPeriodStart || "";
       if (!lastPeriodStart && importedPeriodDays.length > 0) {
         const sorted = [...importedPeriodDays].sort();
@@ -694,6 +709,9 @@ export default function OnboardingScreen() {
         lastPeriodStart = new Date().toISOString().split("T")[0];
       }
 
+      // Step 1: Build and persist the UserProfile to secure storage.
+      // This is the canonical persistent store — cycleProfileService
+      // hydrates from this on app restart.
       const profile: UserProfile = {
         id: generateId(),
         name: onboardingData.name.trim(),
@@ -707,24 +725,24 @@ export default function OnboardingScreen() {
         createdAt: new Date().toISOString(),
       };
       await storage.setUserProfile(profile);
-      await saveOnboardingCycleProfile({
-        userId: profile.id,
-        lastPeriodStartDate: lastPeriodStart,
-        averageCycleLength: profile.cycleLength,
-        averagePeriodLength: profile.periodLength,
-        onboardingSymptoms: onboardingData.goals.filter(
-          (g) => g === "manage_pcos" || g === "manage_endometriosis"
-        ),
-      });
+
+      // Step 2: Mark onboarding as complete and set preferences
       await storage.setOnboardingComplete(true);
       await storage.setPreference("useLotusView", "true");
 
+      // Step 3: Create flow log entries for the user's reported period dates.
+      // These historical logs allow getEffectiveLastPeriodStart() to correctly
+      // identify the real period start from logged data.
+      // NOTE: Each addDailyLog call invalidates the cycleProfileService cache,
+      // so we do this BEFORE populating the cache in Step 4.
       const flowDatesToLog = new Set<string>();
       const previousPeriodDates = onboardingData.previousPeriodDates || [];
 
       if (importedPeriodDays.length > 0) {
+        // Screenshot import: use the exact dates extracted from the image
         importedPeriodDays.forEach((d) => flowDatesToLog.add(d));
       } else {
+        // Manual entry: generate date ranges from start dates + period length
         const addPeriodRange = (startDate: string, duration: number) => {
           const start = new Date(startDate + "T00:00:00");
           if (isNaN(start.getTime())) return;
@@ -754,6 +772,21 @@ export default function OnboardingScreen() {
         };
         await storage.addDailyLog(log);
       }
+
+      // Step 4: Populate the cycleProfileService in-memory cache LAST.
+      // This must come after all addDailyLog calls because each log save
+      // invalidates the cache. By setting it last, we guarantee the cache
+      // is populated and marked as hydrated right before navigation,
+      // so getCycleProfile() returns this data immediately on the Main screen.
+      await saveOnboardingCycleProfile({
+        userId: profile.id,
+        lastPeriodStartDate: lastPeriodStart,
+        averageCycleLength: profile.cycleLength,
+        averagePeriodLength: profile.periodLength,
+        onboardingSymptoms: onboardingData.goals.filter(
+          (g) => g === "manage_pcos" || g === "manage_endometriosis"
+        ),
+      });
 
       navigation.reset({
         index: 0,

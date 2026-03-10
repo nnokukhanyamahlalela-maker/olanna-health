@@ -148,8 +148,11 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 
+  // useLotusCycle reads from cycleProfileService (onboarding baseline)
+  // and returns a CyclePrediction. Re-runs on every screen focus.
   const { data, loading: hookLoading } = useLotusCycle(profile?.id || "");
 
+  // Load profile and logs for late detection (separate from the hook's prediction)
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -179,6 +182,9 @@ export default function HomeScreen() {
     }, [])
   );
 
+  // Convert the hook's CyclePrediction to the legacy CycleData shape
+  // used by the HomeScreen's UI components. Late phase overrides the
+  // predicted phase when the cycle has extended past its expected length.
   const cycleData: CycleData | null = data && profile
     ? {
         currentDay: data.currentCycleDay,

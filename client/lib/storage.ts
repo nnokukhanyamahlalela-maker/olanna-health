@@ -81,6 +81,8 @@ export const storage = {
 
   async setUserProfile(profile: UserProfile): Promise<void> {
     await secureStorage.setUserProfile(profile);
+    // Invalidate the cycle profile cache so the next getCycleProfile() call
+    // re-hydrates from storage with the updated profile data
     invalidateCycleProfileCache();
   },
 
@@ -102,11 +104,14 @@ export const storage = {
 
   async addDailyLog(log: DailyLog): Promise<void> {
     await secureStorage.addDailyLog(log);
+    // Invalidate cache so hooks re-read fresh data including new logs,
+    // which may change the effective period start date
     invalidateCycleProfileCache();
   },
 
   async removeDailyLog(date: string): Promise<void> {
     await secureStorage.removeDailyLog(date);
+    // Invalidate cache so hooks recalculate with updated log set
     invalidateCycleProfileCache();
   },
 

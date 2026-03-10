@@ -1,3 +1,19 @@
+/**
+ * Cycle Utilities
+ *
+ * Utility functions for cycle data processing, late phase detection,
+ * and calendar marker generation. These work alongside the core
+ * cycleCalculator and cycleProfileService.
+ *
+ * Key functions:
+ *   - getEffectiveLastPeriodStart: Determines the "real" period start by
+ *     comparing the profile baseline with actual flow logs. This is the
+ *     mechanism by which logged data overrides prediction data.
+ *   - detectLatePhase: Checks if the user is past their expected cycle
+ *     length without logging a new period.
+ *   - generateCalendarMarkers: Produces per-day marker data for a calendar
+ *     grid, combining predictions with actual logs.
+ */
 import { getPhaseForDay } from "@/constants/phaseConfig";
 import type {
   Phase,
@@ -7,6 +23,10 @@ import type {
 } from "@/types/cycle";
 import { toCyclePhase } from "@/types/cycle";
 
+/**
+ * Format a Date as a YYYY-MM-DD string (local timezone).
+ * Uses manual formatting to avoid timezone issues with toISOString().
+ */
 export function toDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -14,21 +34,36 @@ export function toDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Parse a YYYY-MM-DD string into a Date at midnight local time.
+ * Appending T00:00:00 prevents timezone-related off-by-one errors.
+ */
 function parseDate(s: string): Date {
   return new Date(s + "T00:00:00");
 }
 
+/** Add days to a date, returning a new Date. */
 function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
 }
 
+/** Calculate the number of whole days between two dates (end - start). */
 function diffInDays(start: Date, end: Date): number {
   const ms = end.getTime() - start.getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
+/**
+ * Compute which day of the cycle a given date falls on.
+ * Uses modulo to wrap across multiple cycles.
+ *
+ * @param date - The date to check
+ * @param lastPeriodStart - ISO date of last period start
+ * @param cycleLength - Average cycle length in days
+ * @returns 1-indexed cycle day, or -1 if date is before lastPeriodStart
+ */
 export function computeCycleDay(
   date: Date,
   lastPeriodStart: string,
@@ -40,6 +75,11 @@ export function computeCycleDay(
   return (diff % cycleLength) + 1;
 }
 
+/**
+ * Compute raw (unwrapped) days since last period start.
+ * Unlike computeCycleDay, this does NOT apply modulo — it returns
+ * the actual number of days elapsed, which is needed for late detection.
+ */
 export function computeRawDaysSince(
   date: Date,
   lastPeriodStart: string
@@ -47,6 +87,11 @@ export function computeRawDaysSince(
   return diffInDays(parseDate(lastPeriodStart), date);
 }
 
+/**
+ * Map a cycle day to its internal phase name using phaseConfig.
+ * Delegates to the shared getPhaseForDay() which handles phase boundaries
+ * consistently across all screens.
+ */
 export function computePhase(
   dayInCycle: number,
   cycleLength: number,
@@ -55,16 +100,36 @@ export function computePhase(
   return getPhaseForDay(dayInCycle, cycleLength, periodLength);
 }
 
+/**
+ * Determine the effective last period start date.
+ *
+ * This is the key function that allows logged data to override predictions:
+ *   - If the user has logged flow data, find the most recent consecutive
+ *     streak of flow days (the most recent period).
+ *   - Compare with the profile's lastPeriodStartDate.
+ *   - Return whichever is more recent.
+ *
+ * This ensures that when a user logs a period on the Calendar, the Lotus
+ * wheel immediately reflects the new Day 1.
+ *
+ * @param profile - The user's CycleProfile (baseline from onboarding)
+ * @param logs - Array of flow logs from the user's daily log entries
+ * @returns ISO date string of the effective period start
+ */
 export function getEffectiveLastPeriodStart(
   profile: CycleProfile,
   logs: FlowLog[]
 ): string {
+  // Filter to only logs with actual flow data, sorted newest first
   const logsWithFlow = logs
     .filter((l) => l.flow)
     .sort((a, b) => b.date.localeCompare(a.date));
 
+  // No flow logs — use the onboarding baseline as-is
   if (logsWithFlow.length === 0) return profile.lastPeriodStartDate;
 
+  // Walk backwards from the most recent flow log to find the start
+  // of the consecutive streak (the first day of the most recent period)
   let streakStart = logsWithFlow[0].date;
   for (let i = 1; i < logsWithFlow.length; i++) {
     const prev = parseDate(logsWithFlow[i - 1].date);
@@ -72,6 +137,7 @@ export function getEffectiveLastPeriodStart(
     const gap = Math.round(
       (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24)
     );
+    // Consecutive days (gap of 0 or 1) extend the streak
     if (gap <= 1) {
       streakStart = logsWithFlow[i].date;
     } else {
@@ -79,11 +145,25 @@ export function getEffectiveLastPeriodStart(
     }
   }
 
+  // Return whichever is more recent: the logged streak start or the profile baseline
   return streakStart > profile.lastPeriodStartDate
     ? streakStart
     : profile.lastPeriodStartDate;
 }
 
+/**
+ * Detect whether the user's cycle is "late" — past the expected length
+ * without a new period being logged.
+ *
+ * Late detection logic:
+ *   1. Calculate raw days since the effective last period start
+ *   2. If within the average cycle length → not late
+ *   3. If past the cycle length AND no new flow logged after the predicted
+ *      next period date → the cycle is late
+ *   4. If new flow was logged → a new cycle has started, not late
+ *
+ * @returns Object with isLate flag, daysLate count, and raw current day
+ */
 export function detectLatePhase(
   profile: CycleProfile,
   logs: FlowLog[]
@@ -93,10 +173,12 @@ export function detectLatePhase(
   today.setHours(0, 0, 0, 0);
   const rawDays = computeRawDaysSince(today, effectiveStart);
 
+  // Within normal cycle length — not late
   if (rawDays <= profile.averageCycleLength) {
     return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
   }
 
+  // Past cycle length — check if a new period has been logged
   const predictedNext = addDays(
     parseDate(effectiveStart),
     profile.averageCycleLength
@@ -106,6 +188,7 @@ export function detectLatePhase(
     return parseDate(l.date) >= predictedNext;
   });
 
+  // No new period logged after predicted date → late
   if (!hasNewPeriod) {
     return {
       isLate: true,
@@ -117,6 +200,24 @@ export function detectLatePhase(
   return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
 }
 
+/**
+ * Generate calendar day markers for a given month.
+ *
+ * Combines the user's cycle profile predictions with actual flow logs
+ * to produce per-day marker data for the calendar grid. Each marker
+ * includes phase, period/fertile/ovulation/PMS flags, and whether the
+ * user has logged flow for that day.
+ *
+ * If the user has logged flow on a day, it is always marked as a period
+ * day regardless of what the prediction says — this is how actual data
+ * overrides predictions.
+ *
+ * @param year - Calendar year
+ * @param month - Calendar month (0-indexed, January = 0)
+ * @param profile - The user's CycleProfile
+ * @param logs - Array of flow logs
+ * @returns Array of CalendarDayMarker objects, one per day in the month
+ */
 export function generateCalendarMarkers(
   year: number,
   month: number,
@@ -130,6 +231,7 @@ export function generateCalendarMarkers(
   } = profile;
   const ovulationDay = Math.max(cycleLength - 14, 1);
 
+  // Build a set of dates with logged flow for O(1) lookup
   const flowDates = new Set(logs.filter((l) => l.flow).map((l) => l.date));
   const todayKey = toDateKey(new Date());
 
@@ -142,6 +244,8 @@ export function generateCalendarMarkers(
     const dayInCycle = computeCycleDay(date, effectiveStart, cycleLength);
     const hasFlowLog = flowDates.has(dateKey);
 
+    // A day is marked as period if the user logged flow OR it falls
+    // within the predicted period window — logged data takes priority
     const isPeriod =
       hasFlowLog || (dayInCycle > 0 && dayInCycle <= periodLength);
 
@@ -157,6 +261,7 @@ export function generateCalendarMarkers(
       dayInCycle > cycleLength - 7 &&
       dayInCycle <= cycleLength;
 
+    // Use logged flow to force menstrual phase, otherwise derive from prediction
     const internalPhase: Phase = hasFlowLog
       ? "menstrual"
       : dayInCycle > 0
