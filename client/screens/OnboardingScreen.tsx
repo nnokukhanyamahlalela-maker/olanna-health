@@ -52,6 +52,7 @@ import {
   CAROUSEL_SCREENS,
 } from "@/constants/onboardingTokens";
 import { storage, UserProfile, DailyLog, generateId } from "@/lib/storage";
+import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 
@@ -706,6 +707,15 @@ export default function OnboardingScreen() {
         createdAt: new Date().toISOString(),
       };
       await storage.setUserProfile(profile);
+      await saveOnboardingCycleProfile({
+        userId: profile.id,
+        lastPeriodStartDate: lastPeriodStart,
+        averageCycleLength: profile.cycleLength,
+        averagePeriodLength: profile.periodLength,
+        onboardingSymptoms: onboardingData.goals.filter(
+          (g) => g === "manage_pcos" || g === "manage_endometriosis"
+        ),
+      });
       await storage.setOnboardingComplete(true);
       await storage.setPreference("useLotusView", "true");
 
