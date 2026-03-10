@@ -117,13 +117,7 @@ export function generateCyclePrediction(params: {
 
   if (isLate) {
     uiLabel = "Late Luteal Phase";
-    if (daysLate === 0) {
-      message = "Your period is due around now.";
-    } else if (daysLate === 1) {
-      message = "Your period is 1 day late.";
-    } else {
-      message = `Your period is ${daysLate} days late.`;
-    }
+    message = "Your cycle is taking a little longer this month.";
     helperText = "You remain in the luteal phase until a new bleed is logged.";
   }
 
