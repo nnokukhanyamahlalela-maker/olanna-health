@@ -41,9 +41,9 @@ import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
 import { storage, UserProfile, DailyLog } from "@/lib/storage";
-import { generateCyclePrediction } from "@/services/cycleCalculator";
+import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
-import type { CyclePrediction, CycleProfile } from "@/types/cycle";
+import type { CycleProfile } from "@/types/cycle";
 import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
 
 function toCycleProfile(p: UserProfile): CycleProfile {
@@ -405,9 +405,10 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
   const [isLate, setIsLate] = useState(false);
   const [daysLate, setDaysLate] = useState(0);
+
+  const { data, loading } = useLotusCycle(profile?.id || "");
 
   useFocusEffect(
     useCallback(() => {
@@ -424,7 +425,6 @@ export function LotusCycleScreen() {
             const cp = toCycleProfile(userProfile);
             const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
             const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
-            setCycleStatus(generateCyclePrediction(effectiveProfile));
             const late = detectLatePhase(effectiveProfile, logs);
             setIsLate(late.isLate);
             setDaysLate(late.daysLate);
@@ -439,7 +439,7 @@ export function LotusCycleScreen() {
 
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
-  const currentDay = cycleStatus?.currentCycleDay || DEFAULT_CURRENT_DAY;
+  const currentDay = data?.currentCycleDay || DEFAULT_CURRENT_DAY;
 
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);
