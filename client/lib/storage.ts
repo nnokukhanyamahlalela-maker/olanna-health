@@ -231,12 +231,11 @@ export function calculateCycleDataWithLogs(
 ): CycleData {
   const cp = userProfileToCycleProfile(profile);
   const effectiveStart = getEffectiveLastPeriodStart(cp, dailyLogs);
-  const effectiveProfile: CycleProfile = {
-    ...cp,
-    lastPeriodStartDate: effectiveStart,
-  };
-  const prediction = generateCyclePrediction(effectiveProfile);
-  const late = detectLatePhase(effectiveProfile, dailyLogs);
+  const prediction = generateCyclePrediction({
+    profile: cp,
+    effectiveLastPeriodStartDate: effectiveStart,
+  });
+  const late = detectLatePhase(cp, dailyLogs);
   return cyclePredictionToCycleData(prediction, profile, effectiveStart, late);
 }
 

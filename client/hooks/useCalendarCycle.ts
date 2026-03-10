@@ -56,10 +56,12 @@ export function useCalendarCycle(userId: string) {
 
         // Step 3: Derive effective period start (onboarding vs logged data)
         const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
-        const effectiveProfile = { ...profile, lastPeriodStartDate: effectiveStart };
 
         // Step 4: Generate the prediction
-        const prediction = generateCyclePrediction(effectiveProfile);
+        const prediction = generateCyclePrediction({
+          profile,
+          effectiveLastPeriodStartDate: effectiveStart,
+        });
 
         // Step 5: Build the markedDates record for the calendar UI
         const marks: Record<string, any> = {};
