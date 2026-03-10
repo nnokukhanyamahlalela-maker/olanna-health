@@ -1,4 +1,5 @@
 import { CyclePhase, CyclePrediction, CycleProfile } from "../types/cycle";
+import { isLatePeriod } from "../utils/cycleUtils";
 
 function addDays(date: Date, days: number): Date {
   const next = new Date(date);
@@ -80,9 +81,13 @@ export function generateCyclePrediction(params: {
       profile.averageCycleLength +
     1;
 
-  const isLate = rawCycleDay > profile.averageCycleLength;
-  const daysLate = isLate ? rawCycleDay - profile.averageCycleLength : 0;
-  const expectedPeriodDate = addDays(cycleStartDate, profile.averageCycleLength);
+  const late = isLatePeriod(
+    effectiveLastPeriodStartDate,
+    profile.averageCycleLength,
+    formatDate(today)
+  );
+  const { isLate, daysLate } = late;
+  const expectedPeriodDate = late.expectedPeriodDate;
 
   const currentPhase = getCyclePhase(
     currentCycleDay,

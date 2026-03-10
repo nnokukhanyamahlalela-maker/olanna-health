@@ -152,15 +152,61 @@ export function getEffectiveLastPeriodStart(
 }
 
 /**
+ * Pure late-period detection based on dates and cycle length alone.
+ * No dependency on flow logs — the caller is responsible for providing
+ * the correct `lastPeriodStartDate` (via getEffectiveLastPeriodStart).
+ *
+ * Rule: expected period date passed + no new bleed logged = "Late Luteal"
+ */
+export function isLatePeriod(
+  lastPeriodStartDate: string,
+  averageCycleLengthDays = 28,
+  today?: string
+) {
+  const parseLocalDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const add = (date: Date, days: number) => {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+  };
+
+  const diff = (from: Date, to: Date) => {
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const fromMidnight = new Date(
+      from.getFullYear(),
+      from.getMonth(),
+      from.getDate()
+    ).getTime();
+    const toMidnight = new Date(
+      to.getFullYear(),
+      to.getMonth(),
+      to.getDate()
+    ).getTime();
+    return Math.floor((toMidnight - fromMidnight) / msPerDay);
+  };
+
+  const start = parseLocalDate(lastPeriodStartDate);
+  const current = today ? parseLocalDate(today) : new Date();
+  const expected = add(start, averageCycleLengthDays);
+  const daysLate = Math.max(0, diff(expected, current));
+
+  return {
+    isLate: diff(expected, current) >= 0,
+    daysLate,
+    expectedPeriodDate: expected,
+  };
+}
+
+/**
  * Detect whether the user's cycle is "late" — past the expected length
  * without a new period being logged.
  *
- * Late detection logic:
- *   1. Calculate raw days since the effective last period start
- *   2. If within the average cycle length → not late
- *   3. If past the cycle length AND no new flow logged after the predicted
- *      next period date → the cycle is late
- *   4. If new flow was logged → a new cycle has started, not late
+ * Delegates to isLatePeriod for the core date math, using the effective
+ * last period start derived from flow logs.
  *
  * @returns Object with isLate flag, daysLate count, and raw current day
  */
@@ -172,33 +218,15 @@ export function detectLatePhase(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const rawDays = computeRawDaysSince(today, effectiveStart);
+  const rawCurrentDay = rawDays + 1;
 
-  // Within normal cycle length — not late
-  if (rawDays <= profile.averageCycleLength) {
-    return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
-  }
+  const late = isLatePeriod(effectiveStart, profile.averageCycleLength);
 
-  // Past cycle length — check if a new period has been logged
-  const predictedNext = addDays(
-    parseDate(effectiveStart),
-    profile.averageCycleLength
-  );
-  const hasNewPeriod = logs.some((l) => {
-    if (!l.flow) return false;
-    return parseDate(l.date) >= predictedNext;
-  });
-
-  // No new period logged after predicted date → late
-  if (!hasNewPeriod) {
-    const rawCurrentDay = rawDays + 1;
-    return {
-      isLate: true,
-      daysLate: rawCurrentDay - profile.averageCycleLength,
-      rawCurrentDay,
-    };
-  }
-
-  return { isLate: false, daysLate: 0, rawCurrentDay: rawDays + 1 };
+  return {
+    isLate: late.isLate,
+    daysLate: late.daysLate,
+    rawCurrentDay,
+  };
 }
 
 /**

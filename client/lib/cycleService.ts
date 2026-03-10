@@ -18,6 +18,7 @@ export {
 
 export {
   getEffectiveLastPeriodStart,
+  isLatePeriod,
   detectLatePhase,
   generateCalendarMarkers,
   computeCycleDay,

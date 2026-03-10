@@ -5,7 +5,6 @@ import { generateCyclePrediction } from "@/services/cycleCalculator";
 import { invalidateCycleProfileCache } from "@/services/cycleProfileService";
 import {
   getEffectiveLastPeriodStart,
-  detectLatePhase,
 } from "@/utils/cycleUtils";
 import type { CyclePrediction, CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
@@ -235,21 +234,19 @@ export function calculateCycleDataWithLogs(
     profile: cp,
     effectiveLastPeriodStartDate: effectiveStart,
   });
-  const late = detectLatePhase(cp, dailyLogs);
-  return cyclePredictionToCycleData(prediction, profile, effectiveStart, late);
+  return cyclePredictionToCycleData(prediction, profile, effectiveStart);
 }
 
 function cyclePredictionToCycleData(
   p: CyclePrediction,
   profile: UserProfile,
   effectiveStart: string,
-  late: { isLate: boolean; daysLate: number; rawCurrentDay: number }
 ): CycleData {
-  const internalPhase = late.isLate
+  const internalPhase = p.isLate
     ? ("late" as const)
     : toInternalPhase(p.currentPhase);
   return {
-    currentDay: late.isLate ? late.rawCurrentDay : p.currentCycleDay,
+    currentDay: p.isLate ? p.rawCycleDay : p.currentCycleDay,
     cycleLength: profile.cycleLength,
     periodLength: profile.periodLength,
     lastPeriodStart: effectiveStart,
