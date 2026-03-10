@@ -251,21 +251,42 @@ export default function CalendarScreen() {
 
   const calendarRows: (DayCellInfo | null)[][] = useMemo(() => {
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const todayStr = formatDateKey(today);
     const cells: (DayCellInfo | null)[] = [];
     for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (const m of calendarMarkers) {
-      cells.push({
-        day: m.day,
-        dateKey: m.dateKey,
-        isPeriod: m.isPeriod,
-        isFertile: m.isFertile,
-        isOvulation: m.isOvulation,
-        isPMS: m.isPMS,
-        isToday: m.isToday,
-        phase: m.phase,
-        dayInCycle: m.dayInCycle,
-        hasFlowLog: m.hasFlowLog,
-      });
+    if (calendarMarkers.length > 0) {
+      for (const m of calendarMarkers) {
+        cells.push({
+          day: m.day,
+          dateKey: m.dateKey,
+          isPeriod: m.isPeriod,
+          isFertile: m.isFertile,
+          isOvulation: m.isOvulation,
+          isPMS: m.isPMS,
+          isToday: m.isToday,
+          phase: m.phase,
+          dayInCycle: m.dayInCycle,
+          hasFlowLog: m.hasFlowLog,
+        });
+      }
+    } else {
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(viewYear, viewMonth, d);
+        const dateKey = formatDateKey(date);
+        cells.push({
+          day: d,
+          dateKey,
+          isPeriod: false,
+          isFertile: false,
+          isOvulation: false,
+          isPMS: false,
+          isToday: dateKey === todayStr,
+          phase: "Follicular" as CyclePhase,
+          dayInCycle: 0,
+          hasFlowLog: false,
+        });
+      }
     }
     while (cells.length % 7 !== 0) cells.push(null);
     const rows: (DayCellInfo | null)[][] = [];
@@ -358,8 +379,8 @@ export default function CalendarScreen() {
           </Pressable>
         </View>
 
-        {/* Calendar glass card */}
-        <GlassSurface style={styles.calendarCard} noPadding>
+        {/* Calendar card — uses plain View to avoid GlassSurface overflow clipping on native iOS */}
+        <View style={[styles.calendarCard, { backgroundColor: isDark ? "rgba(42, 23, 48, 0.42)" : "rgba(255, 255, 255, 0.38)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(255, 255, 255, 0.55)" }]}>
           {/* Weekday headers */}
           <View style={styles.weekdayRow}>
             {WEEKDAYS.map((wd) => (
@@ -456,7 +477,7 @@ export default function CalendarScreen() {
               </View>
             ))}
           </View>
-        </GlassSurface>
+        </View>
 
         {/* Filter pills */}
         <View style={styles.filterRow}>
@@ -820,6 +841,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 14,
     marginBottom: 16,
+    borderRadius: 20,
   },
   weekdayRow: {
     flexDirection: "row",
