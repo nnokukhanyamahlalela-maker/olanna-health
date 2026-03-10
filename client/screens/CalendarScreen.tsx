@@ -31,7 +31,9 @@ import {
   generateCalendarMarkers,
   computeCycleDay,
   computePhase,
+  computeRawDaysSince,
   getEffectiveLastPeriodStart,
+  detectLatePhase,
 } from "@/utils/cycleUtils";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
@@ -113,6 +115,8 @@ interface SelectedDayInfo {
   cycleLength: number;
   phase: CyclePhase;
   hasProfile: boolean;
+  isLate?: boolean;
+  daysLate?: number;
 }
 
 export default function CalendarScreen() {
@@ -201,15 +205,21 @@ export default function CalendarScreen() {
       };
     }
 
+    const rawDays = computeRawDaysSince(date, effectiveStart);
+    const late = detectLatePhase(cp, dailyLogs);
+    const isDateLate = rawDays > profile.cycleLength && selectedDate === todayKey && late.isLate;
+
     const internalPhase = hasFlow
       ? "menstrual" as const
       : computePhase(dayInCycle, profile.cycleLength, profile.periodLength || 5);
 
     return {
-      dayInCycle,
+      dayInCycle: isDateLate ? rawDays + 1 : dayInCycle,
       cycleLength: profile.cycleLength,
-      phase: toCyclePhase(internalPhase),
+      phase: isDateLate ? "Luteal" as CyclePhase : toCyclePhase(internalPhase),
       hasProfile: true,
+      isLate: isDateLate,
+      daysLate: isDateLate ? late.daysLate : 0,
     };
   }, [selectedDate, profile, dailyLogs, flowLogDates]);
 
@@ -480,9 +490,16 @@ export default function CalendarScreen() {
           <GlassSurface style={styles.decodeCard} noPadding>
             {selectedDayInfo.dayInCycle > 0 ? (
               (() => {
-                const ip = toInternalPhase(selectedDayInfo.phase);
-                const decode = PHASE_DECODE[selectedDayInfo.phase];
+                const isLateState = selectedDayInfo.isLate === true;
+                const ip: Phase = isLateState ? "late" : toInternalPhase(selectedDayInfo.phase);
                 const pc = phaseConfig[ip];
+                const decode = isLateState
+                  ? {
+                      title: "Awaiting Your Cycle",
+                      body: `Your cycle is ${selectedDayInfo.daysLate || 0} day${(selectedDayInfo.daysLate || 0) === 1 ? "" : "s"} past its expected length of ${selectedDayInfo.cycleLength} days. This can be perfectly normal — stress, sleep, travel, or hormonal shifts can all affect timing. If you have concerns, consider reaching out to your healthcare provider.`,
+                      tip: "Log your period when it arrives so your predictions stay accurate.",
+                    }
+                  : PHASE_DECODE[selectedDayInfo.phase];
                 return (
                   <>
                     <View style={styles.decodeHeader}>
@@ -498,7 +515,10 @@ export default function CalendarScreen() {
                             { color: pc.labelColor },
                           ]}
                         >
-                          Day {selectedDayInfo.dayInCycle}
+                          {isLateState
+                            ? `Day ${selectedDayInfo.cycleLength} + ${selectedDayInfo.daysLate} late`
+                            : `Day ${selectedDayInfo.dayInCycle}`
+                          }
                         </Text>
                       </View>
                       <Text style={[styles.decodePhase, { color: pc.labelColor }]}>
@@ -517,7 +537,7 @@ export default function CalendarScreen() {
                       ]}
                     >
                       <Feather
-                        name="zap"
+                        name={isLateState ? "clock" : "zap"}
                         size={14}
                         color={pc.labelColor}
                       />

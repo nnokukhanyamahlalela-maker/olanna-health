@@ -1,0 +1,136 @@
+// olanna-cycle-status.ts
+
+type CyclePhase =
+  | "Menstrual"
+  | "Follicular"
+  | "Ovulatory"
+  | "Luteal"
+  | "Late Luteal";
+
+interface CycleInput {
+  lastPeriodStartDate: string; // format: YYYY-MM-DD
+  periodLengthDays?: number;   // default 3 to 7
+  averageCycleLengthDays?: number; // default 28
+  today?: string; // format: YYYY-MM-DD, optional for testing
+  hasNewPeriodStarted?: boolean; // true if user logged a new period
+}
+
+interface CycleStatus {
+  currentPhase: CyclePhase;
+  cycleDay: number;
+  daysLate: number;
+  expectedPeriodDate: string;
+  isLate: boolean;
+  message: string;
+  uiLabel: string;
+  uiTone: "normal" | "warning" | "gentle-alert";
+}
+
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + days);
+  return newDate;
+}
+
+function diffInDays(from: Date, to: Date): number {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const fromMidnight = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
+  const toMidnight = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
+  return Math.floor((toMidnight - fromMidnight) / msPerDay);
+}
+
+export function getOlannaCycleStatus(input: CycleInput): CycleStatus {
+  const {
+    lastPeriodStartDate,
+    periodLengthDays = 3,
+    averageCycleLengthDays = 28,
+    today,
+    hasNewPeriodStarted = false,
+  } = input;
+
+  const lastPeriodStart = parseLocalDate(lastPeriodStartDate);
+  const currentDate = today ? parseLocalDate(today) : new Date();
+
+  // If a new period has already started, user is in Menstrual phase day 1+
+  if (hasNewPeriodStarted) {
+    return {
+      currentPhase: "Menstrual",
+      cycleDay: 1,
+      daysLate: 0,
+      expectedPeriodDate: formatLocalDate(currentDate),
+      isLate: false,
+      message: "A new cycle has started.",
+      uiLabel: "Menstrual Phase",
+      uiTone: "normal",
+    };
+  }
+
+  const cycleDay = diffInDays(lastPeriodStart, currentDate) + 1;
+  const expectedPeriodDate = addDays(lastPeriodStart, averageCycleLengthDays);
+  const daysLate = Math.max(0, diffInDays(expectedPeriodDate, currentDate));
+  const isLate = currentDate >= expectedPeriodDate;
+
+  let currentPhase: CyclePhase = "Luteal";
+  let message = "You are currently in the luteal phase.";
+  let uiLabel = "Luteal Phase";
+  let uiTone: "normal" | "warning" | "gentle-alert" = "normal";
+
+  // Basic phase estimation for users without ovulation test data / BBT / CM logs
+  if (cycleDay <= periodLengthDays) {
+    currentPhase = "Menstrual";
+    message = "You are currently in the menstrual phase.";
+    uiLabel = "Menstrual Phase";
+  } else if (cycleDay <= 13) {
+    currentPhase = "Follicular";
+    message = "You are currently in the follicular phase.";
+    uiLabel = "Follicular Phase";
+  } else if (cycleDay >= 14 && cycleDay <= 16) {
+    currentPhase = "Ovulatory";
+    message = "You are currently in the ovulatory phase.";
+    uiLabel = "Ovulatory Phase";
+  } else {
+    currentPhase = "Luteal";
+    message = "You are currently in the luteal phase.";
+    uiLabel = "Luteal Phase";
+  }
+
+  // Late period override:
+  // If the expected date has passed and no new period is logged,
+  // remain in luteal but show a specialized UI state.
+  if (isLate) {
+    currentPhase = "Late Luteal";
+    uiLabel = "Late Luteal Phase";
+    uiTone = "gentle-alert";
+
+    if (daysLate === 0) {
+      message = "Your expected period is due around now. You are still in the luteal phase until bleeding begins.";
+    } else if (daysLate === 1) {
+      message = "Your period is 1 day late. You are still in the luteal phase until a new cycle begins.";
+    } else {
+      message = `Your period is ${daysLate} days late. You are still in the luteal phase until a new cycle begins.`;
+    }
+  }
+
+  return {
+    currentPhase,
+    cycleDay,
+    daysLate,
+    expectedPeriodDate: formatLocalDate(expectedPeriodDate),
+    isLate,
+    message,
+    uiLabel,
+    uiTone,
+  };
+}
