@@ -35,20 +35,40 @@ export type CyclePhase =
  *
  * Populated during onboarding and persisted via cycleProfileService.
  * Fields:
- *   userId             - Unique identifier matching the UserProfile.id
- *   lastPeriodStartDate - ISO date string (YYYY-MM-DD) of the most recent period start
- *   averageCycleLength  - Average number of days in a full cycle (default 28)
- *   averagePeriodLength - Average number of days of menstrual flow (default 5)
- *   onboardingSymptoms  - Optional health conditions selected during onboarding (e.g. PCOS)
- *   updatedAt           - ISO timestamp of last profile update
+ *   userId               - Unique identifier matching the UserProfile.id
+ *   lastPeriodStartDate  - ISO date string (YYYY-MM-DD) of the most recent period start
+ *   averageCycleLength   - Average number of days in a full cycle (default 28)
+ *   averagePeriodLength  - Average number of days of menstrual flow (default 5)
+ *   onboardingSymptoms   - Optional health conditions selected during onboarding (e.g. PCOS)
+ *   onboardingPreferences - Optional user preferences collected during onboarding
+ *   updatedAt            - ISO timestamp of last profile update
  */
 export interface CycleProfile {
   userId: string;
-  lastPeriodStartDate: string;
+  lastPeriodStartDate: string; // YYYY-MM-DD
   averageCycleLength: number;
   averagePeriodLength: number;
   onboardingSymptoms?: string[];
+  onboardingPreferences?: string[];
   updatedAt: string;
+}
+
+/**
+ * A user-logged actual cycle event that overrides prediction data.
+ * When the user logs a real period start date, it takes precedence
+ * over the onboarding baseline for future predictions.
+ *
+ * Fields:
+ *   id              - Unique identifier for this log entry
+ *   userId          - The user who logged this event
+ *   periodStartDate - ISO date string (YYYY-MM-DD) of the actual period start
+ *   createdAt       - ISO timestamp of when this was logged
+ */
+export interface CycleLog {
+  id: string;
+  userId: string;
+  periodStartDate: string; // actual logged date
+  createdAt: string;
 }
 
 /**

@@ -24,6 +24,7 @@ export {
 export type {
   CyclePhase,
   CycleProfile,
+  CycleLog,
   CyclePrediction,
   CyclePrediction as CycleStatus,
   CalendarDayMarker,
