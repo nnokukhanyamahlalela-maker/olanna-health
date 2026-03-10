@@ -128,6 +128,12 @@ export function generateCyclePrediction(params: {
     helperText = "You remain in the luteal phase until a new bleed is logged.";
   }
 
+  if (isLate && daysLate > 45) {
+    uiLabel = "Late Luteal Phase";
+    message = "Your cycle has been extended for a while.";
+    helperText = "If this is unusual for you, consider speaking with a healthcare provider.";
+  }
+
   const nextPeriodOffset = profile.averageCycleLength - (currentCycleDay - 1);
   const nextPeriodStart = addDays(today, nextPeriodOffset);
 
