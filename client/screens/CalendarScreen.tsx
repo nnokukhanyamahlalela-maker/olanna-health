@@ -23,6 +23,7 @@ import { Spacing } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
+import { useCalendarCycle } from "@/hooks/useCalendarCycle";
 import { phaseConfig, Phase } from "@/constants/phaseConfig";
 import type { CyclePhase, CycleProfile } from "@/types/cycle";
 import { toInternalPhase, toCyclePhase } from "@/types/cycle";
@@ -130,6 +131,8 @@ export default function CalendarScreen() {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+
+  const { markedDates, loading: hookLoading } = useCalendarCycle(profile?.id || "");
 
   const loadData = useCallback(async () => {
     try {
