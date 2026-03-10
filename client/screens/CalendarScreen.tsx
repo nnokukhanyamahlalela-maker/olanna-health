@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -23,9 +24,14 @@ import { BorderRadius, Fonts } from "@/constants/theme";
 import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
 import { phaseConfig, Phase } from "@/constants/phaseConfig";
-import type { CyclePhase } from "@/types/cycle";
-import { toInternalPhase } from "@/types/cycle";
-import { useCalendarCycle } from "@/hooks/useCalendarCycle";
+import type { CyclePhase, CycleProfile } from "@/types/cycle";
+import { toInternalPhase, toCyclePhase } from "@/types/cycle";
+import {
+  generateCalendarMarkers,
+  computeCycleDay,
+  computePhase,
+  getEffectiveLastPeriodStart,
+} from "@/utils/cycleUtils";
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -91,6 +97,23 @@ const PHASE_DECODE: Record<CyclePhase, { title: string; body: string; tip: strin
   },
 };
 
+function toCycleProfile(p: UserProfile): CycleProfile {
+  return {
+    userId: p.id,
+    lastPeriodStartDate: p.lastPeriodStart,
+    averageCycleLength: p.cycleLength,
+    averagePeriodLength: p.periodLength,
+    updatedAt: p.createdAt,
+  };
+}
+
+interface SelectedDayInfo {
+  dayInCycle: number;
+  cycleLength: number;
+  phase: CyclePhase;
+  hasProfile: boolean;
+}
+
 export default function CalendarScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -105,15 +128,84 @@ export default function CalendarScreen() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
 
-  const {
-    markers: calendarMarkers,
-    selectedDayInfo,
-    selectedLog,
-    flowLogDates,
-    dailyLogs,
-    profile,
-    refresh: loadData,
-  } = useCalendarCycle(viewYear, viewMonth, selectedDate);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+
+  const loadData = useCallback(async () => {
+    try {
+      const [userProfile, logs] = await Promise.all([
+        storage.getUserProfile(),
+        storage.getDailyLogs(),
+      ]);
+      setProfile(userProfile);
+      setDailyLogs(logs);
+    } catch (error) {
+      console.error("[CalendarScreen] load error:", error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
+
+  const flowLogDates = useMemo(() => {
+    const set = new Set<string>();
+    dailyLogs.forEach((log) => {
+      if (log.flow) set.add(log.date);
+    });
+    return set;
+  }, [dailyLogs]);
+
+  const calendarMarkers = useMemo(() => {
+    if (!profile) return [];
+    return generateCalendarMarkers(viewYear, viewMonth, toCycleProfile(profile), dailyLogs);
+  }, [viewYear, viewMonth, profile, dailyLogs]);
+
+  const selectedDayInfo = useMemo<SelectedDayInfo | null>(() => {
+    if (!selectedDate) return null;
+    const hasFlow = flowLogDates.has(selectedDate);
+
+    if (!profile) {
+      return {
+        dayInCycle: hasFlow ? 1 : 0,
+        cycleLength: 28,
+        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
+        hasProfile: false,
+      };
+    }
+
+    const cp = toCycleProfile(profile);
+    const effectiveStart = getEffectiveLastPeriodStart(cp, dailyLogs);
+    const date = new Date(selectedDate + "T12:00:00");
+    const dayInCycle = computeCycleDay(date, effectiveStart, profile.cycleLength);
+
+    if (dayInCycle <= 0) {
+      return {
+        dayInCycle: hasFlow ? 1 : 0,
+        cycleLength: profile.cycleLength,
+        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
+        hasProfile: true,
+      };
+    }
+
+    const internalPhase = hasFlow
+      ? "menstrual" as const
+      : computePhase(dayInCycle, profile.cycleLength, profile.periodLength || 5);
+
+    return {
+      dayInCycle,
+      cycleLength: profile.cycleLength,
+      phase: toCyclePhase(internalPhase),
+      hasProfile: true,
+    };
+  }, [selectedDate, profile, dailyLogs, flowLogDates]);
+
+  const selectedLog = useMemo(() => {
+    if (!selectedDate) return null;
+    return dailyLogs.find((log) => log.date === selectedDate) || null;
+  }, [selectedDate, dailyLogs]);
 
   const navigateMonth = (delta: number) => {
     let newMonth = viewMonth + delta;
