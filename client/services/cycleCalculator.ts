@@ -56,6 +56,11 @@ export function getLotusPhaseContent(phase: CyclePhase): LotusPhaseContent {
         title: "Boundaries & Reflection",
         subtitle: "Come back to yourself. Protect your energy and create space.",
       };
+    case "Late Luteal":
+      return {
+        title: "Awaiting Your Cycle",
+        subtitle: "You remain in the luteal phase until a new bleed is logged.",
+      };
     default:
       return {
         title: "Your Lotus Cycle",
@@ -89,11 +94,38 @@ export function generateCyclePrediction(params: {
   const { isLate, daysLate } = late;
   const expectedPeriodDate = late.expectedPeriodDate;
 
-  const currentPhase = getCyclePhase(
+  const basePhase = getCyclePhase(
     currentCycleDay,
     profile.averageCycleLength,
     profile.averagePeriodLength
   );
+  const currentPhase: CyclePhase = isLate ? "Late Luteal" : basePhase;
+
+  let uiLabel = `${currentPhase} Phase`;
+  let message = `You are currently in the ${currentPhase.toLowerCase()} phase.`;
+  let helperText = "Your body may still be preparing for your next bleed.";
+
+  if (currentPhase === "Menstrual") {
+    helperText = "This phase begins when bleeding starts.";
+  } else if (currentPhase === "Follicular") {
+    helperText = "A phase often associated with growth and renewal.";
+  } else if (currentPhase === "Ovulatory") {
+    helperText = "Ovulation often happens around the middle of the cycle.";
+  } else if (currentPhase === "Luteal") {
+    helperText = "Your next cycle begins once bleeding starts.";
+  }
+
+  if (isLate) {
+    uiLabel = "Late Luteal Phase";
+    if (daysLate === 0) {
+      message = "Your period is due around now.";
+    } else if (daysLate === 1) {
+      message = "Your period is 1 day late.";
+    } else {
+      message = `Your period is ${daysLate} days late.`;
+    }
+    helperText = "You remain in the luteal phase until a new bleed is logged.";
+  }
 
   const nextPeriodOffset = profile.averageCycleLength - (currentCycleDay - 1);
   const nextPeriodStart = addDays(today, nextPeriodOffset);
@@ -148,5 +180,8 @@ export function generateCyclePrediction(params: {
     ovulationDate: formatDate(ovulationDate),
     periodDates,
     phaseRanges,
+    uiLabel,
+    message,
+    helperText,
   };
 }

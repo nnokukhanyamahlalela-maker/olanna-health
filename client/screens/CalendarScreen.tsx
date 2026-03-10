@@ -98,6 +98,11 @@ const PHASE_DECODE: Record<CyclePhase, { title: string; body: string; tip: strin
     body: "Progesterone rises to prepare for possible pregnancy. You may notice PMS symptoms like bloating, mood shifts, or cravings as the phase progresses.",
     tip: "Prioritise comfort foods, journalling, and winding down routines.",
   },
+  "Late Luteal": {
+    title: "Late Luteal Phase",
+    body: "Your expected period date has passed. This can be perfectly normal — stress, sleep, travel, or hormonal shifts can all affect timing.",
+    tip: "Log your period when it arrives so your predictions stay accurate.",
+  },
 };
 
 function toCycleProfile(p: UserProfile): CycleProfile {

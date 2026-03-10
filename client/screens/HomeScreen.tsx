@@ -170,7 +170,7 @@ export default function HomeScreen() {
         ovulationDate: data.ovulationDate,
         fertileWindowStart: data.fertileWindowStart,
         fertileWindowEnd: data.fertileWindowEnd,
-        phase: isLate ? "late" : toInternalPhase(data.currentPhase),
+        phase: toInternalPhase(data.currentPhase),
         cycles: [],
       }
     : null;

@@ -21,13 +21,15 @@ export type { Phase };
 
 /**
  * Public-facing cycle phase names displayed in the UI.
- * These are the four standard phases of the menstrual cycle.
+ * Includes the four standard phases plus "Late Luteal" which activates
+ * when the expected period date has passed with no new bleed logged.
  */
 export type CyclePhase =
   | "Menstrual"
   | "Follicular"
   | "Ovulatory"
-  | "Luteal";
+  | "Luteal"
+  | "Late Luteal";
 
 /**
  * The user's baseline cycle profile — the single source of truth
@@ -107,6 +109,12 @@ export interface CyclePrediction {
     start: string;
     end: string;
   }[];
+  /** Human-readable phase label for display (e.g. "Late Luteal Phase") */
+  uiLabel: string;
+  /** Contextual status message (e.g. "Your period is 8 days late.") */
+  message: string;
+  /** Supporting guidance text (e.g. "You remain in the luteal phase until a new bleed is logged.") */
+  helperText: string;
 }
 
 /**
@@ -150,18 +158,15 @@ const PHASE_TO_INTERNAL: Record<CyclePhase, Phase> = {
   Follicular: "follicular",
   Ovulatory: "ovulation",
   Luteal: "luteal",
+  "Late Luteal": "late",
 };
 
-/**
- * Mapping from internal Phase to public CyclePhase.
- * Note: "late" maps to "Luteal" since late phase uses luteal styling.
- */
 const INTERNAL_TO_PHASE: Record<string, CyclePhase> = {
   menstrual: "Menstrual",
   follicular: "Follicular",
   ovulation: "Ovulatory",
   luteal: "Luteal",
-  late: "Luteal",
+  late: "Late Luteal",
 };
 
 /** Convert a public CyclePhase to the internal Phase used by phaseConfig. */
