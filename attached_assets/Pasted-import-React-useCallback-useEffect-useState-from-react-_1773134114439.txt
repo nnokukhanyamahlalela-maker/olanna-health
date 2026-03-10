@@ -1,0 +1,864 @@
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Calendar } from "react-native-calendars";
+import { NavigationContainer, useFocusEffect } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+type CyclePhase = "Menstrual" | "Follicular" | "Ovulatory" | "Luteal";
+
+type RootStackParamList = {
+  OnboardingCycle: undefined;
+  LotusCycle: undefined;
+  CycleCalendar: undefined;
+};
+
+interface CycleProfile {
+  userId: string;
+  lastPeriodStartDate: string; // YYYY-MM-DD
+  averageCycleLength: number;
+  averagePeriodLength: number;
+  onboardingSymptoms?: string[];
+  onboardingPreferences?: string[];
+  updatedAt: string;
+}
+
+interface CycleLog {
+  id: string;
+  userId: string;
+  periodStartDate: string;
+  createdAt: string;
+}
+
+interface PhaseRange {
+  phase: CyclePhase;
+  start: string;
+  end: string;
+}
+
+interface CyclePrediction {
+  currentCycleDay: number;
+  currentPhase: CyclePhase;
+  nextPeriodStartDate: string;
+  fertileWindowStart: string;
+  fertileWindowEnd: string;
+  ovulationDate: string;
+  periodDates: string[];
+  phaseRanges: PhaseRange[];
+}
+
+interface LotusPhaseContent {
+  title: string;
+  subtitle: string;
+}
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const CYCLE_PROFILE_KEY = "olanna_cycle_profile";
+const CYCLE_LOGS_KEY = "olanna_cycle_logs";
+
+async function saveCycleProfile(
+  profile: Omit<CycleProfile, "updatedAt">
+): Promise<CycleProfile> {
+  const value: CycleProfile = {
+    ...profile,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await AsyncStorage.setItem(CYCLE_PROFILE_KEY, JSON.stringify(value));
+  return value;
+}
+
+async function getCycleProfile(): Promise<CycleProfile | null> {
+  const raw = await AsyncStorage.getItem(CYCLE_PROFILE_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
+
+async function saveCycleLog(log: CycleLog): Promise<void> {
+  const existing = await getCycleLogs();
+  const updated = [log, ...existing];
+  await AsyncStorage.setItem(CYCLE_LOGS_KEY, JSON.stringify(updated));
+}
+
+async function getCycleLogs(): Promise<CycleLog[]> {
+  const raw = await AsyncStorage.getItem(CYCLE_LOGS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+async function getEffectiveLastPeriodStartDate(): Promise<string | null> {
+  const logs = await getCycleLogs();
+
+  if (logs.length > 0) {
+    const sorted = [...logs].sort(
+      (a, b) =>
+        new Date(b.periodStartDate).getTime() -
+        new Date(a.periodStartDate).getTime()
+    );
+
+    return sorted[0].periodStartDate;
+  }
+
+  const profile = await getCycleProfile();
+  return profile?.lastPeriodStartDate ?? null;
+}
+
+/* =========================================================
+   CYCLE CALCULATOR
+========================================================= */
+
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function formatDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+function diffInDays(start: Date, end: Date): number {
+  const milliseconds = end.getTime() - start.getTime();
+  return Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+}
+
+function getCyclePhase(
+  cycleDay: number,
+  averageCycleLength: number,
+  averagePeriodLength: number
+): CyclePhase {
+  const ovulationDay = averageCycleLength - 14;
+
+  if (cycleDay <= averagePeriodLength) return "Menstrual";
+  if (cycleDay < ovulationDay - 4) return "Follicular";
+  if (cycleDay <= ovulationDay + 1) return "Ovulatory";
+  return "Luteal";
+}
+
+function generateCyclePrediction(params: {
+  profile: CycleProfile;
+  effectiveLastPeriodStartDate: string;
+  today?: Date;
+}): CyclePrediction {
+  const { profile, effectiveLastPeriodStartDate, today = new Date() } = params;
+
+  const cycleStartDate = new Date(effectiveLastPeriodStartDate);
+  const daysSinceStart = diffInDays(cycleStartDate, today);
+
+  const currentCycleDay =
+    ((daysSinceStart % profile.averageCycleLength) + profile.averageCycleLength) %
+      profile.averageCycleLength +
+    1;
+
+  const currentPhase = getCyclePhase(
+    currentCycleDay,
+    profile.averageCycleLength,
+    profile.averagePeriodLength
+  );
+
+  const nextPeriodOffset = profile.averageCycleLength - (currentCycleDay - 1);
+  const nextPeriodStart = addDays(today, nextPeriodOffset);
+
+  const ovulationDay = profile.averageCycleLength - 14;
+  const fertileWindowStartDay = ovulationDay - 5;
+  const fertileWindowEndDay = ovulationDay;
+
+  const currentCycleStart = addDays(today, -(currentCycleDay - 1));
+  const ovulationDate = addDays(currentCycleStart, ovulationDay - 1);
+  const fertileWindowStart = addDays(currentCycleStart, fertileWindowStartDay - 1);
+  const fertileWindowEnd = addDays(currentCycleStart, fertileWindowEndDay - 1);
+
+  const periodDates = Array.from(
+    { length: profile.averagePeriodLength },
+    (_, index) => formatDate(addDays(nextPeriodStart, index))
+  );
+
+  const phaseRanges: PhaseRange[] = [
+    {
+      phase: "Menstrual",
+      start: formatDate(currentCycleStart),
+      end: formatDate(addDays(currentCycleStart, profile.averagePeriodLength - 1)),
+    },
+    {
+      phase: "Follicular",
+      start: formatDate(addDays(currentCycleStart, profile.averagePeriodLength)),
+      end: formatDate(addDays(currentCycleStart, ovulationDay - 6)),
+    },
+    {
+      phase: "Ovulatory",
+      start: formatDate(fertileWindowStart),
+      end: formatDate(addDays(ovulationDate, 1)),
+    },
+    {
+      phase: "Luteal",
+      start: formatDate(addDays(ovulationDate, 2)),
+      end: formatDate(addDays(currentCycleStart, profile.averageCycleLength - 1)),
+    },
+  ];
+
+  return {
+    currentCycleDay,
+    currentPhase,
+    nextPeriodStartDate: formatDate(nextPeriodStart),
+    fertileWindowStart: formatDate(fertileWindowStart),
+    fertileWindowEnd: formatDate(fertileWindowEnd),
+    ovulationDate: formatDate(ovulationDate),
+    periodDates,
+    phaseRanges,
+  };
+}
+
+function getLotusPhaseContent(phase: CyclePhase): LotusPhaseContent {
+  switch (phase) {
+    case "Menstrual":
+      return {
+        title: "Rest & Release",
+        subtitle: "A softer time to slow down, replenish, and listen inward.",
+      };
+    case "Follicular":
+      return {
+        title: "Growth & Renewal",
+        subtitle: "Energy begins to rise. A beautiful time for fresh starts.",
+      };
+    case "Ovulatory":
+      return {
+        title: "Radiance & Expression",
+        subtitle: "You may feel more open, vibrant, and connected.",
+      };
+    case "Luteal":
+      return {
+        title: "Boundaries & Reflection",
+        subtitle: "Come back to yourself. Protect your energy and create space.",
+      };
+    default:
+      return {
+        title: "Your Lotus Cycle",
+        subtitle: "A gentle view of where you are in your cycle.",
+      };
+  }
+}
+
+/* =========================================================
+   HOOKS
+========================================================= */
+
+function useLotusCycle() {
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<CycleProfile | null>(null);
+  const [prediction, setPrediction] = useState<CyclePrediction | null>(null);
+  const [phaseContent, setPhaseContent] = useState<LotusPhaseContent | null>(null);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+
+    const storedProfile = await getCycleProfile();
+    const effectiveLastPeriodStartDate = await getEffectiveLastPeriodStartDate();
+
+    setProfile(storedProfile);
+
+    if (storedProfile && effectiveLastPeriodStartDate) {
+      const computedPrediction = generateCyclePrediction({
+        profile: storedProfile,
+        effectiveLastPeriodStartDate,
+      });
+
+      setPrediction(computedPrediction);
+      setPhaseContent(getLotusPhaseContent(computedPrediction.currentPhase));
+    } else {
+      setPrediction(null);
+      setPhaseContent(null);
+    }
+
+    setLoading(false);
+  }, []);
+
+  return { loading, profile, prediction, phaseContent, refresh };
+}
+
+function enumerateDates(start: string, end: string): string[] {
+  const values: string[] = [];
+  const current = new Date(start);
+  const last = new Date(end);
+
+  while (current <= last) {
+    values.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return values;
+}
+
+function useCalendarCycle() {
+  const [loading, setLoading] = useState(true);
+  const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+
+    const profile = await getCycleProfile();
+    const effectiveLastPeriodStartDate = await getEffectiveLastPeriodStartDate();
+
+    if (!profile || !effectiveLastPeriodStartDate) {
+      setMarkedDates({});
+      setLoading(false);
+      return;
+    }
+
+    const prediction = generateCyclePrediction({
+      profile,
+      effectiveLastPeriodStartDate,
+    });
+
+    const marks: Record<string, any> = {};
+
+    prediction.periodDates.forEach((date) => {
+      marks[date] = {
+        ...(marks[date] || {}),
+        selected: true,
+        selectedColor: "#EAA4B5",
+      };
+    });
+
+    enumerateDates(
+      prediction.fertileWindowStart,
+      prediction.fertileWindowEnd
+    ).forEach((date) => {
+      marks[date] = {
+        ...(marks[date] || {}),
+        marked: true,
+        dotColor: "#C9A7EB",
+      };
+    });
+
+    marks[prediction.ovulationDate] = {
+      ...(marks[prediction.ovulationDate] || {}),
+      selected: true,
+      selectedColor: "#B57EDC",
+      marked: true,
+      dotColor: "#FFFFFF",
+    };
+
+    const todayKey = new Date().toISOString().split("T")[0];
+    marks[todayKey] = {
+      ...(marks[todayKey] || {}),
+      customStyles: {
+        container: {
+          borderWidth: 1,
+          borderColor: "#D48AA3",
+          borderRadius: 10,
+        },
+        text: {
+          fontWeight: "700",
+        },
+      },
+    };
+
+    setMarkedDates(marks);
+    setLoading(false);
+  }, []);
+
+  return { loading, markedDates, refresh };
+}
+
+/* =========================================================
+   SCREENS
+========================================================= */
+
+function OnboardingCycleScreen({ navigation }: any) {
+  const [lastPeriodStartDate, setLastPeriodStartDate] = useState("2026-03-01");
+  const [averageCycleLength, setAverageCycleLength] = useState("28");
+  const [averagePeriodLength, setAveragePeriodLength] = useState("5");
+
+  const handleSaveCycleProfile = async () => {
+    try {
+      if (!lastPeriodStartDate || !averageCycleLength || !averagePeriodLength) {
+        Alert.alert("Missing details", "Please complete all fields.");
+        return;
+      }
+
+      await saveCycleProfile({
+        userId: "user-123",
+        lastPeriodStartDate,
+        averageCycleLength: Number(averageCycleLength),
+        averagePeriodLength: Number(averagePeriodLength),
+        onboardingSymptoms: ["cramps", "bloating"],
+        onboardingPreferences: ["gentle reminders"],
+      });
+
+      Alert.alert(
+        "Saved",
+        "Your cycle details now flow into your Lotus Cycle and Calendar."
+      );
+
+      navigation.navigate("LotusCycle");
+    } catch (error) {
+      Alert.alert("Something went wrong", "We couldn't save your cycle details.");
+    }
+  };
+
+  const handleResetDemo = async () => {
+    await AsyncStorage.multiRemove([CYCLE_PROFILE_KEY, CYCLE_LOGS_KEY]);
+    Alert.alert("Reset complete", "Demo data has been cleared.");
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.eyebrow}>Olanna Health</Text>
+        <Text style={styles.title}>Let’s understand your rhythm</Text>
+        <Text style={styles.subtitle}>
+          Add a few cycle details so your Lotus Cycle and Calendar can reflect
+          your onboarding answers immediately.
+        </Text>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Last period start date</Text>
+          <TextInput
+            value={lastPeriodStartDate}
+            onChangeText={setLastPeriodStartDate}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#9E8E98"
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>Average cycle length</Text>
+          <TextInput
+            value={averageCycleLength}
+            onChangeText={setAverageCycleLength}
+            keyboardType="numeric"
+            placeholder="28"
+            placeholderTextColor="#9E8E98"
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>Average period length</Text>
+          <TextInput
+            value={averagePeriodLength}
+            onChangeText={setAveragePeriodLength}
+            keyboardType="numeric"
+            placeholder="5"
+            placeholderTextColor="#9E8E98"
+            style={styles.input}
+          />
+
+          <Pressable style={styles.button} onPress={handleSaveCycleProfile}>
+            <Text style={styles.buttonText}>Continue</Text>
+          </Pressable>
+
+          <Pressable style={styles.secondaryButton} onPress={handleResetDemo}>
+            <Text style={styles.secondaryButtonText}>Reset demo data</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function LotusCycleScreen({ navigation }: any) {
+  const { loading, prediction, phaseContent, refresh } = useLotusCycle();
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
+
+  const handleLogPeriodToday = async () => {
+    const today = new Date().toISOString().split("T")[0];
+
+    await saveCycleLog({
+      id: String(Date.now()),
+      userId: "user-123",
+      periodStartDate: today,
+      createdAt: new Date().toISOString(),
+    });
+
+    await refresh();
+
+    Alert.alert(
+      "Period logged",
+      "Your actual logged date now overrides the onboarding prediction."
+    );
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
+
+  if (!prediction || !phaseContent) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <Text style={styles.emptyTitle}>No cycle data yet</Text>
+        <Text style={styles.emptySubtitle}>
+          Complete onboarding to see your Lotus Cycle.
+        </Text>
+
+        <Pressable
+          style={[styles.button, { marginTop: 20, minWidth: 220 }]}
+          onPress={() => navigation.navigate("OnboardingCycle")}
+        >
+          <Text style={styles.buttonText}>Go to onboarding</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.header}>Lotus Cycle</Text>
+        <Text style={styles.subheader}>Your rhythm, gently visualised</Text>
+
+        <View style={styles.heroCard}>
+          <Text style={styles.phaseEyebrow}>Current phase</Text>
+          <Text style={styles.phaseTitle}>{phaseContent.title}</Text>
+          <Text style={styles.phaseSubtitle}>{phaseContent.subtitle}</Text>
+
+          <View style={styles.divider} />
+
+          <Text style={styles.detail}>Cycle day {prediction.currentCycleDay}</Text>
+          <Text style={styles.detail}>Phase: {prediction.currentPhase}</Text>
+          <Text style={styles.detail}>Ovulation: {prediction.ovulationDate}</Text>
+          <Text style={styles.detail}>
+            Next period: {prediction.nextPeriodStartDate}
+          </Text>
+        </View>
+
+        <Pressable
+          style={[styles.button, { marginTop: 18 }]}
+          onPress={() => navigation.navigate("CycleCalendar")}
+        >
+          <Text style={styles.buttonText}>Open Cycle Calendar</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.secondaryButton, { marginTop: 12 }]}
+          onPress={handleLogPeriodToday}
+        >
+          <Text style={styles.secondaryButtonText}>
+            Log period start today
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function CycleCalendarScreen({ navigation }: any) {
+  const { loading, markedDates, refresh } = useCalendarCycle();
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.header}>Cycle Calendar</Text>
+        <Text style={styles.subheader}>
+          Your onboarding details are reflected here immediately.
+        </Text>
+
+        <View style={styles.calendarCard}>
+          <Calendar
+            markingType="custom"
+            markedDates={markedDates}
+            theme={{
+              backgroundColor: "#FFFFFF",
+              calendarBackground: "#FFFFFF",
+              textSectionTitleColor: "#8A7480",
+              selectedDayBackgroundColor: "#D991AD",
+              selectedDayTextColor: "#FFFFFF",
+              todayTextColor: "#B06C8D",
+              dayTextColor: "#3F2A34",
+              textDisabledColor: "#D6C8CF",
+              monthTextColor: "#3F2A34",
+              arrowColor: "#B06C8D",
+              textDayFontWeight: "500",
+              textMonthFontWeight: "700",
+              textDayHeaderFontWeight: "600",
+              textDayFontSize: 15,
+              textMonthFontSize: 18,
+              textDayHeaderFontSize: 12,
+            }}
+          />
+        </View>
+
+        <View style={styles.legendRow}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: "#EAA4B5" }]} />
+            <Text style={styles.legendText}>Predicted period</Text>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: "#C9A7EB" }]} />
+            <Text style={styles.legendText}>Fertile window</Text>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: "#B57EDC" }]} />
+            <Text style={styles.legendText}>Ovulation</Text>
+          </View>
+        </View>
+
+        <Pressable
+          style={[styles.button, { marginTop: 18 }]}
+          onPress={() => navigation.navigate("LotusCycle")}
+        >
+          <Text style={styles.buttonText}>Back to Lotus Cycle</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="OnboardingCycle"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#FFF9FC",
+          },
+          headerShadowVisible: false,
+          headerTintColor: "#3F2A34",
+          headerTitleStyle: {
+            fontWeight: "700",
+          },
+          contentStyle: {
+            backgroundColor: "#FFF9FC",
+          },
+        }}
+      >
+        <Stack.Screen
+          name="OnboardingCycle"
+          component={OnboardingCycleScreen}
+          options={{ title: "Cycle Onboarding" }}
+        />
+        <Stack.Screen
+          name="LotusCycle"
+          component={LotusCycleScreen}
+          options={{ title: "Lotus Cycle" }}
+        />
+        <Stack.Screen
+          name="CycleCalendar"
+          component={CycleCalendarScreen}
+          options={{ title: "Cycle Calendar" }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+/* =========================================================
+   STYLES
+========================================================= */
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFF9FC",
+  },
+  content: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF9FC",
+    padding: 24,
+  },
+  eyebrow: {
+    fontSize: 13,
+    color: "#B57A94",
+    marginBottom: 10,
+    letterSpacing: 0.6,
+  },
+  title: {
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: "700",
+    color: "#402B35",
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: "#6F5A64",
+    marginBottom: 24,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  label: {
+    fontSize: 14,
+    color: "#5A4750",
+    marginBottom: 8,
+    marginTop: 14,
+  },
+  input: {
+    height: 52,
+    borderWidth: 1,
+    borderColor: "#F0DCE5",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFF7FA",
+    color: "#2F2127",
+  },
+  button: {
+    marginTop: 24,
+    backgroundColor: "#D991AD",
+    borderRadius: 18,
+    height: 54,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  secondaryButton: {
+    marginTop: 14,
+    borderRadius: 18,
+    minHeight: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    backgroundColor: "#F7EAF0",
+  },
+  secondaryButtonText: {
+    color: "#8A5E72",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#3F2A34",
+    marginBottom: 8,
+  },
+  subheader: {
+    fontSize: 15,
+    color: "#74606A",
+    marginBottom: 24,
+  },
+  heroCard: {
+    backgroundColor: "#F8EEF6",
+    borderRadius: 28,
+    padding: 24,
+  },
+  phaseEyebrow: {
+    fontSize: 13,
+    color: "#A56F89",
+    marginBottom: 10,
+    letterSpacing: 0.5,
+  },
+  phaseTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "700",
+    color: "#472F3A",
+    marginBottom: 10,
+  },
+  phaseSubtitle: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: "#6E5862",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E5D2DC",
+    marginVertical: 20,
+  },
+  detail: {
+    fontSize: 15,
+    color: "#503C45",
+    marginBottom: 10,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#402B35",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: "#6F5A64",
+    textAlign: "center",
+  },
+  calendarCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  legendRow: {
+    marginTop: 20,
+    gap: 12,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 999,
+    marginRight: 10,
+  },
+  legendText: {
+    color: "#5E4953",
+    fontSize: 14,
+  },
+});
