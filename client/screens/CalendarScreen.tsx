@@ -38,7 +38,9 @@ import {
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const DAY_SIZE = Math.floor((SCREEN_WIDTH - 80) / 7);
+const CALENDAR_PADDING = 16 * 2 + 10 * 2;
+const DAY_SIZE = Math.floor((SCREEN_WIDTH - CALENDAR_PADDING) / 7);
+const GRID_WIDTH = DAY_SIZE * 7;
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -814,7 +816,8 @@ const styles = StyleSheet.create({
   },
   weekdayRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    width: GRID_WIDTH,
+    alignSelf: "center",
     marginBottom: 8,
   },
   weekdayCell: {
@@ -830,7 +833,8 @@ const styles = StyleSheet.create({
   dayGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-around",
+    width: GRID_WIDTH,
+    alignSelf: "center",
   },
   dayCell: {
     width: DAY_SIZE,

@@ -139,7 +139,7 @@ export function GlassSurface({
             { borderColor: glass.innerGlow, borderRadius },
           ]}
         />
-        <View style={{ padding: paddingValue, zIndex: 2 }}>{children}</View>
+        <View style={{ padding: paddingValue, zIndex: 2, alignSelf: "stretch" }}>{children}</View>
       </View>
     );
   }
