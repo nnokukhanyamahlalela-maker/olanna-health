@@ -1,6 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { LotusCycleScreen } from "@/screens/LotusCycleScreen";
+import LotusCycleScreen from "@/screens/LotusCycleScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type HomeStackParamList = {
