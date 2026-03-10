@@ -99,6 +99,8 @@ export function generateCyclePrediction(params: {
     profile.averageCycleLength,
     profile.averagePeriodLength
   );
+  const daysUntilPeriod = diffInDays(today, expectedPeriodDate);
+  const isPeriodDueSoon = daysUntilPeriod <= 2 && daysUntilPeriod >= 0;
   const currentPhase: CyclePhase = isLate ? "Late Luteal" : basePhase;
 
   let uiLabel = `${currentPhase} Phase`;
@@ -115,9 +117,14 @@ export function generateCyclePrediction(params: {
     helperText = "Your next cycle begins once bleeding starts.";
   }
 
+  if (isPeriodDueSoon && !isLate) {
+    message = "Your period is expected soon.";
+    helperText = "Your next cycle begins once bleeding starts.";
+  }
+
   if (isLate) {
     uiLabel = "Late Luteal Phase";
-    message = "Your period is expected soon.";
+    message = "Your cycle is taking a little longer this month.";
     helperText = "You remain in the luteal phase until a new bleed is logged.";
   }
 
@@ -167,6 +174,7 @@ export function generateCyclePrediction(params: {
     isLate,
     daysLate,
     expectedPeriodDate: formatDate(expectedPeriodDate),
+    isPeriodDueSoon,
     currentPhase,
     nextPeriodStartDate: formatDate(nextPeriodStart),
     fertileWindowStart: formatDate(fertileWindowStart),

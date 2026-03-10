@@ -91,6 +91,8 @@ export interface CyclePrediction {
   daysLate: number;
   /** ISO date of the expected period start (lastPeriodStart + cycleLength) */
   expectedPeriodDate: string;
+  /** True when the expected period date is 0–2 days away */
+  isPeriodDueSoon: boolean;
   /** The phase corresponding to the current cycle day */
   currentPhase: CyclePhase;
   /** ISO date string of the predicted next period start */
