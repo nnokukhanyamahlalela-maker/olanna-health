@@ -249,9 +249,7 @@ export default function CalendarScreen() {
     setViewYear(newYear);
   };
 
-  // Build the calendar grid cells from hook-provided markers,
-  // prepending null entries for weekday alignment.
-  const calendarDays: (DayCellInfo | null)[] = useMemo(() => {
+  const calendarRows: (DayCellInfo | null)[][] = useMemo(() => {
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
     const cells: (DayCellInfo | null)[] = [];
     for (let i = 0; i < firstDay; i++) cells.push(null);
@@ -269,7 +267,12 @@ export default function CalendarScreen() {
         hasFlowLog: m.hasFlowLog,
       });
     }
-    return cells;
+    while (cells.length % 7 !== 0) cells.push(null);
+    const rows: (DayCellInfo | null)[][] = [];
+    for (let i = 0; i < cells.length; i += 7) {
+      rows.push(cells.slice(i, i + 7));
+    }
+    return rows;
   }, [viewYear, viewMonth, calendarMarkers]);
 
   const getDayBgColor = (info: DayCellInfo): string | undefined => {
@@ -368,86 +371,90 @@ export default function CalendarScreen() {
             ))}
           </View>
 
-          {/* Day grid */}
+          {/* Day grid — rendered as explicit rows to avoid flexWrap issues on native iOS */}
           <View style={styles.dayGrid}>
-            {calendarDays.map((info, idx) => {
-              if (!info) {
-                return <View key={`empty-${idx}`} style={styles.dayCell} />;
-              }
+            {calendarRows.map((row, rowIdx) => (
+              <View key={`row-${rowIdx}`} style={styles.dayRow}>
+                {row.map((info, colIdx) => {
+                  if (!info) {
+                    return <View key={`empty-${rowIdx}-${colIdx}`} style={styles.dayCell} />;
+                  }
 
-              const bgColor = getDayBgColor(info);
-              const dotColor = getDayDotColor(info);
-              const isSelected = selectedDate === info.dateKey;
-              const show = shouldShow(info);
-              const isDimmed = filter !== "all" && !show;
-              const dayTextColor =
-                isSelected
-                  ? "#FFFFFF"
-                  : info.isToday
-                  ? brand.primary
-                  : isDimmed
-                  ? isDark
-                    ? "rgba(255,255,255,0.35)"
-                    : "rgba(0,0,0,0.4)"
-                  : show && bgColor
-                  ? isDark
-                    ? "#FFFFFF"
-                    : neutral.textPrimary
-                  : isDark
-                  ? "rgba(255,255,255,0.8)"
-                  : neutral.textPrimary;
+                  const bgColor = getDayBgColor(info);
+                  const dotColor = getDayDotColor(info);
+                  const isSelected = selectedDate === info.dateKey;
+                  const show = shouldShow(info);
+                  const isDimmed = filter !== "all" && !show;
+                  const dayTextColor =
+                    isSelected
+                      ? "#FFFFFF"
+                      : info.isToday
+                      ? brand.primary
+                      : isDimmed
+                      ? isDark
+                        ? "rgba(255,255,255,0.35)"
+                        : "rgba(0,0,0,0.4)"
+                      : show && bgColor
+                      ? isDark
+                        ? "#FFFFFF"
+                        : neutral.textPrimary
+                      : isDark
+                      ? "rgba(255,255,255,0.8)"
+                      : neutral.textPrimary;
 
-              const bgOpacity = filter === "all" ? "B3" : "CC";
+                  const bgOpacity = filter === "all" ? "B3" : "CC";
 
-              return (
-                <Pressable
-                  key={info.dateKey}
-                  style={styles.dayCell}
-                  onPress={() => {
-                    setSelectedDate(info.dateKey);
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }}
-                  testID={`calendar-day-${info.day}`}
-                >
-                  <View
-                    style={[
-                      styles.dayCircle,
-                      show && bgColor
-                        ? { backgroundColor: bgColor + (isSelected ? "" : bgOpacity) }
-                        : undefined,
-                      isSelected
-                        ? { backgroundColor: brand.primary }
-                        : undefined,
-                      info.isToday && !isSelected
-                        ? {
-                            borderWidth: 2,
-                            borderColor: brand.primary,
-                          }
-                        : undefined,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.dayText,
-                        {
-                          color: dayTextColor,
-                          fontWeight: info.isToday || isSelected ? "700" : "500",
-                        },
-                      ]}
+                  return (
+                    <Pressable
+                      key={info.dateKey}
+                      style={styles.dayCell}
+                      onPress={() => {
+                        setSelectedDate(info.dateKey);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      testID={`calendar-day-${info.day}`}
                     >
-                      {info.day}
-                    </Text>
-                  </View>
-                  {info.hasFlowLog && !isSelected ? (
-                    <View style={styles.petalIndicator}>
-                      <LotusIcon size={12} color={phaseTokens.menstrual.solid} variant="mini" />
-                    </View>
-                  ) : dotColor && !isSelected ? (
-                    <View style={[styles.phaseDot, { backgroundColor: dotColor }]} />
-                  ) : null}
-                </Pressable>
-              );
-            })}
+                      <View
+                        style={[
+                          styles.dayCircle,
+                          show && bgColor
+                            ? { backgroundColor: bgColor + (isSelected ? "" : bgOpacity) }
+                            : undefined,
+                          isSelected
+                            ? { backgroundColor: brand.primary }
+                            : undefined,
+                          info.isToday && !isSelected
+                            ? {
+                                borderWidth: 2,
+                                borderColor: brand.primary,
+                              }
+                            : undefined,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.dayText,
+                            {
+                              color: dayTextColor,
+                              fontWeight: info.isToday || isSelected ? "700" : "500",
+                            },
+                          ]}
+                        >
+                          {info.day}
+                        </Text>
+                      </View>
+                      {info.hasFlowLog && !isSelected ? (
+                        <View style={styles.petalIndicator}>
+                          <LotusIcon size={12} color={phaseTokens.menstrual.solid} variant="mini" />
+                        </View>
+                      ) : dotColor && !isSelected ? (
+                        <View style={[styles.phaseDot, { backgroundColor: dotColor }]} />
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
           </View>
         </GlassSurface>
 
@@ -831,10 +838,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   dayGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    width: GRID_WIDTH,
     alignSelf: "center",
+  },
+  dayRow: {
+    flexDirection: "row",
+    width: GRID_WIDTH,
   },
   dayCell: {
     width: DAY_SIZE,
