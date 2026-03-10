@@ -40,21 +40,9 @@ import {
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
-import { storage, UserProfile, DailyLog } from "@/lib/storage";
+import { storage, UserProfile } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
-import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
-import type { CycleProfile } from "@/types/cycle";
 import { PHASE_FOODS, PHASE_VIBES, PHASE_MOVEMENT, PHASE_SELFCARE, CyclePhase } from "@/lib/dailyDecode";
-
-function toCycleProfile(p: UserProfile): CycleProfile {
-  return {
-    userId: p.id,
-    lastPeriodStartDate: p.lastPeriodStart,
-    averageCycleLength: p.cycleLength,
-    averagePeriodLength: p.periodLength,
-    updatedAt: p.createdAt,
-  };
-}
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -206,6 +194,7 @@ function InteractiveCycleWheel({
   onDaySelect,
   isLate = false,
   daysLate = 0,
+  rawCycleDay,
 }: {
   cycleLength: number;
   periodLength: number;
@@ -214,6 +203,7 @@ function InteractiveCycleWheel({
   onDaySelect: (day: number) => void;
   isLate?: boolean;
   daysLate?: number;
+  rawCycleDay?: number;
 }) {
   const size = Math.min(SCREEN_WIDTH - 40, 340);
   const strokeWidth = 24;
@@ -380,7 +370,7 @@ function InteractiveCycleWheel({
 
         <Text style={styles.dayText}>
           {isLate && selectedDay === currentDay
-            ? `Day ${cycleLength} + ${daysLate} late`
+            ? `Day ${rawCycleDay || cycleLength} \u2022 ${daysLate} day${daysLate === 1 ? "" : "s"} late`
             : `Day ${selectedDay} of ${cycleLength}`
           }
         </Text>
@@ -405,39 +395,17 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLate, setIsLate] = useState(false);
-  const [daysLate, setDaysLate] = useState(0);
 
-  // useLotusCycle reads from cycleProfileService (populated during onboarding)
-  // and generates a CyclePrediction with current day, phase, next period, etc.
-  // It re-runs on every screen focus via useFocusEffect internally.
   const { data, loading } = useLotusCycle(profile?.id || "");
 
-  // Load the UserProfile and daily logs separately for late detection.
-  // The hook handles prediction; this handles the "late" state which requires
-  // comparing raw days elapsed against the cycle length + checking for new logs.
   useFocusEffect(
     useCallback(() => {
       let active = true;
       (async () => {
         try {
-          const [userProfile, logs] = await Promise.all([
-            storage.getUserProfile(),
-            storage.getDailyLogs(),
-          ]);
+          const userProfile = await storage.getUserProfile();
           if (!active) return;
           setProfile(userProfile);
-          if (userProfile) {
-            // Convert UserProfile to CycleProfile for utility functions
-            const cp = toCycleProfile(userProfile);
-            // Get effective start (onboarding baseline vs logged data)
-            const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
-            const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
-            // Check if cycle is past expected length with no new period logged
-            const late = detectLatePhase(effectiveProfile, logs);
-            setIsLate(late.isLate);
-            setDaysLate(late.daysLate);
-          }
         } catch (e) {
           console.error("[LotusCycleScreen] load error:", e);
         }
@@ -449,6 +417,8 @@ export function LotusCycleScreen() {
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
   const currentDay = data?.currentCycleDay || DEFAULT_CURRENT_DAY;
+  const isLate = data?.isLate || false;
+  const daysLate = data?.daysLate || 0;
 
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);
@@ -508,6 +478,7 @@ export function LotusCycleScreen() {
           onDaySelect={setSelectedDay}
           isLate={isLate}
           daysLate={daysLate}
+          rawCycleDay={data?.rawCycleDay}
         />
 
         <View style={styles.insightsSection}>

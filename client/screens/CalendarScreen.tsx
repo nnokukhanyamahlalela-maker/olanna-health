@@ -516,7 +516,7 @@ export default function CalendarScreen() {
                           ]}
                         >
                           {isLateState
-                            ? `Day ${selectedDayInfo.cycleLength} + ${selectedDayInfo.daysLate} late`
+                            ? `Day ${selectedDayInfo.dayInCycle} \u2022 ${selectedDayInfo.daysLate} day${(selectedDayInfo.daysLate || 0) === 1 ? "" : "s"} late`
                             : `Day ${selectedDayInfo.dayInCycle}`
                           }
                         </Text>

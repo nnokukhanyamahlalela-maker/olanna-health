@@ -190,10 +190,11 @@ export function detectLatePhase(
 
   // No new period logged after predicted date → late
   if (!hasNewPeriod) {
+    const rawCurrentDay = rawDays + 1;
     return {
       isLate: true,
-      daysLate: rawDays - profile.averageCycleLength,
-      rawCurrentDay: rawDays + 1,
+      daysLate: rawCurrentDay - profile.averageCycleLength,
+      rawCurrentDay,
     };
   }
 

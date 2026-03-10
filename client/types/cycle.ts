@@ -81,6 +81,14 @@ export interface CycleLog {
 export interface CyclePrediction {
   /** Current day in the cycle (1-indexed, wraps via modulo for past cycles) */
   currentCycleDay: number;
+  /** Raw (unwrapped) cycle day — continues counting past cycleLength (e.g. Day 37) */
+  rawCycleDay: number;
+  /** True when rawCycleDay exceeds averageCycleLength and no new period logged */
+  isLate: boolean;
+  /** Number of days past the expected cycle length (0 if not late) */
+  daysLate: number;
+  /** ISO date of the expected period start (lastPeriodStart + cycleLength) */
+  expectedPeriodDate: string;
   /** The phase corresponding to the current cycle day */
   currentPhase: CyclePhase;
   /** ISO date string of the predicted next period start */

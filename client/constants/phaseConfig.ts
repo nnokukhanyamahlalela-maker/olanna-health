@@ -70,7 +70,7 @@ export const phaseConfig: Record<Phase, PhaseConfig> = {
     endDay: 28,
   },
   late: {
-    label: "Late",
+    label: "Late Luteal",
     subtitle: "Awaiting Your Cycle",
     tagline: "Awaiting Your Cycle",
     color: phaseTokens.luteal.solid,

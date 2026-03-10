@@ -1,0 +1,404 @@
+import React from "react";
+
+type CyclePhase =
+  | "Menstrual"
+  | "Follicular"
+  | "Ovulatory"
+  | "Luteal"
+  | "Late Luteal";
+
+interface CycleInput {
+  lastPeriodStartDate: string; // YYYY-MM-DD
+  periodLengthDays?: number;
+  averageCycleLengthDays?: number;
+  today?: string; // YYYY-MM-DD
+  hasNewPeriodStarted?: boolean;
+}
+
+interface CycleStatus {
+  currentPhase: CyclePhase;
+  cycleDay: number;
+  daysLate: number;
+  expectedPeriodDate: string;
+  isLate: boolean;
+  message: string;
+  uiLabel: string;
+  helperText: string;
+}
+
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + days);
+  return newDate;
+}
+
+function diffInDays(from: Date, to: Date): number {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const fromMidnight = new Date(
+    from.getFullYear(),
+    from.getMonth(),
+    from.getDate()
+  ).getTime();
+  const toMidnight = new Date(
+    to.getFullYear(),
+    to.getMonth(),
+    to.getDate()
+  ).getTime();
+
+  return Math.floor((toMidnight - fromMidnight) / msPerDay);
+}
+
+function getOlannaCycleStatus(input: CycleInput): CycleStatus {
+  const {
+    lastPeriodStartDate,
+    periodLengthDays = 3,
+    averageCycleLengthDays = 28,
+    today,
+    hasNewPeriodStarted = false,
+  } = input;
+
+  const lastPeriodStart = parseLocalDate(lastPeriodStartDate);
+  const currentDate = today ? parseLocalDate(today) : new Date();
+
+  if (hasNewPeriodStarted) {
+    return {
+      currentPhase: "Menstrual",
+      cycleDay: 1,
+      daysLate: 0,
+      expectedPeriodDate: formatLocalDate(currentDate),
+      isLate: false,
+      uiLabel: "Menstrual Phase",
+      message: "A new cycle has begun.",
+      helperText: "Day 1 of your cycle starts when bleeding begins.",
+    };
+  }
+
+  const cycleDay = diffInDays(lastPeriodStart, currentDate) + 1;
+  const expectedPeriodDate = addDays(lastPeriodStart, averageCycleLengthDays);
+  const daysLate = Math.max(0, diffInDays(expectedPeriodDate, currentDate));
+  const isLate = diffInDays(expectedPeriodDate, currentDate) >= 0;
+
+  let currentPhase: CyclePhase = "Luteal";
+  let uiLabel = "Luteal Phase";
+  let message = "You are currently in the luteal phase.";
+  let helperText = "Your body may still be preparing for your next bleed.";
+
+  if (cycleDay <= periodLengthDays) {
+    currentPhase = "Menstrual";
+    uiLabel = "Menstrual Phase";
+    message = "You are currently in the menstrual phase.";
+    helperText = "This phase begins when bleeding starts.";
+  } else if (cycleDay <= 13) {
+    currentPhase = "Follicular";
+    uiLabel = "Follicular Phase";
+    message = "You are currently in the follicular phase.";
+    helperText = "This is often a time of renewal, energy, and growth.";
+  } else if (cycleDay >= 14 && cycleDay <= 16) {
+    currentPhase = "Ovulatory";
+    uiLabel = "Ovulatory Phase";
+    message = "You are currently in the ovulatory phase.";
+    helperText = "Ovulation often happens around the middle of the cycle.";
+  } else {
+    currentPhase = "Luteal";
+    uiLabel = "Luteal Phase";
+    message = "You are currently in the luteal phase.";
+    helperText = "Your next cycle will begin once bleeding starts.";
+  }
+
+  if (isLate && !hasNewPeriodStarted) {
+    currentPhase = "Late Luteal";
+    uiLabel = "Late Luteal Phase";
+
+    if (daysLate === 0) {
+      message = "Your period is due around now.";
+      helperText =
+        "You remain in the luteal phase until a new bleed is logged.";
+    } else if (daysLate === 1) {
+      message = "Your period is 1 day late.";
+      helperText =
+        "You remain in the luteal phase until a new bleed is logged.";
+    } else {
+      message = `Your period is ${daysLate} days late.`;
+      helperText =
+        "You remain in the luteal phase until a new bleed is logged.";
+    }
+  }
+
+  return {
+    currentPhase,
+    cycleDay,
+    daysLate,
+    expectedPeriodDate: formatLocalDate(expectedPeriodDate),
+    isLate,
+    uiLabel,
+    message,
+    helperText,
+  };
+}
+
+function getPhaseColors(phase: CyclePhase) {
+  switch (phase) {
+    case "Menstrual":
+      return {
+        bg: "linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 100%)",
+        border: "#F9A8D4",
+        badge: "#BE185D",
+        text: "#4A1D36",
+        soft: "#FFF7FB",
+      };
+    case "Follicular":
+      return {
+        bg: "linear-gradient(135deg, #FDF2F8 0%, #FAE8FF 100%)",
+        border: "#E9D5FF",
+        badge: "#9333EA",
+        text: "#3B1F46",
+        soft: "#FCF8FF",
+      };
+    case "Ovulatory":
+      return {
+        bg: "linear-gradient(135deg, #FFE4E6 0%, #FCE7F3 100%)",
+        border: "#FDA4AF",
+        badge: "#DB2777",
+        text: "#4C1D2F",
+        soft: "#FFF8FA",
+      };
+    case "Late Luteal":
+      return {
+        bg: "linear-gradient(135deg, #FFF1F2 0%, #FDF2F8 100%)",
+        border: "#F9A8D4",
+        badge: "#9D174D",
+        text: "#4A1D36",
+        soft: "#FFF9FB",
+      };
+    case "Luteal":
+    default:
+      return {
+        bg: "linear-gradient(135deg, #FAF5FF 0%, #FDF2F8 100%)",
+        border: "#D8B4FE",
+        badge: "#7E22CE",
+        text: "#3F214A",
+        soft: "#FDFCFF",
+      };
+  }
+}
+
+type LatePeriodStatusCardProps = {
+  input: CycleInput;
+};
+
+export function LatePeriodStatusCard({
+  input,
+}: LatePeriodStatusCardProps) {
+  const status = getOlannaCycleStatus(input);
+  const colors = getPhaseColors(status.currentPhase);
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#FFF9FC",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          borderRadius: "28px",
+          padding: "24px",
+          background: colors.bg,
+          border: `1px solid ${colors.border}`,
+          boxShadow: "0 12px 30px rgba(80, 30, 60, 0.08)",
+          color: colors.text,
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 14px",
+            borderRadius: "999px",
+            background: "rgba(255,255,255,0.75)",
+            border: `1px solid ${colors.border}`,
+            fontSize: "13px",
+            fontWeight: 600,
+            color: colors.badge,
+          }}
+        >
+          {status.uiLabel}
+        </div>
+
+        <div style={{ marginTop: "18px" }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "13px",
+              opacity: 0.72,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Current cycle insight
+          </p>
+
+          <h1
+            style={{
+              margin: "10px 0 8px 0",
+              fontSize: "30px",
+              lineHeight: 1.1,
+              fontWeight: 700,
+            }}
+          >
+            {status.message}
+          </h1>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: "15px",
+              lineHeight: 1.6,
+              opacity: 0.86,
+            }}
+          >
+            {status.helperText}
+          </p>
+        </div>
+
+        <div
+          style={{
+            marginTop: "22px",
+            padding: "18px",
+            borderRadius: "22px",
+            background: "rgba(255,255,255,0.72)",
+            border: "1px solid rgba(255,255,255,0.7)",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "14px",
+            }}
+          >
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "12px",
+                  opacity: 0.65,
+                }}
+              >
+                Cycle day
+              </p>
+              <p
+                style={{
+                  margin: "6px 0 0 0",
+                  fontSize: "22px",
+                  fontWeight: 700,
+                }}
+              >
+                {status.cycleDay}
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "12px",
+                  opacity: 0.65,
+                }}
+              >
+                Days late
+              </p>
+              <p
+                style={{
+                  margin: "6px 0 0 0",
+                  fontSize: "22px",
+                  fontWeight: 700,
+                }}
+              >
+                {status.daysLate}
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: "16px",
+              paddingTop: "16px",
+              borderTop: "1px solid rgba(100, 50, 80, 0.08)",
+            }}
+          >
+            <p style={{ margin: 0, fontSize: "12px", opacity: 0.65 }}>
+              Expected period date
+            </p>
+            <p
+              style={{
+                margin: "6px 0 0 0",
+                fontSize: "16px",
+                fontWeight: 600,
+              }}
+            >
+              {status.expectedPeriodDate}
+            </p>
+          </div>
+        </div>
+
+        {status.isLate && (
+          <div
+            style={{
+              marginTop: "18px",
+              padding: "16px",
+              borderRadius: "20px",
+              background: colors.soft,
+              border: `1px solid ${colors.border}`,
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              Your cycle has not yet reset because no new bleeding has been
+              logged. In Olanna, this state is shown as{" "}
+              <strong>Late Luteal</strong> so the user knows they are still in
+              the luteal window, but beyond their expected period date.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const input: CycleInput = {
+    lastPeriodStartDate: "2026-02-02",
+    periodLengthDays: 3,
+    averageCycleLengthDays: 28,
+    today: "2026-03-10",
+    hasNewPeriodStarted: false,
+  };
+
+  return <LatePeriodStatusCard input={input} />;
+}

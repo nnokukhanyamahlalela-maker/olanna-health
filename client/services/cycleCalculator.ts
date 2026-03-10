@@ -73,10 +73,16 @@ export function generateCyclePrediction(params: {
   const cycleStartDate = new Date(effectiveLastPeriodStartDate);
   const daysSinceStart = diffInDays(cycleStartDate, today);
 
+  const rawCycleDay = daysSinceStart + 1;
+
   const currentCycleDay =
     ((daysSinceStart % profile.averageCycleLength) + profile.averageCycleLength) %
       profile.averageCycleLength +
     1;
+
+  const isLate = rawCycleDay > profile.averageCycleLength;
+  const daysLate = isLate ? rawCycleDay - profile.averageCycleLength : 0;
+  const expectedPeriodDate = addDays(cycleStartDate, profile.averageCycleLength);
 
   const currentPhase = getCyclePhase(
     currentCycleDay,
@@ -126,6 +132,10 @@ export function generateCyclePrediction(params: {
 
   return {
     currentCycleDay,
+    rawCycleDay,
+    isLate,
+    daysLate,
+    expectedPeriodDate: formatDate(expectedPeriodDate),
     currentPhase,
     nextPeriodStartDate: formatDate(nextPeriodStart),
     fertileWindowStart: formatDate(fertileWindowStart),

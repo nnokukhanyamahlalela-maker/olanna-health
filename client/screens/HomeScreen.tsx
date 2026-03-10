@@ -29,20 +29,8 @@ import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
-import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
-import type { CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
-
-function toCycleProfile(p: UserProfile): CycleProfile {
-  return {
-    userId: p.id,
-    lastPeriodStartDate: p.lastPeriodStart,
-    averageCycleLength: p.cycleLength,
-    averagePeriodLength: p.periodLength,
-    updatedAt: p.createdAt,
-  };
-}
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -142,34 +130,23 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLate, setIsLate] = useState(false);
-  const [daysLate, setDaysLate] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
 
   const { data, loading: hookLoading } = useLotusCycle(profile?.id || "");
 
-  // Load profile and logs for late detection (separate from the hook's prediction)
+  const isLate = data?.isLate || false;
+  const daysLate = data?.daysLate || 0;
+
   useFocusEffect(
     useCallback(() => {
       let active = true;
       (async () => {
         try {
-          const [userProfile, logs] = await Promise.all([
-            storage.getUserProfile(),
-            storage.getDailyLogs(),
-          ]);
+          const userProfile = await storage.getUserProfile();
           if (!active) return;
           setProfile(userProfile);
-          if (userProfile) {
-            const cp = toCycleProfile(userProfile);
-            const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
-            const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
-            const late = detectLatePhase(effectiveProfile, logs);
-            setIsLate(late.isLate);
-            setDaysLate(late.daysLate);
-          }
         } catch (e) {
           console.error("[HomeScreen] load error:", e);
         } finally {
@@ -302,7 +279,7 @@ export default function HomeScreen() {
               {/* Day Counter at bottom */}
               <ThemedText style={styles.dayCounterText}>
                 {isLate && wheelDay === null
-                  ? `Day ${cycleData.cycleLength} + ${daysLate} late`
+                  ? `Day ${data?.rawCycleDay || cycleData.cycleLength} \u2022 ${daysLate} day${daysLate === 1 ? "" : "s"} late`
                   : `Day ${currentDay} of ${cycleData.cycleLength}`
                 }
               </ThemedText>
