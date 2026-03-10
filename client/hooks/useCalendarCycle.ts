@@ -1,93 +1,78 @@
 import { useCallback, useState } from "react";
-import {
-  getCycleProfile,
-  getEffectiveLastPeriodStartDate,
-} from "../services/cycleStorage";
+import { useFocusEffect } from "@react-navigation/native";
+import { getCycleProfile } from "../services/cycleProfileService";
 import { generateCyclePrediction } from "../services/cycleCalculator";
+import { getEffectiveLastPeriodStart } from "../utils/cycleUtils";
+import { storage } from "../lib/storage";
 
-type MarkedDates = Record<string, any>;
-
-function enumerateDates(start: string, end: string): string[] {
-  const values: string[] = [];
-  const current = new Date(start);
-  const last = new Date(end);
-
-  while (current <= last) {
-    values.push(current.toISOString().split("T")[0]);
-    current.setDate(current.getDate() + 1);
-  }
-
-  return values;
-}
-
-export function useCalendarCycle() {
+export function useCalendarCycle(userId: string) {
+  const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
-  const [markedDates, setMarkedDates] = useState<MarkedDates>({});
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
 
-    const profile = await getCycleProfile();
-    const effectiveLastPeriodStartDate = await getEffectiveLastPeriodStartDate();
+      async function load() {
+        setLoading(true);
 
-    if (!profile || !effectiveLastPeriodStartDate) {
-      setMarkedDates({});
-      setLoading(false);
-      return;
-    }
+        const profile = await getCycleProfile(userId);
 
-    const prediction = generateCyclePrediction({
-      profile,
-      effectiveLastPeriodStartDate,
-    });
+        if (!profile) {
+          if (active) {
+            setMarkedDates({});
+            setLoading(false);
+          }
+          return;
+        }
 
-    const marks: MarkedDates = {};
+        const logs = await storage.getDailyLogs();
 
-    prediction.periodDates.forEach((date) => {
-      marks[date] = {
-        ...(marks[date] || {}),
-        selected: true,
-        selectedColor: "#EAA4B5",
-      };
-    });
+        const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
 
-    enumerateDates(
-      prediction.fertileWindowStart,
-      prediction.fertileWindowEnd
-    ).forEach((date) => {
-      marks[date] = {
-        ...(marks[date] || {}),
-        marked: true,
-        dotColor: "#C9A7EB",
-      };
-    });
+        const prediction = generateCyclePrediction({
+          profile: { ...profile, lastPeriodStartDate: effectiveStart },
+          effectiveLastPeriodStartDate: effectiveStart,
+        });
 
-    marks[prediction.ovulationDate] = {
-      ...(marks[prediction.ovulationDate] || {}),
-      selected: true,
-      selectedColor: "#B57EDC",
-      marked: true,
-      dotColor: "#FFFFFF",
-    };
+        const marks: Record<string, any> = {};
 
-    const todayKey = new Date().toISOString().split("T")[0];
-    marks[todayKey] = {
-      ...(marks[todayKey] || {}),
-      customStyles: {
-        container: {
-          borderWidth: 1,
-          borderColor: "#D48AA3",
-          borderRadius: 10,
-        },
-        text: {
-          fontWeight: "700",
-        },
-      },
-    };
+        prediction.periodDates.forEach((date) => {
+          marks[date] = {
+            marked: true,
+            type: "predictedPeriod",
+          };
+        });
 
-    setMarkedDates(marks);
-    setLoading(false);
-  }, []);
+        marks[prediction.ovulationDate] = {
+          marked: true,
+          type: "ovulation",
+        };
 
-  return { loading, markedDates, refresh };
+        let fertileCursor = new Date(prediction.fertileWindowStart);
+        const fertileEnd = new Date(prediction.fertileWindowEnd);
+
+        while (fertileCursor <= fertileEnd) {
+          const key = fertileCursor.toISOString().split("T")[0];
+          marks[key] = {
+            ...(marks[key] || {}),
+            marked: true,
+            type: "fertileWindow",
+          };
+          fertileCursor.setDate(fertileCursor.getDate() + 1);
+        }
+
+        if (active) {
+          setMarkedDates(marks);
+          setLoading(false);
+        }
+      }
+
+      load();
+
+      return () => { active = false; };
+    }, [userId])
+  );
+
+  return { markedDates, loading };
 }

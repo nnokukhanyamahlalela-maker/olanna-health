@@ -1,52 +1,46 @@
 import { useCallback, useState } from "react";
-import { CyclePrediction, CycleProfile } from "../types/cycle";
-import {
-  getCycleProfile,
-  getEffectiveLastPeriodStartDate,
-} from "../services/cycleStorage";
-import {
-  generateCyclePrediction,
-  getLotusPhaseContent,
-  LotusPhaseContent,
-} from "../services/cycleCalculator";
+import { useFocusEffect } from "@react-navigation/native";
+import { getCycleProfile } from "../services/cycleProfileService";
+import { generateCyclePrediction } from "../services/cycleCalculator";
+import { getEffectiveLastPeriodStart } from "../utils/cycleUtils";
+import { storage } from "../lib/storage";
+import { CyclePrediction } from "../types/cycle";
 
-interface UseLotusCycleResult {
-  loading: boolean;
-  profile: CycleProfile | null;
-  prediction: CyclePrediction | null;
-  phaseContent: LotusPhaseContent | null;
-  refresh: () => Promise<void>;
-}
-
-export function useLotusCycle(): UseLotusCycleResult {
+export function useLotusCycle(userId: string) {
+  const [data, setData] = useState<CyclePrediction | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<CycleProfile | null>(null);
-  const [prediction, setPrediction] = useState<CyclePrediction | null>(null);
-  const [phaseContent, setPhaseContent] = useState<LotusPhaseContent | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
 
-    const storedProfile = await getCycleProfile();
-    const effectiveLastPeriodStartDate = await getEffectiveLastPeriodStartDate();
+      async function load() {
+        setLoading(true);
 
-    setProfile(storedProfile);
+        const profile = await getCycleProfile(userId);
 
-    if (storedProfile && effectiveLastPeriodStartDate) {
-      const computedPrediction = generateCyclePrediction({
-        profile: storedProfile,
-        effectiveLastPeriodStartDate,
-      });
+        if (profile) {
+          const logs = await storage.getDailyLogs();
 
-      setPrediction(computedPrediction);
-      setPhaseContent(getLotusPhaseContent(computedPrediction.currentPhase));
-    } else {
-      setPrediction(null);
-      setPhaseContent(null);
-    }
+          const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
 
-    setLoading(false);
-  }, []);
+          const prediction = generateCyclePrediction({
+            profile: { ...profile, lastPeriodStartDate: effectiveStart },
+            effectiveLastPeriodStartDate: effectiveStart,
+          });
+          if (active) setData(prediction);
+        } else {
+          if (active) setData(null);
+        }
 
-  return { loading, profile, prediction, phaseContent, refresh };
+        if (active) setLoading(false);
+      }
+
+      load();
+
+      return () => { active = false; };
+    }, [userId])
+  );
+
+  return { data, loading };
 }
