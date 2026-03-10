@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getCycleProfile } from "../services/cycleProfileService";
 import { generateCyclePrediction } from "../services/cycleCalculator";
+import { getEffectiveLastPeriodStart } from "../utils/cycleUtils";
+import { storage } from "../lib/storage";
 
 export function useCalendarCycle(userId: string) {
   const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
@@ -17,7 +19,10 @@ export function useCalendarCycle(userId: string) {
         return;
       }
 
-      const prediction = generateCyclePrediction(profile);
+      const logs = await storage.getDailyLogs();
+      const effectiveStart = getEffectiveLastPeriodStart(profile, logs);
+      const effectiveProfile = { ...profile, lastPeriodStartDate: effectiveStart };
+      const prediction = generateCyclePrediction(effectiveProfile);
 
       const marks: Record<string, any> = {};
 

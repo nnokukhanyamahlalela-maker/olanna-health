@@ -8,6 +8,7 @@ export {
 export {
   saveOnboardingCycleProfile,
   getCycleProfile,
+  invalidateCycleProfileCache,
 } from "@/services/cycleProfileService";
 
 export {

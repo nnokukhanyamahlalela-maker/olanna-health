@@ -1,0 +1,90 @@
+// src/screens/OnboardingScreen.tsx
+
+import React, { useState } from "react";
+import { Alert, Button, SafeAreaView, Text, TextInput, View } from "react-native";
+import { saveCycleProfile } from "../services/cycleStorage";
+
+export default function OnboardingScreen({ navigation }: any) {
+  const [lastPeriodStartDate, setLastPeriodStartDate] = useState("2026-03-01");
+  const [averageCycleLength, setAverageCycleLength] = useState("28");
+  const [averagePeriodLength, setAveragePeriodLength] = useState("5");
+
+  const handleCompleteOnboarding = async () => {
+    try {
+      await saveCycleProfile({
+        userId: "user-123",
+        lastPeriodStartDate,
+        averageCycleLength: Number(averageCycleLength),
+        averagePeriodLength: Number(averagePeriodLength),
+        onboardingSymptoms: ["cramps", "bloating"],
+        onboardingPreferences: ["cycle reminders"],
+      });
+
+      Alert.alert(
+        "Saved",
+        "Your onboarding cycle data has been saved and will now reflect in the Lotus Cycle and Calendar."
+      );
+
+      navigation.navigate("LotusCycle");
+    } catch (error) {
+      Alert.alert("Error", "Could not save onboarding data.");
+    }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 20 }}>
+        Cycle Onboarding
+      </Text>
+
+      <View style={{ marginBottom: 16 }}>
+        <Text>Last period start date (YYYY-MM-DD)</Text>
+        <TextInput
+          value={lastPeriodStartDate}
+          onChangeText={setLastPeriodStartDate}
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 8,
+          }}
+        />
+      </View>
+
+      <View style={{ marginBottom: 16 }}>
+        <Text>Average cycle length</Text>
+        <TextInput
+          value={averageCycleLength}
+          onChangeText={setAverageCycleLength}
+          keyboardType="numeric"
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 8,
+          }}
+        />
+      </View>
+
+      <View style={{ marginBottom: 24 }}>
+        <Text>Average period length</Text>
+        <TextInput
+          value={averagePeriodLength}
+          onChangeText={setAveragePeriodLength}
+          keyboardType="numeric"
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 8,
+          }}
+        />
+      </View>
+
+      <Button title="Complete onboarding" onPress={handleCompleteOnboarding} />
+    </SafeAreaView>
+  );
+}

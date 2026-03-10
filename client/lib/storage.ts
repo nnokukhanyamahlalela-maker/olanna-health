@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
 import { generateCyclePrediction } from "@/services/cycleCalculator";
+import { invalidateCycleProfileCache } from "@/services/cycleProfileService";
 import {
   getEffectiveLastPeriodStart,
   detectLatePhase,
@@ -80,6 +81,7 @@ export const storage = {
 
   async setUserProfile(profile: UserProfile): Promise<void> {
     await secureStorage.setUserProfile(profile);
+    invalidateCycleProfileCache();
   },
 
   async getCycleData(): Promise<CycleData | null> {
@@ -100,10 +102,12 @@ export const storage = {
 
   async addDailyLog(log: DailyLog): Promise<void> {
     await secureStorage.addDailyLog(log);
+    invalidateCycleProfileCache();
   },
 
   async removeDailyLog(date: string): Promise<void> {
     await secureStorage.removeDailyLog(date);
+    invalidateCycleProfileCache();
   },
 
   async getScreenings(): Promise<Screening[]> {

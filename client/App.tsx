@@ -28,7 +28,8 @@ import {
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
-
+import { setCycleProfileStorageBackend } from "@/services/cycleProfileService";
+import { storage } from "@/lib/storage";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ReduceTransparencyProvider } from "@/components/GlassCard";
@@ -38,6 +39,7 @@ import { typography, defaultTextColor } from "@/theme/typography";
 import type { AppTextVariant } from "@/theme/typography";
 
 SplashScreen.preventAutoHideAsync();
+setCycleProfileStorageBackend(storage);
 
 const SHOW_TYPOGRAPHY_DEMO = false;
 

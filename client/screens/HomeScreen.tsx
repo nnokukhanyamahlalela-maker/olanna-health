@@ -28,9 +28,9 @@ import { PhaseExplainerCard } from "@/components/PhaseExplainerCard";
 import { Phase, phaseConfig, getPhaseForDay } from "@/constants/phaseConfig";
 import { Spacing, ScreenPadding, PillSpacing } from "@/constants/spacing";
 import { storage, CycleData, UserProfile } from "@/lib/storage";
-import { generateCyclePrediction } from "@/services/cycleCalculator";
+import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { getEffectiveLastPeriodStart, detectLatePhase } from "@/utils/cycleUtils";
-import type { CyclePrediction, CycleProfile } from "@/types/cycle";
+import type { CycleProfile } from "@/types/cycle";
 import { toInternalPhase } from "@/types/cycle";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -142,12 +142,13 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [cycleStatus, setCycleStatus] = useState<CyclePrediction | null>(null);
   const [isLate, setIsLate] = useState(false);
   const [daysLate, setDaysLate] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [wheelDay, setWheelDay] = useState<number | null>(null);
+
+  const { data, loading: hookLoading } = useLotusCycle(profile?.id || "");
 
   useFocusEffect(
     useCallback(() => {
@@ -164,7 +165,6 @@ export default function HomeScreen() {
             const cp = toCycleProfile(userProfile);
             const effectiveStart = getEffectiveLastPeriodStart(cp, logs);
             const effectiveProfile: CycleProfile = { ...cp, lastPeriodStartDate: effectiveStart };
-            setCycleStatus(generateCyclePrediction(effectiveProfile));
             const late = detectLatePhase(effectiveProfile, logs);
             setIsLate(late.isLate);
             setDaysLate(late.daysLate);
@@ -179,17 +179,17 @@ export default function HomeScreen() {
     }, [])
   );
 
-  const cycleData: CycleData | null = cycleStatus && profile
+  const cycleData: CycleData | null = data && profile
     ? {
-        currentDay: cycleStatus.currentCycleDay,
+        currentDay: data.currentCycleDay,
         cycleLength: profile.cycleLength,
         periodLength: profile.periodLength,
         lastPeriodStart: profile.lastPeriodStart,
-        nextPeriodStart: cycleStatus.nextPeriodStartDate,
-        ovulationDate: cycleStatus.ovulationDate,
-        fertileWindowStart: cycleStatus.fertileWindowStart,
-        fertileWindowEnd: cycleStatus.fertileWindowEnd,
-        phase: isLate ? "late" : toInternalPhase(cycleStatus.currentPhase),
+        nextPeriodStart: data.nextPeriodStartDate,
+        ovulationDate: data.ovulationDate,
+        fertileWindowStart: data.fertileWindowStart,
+        fertileWindowEnd: data.fertileWindowEnd,
+        phase: isLate ? "late" : toInternalPhase(data.currentPhase),
         cycles: [],
       }
     : null;

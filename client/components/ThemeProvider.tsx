@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { useColorScheme, AccessibilityInfo } from "react-native";
+import { useColorScheme, AccessibilityInfo, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeMode, ThemeColors, lightTheme, darkTheme } from "@/constants/themeColors";
 
@@ -46,29 +46,37 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     const checkAccessibility = async () => {
       try {
-        const [transparency, motion] = await Promise.all([
-          AccessibilityInfo.isReduceTransparencyEnabled(),
-          AccessibilityInfo.isReduceMotionEnabled(),
-        ]);
-        setReduceTransparency(transparency);
-        setReduceMotion(motion);
+        if (Platform.OS !== "web") {
+          const [transparency, motion] = await Promise.all([
+            AccessibilityInfo.isReduceTransparencyEnabled(),
+            AccessibilityInfo.isReduceMotionEnabled(),
+          ]);
+          setReduceTransparency(transparency);
+          setReduceMotion(motion);
+        } else {
+          const motion = await AccessibilityInfo.isReduceMotionEnabled();
+          setReduceMotion(motion);
+        }
       } catch (error) {
         console.warn("Failed to check accessibility settings:", error);
       }
     };
     checkAccessibility();
 
-    const transparencyListener = AccessibilityInfo.addEventListener(
-      "reduceTransparencyChanged",
-      setReduceTransparency
-    );
+    let transparencyListener: any;
+    if (Platform.OS !== "web") {
+      transparencyListener = AccessibilityInfo.addEventListener(
+        "reduceTransparencyChanged",
+        setReduceTransparency
+      );
+    }
     const motionListener = AccessibilityInfo.addEventListener(
       "reduceMotionChanged",
       setReduceMotion
     );
 
     return () => {
-      transparencyListener.remove();
+      if (transparencyListener) transparencyListener.remove();
       motionListener.remove();
     };
   }, []);
