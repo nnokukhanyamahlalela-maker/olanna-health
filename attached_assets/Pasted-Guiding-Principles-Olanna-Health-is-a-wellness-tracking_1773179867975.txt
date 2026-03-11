@@ -1,0 +1,378 @@
+Guiding Principles
+
+Olanna Health is a wellness tracking and educational application.
+
+The system must:
+
+Allow users to log health-related information
+
+Provide reminders and educational prompts
+
+Generate simple summaries and charts
+
+Never provide medical diagnoses or treatment recommendations
+
+All insights must be descriptive summaries of user-logged data, not medical interpretations.
+
+Example acceptable insight:
+
+"You logged cramps 4 times this cycle."
+
+Example unacceptable insight:
+
+"You may have endometriosis."
+
+Global Database Structure
+Users
+users
+- id (uuid, primary key)
+- email (text)
+- name (text)
+- created_at (timestamp)
+Base Tracker Entry Table
+
+Every log entry in the app should reference this base structure.
+
+tracker_entries
+- id (uuid, primary key)
+- user_id (uuid, foreign key -> users.id)
+- tracker_type (text) 
+    -- symptoms
+    -- supplements
+    -- medication
+    -- sexual_health
+    -- period_product
+- entry_date (date)
+- entry_time (time, nullable)
+- cycle_day (integer, nullable)
+- cycle_phase (text, nullable)
+    -- menstrual
+    -- follicular
+    -- ovulatory
+    -- luteal
+- notes (text, nullable)
+- created_at (timestamp)
+- updated_at (timestamp)
+
+This allows all trackers to share one logging structure.
+
+Symptoms Tracker
+
+Purpose: allow users to log body signals and later view simple charts.
+
+symptom_entries
+- id (uuid, primary key)
+- tracker_entry_id (uuid, foreign key -> tracker_entries.id)
+- symptom_name (text)
+    -- cramps
+    -- headache
+    -- bloating
+    -- fatigue
+    -- acne
+    -- breast tenderness
+- intensity (text)
+    -- mild
+    -- moderate
+    -- strong
+- time_of_day (text)
+    -- morning
+    -- afternoon
+    -- evening
+- category (text)
+    -- pain
+    -- digestion
+    -- skin
+    -- mood
+    -- energy
+Insights that can be generated
+
+Examples:
+
+“Cramps were logged 3 times this cycle.”
+
+“Bloating was most frequently logged during the luteal phase.”
+
+Supplements Tracker
+
+Purpose: allow users to log supplements they choose to take.
+
+supplement_entries
+- id (uuid, primary key)
+- tracker_entry_id (uuid, foreign key -> tracker_entries.id)
+- supplement_name (text)
+- dosage_value (numeric, nullable)
+- dosage_unit (text, nullable)
+    -- mg
+    -- mcg
+    -- ml
+    -- capsule
+- frequency_label (text)
+    -- daily
+    -- occasionally
+    -- weekly
+- taken_at (timestamp, nullable)
+
+Example insights:
+
+“You logged magnesium on 9 days this cycle.”
+
+“Most supplements were logged in the morning.”
+
+Medication Tracker
+
+Purpose: allow users to track medications they are taking.
+
+This tracker must not interpret medication effectiveness or treatment outcomes.
+
+medication_entries
+- id (uuid, primary key)
+- tracker_entry_id (uuid, foreign key -> tracker_entries.id)
+- medication_name (text)
+- dosage_value (numeric, nullable)
+- dosage_unit (text, nullable)
+- frequency_label (text)
+    -- daily
+    -- as_needed
+    -- twice_daily
+- taken_at (timestamp, nullable)
+
+Possible prompts:
+
+“You logged this medication 12 times this month.”
+
+“Consider discussing your medication routine during your next healthcare visit.”
+
+Sexual Health Tracker
+
+Purpose:
+
+encourage awareness of sexual health
+
+support routine screening reminders
+
+track screening history
+
+This tracker must never assess risk or diagnose infections.
+
+Screening History
+sexual_health_screenings
+- id (uuid, primary key)
+- user_id (uuid)
+- screening_type (text)
+    -- hiv_test
+    -- pap_smear
+    -- sti_screen
+- last_completed_date (date)
+- reminder_enabled (boolean)
+- reminder_interval_months (integer)
+- next_reminder_date (date)
+- created_at (timestamp)
+
+Example reminders:
+
+“You last logged an HIV test 6 months ago.”
+
+“Many health guidelines recommend routine cervical screenings.”
+
+Sexual Health Logs
+sexual_health_entries
+- id (uuid, primary key)
+- tracker_entry_id (uuid, foreign key -> tracker_entries.id)
+- sexual_activity_logged (boolean, nullable)
+- protection_used (text)
+    -- yes
+    -- no
+    -- prefer_not_to_say
+- libido_level (text, nullable)
+    -- low
+    -- medium
+    -- high
+- comfort_level (text, nullable)
+    -- comfortable
+    -- slight_discomfort
+    -- uncomfortable
+Period Product Safety
+
+This system contains:
+
+Product knowledge database
+
+User product logs
+
+The app must present neutral ingredient information, not safety judgments.
+
+Period Product Database
+period_products
+- id (uuid, primary key)
+- brand_name (text)
+- product_name (text)
+- product_type (text)
+    -- pad
+    -- tampon
+    -- cup
+    -- disc
+    -- liner
+- material_summary (text)
+- fragrance_free (boolean, nullable)
+- chlorine_free (boolean, nullable)
+- organic_claim (boolean, nullable)
+- reusable (boolean)
+- source_url (text, nullable)
+- education_note (text, nullable)
+- created_at (timestamp)
+Ingredient Table
+period_product_ingredients
+- id (uuid, primary key)
+- period_product_id (uuid)
+- ingredient_name (text)
+- ingredient_category (text)
+    -- fragrance
+    -- absorbent
+    -- plastic
+    -- cotton
+    -- dye
+- disclosure_level (text)
+    -- full
+    -- partial
+    -- unknown
+User Product Logs
+period_product_logs
+- id (uuid, primary key)
+- tracker_entry_id (uuid)
+- period_product_id (uuid, nullable)
+- custom_brand_name (text, nullable)
+- custom_product_name (text, nullable)
+- wear_time_hours (integer, nullable)
+- comfort_level (text)
+    -- comfortable
+    -- slight_irritation
+    -- uncomfortable
+
+Displayed information should use neutral labels such as:
+
+fragrance-free
+
+reusable
+
+synthetic materials present
+
+ingredient disclosure unavailable
+
+Avoid labeling products as safe or unsafe.
+
+Insights System
+
+Insights must be summary reflections of logged data.
+
+user_insight_snapshots
+- id (uuid, primary key)
+- user_id (uuid)
+- tracker_type (text)
+- period_start_date (date)
+- period_end_date (date)
+- insight_type (text)
+    -- frequency_summary
+    -- trend_summary
+    -- consistency_summary
+- insight_title (text)
+- insight_text (text)
+- chart_data_json (json)
+- created_at (timestamp)
+
+Example insight records:
+
+Title:
+"Most logged body signals"
+
+Text:
+"Bloating and cramps were your most frequently logged body signals this cycle."
+
+Educational Prompts System
+
+This supports gentle reminders and educational messages.
+
+education_prompts
+- id (uuid, primary key)
+- category (text)
+    -- sexual_health
+    -- medication
+    -- products
+    -- symptoms
+- title (text)
+- body_text (text)
+- prompt_type (text)
+    -- reminder
+    -- reflection
+    -- education
+- trigger_rule (text)
+- is_active (boolean)
+
+Example prompts:
+
+"Routine HIV testing can be an important part of sexual health."
+
+"Tracking symptoms can help you notice patterns over time."
+
+"Some menstrual product brands disclose more ingredient information than others."
+
+Premium Feature Support
+feature_access
+- id (uuid, primary key)
+- user_id (uuid)
+- feature_key (text)
+    -- symptom_charts
+    -- screening_reminders
+    -- product_comparisons
+- access_level (text)
+    -- free
+    -- premium
+- starts_at (timestamp)
+- ends_at (timestamp)
+
+Potential premium features:
+
+advanced symptom charts
+
+screening reminders
+
+product comparison views
+
+downloadable health summaries
+
+Safety Language
+
+All UI language must avoid diagnosis.
+
+Allowed language:
+
+log
+
+reflect
+
+track
+
+notice patterns
+
+stay informed
+
+educational information
+
+routine reminder
+
+Avoid:
+
+diagnose
+
+detect conditions
+
+medical risk assessment
+
+treatment recommendations
+
+App Disclaimer
+
+This disclaimer should appear in onboarding and settings.
+
+Olanna Health Disclaimer
+
+Olanna Health is a wellness tracking and educational tool designed to support personal awareness of menstrual and sexual health. The app does not provide medical advice, diagnosis, or treatment. Any summaries, reminders, or insights are based solely on information you choose to log and are intended for personal awareness only. Always consult a qualified healthcare professional for medical concerns.
