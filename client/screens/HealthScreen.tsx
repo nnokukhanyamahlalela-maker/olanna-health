@@ -34,6 +34,7 @@ interface TrackerCardData {
   icon: keyof typeof Feather.glyphMap;
   color: string;
   route?: keyof RootStackParamList;
+  comingSoon?: boolean;
 }
 
 function TrackerCard({
@@ -75,7 +76,7 @@ function TrackerCard({
           {item.title}
         </ThemedText>
         <ThemedText style={[styles.trackerSubtitle, { color: theme.textSecondary }]}>
-          {item.subtitle}
+          {item.comingSoon ? "Coming soon" : item.subtitle}
         </ThemedText>
       </GlassSurface>
     </AnimatedPressable>
@@ -179,6 +180,7 @@ export default function HealthScreen() {
       subtitle: "Track your daily supplements",
       icon: "sun",
       color: "#7A8C5E",
+      route: "Supplements",
     },
     {
       id: "medications",
@@ -186,6 +188,7 @@ export default function HealthScreen() {
       subtitle: "Manage your medications",
       icon: "package",
       color: "#7B5EA7",
+      route: "Medications",
     },
     {
       id: "gut-health",
@@ -193,6 +196,7 @@ export default function HealthScreen() {
       subtitle: "Monitor digestive wellness",
       icon: "heart",
       color: "#B8860B",
+      comingSoon: true,
     },
     {
       id: "sexual-health",
@@ -214,6 +218,9 @@ export default function HealthScreen() {
 
   const handleTrackerPress = (item: TrackerCardData) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (item.comingSoon) {
+      return;
+    }
     if (item.route) {
       navigation.navigate(item.route as any);
     }
