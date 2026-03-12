@@ -89,10 +89,40 @@ title = "Olanna Health — Notifications For Her Partner"
 id = "x8kvNCRt3vAniwcIO3h7B"
 uri = "file://attached_assets/appstore_notif_her.png"
 type = "image"
-title = "Olanna Health — Notifications That Empower You"
+title = "Notification - Her"
 
 [[outputs]]
 id = "-nbKP50fCmoCi_jfuW8Ut"
 uri = "file://attached_assets/appstore_notif_partner.png"
 type = "image"
-title = "Olanna Health — Keep Her Partner In The Loop"
+title = "Notification - Partner"
+
+[[outputs]]
+id = "6BjftKz2dT38uAztfxxbf"
+uri = "file://attached_assets/appstore_lotus_cycle.png"
+type = "image"
+title = "Lotus Cycle Screen"
+
+[[outputs]]
+id = "OpyN07yiF55Fl-Nb4jxpO"
+uri = "file://attached_assets/appstore_calendar.png"
+type = "image"
+title = "Calendar Screen"
+
+[[outputs]]
+id = "osMjZvudSdnLhbu3SUtUz"
+uri = "file://attached_assets/appstore_checkin.png"
+type = "image"
+title = "Check-in Screen"
+
+[[outputs]]
+id = "8JTbLLn82tLD0FRnKP0wC"
+uri = "file://attached_assets/appstore_health.png"
+type = "image"
+title = "Health Screen"
+
+[[outputs]]
+id = "wLzDQShhhk1WnLu2Ojx34"
+uri = "file://attached_assets/appstore_learn.png"
+type = "image"
+title = "Learn Screen"
