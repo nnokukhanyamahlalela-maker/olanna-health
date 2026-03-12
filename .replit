@@ -3,6 +3,7 @@ modules = ["nodejs-22"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["glib", "nss", "nspr", "atk", "libdrm", "alsa-lib", "at-spi2-atk", "at-spi2-core", "mesa", "expat", "pango", "cairo", "dbus", "chromium"]
 
 [deployment]
 deploymentTarget = "cloudrun"

@@ -36,3 +36,39 @@ id = "82sqBTcRyZEokL6GPtdTy"
 uri = "file://attached_assets/appstore_6_privacy.png"
 type = "image"
 title = "6. Your Privacy, Protected"
+
+[[outputs]]
+id = "nbh3TsBhMeOaqj3RyHl8h"
+uri = "file://attached_assets/screenshot_cycle.png"
+type = "image"
+title = "1. The Lotus Cycle — Cycle Wheel"
+
+[[outputs]]
+id = "FqEyiZg0Jsq5UUSiTMjli"
+uri = "file://attached_assets/screenshot_insights.png"
+type = "image"
+title = "2. Phase Insights — Vibes, Foods, Self-Care"
+
+[[outputs]]
+id = "yM5ON5w_MwQY02LhYbvcm"
+uri = "file://attached_assets/screenshot_calendar.png"
+type = "image"
+title = "3. Calendar — Colour-Coded Cycle View"
+
+[[outputs]]
+id = "M-931I4cwevYCfJZdr6oz"
+uri = "file://attached_assets/screenshot_checkin.png"
+type = "image"
+title = "4. Check-in — Symptom Tracking"
+
+[[outputs]]
+id = "qhtfS1iuYwhNhmm-5X1Jh"
+uri = "file://attached_assets/screenshot_health.png"
+type = "image"
+title = "5. Health — Trackers Dashboard"
+
+[[outputs]]
+id = "c7yijXm7_ji5FBy0lnZih"
+uri = "file://attached_assets/screenshot_learn.png"
+type = "image"
+title = "6. Learn — Evidence-Based Education"
