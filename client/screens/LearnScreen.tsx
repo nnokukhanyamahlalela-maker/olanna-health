@@ -27,10 +27,6 @@ const categories = [
   "Periods",
   "PCOS",
   "Endometriosis",
-  "Sexual Health",
-  "Fertility",
-  "Wellness",
-  "Screenings",
 ];
 
 export default function LearnScreen() {

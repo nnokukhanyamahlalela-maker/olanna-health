@@ -116,7 +116,7 @@ export async function saveOnboardingCycleProfile(
 export async function getCycleProfile(userId: string): Promise<CycleProfile | null> {
   await hydrateFromStorage();
 
-  if (cachedProfile && (userId === "" || cachedProfile.userId === userId)) {
+  if (cachedProfile && userId !== "" && cachedProfile.userId === userId) {
     return cachedProfile;
   }
   return null;

@@ -510,11 +510,12 @@ export function LotusCycleScreen() {
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);
 
-  // Sync selectedDay to currentDay whenever cycle data refreshes.
-  if (currentDay !== prevCurrentDayRef.current) {
-    prevCurrentDayRef.current = currentDay;
-    setSelectedDay(currentDay);
-  }
+  useEffect(() => {
+    if (currentDay !== prevCurrentDayRef.current) {
+      prevCurrentDayRef.current = currentDay;
+      setSelectedDay(currentDay);
+    }
+  }, [currentDay]);
 
   const clampedSelectedDay = Math.min(selectedDay, cycleLength);
   const clampedCurrentDay = Math.min(currentDay, cycleLength);

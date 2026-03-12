@@ -143,6 +143,7 @@ export const storage = {
   async clearAllData(): Promise<void> {
     await secureStorage.clearAllSecureData();
     await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
+    invalidateCycleProfileCache();
   },
 
   async getPreference(key: string): Promise<string | null> {
