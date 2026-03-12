@@ -37,6 +37,7 @@ import {
   PHASE_ORDER,
   phaseConfig,
 } from "@/constants/phaseConfig";
+import { GlassSurface } from "@/components/GlassSurface";
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
@@ -95,11 +96,11 @@ function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) 
   );
 }
 
+const PHASE_CIRCLE_SIZE = 52;
+
 function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean }) {
   const config = phaseConfig[phase];
-  const circleColor = PHASE_CIRCLE_COLORS[phase];
   const labelColor = PHASE_LABEL_COLORS[phase];
-  const circleSize = (SCREEN_WIDTH - 80) / 2 - 16;
 
   return (
     <View style={[styles.phaseCardItem, isActive ? styles.phaseCardActive : null]}>
@@ -107,15 +108,16 @@ function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean })
         style={[
           styles.phaseCircle,
           {
-            width: circleSize,
-            height: circleSize,
-            borderRadius: circleSize / 2,
+            width: PHASE_CIRCLE_SIZE,
+            height: PHASE_CIRCLE_SIZE,
+            borderRadius: PHASE_CIRCLE_SIZE / 2,
             overflow: "hidden",
+            backgroundColor: PHASE_CIRCLE_COLORS[phase] + "30",
           },
           isActive ? styles.phaseCircleActive : null,
         ]}
       >
-        <PhaseLotus variant={config.lotusVariant} size={circleSize} />
+        <PhaseLotus variant={config.lotusVariant} size={PHASE_CIRCLE_SIZE} />
       </View>
       <Text style={[styles.phaseLabel, { color: labelColor }]}>{config.label}</Text>
       <Text style={styles.phaseSubtitle}>{config.subtitle}</Text>
@@ -484,7 +486,7 @@ export function LotusCycleScreen() {
         <View style={styles.insightsSection}>
           <Text style={styles.insightsTitle}>Phase Insights</Text>
 
-          <View style={styles.insightCard}>
+          <GlassSurface style={styles.insightCard} borderRadius={BorderRadius.lg} padding={16}>
             <View style={styles.insightHeader}>
               <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
                 <Feather name="heart" size={16} color={phaseConfig[currentPhase].labelColor} />
@@ -492,9 +494,9 @@ export function LotusCycleScreen() {
               <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>Vibes</Text>
             </View>
             <Text style={styles.insightBody}>{PHASE_VIBES[currentPhase as CyclePhase]}</Text>
-          </View>
+          </GlassSurface>
 
-          <View style={styles.insightCard}>
+          <GlassSurface style={styles.insightCard} borderRadius={BorderRadius.lg} padding={16}>
             <View style={styles.insightHeader}>
               <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
                 <Feather name="activity" size={16} color={phaseConfig[currentPhase].labelColor} />
@@ -504,9 +506,9 @@ export function LotusCycleScreen() {
               </Text>
             </View>
             <Text style={styles.insightBody}>{PHASE_MOVEMENT[currentPhase as CyclePhase].body}</Text>
-          </View>
+          </GlassSurface>
 
-          <View style={styles.insightCard}>
+          <GlassSurface style={styles.insightCard} borderRadius={BorderRadius.lg} padding={16}>
             <View style={styles.insightHeader}>
               <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
                 <Feather name="coffee" size={16} color={phaseConfig[currentPhase].labelColor} />
@@ -520,9 +522,9 @@ export function LotusCycleScreen() {
                 </View>
               ))}
             </View>
-          </View>
+          </GlassSurface>
 
-          <View style={styles.insightCard}>
+          <GlassSurface style={styles.insightCard} borderRadius={BorderRadius.lg} padding={16}>
             <View style={styles.insightHeader}>
               <View style={[styles.insightIconCircle, { backgroundColor: phaseConfig[currentPhase].softBg }]}>
                 <Feather name="sun" size={16} color={phaseConfig[currentPhase].labelColor} />
@@ -530,7 +532,7 @@ export function LotusCycleScreen() {
               <Text style={[styles.insightLabel, { color: phaseConfig[currentPhase].labelColor }]}>Self-Care</Text>
             </View>
             <Text style={styles.insightBody}>{PHASE_SELFCARE[currentPhase as CyclePhase]}</Text>
-          </View>
+          </GlassSurface>
         </View>
       </ScrollView>
     </View>
@@ -570,15 +572,14 @@ const styles = StyleSheet.create({
   },
   phaseGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 12,
+    paddingHorizontal: 4,
   },
   phaseCardItem: {
-    width: (SCREEN_WIDTH - 80) / 2,
     alignItems: "center",
-    marginBottom: 20,
-    opacity: 0.7,
+    opacity: 0.6,
+    flex: 1,
   },
   phaseCardActive: {
     opacity: 1,
@@ -586,29 +587,27 @@ const styles = StyleSheet.create({
   phaseCircle: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    marginBottom: 6,
   },
   phaseCircleActive: {
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   phaseLabel: {
     fontFamily: Fonts.heading,
-    fontSize: 17,
-    letterSpacing: 0.3,
-    marginBottom: 2,
+    fontSize: 12,
+    letterSpacing: 0.2,
+    marginBottom: 1,
   },
   phaseSubtitle: {
     fontFamily: Fonts.body,
-    fontSize: 13,
+    fontSize: 10,
     color: neutral.textSecondary,
     letterSpacing: 0.1,
+    textAlign: "center",
   },
   wheelContainer: {
     alignItems: "center",
@@ -682,9 +681,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   insightCard: {
-    backgroundColor: "rgba(255,255,255,0.65)",
-    borderRadius: BorderRadius.md,
-    padding: 16,
     gap: 10,
   },
   insightHeader: {
