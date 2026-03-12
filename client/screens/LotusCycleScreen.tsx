@@ -430,48 +430,40 @@ const LOTUS_SYNOPSIS = [
   },
 ];
 
-function LotusSynopsis({ isExpanded, onToggle }: { isExpanded: boolean; onToggle: () => void }) {
+const SYNOPSIS_CARD_WIDTH = SCREEN_WIDTH - 80;
+
+function LotusSynopsisStrip() {
   return (
-    <GlassSurface style={styles.synopsisCard} borderRadius={BorderRadius.lg} padding={16}>
-      <Pressable onPress={onToggle} style={styles.synopsisHeader}>
-        <View style={styles.synopsisHeaderLeft}>
-          <Feather name="info" size={16} color={neutral.textSecondary} />
-          <Text style={styles.synopsisHeaderText}>How the Lotus Cycle Works</Text>
-        </View>
-        <Feather
-          name={isExpanded ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={neutral.textSecondary}
-        />
-      </Pressable>
-
-      {isExpanded ? (
-        <View style={styles.synopsisContent}>
-          <Text style={styles.synopsisIntro}>
-            The Lotus Cycle mirrors your menstrual journey through four stages of a lotus flower — from closed bud to full bloom and back again. Each stage reflects what's happening in your body and guides you toward what it needs most.
-          </Text>
-
-          {LOTUS_SYNOPSIS.map((item, index) => (
-            <View key={index} style={styles.synopsisItem}>
-              <View style={styles.synopsisItemHeader}>
-                <View style={[styles.synopsisIconCircle, { backgroundColor: item.softBg }]}>
-                  <Feather name={item.icon} size={14} color={item.color} />
-                </View>
-                <View style={styles.synopsisItemTitles}>
-                  <Text style={[styles.synopsisStage, { color: item.color }]}>{item.stage}</Text>
-                  <Text style={styles.synopsisPhaseDays}>{item.phase} · {item.days}</Text>
-                </View>
+    <View style={styles.synopsisStrip}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={SYNOPSIS_CARD_WIDTH + 10}
+        decelerationRate="fast"
+        contentContainerStyle={styles.synopsisScrollContent}
+      >
+        {LOTUS_SYNOPSIS.map((item, index) => (
+          <GlassSurface
+            key={index}
+            style={[styles.synopsisSlide, { width: SYNOPSIS_CARD_WIDTH }]}
+            borderRadius={BorderRadius.md}
+            padding={14}
+            tint="subtle"
+          >
+            <View style={styles.synopsisSlideHeader}>
+              <View style={[styles.synopsisIconCircle, { backgroundColor: item.softBg }]}>
+                <Feather name={item.icon} size={13} color={item.color} />
               </View>
-              <Text style={styles.synopsisBody}>{item.body}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.synopsisStage, { color: item.color }]}>{item.stage}</Text>
+                <Text style={styles.synopsisPhaseDays}>{item.phase} · {item.days}</Text>
+              </View>
             </View>
-          ))}
-
-          <Text style={styles.synopsisFooter}>
-            Swipe around the wheel to explore each day of your cycle. The lotus at the centre transforms as you move through your phases.
-          </Text>
-        </View>
-      ) : null}
-    </GlassSurface>
+            <Text style={styles.synopsisSlideBody} numberOfLines={3}>{item.body}</Text>
+          </GlassSurface>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -481,7 +473,6 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
 
@@ -558,6 +549,8 @@ export function LotusCycleScreen() {
           ))}
         </View>
 
+        <LotusSynopsisStrip />
+
         <InteractiveCycleWheel
           cycleLength={cycleLength}
           periodLength={periodLength}
@@ -621,10 +614,6 @@ export function LotusCycleScreen() {
           </GlassSurface>
         </View>
 
-        <LotusSynopsis
-          isExpanded={synopsisExpanded}
-          onToggle={() => setSynopsisExpanded((v) => !v)}
-        />
       </ScrollView>
     </View>
   );
@@ -812,78 +801,47 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
   },
-  synopsisCard: {
-    marginTop: 8,
-    marginBottom: 24,
+  synopsisStrip: {
+    marginHorizontal: -20,
+    marginBottom: 6,
   },
-  synopsisHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  synopsisScrollContent: {
+    paddingHorizontal: 20,
+    gap: 10,
   },
-  synopsisHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  synopsisSlide: {
+    marginBottom: 2,
   },
-  synopsisHeaderText: {
-    fontFamily: Fonts.heading,
-    fontSize: 14,
-    color: neutral.textPrimary,
-    letterSpacing: 0.2,
-  },
-  synopsisContent: {
-    marginTop: 14,
-    gap: 16,
-  },
-  synopsisIntro: {
-    fontFamily: Fonts.body,
-    fontSize: 13,
-    color: neutral.textSecondary,
-    lineHeight: 20,
-  },
-  synopsisItem: {
-    gap: 6,
-  },
-  synopsisItemHeader: {
+  synopsisSlideHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    marginBottom: 6,
   },
   synopsisIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
   },
-  synopsisItemTitles: {
-    flex: 1,
-  },
   synopsisStage: {
     fontFamily: Fonts.heading,
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 0.2,
+    lineHeight: 17,
   },
   synopsisPhaseDays: {
     fontFamily: Fonts.body,
-    fontSize: 11,
+    fontSize: 10.5,
     color: neutral.textSecondary,
+    lineHeight: 14,
   },
-  synopsisBody: {
-    fontFamily: Fonts.body,
-    fontSize: 13,
-    color: neutral.textSecondary,
-    lineHeight: 20,
-    paddingLeft: 38,
-  },
-  synopsisFooter: {
+  synopsisSlideBody: {
     fontFamily: Fonts.body,
     fontSize: 12,
     color: neutral.textSecondary,
-    fontStyle: "italic" as const,
-    lineHeight: 18,
-    marginTop: 4,
+    lineHeight: 17,
   },
 });
 
