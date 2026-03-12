@@ -144,3 +144,9 @@ id = "418SBR2YLlg8wNgEBtuX0"
 uri = "file://attached_assets/lotus_follicular_expanded.png"
 type = "image"
 title = "Follicular Flower Tapped"
+
+[[outputs]]
+id = "Wu5mQOSCa2R_z3o2Z8AWE"
+uri = "file://attached_assets/lotus_synopsis_no_icon.png"
+type = "image"
+title = "Synopsis Card - Icons Removed"
