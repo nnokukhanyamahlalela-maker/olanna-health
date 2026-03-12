@@ -48,6 +48,20 @@ export const TOPIC_CATEGORIES = [
     icon: "heart" as const,
     color: "#7B5EA7",
   },
+  {
+    id: "sexual-health",
+    label: "Sexual Health",
+    description: "STI awareness, screening, and safer sex",
+    icon: "shield" as const,
+    color: "#C2185B",
+  },
+  {
+    id: "fertility",
+    label: "Fertility",
+    description: "Understanding your fertile window and beyond",
+    icon: "sunrise" as const,
+    color: "#B8730A",
+  },
 ] as const;
 
 export const articles: Article[] = [
@@ -800,6 +814,473 @@ export const articles: Article[] = [
       { number: 1, text: "Zondervan KT, Becker CM, Missmer SA. Endometriosis. N Engl J Med. 2020;382(13):1244-1256." },
       { number: 2, text: "Johnson NP, Hummelshoj L; World Endometriosis Society Montpellier Consortium. Consensus on current management of endometriosis. Hum Reprod. 2013." },
       { number: 3, text: "Agarwal SK, Chapron C, Giudice LC, et al. Clinical diagnosis of endometriosis: a call to action. Am J Obstet Gynecol. 2019." },
+    ],
+  },
+  {
+    id: "6",
+    slug: "sti-screening-south-africa",
+    title: "STI Screening in South Africa: What Every Woman Should Know",
+    subtitle: "STIs are incredibly common \u2014 and most of the time, they show no symptoms at all. Regular screening is one of the most powerful things you can do for your health.",
+    summary: "A clear, judgement-free guide to STI screening in South Africa \u2014 what to test for, how often, where to go, and why it matters more than you think.",
+    category: "Sexual Health",
+    topic: "sexual-health",
+    author: "Olanna Editorial",
+    date: "10 March 2026",
+    readTime: "7 min",
+    sections: [
+      {
+        type: "paragraph",
+        content: "Let us start with one very important truth: sexually transmitted infections (STIs) are not a moral failing. They are a health reality. They are common, they are treatable, and in many cases, they are entirely preventable. The problem is not STIs themselves \u2014 it is the silence around them.",
+      },
+      {
+        type: "paragraph",
+        content: "In South Africa, where HIV prevalence among young women aged 15\u201324 remains among the highest in the world, and where conditions like chlamydia and gonorrhoea often go undiagnosed, routine screening is not optional \u2014 it is essential self-care.",
+      },
+      {
+        type: "heading",
+        content: "Why Screening Matters \u2014 Even When You Feel Fine",
+      },
+      {
+        type: "paragraph",
+        content: "Most STIs do not announce themselves. Chlamydia, gonorrhoea, syphilis, HPV, and even HIV can be present for months or years without any noticeable symptoms. By the time signs do appear, complications may already be developing \u2014 including pelvic inflammatory disease (PID), fertility challenges, and increased vulnerability to other infections.",
+      },
+      {
+        type: "quote",
+        content: "You do not need to have symptoms to have an STI. You do not need to have \u201Cmany partners\u201D to be at risk. You just need to be sexually active \u2014 and that is enough reason to get screened.",
+      },
+      {
+        type: "heading",
+        content: "What Should You Be Screened For?",
+      },
+      {
+        type: "paragraph",
+        content: "The South African HIV Clinicians Society (SAHCS) and the Department of Health recommend the following as part of routine sexual health care:",
+      },
+      {
+        type: "bullets",
+        content: "Recommended STI screenings",
+        items: [
+          "HIV \u2014 at least once a year if sexually active, or more frequently if you have new or multiple partners",
+          "Syphilis \u2014 a simple blood test; rates have been rising sharply in South Africa",
+          "Chlamydia and gonorrhoea \u2014 urine test or swab; recommended annually for women under 25 or with new partners",
+          "Hepatitis B \u2014 especially if not vaccinated; a blood test can confirm immunity or infection",
+          "HPV \u2014 through cervical screening (Pap smear or HPV DNA test); recommended from age 25 or within 3 years of becoming sexually active",
+        ],
+      },
+      {
+        type: "heading",
+        content: "Where Can You Get Screened in South Africa?",
+      },
+      {
+        type: "bullets",
+        content: "Screening locations",
+        items: [
+          "Public clinics and community health centres \u2014 free HIV and STI testing is widely available",
+          "Campus health services \u2014 most universities offer free, confidential testing",
+          "Private GPs and gynaecologists \u2014 can order full STI panels; may be covered by medical aid",
+          "Organisations like Anova Health Institute, loveLife, and Right to Care run mobile and walk-in testing across provinces",
+          "Home self-test kits for HIV are available at pharmacies (e.g., OraQuick, BioSure)",
+        ],
+      },
+      {
+        type: "heading",
+        content: "How Often Should You Screen?",
+      },
+      {
+        type: "bullets",
+        content: "Screening frequency guidelines",
+        items: [
+          "Annually if you are sexually active with a single partner",
+          "Every 3\u20136 months if you have new or multiple partners",
+          "After any unprotected sexual contact",
+          "If a partner has been diagnosed with an STI",
+          "During pregnancy \u2014 HIV, syphilis, and hepatitis B are routinely screened at antenatal visits",
+        ],
+      },
+      {
+        type: "heading",
+        content: "What to Expect During a Screening",
+      },
+      {
+        type: "paragraph",
+        content: "STI screening is usually quick, simple, and far less uncomfortable than most people expect. Depending on the infection, it may involve a blood draw, a urine sample, or a swab. Results can take anywhere from a few minutes (rapid HIV test) to a few days (lab-based panels).",
+      },
+      {
+        type: "paragraph",
+        content: "You have the right to confidentiality. You have the right to ask questions. And you have the right to request specific tests \u2014 you do not need to wait for a doctor to suggest them.",
+      },
+      {
+        type: "heading",
+        content: "Talking to a Partner About Testing",
+      },
+      {
+        type: "paragraph",
+        content: "This can feel difficult, but it does not have to be a confrontation. Framing it as something you do together \u2014 \u201CI got tested, would you be willing to as well?\u201D \u2014 centres it on mutual care, not suspicion. A partner who respects your health will respect the conversation.",
+      },
+      {
+        type: "heading",
+        content: "The Bottom Line",
+      },
+      {
+        type: "paragraph",
+        content: "Getting screened is not a sign that something is wrong. It is a sign that you take your health seriously. It is one of the most straightforward, empowering things you can do \u2014 and it takes less time than most people spend choosing what to have for lunch.",
+      },
+      {
+        type: "paragraph",
+        content: "Your body deserves attention, not avoidance. And your sexual health is just health. Full stop.",
+      },
+      {
+        type: "disclaimer",
+        content: "This article is for educational purposes only and does not constitute medical advice. Always consult with a qualified healthcare provider regarding any medical condition, testing, or treatment.",
+      },
+    ],
+    references: [
+      { number: 1, text: "South African HIV Clinicians Society. National HIV Testing Services Policy. 2023." },
+      { number: 2, text: "National Department of Health, South Africa. Sexually Transmitted Infections Management Guidelines. 2022." },
+      { number: 3, text: "World Health Organization. Global health sector strategies on HIV, viral hepatitis and STIs, 2022\u20132030." },
+      { number: 4, text: "Hussain S, Garrett C, Cowan FM. Evidence-based approaches to reduce sexually transmitted infections. BMJ. 2021." },
+    ],
+  },
+  {
+    id: "7",
+    slug: "cervical-screening-pap-smear-guide",
+    title: "Your Cervical Screening Guide: Pap Smears, HPV, and Why It Matters",
+    subtitle: "Cervical cancer is one of the most preventable cancers \u2014 but only if we screen for it. Here is what South African women need to know.",
+    summary: "A practical guide to cervical screening in South Africa \u2014 when to start, what happens, and how HPV connects to cervical health.",
+    category: "Sexual Health",
+    topic: "sexual-health",
+    author: "Olanna Editorial",
+    date: "8 March 2026",
+    readTime: "6 min",
+    sections: [
+      {
+        type: "paragraph",
+        content: "Cervical cancer is the leading cause of cancer death among South African women. That statistic is heartbreaking \u2014 but here is the important part: it is also one of the most preventable cancers in the world. With regular screening, most cervical cancers can be caught early or prevented entirely.",
+      },
+      {
+        type: "heading",
+        content: "What Is Cervical Screening?",
+      },
+      {
+        type: "paragraph",
+        content: "Cervical screening checks for changes in the cells of your cervix (the lower part of your uterus) before they become cancerous. The two main methods are the Pap smear, which looks for abnormal cells, and the HPV DNA test, which detects the presence of high-risk strains of human papillomavirus \u2014 the virus responsible for nearly all cervical cancers.",
+      },
+      {
+        type: "heading",
+        content: "When Should You Start?",
+      },
+      {
+        type: "paragraph",
+        content: "The South African Society of Obstetricians and Gynaecologists (SASOG) recommends that cervical screening begin at age 25, or within 3 years of becoming sexually active \u2014 whichever comes first. For women living with HIV, screening should begin at diagnosis regardless of age, and be repeated more frequently.",
+      },
+      {
+        type: "bullets",
+        content: "Screening schedule",
+        items: [
+          "Age 25\u201365: Pap smear every 3 years, or HPV test every 5 years",
+          "Women living with HIV: Pap smear annually",
+          "After abnormal results: follow-up as directed by your healthcare provider",
+          "After age 65: screening can stop if previous results have been consistently normal",
+        ],
+      },
+      {
+        type: "heading",
+        content: "What Happens During a Pap Smear?",
+      },
+      {
+        type: "paragraph",
+        content: "A small brush or spatula is used to gently collect cells from the surface of your cervix. It takes about 30 seconds and may feel slightly uncomfortable, but it should not be painful. You can request a smaller speculum, ask the nurse to talk you through it, or bring someone with you for support.",
+      },
+      {
+        type: "heading",
+        content: "Understanding HPV",
+      },
+      {
+        type: "paragraph",
+        content: "HPV is the most common sexually transmitted infection globally. Most sexually active people will contract HPV at some point, and in the majority of cases, your immune system clears it within 1\u20132 years. However, certain high-risk strains (mainly HPV 16 and 18) can persist and lead to cell changes over time.",
+      },
+      {
+        type: "paragraph",
+        content: "Having HPV does not mean you will get cervical cancer. It means you should be monitored. This is exactly what screening is designed for.",
+      },
+      {
+        type: "heading",
+        content: "The HPV Vaccine",
+      },
+      {
+        type: "paragraph",
+        content: "South Africa introduced the HPV vaccine into its public school immunisation programme in 2014, targeting girls in Grade 4. If you missed the vaccine as a child, it is still effective for women up to age 45. Ask your healthcare provider about catch-up vaccination.",
+      },
+      {
+        type: "heading",
+        content: "Where to Get Screened",
+      },
+      {
+        type: "bullets",
+        content: "Screening access",
+        items: [
+          "Public health clinics and community health centres offer free Pap smears",
+          "Private gynaecologists can provide both Pap smears and HPV DNA tests",
+          "Cancer Association of South Africa (CANSA) runs screening campaigns across provinces",
+          "Some pharmacies now offer self-collection HPV test kits",
+        ],
+      },
+      {
+        type: "heading",
+        content: "The Bottom Line",
+      },
+      {
+        type: "paragraph",
+        content: "A Pap smear takes less than a minute. It could save your life. Do not let discomfort, embarrassment, or busyness stand between you and a preventable cancer. Schedule it, do it, and move on with the peace of mind that you are looking after yourself.",
+      },
+      {
+        type: "disclaimer",
+        content: "This article is for educational purposes only and does not constitute medical advice. Always consult with a qualified healthcare provider regarding screening, vaccination, or any health concern.",
+      },
+    ],
+    references: [
+      { number: 1, text: "South African Society of Obstetricians and Gynaecologists (SASOG). Cervical Cancer Prevention Guidelines. 2023." },
+      { number: 2, text: "National Cancer Registry, South Africa. Cancer Statistics. 2022." },
+      { number: 3, text: "World Health Organization. Cervical cancer elimination strategy. 2020." },
+    ],
+  },
+  {
+    id: "8",
+    slug: "understanding-your-fertile-window",
+    title: "Understanding Your Fertile Window: When Can You Actually Conceive?",
+    subtitle: "Whether you are trying to conceive or simply want to know your body better, understanding your fertile window is one of the most empowering things you can learn.",
+    summary: "A clear explanation of your fertile window \u2014 how ovulation works, how to identify your most fertile days, and what influences your fertility each cycle.",
+    category: "Fertility",
+    topic: "fertility",
+    author: "Olanna Editorial",
+    date: "6 March 2026",
+    readTime: "7 min",
+    sections: [
+      {
+        type: "paragraph",
+        content: "There is a common misconception that you can fall pregnant at any point in your cycle. In reality, there is a relatively narrow window each month when conception is possible \u2014 and understanding that window can change the way you relate to your cycle, whether your goal is pregnancy, prevention, or simply self-knowledge.",
+      },
+      {
+        type: "heading",
+        content: "What Is the Fertile Window?",
+      },
+      {
+        type: "paragraph",
+        content: "Your fertile window is the span of days during each cycle when sexual intercourse could lead to pregnancy. It typically lasts about 6 days: the 5 days before ovulation and the day of ovulation itself.",
+      },
+      {
+        type: "paragraph",
+        content: "Why 5 days before? Because sperm can survive in the reproductive tract for up to 5 days. So even if you have sex several days before you ovulate, those sperm may still be present when the egg is released.",
+      },
+      {
+        type: "quote",
+        content: "The egg itself survives only 12\u201324 hours after ovulation. That is why the timing of the fertile window centres around the days leading up to, and including, ovulation day.",
+      },
+      {
+        type: "heading",
+        content: "When Does Ovulation Happen?",
+      },
+      {
+        type: "paragraph",
+        content: "In a textbook 28-day cycle, ovulation typically occurs around day 14. But cycles vary widely. If your cycle is 26 days, you may ovulate around day 12. If it is 32 days, ovulation might not happen until day 18 or later. The key is not the calendar date \u2014 it is knowing your own pattern.",
+      },
+      {
+        type: "paragraph",
+        content: "Ovulation is triggered by a surge of luteinising hormone (LH). Many women can detect this surge using ovulation predictor kits (OPKs), which are available at most South African pharmacies.",
+      },
+      {
+        type: "heading",
+        content: "Signs Your Body Gives You",
+      },
+      {
+        type: "paragraph",
+        content: "Your body offers several natural clues that ovulation is approaching:",
+      },
+      {
+        type: "bullets",
+        content: "Ovulation signs",
+        items: [
+          "Cervical mucus changes \u2014 it becomes clear, stretchy, and slippery (like raw egg white), making it easier for sperm to travel",
+          "A slight rise in basal body temperature (BBT) \u2014 after ovulation, your resting temperature increases by about 0.2\u20130.5\u00b0C and stays elevated until your next period",
+          "Mild pelvic twinges \u2014 some women feel a brief, one-sided ache called mittelschmerz (ovulation pain)",
+          "Increased libido \u2014 your body naturally drives you toward intimacy near your most fertile days",
+          "Breast tenderness \u2014 hormonal shifts around ovulation can cause mild sensitivity",
+        ],
+      },
+      {
+        type: "heading",
+        content: "Tracking Your Fertile Window",
+      },
+      {
+        type: "paragraph",
+        content: "The most reliable approach combines multiple methods. Track your cycle length over several months. Monitor cervical mucus changes. Use OPKs during your estimated fertile window. And if you want even more precision, consider tracking your basal body temperature each morning before getting out of bed.",
+      },
+      {
+        type: "paragraph",
+        content: "Olanna\u2019s Cycle Length Calculator and calendar can help you estimate your fertile window based on your actual cycle data \u2014 look for the highlighted fertile days on your calendar.",
+      },
+      {
+        type: "heading",
+        content: "What Can Affect Your Fertility?",
+      },
+      {
+        type: "bullets",
+        content: "Factors affecting fertility",
+        items: [
+          "Stress \u2014 high cortisol can delay or suppress ovulation",
+          "Weight changes \u2014 both significant weight loss and gain can disrupt hormonal balance",
+          "Age \u2014 fertility begins to decline gradually from your late 20s and more noticeably after 35",
+          "Conditions like PCOS \u2014 irregular ovulation is one of the most common causes of difficulty conceiving",
+          "Thyroid disorders \u2014 both hypothyroidism and hyperthyroidism can affect ovulation",
+          "Medications \u2014 some anti-inflammatories and antidepressants can influence cycle regularity",
+        ],
+      },
+      {
+        type: "heading",
+        content: "A Note on Fertility Awareness as Contraception",
+      },
+      {
+        type: "paragraph",
+        content: "Some women use fertility awareness-based methods (FABMs) to avoid pregnancy by abstaining from sex or using barrier methods during their fertile window. When used perfectly, these methods can be effective \u2014 but they require careful, consistent tracking and are not as reliable as hormonal contraception or IUDs. If you are considering this approach, speak with a healthcare provider who can guide you.",
+      },
+      {
+        type: "heading",
+        content: "The Bottom Line",
+      },
+      {
+        type: "paragraph",
+        content: "Understanding your fertile window is not just about making babies. It is about understanding your body at a deeper level \u2014 knowing why you feel energised on certain days, why your skin glows, why your mood shifts. Your cycle is a monthly conversation between your brain and your ovaries, and your fertile window is the climax of that conversation.",
+      },
+      {
+        type: "disclaimer",
+        content: "This article is for educational purposes only and does not constitute medical advice. If you are trying to conceive or have concerns about your fertility, please consult with a qualified healthcare provider.",
+      },
+    ],
+    references: [
+      { number: 1, text: "Wilcox AJ, Dunson D, Baird DD. The timing of the \u201Cfertile window\u201D in the menstrual cycle. BMJ. 2000;321(7271):1259-1262." },
+      { number: 2, text: "American College of Obstetricians and Gynecologists. Fertility Awareness\u2013Based Methods of Family Planning. ACOG Committee Opinion No. 797. 2019." },
+      { number: 3, text: "Ecochard R, Duterque O, Hugo H, et al. Fertile days estimates from the Barrett and Marshall study are consistent. Fertil Steril. 2021." },
+    ],
+  },
+  {
+    id: "9",
+    slug: "fertility-after-30-south-africa",
+    title: "Fertility After 30: What South African Women Should Actually Know",
+    subtitle: "The headlines love to panic us about our biological clocks. Here is what the evidence actually says \u2014 and what you can do right now.",
+    summary: "An honest, evidence-based look at fertility and age \u2014 what really changes after 30, when to seek help, and how to support your reproductive health.",
+    category: "Fertility",
+    topic: "fertility",
+    author: "Olanna Editorial",
+    date: "4 March 2026",
+    readTime: "8 min",
+    sections: [
+      {
+        type: "paragraph",
+        content: "If you are a woman over 30 who has ever made the mistake of searching \u201Cfertility after 30\u201D on the internet, you have probably been served a buffet of panic. Your eggs are \u201Cdeclining.\u201D Your chances are \u201Cplummeting.\u201D The clock is \u201Cticking.\u201D",
+      },
+      {
+        type: "paragraph",
+        content: "Here is the truth: yes, age is a factor in fertility. But the conversation around it has been so distorted by fear that many women are making decisions based on anxiety rather than evidence. Let us bring some clarity.",
+      },
+      {
+        type: "heading",
+        content: "What Actually Happens to Fertility with Age?",
+      },
+      {
+        type: "paragraph",
+        content: "Women are born with all the eggs they will ever have \u2014 roughly 1\u20132 million at birth, declining to about 300,000\u2013400,000 by puberty. Each month, a group of follicles is recruited, one egg is released, and the rest are reabsorbed. This is a lifelong process, not something that begins at 30.",
+      },
+      {
+        type: "bullets",
+        content: "Fertility timeline",
+        items: [
+          "20s: Peak fertility. Roughly 25\u201330% chance of conceiving each cycle with regular unprotected intercourse.",
+          "Early 30s: A gradual decline begins, but for most women, fertility remains strong. Monthly conception rates are around 20\u201325%.",
+          "Mid-to-late 30s: The decline becomes more noticeable. By 35, monthly conception rates drop to about 15\u201320%. Egg quality also begins to change, increasing the risk of chromosomal abnormalities.",
+          "40+: Monthly conception rates fall to around 5\u201310%. The risk of miscarriage rises. But pregnancies still happen \u2014 many women conceive naturally in their early 40s.",
+        ],
+      },
+      {
+        type: "quote",
+        content: "The decline is real, but it is gradual \u2014 not a cliff edge. Most women in their early 30s have years of fertility ahead of them.",
+      },
+      {
+        type: "heading",
+        content: "The South African Context",
+      },
+      {
+        type: "paragraph",
+        content: "In South Africa, many women are choosing to have children later \u2014 pursuing education, careers, or simply waiting for the right circumstances. This is a personal decision that deserves support, not judgement. At the same time, access to fertility services remains uneven. IVF and fertility testing are expensive, often not covered by medical aid, and concentrated in urban centres.",
+      },
+      {
+        type: "paragraph",
+        content: "This makes proactive fertility awareness even more important: understanding your body now can help you make informed decisions later, whether or not assisted reproduction is part of your plan.",
+      },
+      {
+        type: "heading",
+        content: "When Should You See a Doctor?",
+      },
+      {
+        type: "bullets",
+        content: "When to seek fertility advice",
+        items: [
+          "Under 35 and have been trying to conceive for 12 months without success",
+          "Over 35 and have been trying for 6 months",
+          "You have irregular periods, very painful periods, or have been diagnosed with PCOS or endometriosis",
+          "You have a history of pelvic infections, surgery, or sexually transmitted infections",
+          "You want to understand your fertility status before you start trying",
+        ],
+      },
+      {
+        type: "heading",
+        content: "What Can You Do Right Now?",
+      },
+      {
+        type: "paragraph",
+        content: "Whether you want children soon, someday, or never, these habits support your reproductive health at every age:",
+      },
+      {
+        type: "bullets",
+        content: "Supporting your fertility",
+        items: [
+          "Track your cycle \u2014 knowing whether you ovulate regularly is the single most useful piece of fertility information you can have",
+          "Manage stress \u2014 chronic stress can suppress ovulation and disrupt your cycle",
+          "Prioritise sleep \u2014 your hormones are regulated by circadian rhythms; poor sleep affects them directly",
+          "Eat well \u2014 a diet rich in whole foods, healthy fats, iron, and folate supports egg quality and hormonal balance",
+          "Limit alcohol and stop smoking \u2014 both have measurable negative effects on fertility",
+          "Stay informed \u2014 consider an AMH (anti-M\u00FCllerian hormone) blood test to get a snapshot of your ovarian reserve",
+        ],
+      },
+      {
+        type: "heading",
+        content: "A Note on Egg Freezing",
+      },
+      {
+        type: "paragraph",
+        content: "Egg freezing (oocyte cryopreservation) is an option for women who want to preserve their fertility for the future. In South Africa, the procedure is available at fertility clinics in major cities, though costs typically range from R30,000 to R60,000 per cycle, plus annual storage fees. It is most effective when done before age 35, while egg quality is higher.",
+      },
+      {
+        type: "paragraph",
+        content: "Egg freezing is not a guarantee, but it is a tool \u2014 and knowing it exists can be part of an informed conversation about your future.",
+      },
+      {
+        type: "heading",
+        content: "The Bottom Line",
+      },
+      {
+        type: "paragraph",
+        content: "Your fertility is not a countdown timer. It is a part of your body that deserves the same thoughtful, informed attention you give to everything else. Do not let fear-based headlines make your decisions for you. Learn about your cycle, listen to your body, and if you have concerns, talk to a healthcare provider who will listen back.",
+      },
+      {
+        type: "disclaimer",
+        content: "This article is for educational purposes only and does not constitute medical advice. If you have concerns about your fertility, please consult with a qualified healthcare provider or fertility specialist.",
+      },
+    ],
+    references: [
+      { number: 1, text: "American Society for Reproductive Medicine. Age and Fertility: A Guide for Patients. 2023." },
+      { number: 2, text: "te Velde ER, Pearson PL. The variability of female reproductive ageing. Hum Reprod Update. 2002;8(2):141-154." },
+      { number: 3, text: "Fertility Society of South Africa. Guidelines on Fertility Preservation. 2022." },
+      { number: 4, text: "Practice Committee of ASRM. Optimizing natural fertility. Fertil Steril. 2022." },
     ],
   },
 ];
