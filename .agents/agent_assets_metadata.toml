@@ -1,0 +1,38 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "J9CbkrxM-blRGdYunOocY"
+uri = "file://attached_assets/appstore_1_cycle_wheel.png"
+type = "image"
+title = "1. Your Cycle, Beautifully Tracked"
+
+[[outputs]]
+id = "DOzgX-ngF0VfWLSwztAmc"
+uri = "file://attached_assets/appstore_2_calendar.png"
+type = "image"
+title = "2. Every Day, Colour-Coded"
+
+[[outputs]]
+id = "ybIkE9GvCQW5MhKvZHqq3"
+uri = "file://attached_assets/appstore_3_health_trackers.png"
+type = "image"
+title = "3. Track What Matters"
+
+[[outputs]]
+id = "DGmgxHKD4VtPs-lGnKk3P"
+uri = "file://attached_assets/appstore_4_symptoms.png"
+type = "image"
+title = "4. 200+ Symptoms Tracked"
+
+[[outputs]]
+id = "MZkSYt5kPEhVrgqiN522y"
+uri = "file://attached_assets/appstore_5_dark_mode.png"
+type = "image"
+title = "5. Beautiful in Any Light"
+
+[[outputs]]
+id = "82sqBTcRyZEokL6GPtdTy"
+uri = "file://attached_assets/appstore_6_privacy.png"
+type = "image"
+title = "6. Your Privacy, Protected"
