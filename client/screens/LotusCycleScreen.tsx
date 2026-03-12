@@ -829,13 +829,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 6,
   },
-  synopsisIconCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   synopsisStage: {
     fontFamily: Fonts.heading,
     fontSize: 13,
