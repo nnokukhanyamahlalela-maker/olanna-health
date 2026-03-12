@@ -465,9 +465,6 @@ function PhaseSynopsisCard({ phase, onDismiss }: { phase: Phase; onDismiss: () =
         tint="subtle"
       >
         <View style={styles.synopsisSlideHeader}>
-          <View style={[styles.synopsisIconCircle, { backgroundColor: synopsis.softBg }]}>
-            <Feather name={synopsis.icon} size={13} color={synopsis.color} />
-          </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.synopsisStage, { color: synopsis.color }]}>{synopsis.stage}</Text>
             <Text style={styles.synopsisPhaseDays}>{synopsis.phaseName} · {synopsis.days}</Text>
