@@ -72,3 +72,15 @@ id = "c7yijXm7_ji5FBy0lnZih"
 uri = "file://attached_assets/screenshot_learn.png"
 type = "image"
 title = "6. Learn — Evidence-Based Education"
+
+[[outputs]]
+id = "wJkTfonsYIMR0WRdD7E4Q"
+uri = "file://attached_assets/notif_for_her.png"
+type = "image"
+title = "Olanna Health — Notifications For Her"
+
+[[outputs]]
+id = "VAl_f_y2-DTrMF_QYWnVh"
+uri = "file://attached_assets/notif_for_partner.png"
+type = "image"
+title = "Olanna Health — Notifications For Her Partner"
