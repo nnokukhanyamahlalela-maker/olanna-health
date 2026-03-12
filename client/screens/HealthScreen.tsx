@@ -22,8 +22,28 @@ import { Spacing, ScreenPadding } from "@/constants/spacing";
 import { BorderRadius, Fonts } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useLotusCycle } from "@/hooks/useLotusCycle";
+import { PHASE_SELFCARE } from "@/lib/dailyDecode";
+import { phase as phaseColors } from "@/constants/colors";
+import type { CyclePhase } from "@/types/cycle";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const PHASE_DOT_COLOR: Record<string, string> = {
+  Menstrual: phaseColors.menstrual.solid,
+  Follicular: phaseColors.follicular.solid,
+  Ovulatory: phaseColors.ovulatory.solid,
+  Luteal: phaseColors.luteal.solid,
+  "Late Luteal": phaseColors.luteal.solid,
+};
+
+const PHASE_KEY_MAP: Record<string, keyof typeof PHASE_SELFCARE> = {
+  Menstrual: "menstrual",
+  Follicular: "follicular",
+  Ovulatory: "ovulation",
+  Luteal: "luteal",
+  "Late Luteal": "late",
+};
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -143,6 +163,7 @@ export default function HealthScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: cyclePrediction } = useLotusCycle(profile?.id || "");
 
   const loadData = async () => {
     try {
@@ -262,13 +283,29 @@ export default function HealthScreen() {
 
         <GlassSurface style={styles.phaseCard} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
           <View style={styles.phaseRow}>
-            <View style={[styles.phaseDot, { backgroundColor: "#F6BFD3" }]} />
+            <View
+              style={[
+                styles.phaseDot,
+                {
+                  backgroundColor: cyclePrediction
+                    ? PHASE_DOT_COLOR[cyclePrediction.currentPhase] ?? "#F6BFD3"
+                    : "#F6BFD3",
+                },
+              ]}
+            />
             <ThemedText style={[styles.phaseLabel, { color: theme.text }]}>
-              Current Phase
+              {cyclePrediction ? cyclePrediction.currentPhase : "Current Phase"}
             </ThemedText>
+            {cyclePrediction && (
+              <ThemedText style={[styles.phaseDayLabel, { color: theme.textSecondary }]}>
+                Day {cyclePrediction.rawCycleDay}
+              </ThemedText>
+            )}
           </View>
           <ThemedText style={[styles.phaseInsight, { color: theme.textSecondary }]}>
-            Your hormones shift throughout each cycle, influencing mood, energy, and well-being.
+            {cyclePrediction
+              ? PHASE_SELFCARE[PHASE_KEY_MAP[cyclePrediction.currentPhase] ?? "follicular"]
+              : "Your hormones shift throughout each cycle, influencing mood, energy, and well-being."}
           </ThemedText>
         </GlassSurface>
 
@@ -404,6 +441,11 @@ const styles = StyleSheet.create({
   phaseLabel: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 15,
+    flex: 1,
+  },
+  phaseDayLabel: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
   },
   phaseInsight: {
     fontFamily: Fonts.body,
