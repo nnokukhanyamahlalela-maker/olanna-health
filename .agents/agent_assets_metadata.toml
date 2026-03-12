@@ -101,13 +101,13 @@ title = "Notification - Partner"
 id = "6BjftKz2dT38uAztfxxbf"
 uri = "file://attached_assets/appstore_lotus_cycle.png"
 type = "image"
-title = "Updated Lotus Cycle Screen"
+title = "Lotus Cycle - With Overlay"
 
 [[outputs]]
 id = "OpyN07yiF55Fl-Nb4jxpO"
 uri = "file://attached_assets/appstore_calendar.png"
 type = "image"
-title = "Calendar Screen"
+title = "Calendar - With Overlay"
 
 [[outputs]]
 id = "osMjZvudSdnLhbu3SUtUz"
@@ -125,4 +125,4 @@ title = "Health Screen"
 id = "wLzDQShhhk1WnLu2Ojx34"
 uri = "file://attached_assets/appstore_learn.png"
 type = "image"
-title = "Learn Screen"
+title = "Learn - With Overlay"

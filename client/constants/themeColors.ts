@@ -75,7 +75,7 @@ export const lightTheme: ThemeColors = {
   },
   
   gradientStops: ["#FF9A6B", "#FF3F9E", "#F7B0C8", "#E7C2E8"] as const,
-  gradientOverlay: "rgba(255, 255, 255, 0.06)",
+  gradientOverlay: "rgba(255, 255, 255, 0.22)",
   
   statusBar: "light",
   
@@ -115,7 +115,7 @@ export const darkTheme: ThemeColors = {
   },
   
   gradientStops: ["#1B0F1E", "#3A1230", "#6B1B4A", "#2A1730"] as const,
-  gradientOverlay: "rgba(0, 0, 0, 0.15)",
+  gradientOverlay: "rgba(0, 0, 0, 0.25)",
   
   statusBar: "light",
   
