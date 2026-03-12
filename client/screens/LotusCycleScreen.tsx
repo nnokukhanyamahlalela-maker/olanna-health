@@ -391,12 +391,97 @@ function InteractiveCycleWheel({
   );
 }
 
+const LOTUS_SYNOPSIS = [
+  {
+    stage: "The Bud",
+    phase: "Menstrual Phase",
+    days: "Days 1–5",
+    icon: "droplet" as const,
+    color: "#C2185B",
+    softBg: "#C2185B20",
+    body: "Your lotus is a tightly closed bud — your body is shedding its lining and turning inward. This is a time for deep rest, gentle warmth, and honouring the release. Energy is at its lowest; let the bud sleep.",
+  },
+  {
+    stage: "The Rising Lotus",
+    phase: "Follicular Phase",
+    days: "Days 6–13",
+    icon: "trending-up" as const,
+    color: "#8E4470",
+    softBg: "#8E447020",
+    body: "Petals begin to unfurl as oestrogen rises and a new follicle matures. Creativity and energy build steadily. This is your spring — plan, explore, and let new ideas take root.",
+  },
+  {
+    stage: "Full Bloom",
+    phase: "Ovulatory Phase",
+    days: "Days 14–16",
+    icon: "sun" as const,
+    color: "#B8730A",
+    softBg: "#B8730A20",
+    body: "The lotus opens completely — you're at peak radiance. An egg is released, fertility peaks, and so does confidence and social energy. Shine, connect, and express yourself fully.",
+  },
+  {
+    stage: "The Closing Lotus",
+    phase: "Luteal Phase",
+    days: "Days 17–28",
+    icon: "moon" as const,
+    color: "#7B1FA2",
+    softBg: "#7B1FA220",
+    body: "Petals draw gently inward as progesterone rises. Your body prepares to either nurture or release. It's a time for boundaries, reflection, and nesting. Honour the slowdown — the bud will return.",
+  },
+];
+
+function LotusSynopsis({ isExpanded, onToggle }: { isExpanded: boolean; onToggle: () => void }) {
+  return (
+    <GlassSurface style={styles.synopsisCard} borderRadius={BorderRadius.lg} padding={16}>
+      <Pressable onPress={onToggle} style={styles.synopsisHeader}>
+        <View style={styles.synopsisHeaderLeft}>
+          <Feather name="info" size={16} color={neutral.textSecondary} />
+          <Text style={styles.synopsisHeaderText}>How the Lotus Cycle Works</Text>
+        </View>
+        <Feather
+          name={isExpanded ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={neutral.textSecondary}
+        />
+      </Pressable>
+
+      {isExpanded ? (
+        <View style={styles.synopsisContent}>
+          <Text style={styles.synopsisIntro}>
+            The Lotus Cycle mirrors your menstrual journey through four stages of a lotus flower — from closed bud to full bloom and back again. Each stage reflects what's happening in your body and guides you toward what it needs most.
+          </Text>
+
+          {LOTUS_SYNOPSIS.map((item, index) => (
+            <View key={index} style={styles.synopsisItem}>
+              <View style={styles.synopsisItemHeader}>
+                <View style={[styles.synopsisIconCircle, { backgroundColor: item.softBg }]}>
+                  <Feather name={item.icon} size={14} color={item.color} />
+                </View>
+                <View style={styles.synopsisItemTitles}>
+                  <Text style={[styles.synopsisStage, { color: item.color }]}>{item.stage}</Text>
+                  <Text style={styles.synopsisPhaseDays}>{item.phase} · {item.days}</Text>
+                </View>
+              </View>
+              <Text style={styles.synopsisBody}>{item.body}</Text>
+            </View>
+          ))}
+
+          <Text style={styles.synopsisFooter}>
+            Swipe around the wheel above to explore each day of your cycle. The lotus at the centre transforms as you move through your phases.
+          </Text>
+        </View>
+      ) : null}
+    </GlassSurface>
+  );
+}
+
 export function LotusCycleScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
 
@@ -471,6 +556,11 @@ export function LotusCycleScreen() {
             />
           ))}
         </View>
+
+        <LotusSynopsis
+          isExpanded={synopsisExpanded}
+          onToggle={() => setSynopsisExpanded((v) => !v)}
+        />
 
         <InteractiveCycleWheel
           cycleLength={cycleLength}
@@ -720,6 +810,78 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: 13,
     fontWeight: "500",
+  },
+  synopsisCard: {
+    marginBottom: 16,
+  },
+  synopsisHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  synopsisHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  synopsisHeaderText: {
+    fontFamily: Fonts.heading,
+    fontSize: 14,
+    color: neutral.textPrimary,
+    letterSpacing: 0.2,
+  },
+  synopsisContent: {
+    marginTop: 14,
+    gap: 16,
+  },
+  synopsisIntro: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: neutral.textSecondary,
+    lineHeight: 20,
+  },
+  synopsisItem: {
+    gap: 6,
+  },
+  synopsisItemHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  synopsisIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  synopsisItemTitles: {
+    flex: 1,
+  },
+  synopsisStage: {
+    fontFamily: Fonts.heading,
+    fontSize: 14,
+    letterSpacing: 0.2,
+  },
+  synopsisPhaseDays: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    color: neutral.textSecondary,
+  },
+  synopsisBody: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: neutral.textSecondary,
+    lineHeight: 20,
+    paddingLeft: 38,
+  },
+  synopsisFooter: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: neutral.textSecondary,
+    fontStyle: "italic" as const,
+    lineHeight: 18,
+    marginTop: 4,
   },
 });
 
