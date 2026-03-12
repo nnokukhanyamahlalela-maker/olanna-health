@@ -84,3 +84,15 @@ id = "VAl_f_y2-DTrMF_QYWnVh"
 uri = "file://attached_assets/notif_for_partner.png"
 type = "image"
 title = "Olanna Health — Notifications For Her Partner"
+
+[[outputs]]
+id = "x8kvNCRt3vAniwcIO3h7B"
+uri = "file://attached_assets/appstore_notif_her.png"
+type = "image"
+title = "App Store — Notifications That Empower You (For Her)"
+
+[[outputs]]
+id = "-nbKP50fCmoCi_jfuW8Ut"
+uri = "file://attached_assets/appstore_notif_partner.png"
+type = "image"
+title = "App Store — Keep Her Partner In The Loop"
