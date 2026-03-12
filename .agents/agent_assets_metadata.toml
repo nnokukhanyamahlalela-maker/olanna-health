@@ -89,10 +89,10 @@ title = "Olanna Health — Notifications For Her Partner"
 id = "x8kvNCRt3vAniwcIO3h7B"
 uri = "file://attached_assets/appstore_notif_her.png"
 type = "image"
-title = "App Store — Notifications That Empower You (For Her)"
+title = "Olanna Health — Notifications That Empower You"
 
 [[outputs]]
 id = "-nbKP50fCmoCi_jfuW8Ut"
 uri = "file://attached_assets/appstore_notif_partner.png"
 type = "image"
-title = "App Store — Keep Her Partner In The Loop"
+title = "Olanna Health — Keep Her Partner In The Loop"
