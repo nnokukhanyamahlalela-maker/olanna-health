@@ -38,6 +38,7 @@ import {
   phaseConfig,
 } from "@/constants/phaseConfig";
 import { GlassSurface } from "@/components/GlassSurface";
+import { AppGradient } from "@/components/AppGradient";
 import { Fonts, BorderRadius } from "@/constants/theme";
 import { neutral, getPhaseColors } from "@/constants/colors";
 import { getPhaseGradient, toPhaseName } from "@/constants/phase";
@@ -516,7 +517,7 @@ export function LotusCycleScreen() {
     : getPhaseForDay(clampedSelectedDay, cycleLength, periodLength);
 
   return (
-    <View style={styles.root}>
+    <AppGradient style={styles.root}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -615,14 +616,13 @@ export function LotusCycleScreen() {
         </View>
 
       </ScrollView>
-    </View>
+    </AppGradient>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: neutral.bgPrimary,
   },
   scrollView: {
     flex: 1,
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 14,
   },
   title: {
     fontFamily: Fonts.heading,
@@ -646,14 +646,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.05)",
+    backgroundColor: "rgba(255,255,255,0.35)",
     alignItems: "center",
     justifyContent: "center",
   },
   phaseGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 4,
     paddingHorizontal: 4,
   },
   phaseCardItem: {
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
   },
   synopsisStrip: {
     marginHorizontal: -20,
-    marginBottom: 6,
+    marginBottom: 0,
   },
   synopsisScrollContent: {
     paddingHorizontal: 20,
