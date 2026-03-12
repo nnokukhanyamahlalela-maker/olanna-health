@@ -103,8 +103,8 @@ export default function LearnScreen() {
           style={styles.quickLinkPressable}
         >
           <GlassSurface style={styles.quickLinkCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
-            <View style={[styles.quickLinkIcon, { backgroundColor: theme.primary + "15" }]}>
-              <Feather name="book" size={18} color={theme.primary} />
+            <View style={[styles.quickLinkIcon, { backgroundColor: "#6B4C8A40" }]}>
+              <Feather name="book" size={18} color="#6B4C8A" />
             </View>
             <AppText variant="label" color={theme.text}>
               Glossary
@@ -131,7 +131,7 @@ export default function LearnScreen() {
               onPress={() => setSelectedCategory(topic.label === "Periods 101" ? "Periods" : topic.label)}
             >
               <GlassSurface style={styles.topicCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
-                <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "30" }]}>
+                <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "40" }]}>
                   <Feather name={topic.icon} size={20} color={topic.color} />
                 </View>
                 <AppText variant="label" color={theme.text} style={styles.topicCardTitle}>

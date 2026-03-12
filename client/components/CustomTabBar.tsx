@@ -99,7 +99,7 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, isDark }: TabItem
   const isLotus = routeName === "CheckInTab";
 
   const activeColor = brand.primary;
-  const inactiveColor = isDark ? "rgba(255,255,255,0.40)" : "rgba(90,74,71,0.45)";
+  const inactiveColor = isDark ? "rgba(255,255,255,0.55)" : "rgba(90,74,71,0.65)";
   const iconColor = isFocused ? activeColor : inactiveColor;
 
   return (

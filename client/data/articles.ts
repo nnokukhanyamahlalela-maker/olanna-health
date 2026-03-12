@@ -32,21 +32,21 @@ export const TOPIC_CATEGORIES = [
     label: "Periods 101",
     description: "Your cycle explained, clearly and simply",
     icon: "droplet" as const,
-    color: "#D4A090",
+    color: "#C2664E",
   },
   {
     id: "pcos",
     label: "PCOS",
     description: "Understanding and managing polycystic ovarian syndrome",
     icon: "activity" as const,
-    color: "#B8C4B8",
+    color: "#4A7A4E",
   },
   {
     id: "endometriosis",
     label: "Endometriosis",
     description: "Everything you need to know about endo",
     icon: "heart" as const,
-    color: "#C8C0D0",
+    color: "#7B5EA7",
   },
 ] as const;
 

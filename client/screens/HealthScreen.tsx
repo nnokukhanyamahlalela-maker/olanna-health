@@ -89,7 +89,7 @@ function TrackerCard({
       ]}
     >
       <GlassSurface style={styles.trackerCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "20" }]}>
+        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "40" }]}>
           <Feather name={item.icon} size={22} color={item.color} />
         </View>
         <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
@@ -136,7 +136,7 @@ function InsightPlaceholderCard({
     >
       <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
         <View style={styles.insightCardRow}>
-          <View style={[styles.insightIconWrap, { backgroundColor: color + "20" }]}>
+          <View style={[styles.insightIconWrap, { backgroundColor: color + "40" }]}>
             <Feather name={icon} size={20} color={color} />
           </View>
           <View style={styles.insightContent}>
@@ -200,7 +200,7 @@ export default function HealthScreen() {
       title: "Supplements",
       subtitle: "Track your daily supplements",
       icon: "sun",
-      color: "#7A8C5E",
+      color: "#5A8A3E",
       route: "Supplements",
     },
     {
@@ -339,7 +339,7 @@ export default function HealthScreen() {
           >
             <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
               <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C20" }]}>
+                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C40" }]}>
                   <Feather name="clipboard" size={20} color="#C2185B" />
                 </View>
                 <View style={styles.insightContent}>
@@ -364,7 +364,7 @@ export default function HealthScreen() {
           >
             <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
               <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#D4502020" }]}>
+                <View style={[styles.insightIconWrap, { backgroundColor: "#D4502040" }]}>
                   <Feather name="calendar" size={20} color="#D45020" />
                 </View>
                 <View style={styles.insightContent}>
