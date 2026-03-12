@@ -467,7 +467,7 @@ function LotusSynopsis({ isExpanded, onToggle }: { isExpanded: boolean; onToggle
           ))}
 
           <Text style={styles.synopsisFooter}>
-            Swipe around the wheel above to explore each day of your cycle. The lotus at the centre transforms as you move through your phases.
+            Swipe around the wheel to explore each day of your cycle. The lotus at the centre transforms as you move through your phases.
           </Text>
         </View>
       ) : null}
@@ -558,11 +558,6 @@ export function LotusCycleScreen() {
           ))}
         </View>
 
-        <LotusSynopsis
-          isExpanded={synopsisExpanded}
-          onToggle={() => setSynopsisExpanded((v) => !v)}
-        />
-
         <InteractiveCycleWheel
           cycleLength={cycleLength}
           periodLength={periodLength}
@@ -625,6 +620,11 @@ export function LotusCycleScreen() {
             <Text style={styles.insightBody}>{PHASE_SELFCARE[currentPhase as CyclePhase]}</Text>
           </GlassSurface>
         </View>
+
+        <LotusSynopsis
+          isExpanded={synopsisExpanded}
+          onToggle={() => setSynopsisExpanded((v) => !v)}
+        />
       </ScrollView>
     </View>
   );
@@ -813,7 +813,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   synopsisCard: {
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 24,
   },
   synopsisHeader: {
     flexDirection: "row",
