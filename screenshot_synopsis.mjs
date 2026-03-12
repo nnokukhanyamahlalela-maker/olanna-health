@@ -3,86 +3,101 @@ import { chromium } from 'playwright';
 const OUT = '/home/runner/workspace/attached_assets';
 const CHROMIUM_PATH = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium';
 
-async function tryClick(page, selector) {
-  const loc = page.locator(selector).first();
-  if (await loc.count() > 0 && await loc.isVisible().catch(() => false)) {
-    await loc.click({ force: true });
-    await page.waitForTimeout(1000);
-    return true;
-  }
-  return false;
-}
-
 async function run() {
   const browser = await chromium.launch({ headless: true, executablePath: CHROMIUM_PATH });
-  const ctx = await browser.newContext({ viewport: { width: 400, height: 720 }, deviceScaleFactor: 3 });
+  const ctx = await browser.newContext({ viewport: { width: 400, height: 720 }, deviceScaleFactor: 3, hasTouch: true });
   const page = await ctx.newPage();
 
-  await page.goto('http://localhost:8081', { timeout: 60000 });
-  await page.waitForTimeout(36000);
-
-  let body = () => page.innerText('body').catch(() => '');
-  let text;
-
-  await tryClick(page, 'text=/Continue/i');
-  await page.waitForTimeout(1500);
-  text = await body();
-  if (text.includes('call you')) {
-    await page.locator('input').first().fill('Amara');
-    await page.waitForTimeout(500);
-    await tryClick(page, 'text=/Continue/i');
-    await page.waitForTimeout(3000);
-  }
-  text = await body();
-  if (text.includes('Nice to meet')) await page.waitForTimeout(3500);
-  text = await body();
-  if (text.includes('Tell me about') || text.includes('Enter manually')) {
-    await tryClick(page, 'text=/Enter manually/i');
-    await page.waitForTimeout(1000);
-    await tryClick(page, 'text=/Continue/i');
-    await page.waitForTimeout(1500);
-  }
-  text = await body();
-  if (text.includes('pleasure') || text.includes('Select all')) {
-    await tryClick(page, 'text=/Track my period/i');
-    await page.waitForTimeout(500);
-    await tryClick(page, 'text=/General wellness/i');
-    await page.waitForTimeout(1000);
-    await tryClick(page, 'text=/Continue/i');
-    await page.waitForTimeout(1500);
-  }
-  text = await body();
-  if (text.includes('Perfect') || text.includes('get started')) await page.waitForTimeout(4000);
-  for (let i = 0; i < 5; i++) {
-    text = await body();
-    if (text.includes('The Lotus Cycle')) break;
-    await tryClick(page, 'text=/^Next$/i') || await tryClick(page, 'text=/Get Started/i');
+  await page.goto('http://localhost:8081', { timeout: 30000, waitUntil: 'networkidle' });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+  
+  for (let i = 0; i < 25; i++) {
+    if (await page.evaluate(() => document.body.innerText.length > 10)) break;
     await page.waitForTimeout(1500);
   }
   await page.waitForTimeout(3000);
-  console.log('Main app loaded!');
 
-  // Click the synopsis to expand it
-  await tryClick(page, 'text=/How the Lotus Cycle Works/i');
-  await page.waitForTimeout(1000);
+  // Onboarding
+  await page.locator('text=Continue').first().click();
+  await page.waitForTimeout(1500);
+  const nameInput = page.locator('input').first();
+  await nameInput.click();
+  await page.keyboard.type('Amara', { delay: 30 });
+  await page.waitForTimeout(300);
+  await page.locator('text=Continue').first().click();
+  await page.waitForTimeout(1500);
+  let t = await page.evaluate(() => document.body.innerText.substring(0, 60));
+  if (t.includes('Nice to meet you')) {
+    await page.locator('text=Continue').first().click();
+    await page.waitForTimeout(1500);
+  }
+  t = await page.evaluate(() => document.body.innerText.substring(0, 80));
+  if (t.includes('Tell me about your cycle')) {
+    await page.locator('[aria-label="Continue"]').click({ timeout: 3000 });
+    await page.waitForTimeout(1500);
+  }
+  t = await page.evaluate(() => document.body.innerText.substring(0, 80));
+  if (t.includes('pleasure') || t.includes('Track my period')) {
+    await page.locator('text=Track my period').first().click();
+    await page.waitForTimeout(300);
+    await page.locator('text=Continue').first().click();
+    await page.waitForTimeout(1500);
+  }
+  t = await page.evaluate(() => document.body.innerText.substring(0, 60));
+  if (t.includes('Perfect')) {
+    await page.waitForTimeout(2500);
+    const cont = page.locator('text=Continue').first();
+    if (await cont.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await cont.click();
+      await page.waitForTimeout(1500);
+    }
+  }
+  for (let i = 0; i < 6; i++) {
+    const gs = page.locator('text=Get Started').first();
+    if (await gs.isVisible({ timeout: 500 }).catch(() => false)) {
+      await gs.click();
+      await page.waitForTimeout(2000);
+      break;
+    }
+    const next = page.locator('text=Next').first();
+    if (await next.isVisible({ timeout: 500 }).catch(() => false)) {
+      await next.click();
+      await page.waitForTimeout(800);
+    }
+  }
+  await page.waitForTimeout(3000);
 
-  // Scroll down a little to show the expanded content
-  await page.mouse.move(200, 350);
-  for (let i = 0; i < 3; i++) { await page.mouse.wheel(0, 120); await page.waitForTimeout(200); }
-  await page.waitForTimeout(500);
+  // Navigate to Cycle tab
+  const cycleTab = page.locator('[aria-label="Cycle"]').first();
+  if (await cycleTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await cycleTab.click();
+    await page.waitForTimeout(3000);
+  }
 
-  await page.screenshot({ path: `${OUT}/screenshot_synopsis_expanded.png` });
-  console.log('Saved: synopsis expanded (top)');
+  // Screenshot 1: Clean view (no synopsis expanded)
+  await page.screenshot({ path: `${OUT}/lotus_clean.png` });
+  console.log('Clean view saved');
 
-  // Scroll more to show remaining stages
-  for (let i = 0; i < 4; i++) { await page.mouse.wheel(0, 150); await page.waitForTimeout(200); }
-  await page.waitForTimeout(500);
+  // Screenshot 2: Tap "Menstrual" flower to expand synopsis
+  const menstrualFlower = page.locator('text=Menstrual').first();
+  if (await menstrualFlower.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await menstrualFlower.click();
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: `${OUT}/lotus_menstrual_expanded.png` });
+    console.log('Menstrual expanded saved');
+  }
 
-  await page.screenshot({ path: `${OUT}/screenshot_synopsis_expanded2.png` });
-  console.log('Saved: synopsis expanded (bottom)');
+  // Screenshot 3: Tap "Follicular" flower
+  const follicularFlower = page.locator('text=Follicular').first();
+  if (await follicularFlower.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await follicularFlower.click();
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: `${OUT}/lotus_follicular_expanded.png` });
+    console.log('Follicular expanded saved');
+  }
 
   await browser.close();
-  console.log('All done!');
 }
 
 run().catch(e => { console.error('Error:', e.message); process.exit(1); });

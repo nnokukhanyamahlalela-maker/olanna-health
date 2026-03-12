@@ -126,3 +126,21 @@ id = "wLzDQShhhk1WnLu2Ojx34"
 uri = "file://attached_assets/appstore_learn.png"
 type = "image"
 title = "Learn - With Overlay"
+
+[[outputs]]
+id = "S9sF2nzDDDU1ody5Ga5dq"
+uri = "file://attached_assets/lotus_clean.png"
+type = "image"
+title = "Clean View (no synopsis)"
+
+[[outputs]]
+id = "WFzkc0ohjsm3h6h6x0QGo"
+uri = "file://attached_assets/lotus_menstrual_expanded.png"
+type = "image"
+title = "Menstrual Flower Tapped"
+
+[[outputs]]
+id = "418SBR2YLlg8wNgEBtuX0"
+uri = "file://attached_assets/lotus_follicular_expanded.png"
+type = "image"
+title = "Follicular Flower Tapped"

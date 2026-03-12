@@ -99,12 +99,25 @@ function PhaseLotus({ variant, size }: { variant: LotusVariant; size: number }) 
 
 const PHASE_CIRCLE_SIZE = 52;
 
-function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean }) {
+function PhaseGridCard({
+  phase,
+  isActive,
+  isExpanded,
+  onPress,
+}: {
+  phase: Phase;
+  isActive: boolean;
+  isExpanded: boolean;
+  onPress: () => void;
+}) {
   const config = phaseConfig[phase];
   const labelColor = PHASE_LABEL_COLORS[phase];
 
   return (
-    <View style={[styles.phaseCardItem, isActive ? styles.phaseCardActive : null]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.phaseCardItem, isActive ? styles.phaseCardActive : null]}
+    >
       <View
         style={[
           styles.phaseCircle,
@@ -116,13 +129,14 @@ function PhaseGridCard({ phase, isActive }: { phase: Phase; isActive: boolean })
             backgroundColor: PHASE_CIRCLE_COLORS[phase] + "30",
           },
           isActive ? styles.phaseCircleActive : null,
+          isExpanded ? { borderWidth: 2, borderColor: labelColor } : null,
         ]}
       >
         <PhaseLotus variant={config.lotusVariant} size={PHASE_CIRCLE_SIZE} />
       </View>
       <Text style={[styles.phaseLabel, { color: labelColor }]}>{config.label}</Text>
       <Text style={styles.phaseSubtitle}>{config.subtitle}</Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -392,79 +406,77 @@ function InteractiveCycleWheel({
   );
 }
 
-const LOTUS_SYNOPSIS = [
-  {
+const PHASE_SYNOPSIS: Record<string, {
+  stage: string;
+  phaseName: string;
+  days: string;
+  icon: keyof typeof Feather.glyphMap;
+  color: string;
+  softBg: string;
+  body: string;
+}> = {
+  menstrual: {
     stage: "The Bud",
-    phase: "Menstrual Phase",
+    phaseName: "Menstrual Phase",
     days: "Days 1–5",
-    icon: "droplet" as const,
+    icon: "droplet",
     color: "#C2185B",
     softBg: "#C2185B20",
     body: "Your lotus is a tightly closed bud — your body is shedding its lining and turning inward. This is a time for deep rest, gentle warmth, and honouring the release. Energy is at its lowest; let the bud sleep.",
   },
-  {
+  follicular: {
     stage: "The Rising Lotus",
-    phase: "Follicular Phase",
+    phaseName: "Follicular Phase",
     days: "Days 6–13",
-    icon: "trending-up" as const,
+    icon: "trending-up",
     color: "#8E4470",
     softBg: "#8E447020",
     body: "Petals begin to unfurl as oestrogen rises and a new follicle matures. Creativity and energy build steadily. This is your spring — plan, explore, and let new ideas take root.",
   },
-  {
+  ovulation: {
     stage: "Full Bloom",
-    phase: "Ovulatory Phase",
+    phaseName: "Ovulatory Phase",
     days: "Days 14–16",
-    icon: "sun" as const,
+    icon: "sun",
     color: "#B8730A",
     softBg: "#B8730A20",
     body: "The lotus opens completely — you're at peak radiance. An egg is released, fertility peaks, and so does confidence and social energy. Shine, connect, and express yourself fully.",
   },
-  {
+  luteal: {
     stage: "The Closing Lotus",
-    phase: "Luteal Phase",
+    phaseName: "Luteal Phase",
     days: "Days 17–28",
-    icon: "moon" as const,
+    icon: "moon",
     color: "#7B1FA2",
     softBg: "#7B1FA220",
     body: "Petals draw gently inward as progesterone rises. Your body prepares to either nurture or release. It's a time for boundaries, reflection, and nesting. Honour the slowdown — the bud will return.",
   },
-];
+};
 
-const SYNOPSIS_CARD_WIDTH = SCREEN_WIDTH - 80;
+function PhaseSynopsisCard({ phase, onDismiss }: { phase: Phase; onDismiss: () => void }) {
+  const synopsis = PHASE_SYNOPSIS[phase] || PHASE_SYNOPSIS.menstrual;
 
-function LotusSynopsisStrip() {
   return (
-    <View style={styles.synopsisStrip}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={SYNOPSIS_CARD_WIDTH + 10}
-        decelerationRate="fast"
-        contentContainerStyle={styles.synopsisScrollContent}
+    <Pressable onPress={onDismiss}>
+      <GlassSurface
+        style={styles.synopsisReveal}
+        borderRadius={BorderRadius.md}
+        padding={14}
+        tint="subtle"
       >
-        {LOTUS_SYNOPSIS.map((item, index) => (
-          <GlassSurface
-            key={index}
-            style={[styles.synopsisSlide, { width: SYNOPSIS_CARD_WIDTH }]}
-            borderRadius={BorderRadius.md}
-            padding={14}
-            tint="subtle"
-          >
-            <View style={styles.synopsisSlideHeader}>
-              <View style={[styles.synopsisIconCircle, { backgroundColor: item.softBg }]}>
-                <Feather name={item.icon} size={13} color={item.color} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.synopsisStage, { color: item.color }]}>{item.stage}</Text>
-                <Text style={styles.synopsisPhaseDays}>{item.phase} · {item.days}</Text>
-              </View>
-            </View>
-            <Text style={styles.synopsisSlideBody} numberOfLines={3}>{item.body}</Text>
-          </GlassSurface>
-        ))}
-      </ScrollView>
-    </View>
+        <View style={styles.synopsisSlideHeader}>
+          <View style={[styles.synopsisIconCircle, { backgroundColor: synopsis.softBg }]}>
+            <Feather name={synopsis.icon} size={13} color={synopsis.color} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.synopsisStage, { color: synopsis.color }]}>{synopsis.stage}</Text>
+            <Text style={styles.synopsisPhaseDays}>{synopsis.phaseName} · {synopsis.days}</Text>
+          </View>
+          <Feather name="x" size={14} color={neutral.textSecondary} />
+        </View>
+        <Text style={styles.synopsisSlideBody}>{synopsis.body}</Text>
+      </GlassSurface>
+    </Pressable>
   );
 }
 
@@ -474,6 +486,7 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [expandedPhase, setExpandedPhase] = useState<Phase | null>(null);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
 
@@ -546,11 +559,20 @@ export function LotusCycleScreen() {
               key={phase}
               phase={phase}
               isActive={phase === currentPhase}
+              isExpanded={expandedPhase === phase}
+              onPress={() =>
+                setExpandedPhase((prev) => (prev === phase ? null : phase))
+              }
             />
           ))}
         </View>
 
-        <LotusSynopsisStrip />
+        {expandedPhase && PHASE_SYNOPSIS[expandedPhase] && (
+          <PhaseSynopsisCard
+            phase={expandedPhase}
+            onDismiss={() => setExpandedPhase(null)}
+          />
+        )}
 
         <InteractiveCycleWheel
           cycleLength={cycleLength}
@@ -801,16 +823,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
   },
-  synopsisStrip: {
-    marginHorizontal: -20,
-    marginBottom: 0,
-  },
-  synopsisScrollContent: {
-    paddingHorizontal: 20,
-    gap: 10,
-  },
-  synopsisSlide: {
-    marginBottom: 2,
+  synopsisReveal: {
+    marginBottom: 4,
   },
   synopsisSlideHeader: {
     flexDirection: "row",
