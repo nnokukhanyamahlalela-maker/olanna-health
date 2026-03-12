@@ -1,0 +1,97 @@
+Update the existing React Native Health tab to add a new “Gut Health” section.
+
+Context:
+- This is a wellness app, not a medical app.
+- We are not doctors.
+- All Gut Health content must be educational and informational only.
+- Do not use language that implies medical advice, diagnosis, treatment, prevention, or symptom management.
+- Do not make claims that the app can fix, treat, balance, heal, detect, prevent, or manage any condition or symptom.
+- The tone should feel calm, supportive, premium, modern, and concise.
+- The new section must visually match the current Health tab UI.
+
+Technical requirements:
+- React Native only
+- Reuse the existing design system, spacing, colors, typography, card styles, and layout patterns already used in the Health tab
+- Do not change unrelated parts of the app
+- Keep the implementation production-ready and clean
+- If the project uses component files, create a small reusable section/card component only if helpful
+- If the project uses a constants/content file, place copy there consistently; otherwise keep the text in the screen component
+- Make sure the layout is mobile-friendly and scrollable if needed
+
+Goal:
+Add a Gut Health section that provides educational digestive wellness content in a legally safer and ethically appropriate way.
+
+Please implement the Gut Health section with the following exact content:
+
+Section title:
+Gut Health
+
+Section subtitle:
+Educational digestive wellness insights
+
+Card 1:
+Title: About gut health
+Body: Gut health refers to general digestive wellness and the balance of microorganisms in the gut. Research suggests the gut may play a role in digestion, nutrient absorption, and overall well-being. Experiences can vary from person to person.
+
+Card 2:
+Title: Common digestive experiences
+Body: Some people notice patterns such as bloating, digestive discomfort, changes in bowel habits, or shifts in energy. Tracking how you feel over time may help you better understand your personal wellness patterns.
+
+Card 3:
+Title: Everyday habits that may support gut wellness
+Items:
+- Eat a variety of fiber-rich foods
+- Stay hydrated
+- Include regular movement
+- Prioritize sleep
+- Manage everyday stress
+
+Card 4:
+Title: Foods commonly associated with gut wellness
+Items:
+- Yogurt or kefir
+- Oats
+- Bananas
+- Leafy greens
+- Beans and lentils
+- Fermented foods like kimchi or sauerkraut
+
+Disclaimer:
+Add this exact text at the bottom of the Gut Health section in a subtle but clearly readable style:
+
+This information is provided for educational and wellness purposes only and is not medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for medical concerns or before making health-related decisions.
+
+Microcopy rules:
+- Prefer wording like:
+  - may support
+  - commonly associated with
+  - some people notice
+  - general wellness
+  - educational insights
+  - track patterns over time
+- Avoid wording like:
+  - treats
+  - prevents
+  - fixes
+  - diagnoses
+  - manages symptoms
+  - balances hormones
+  - heals
+  - corrects
+  - solves
+
+UI guidance:
+- Match the existing Health tab look and feel
+- Use soft, premium card styling consistent with the current screen
+- Keep the content easy to scan
+- Make the disclaimer visible but secondary
+- Do not use clinical or medical-looking styling
+- Preserve the current hierarchy and spacing rhythm
+- Place the Gut Health section naturally within the Health tab, likely below the existing cards or trackers
+
+Output requirements:
+- Return the updated React Native code for the Health tab
+- Include any new components created
+- Keep the code production-ready
+- Do not include placeholder pseudocode
+- Ensure the final code compiles in the existing project structure

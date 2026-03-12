@@ -34,6 +34,7 @@ import PartnerDashboardScreen from "@/screens/PartnerDashboardScreen";
 import PMSCheckerScreen from "@/screens/PMSCheckerScreen";
 import SupplementsScreen from "@/screens/SupplementsScreen";
 import MedicationsScreen from "@/screens/MedicationsScreen";
+import GutHealthScreen from "@/screens/GutHealthScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 
@@ -70,6 +71,7 @@ export type RootStackParamList = {
   PMSChecker: undefined;
   Supplements: undefined;
   Medications: undefined;
+  GutHealth: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -258,6 +260,13 @@ export default function RootStackNavigator() {
         component={MedicationsScreen}
         options={{
           headerTitle: "Medications",
+        }}
+      />
+      <Stack.Screen
+        name="GutHealth"
+        component={GutHealthScreen}
+        options={{
+          headerTitle: "Gut Health",
         }}
       />
       <Stack.Screen

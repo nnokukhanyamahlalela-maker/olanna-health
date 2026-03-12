@@ -193,10 +193,10 @@ export default function HealthScreen() {
     {
       id: "gut-health",
       title: "Gut Health",
-      subtitle: "Monitor digestive wellness",
+      subtitle: "Educational digestive wellness insights",
       icon: "heart",
       color: "#B8860B",
-      comingSoon: true,
+      route: "GutHealth",
     },
     {
       id: "sexual-health",
