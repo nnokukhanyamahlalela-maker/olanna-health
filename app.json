@@ -6,11 +6,29 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "olannahealth",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.olannahealth.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.olannahealth.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Olanna Health needs access to your photo library so you can import cycle data from screenshots of other period tracking apps.",
+        "NSCameraUsageDescription": "Olanna Health needs camera access so you can take photos of your cycle tracking data to import.",
+        "CFBundleDevelopmentRegion": "en",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +52,14 @@
           "backgroundColor": "#F0699A"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Olanna Health needs access to your photos so you can import cycle data from screenshots of other period tracking apps.",
+          "cameraPermission": "Olanna Health needs camera access so you can take photos of your cycle tracking data to import."
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true
