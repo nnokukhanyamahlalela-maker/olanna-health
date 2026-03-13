@@ -195,14 +195,6 @@ export default function ProfileScreen() {
             isDark={isDark}
           />
           <MenuItem
-            icon="sun"
-            label="Appearance"
-            color="#B8860B"
-            onPress={() => navigation.navigate("Appearance")}
-            theme={theme}
-            isDark={isDark}
-          />
-          <MenuItem
             icon="bell"
             label="Notifications"
             color="#D4764E"

@@ -19,7 +19,6 @@ import CheckInScreen from "@/screens/CheckInScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import CycleCalculatorScreen from "@/screens/CycleCalculatorScreen";
 import DailyDecodeScreen from "@/screens/DailyDecodeScreen";
-import AppearanceScreen from "@/screens/AppearanceScreen";
 import TermsOfServiceScreen from "@/screens/TermsOfServiceScreen";
 import AboutScreen from "@/screens/AboutScreen";
 
@@ -56,7 +55,6 @@ export type RootStackParamList = {
   Profile: undefined;
   CycleCalculator: undefined;
   DailyDecode: { decode: DailyDecodeOutput };
-  Appearance: undefined;
   TermsOfService: undefined;
   About: undefined;
 
@@ -190,13 +188,6 @@ export default function RootStackNavigator() {
         component={DailyDecodeScreen}
         options={{
           headerTitle: "Your Daily Decode",
-        }}
-      />
-      <Stack.Screen
-        name="Appearance"
-        component={AppearanceScreen}
-        options={{
-          headerTitle: "Appearance",
         }}
       />
       <Stack.Screen
