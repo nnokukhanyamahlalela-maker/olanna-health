@@ -67,6 +67,7 @@ export default function CheckInScreen() {
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   const [viewMode, setViewMode] = useState<ViewMode>('categories');
+  const [activeCategoryId, setActiveCategoryId] = useState<string>('core-cycle');
   const [selectedCategory, setSelectedCategory] = useState<SymptomCategory | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<Map<string, SymptomLog>>(new Map());
   const [painPoints, setPainPoints] = useState<BodyPainPoint[]>([]);
@@ -275,6 +276,16 @@ export default function CheckInScreen() {
 
   const loggedCount = selectedSymptoms.size + painPoints.length;
 
+  const getCategoryLoggedCount = useCallback((categoryId: string) => {
+    let count = 0;
+    selectedSymptoms.forEach((_, key) => {
+      if (key.startsWith(categoryId + '-')) count++;
+    });
+    return count;
+  }, [selectedSymptoms]);
+
+  const activeCategory = getOrderedCategories().find(c => c.id === activeCategoryId) || getOrderedCategories()[0];
+
   const renderCategorySection = (category: SymptomCategory, index: number) => (
     <Animated.View
       key={category.id}
@@ -413,6 +424,89 @@ export default function CheckInScreen() {
         </GlassSurface>
       </View>
 
+      {viewMode === 'categories' ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryStrip}
+          style={styles.categoryStripContainer}
+        >
+          {favorites.length > 0 ? (
+            <Pressable
+              onPress={() => setActiveCategoryId('__favorites__')}
+              style={[
+                styles.categoryPillBtn,
+                activeCategoryId === '__favorites__' ? styles.categoryPillBtnActive : undefined,
+              ]}
+              testID="category-pill-favorites"
+            >
+              <Feather
+                name="star"
+                size={14}
+                color={activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.tertiary}
+              />
+              <ThemedText
+                type="caption"
+                style={{
+                  color: activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.text,
+                  fontWeight: '600',
+                }}
+              >
+                Favourites
+              </ThemedText>
+            </Pressable>
+          ) : null}
+          {getOrderedCategories().map(cat => {
+            const isActive = activeCategoryId === cat.id;
+            const catCount = getCategoryLoggedCount(cat.id);
+            return (
+              <Pressable
+                key={cat.id}
+                onPress={() => setActiveCategoryId(cat.id)}
+                style={[
+                  styles.categoryPillBtn,
+                  isActive ? styles.categoryPillBtnActive : undefined,
+                ]}
+                testID={`category-pill-${cat.id}`}
+              >
+                <Feather
+                  name={cat.icon as any}
+                  size={14}
+                  color={isActive ? '#FFFFFF' : '#C2185B'}
+                />
+                <ThemedText
+                  type="caption"
+                  style={{
+                    color: isActive ? '#FFFFFF' : theme.text,
+                    fontWeight: '600',
+                  }}
+                  numberOfLines={1}
+                >
+                  {cat.name}
+                </ThemedText>
+                {catCount > 0 ? (
+                  <View style={[
+                    styles.categoryCountBadge,
+                    { backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(194,24,91,0.15)' },
+                  ]}>
+                    <ThemedText
+                      type="caption"
+                      style={{
+                        color: isActive ? '#FFFFFF' : '#C2185B',
+                        fontWeight: '700',
+                        fontSize: 10,
+                      }}
+                    >
+                      {catCount}
+                    </ThemedText>
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      ) : null}
+
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -422,7 +516,7 @@ export default function CheckInScreen() {
       >
         {viewMode === 'categories' ? (
           <>
-            {favorites.length > 0 ? (
+            {activeCategoryId === '__favorites__' ? (
               <GlassSurface borderRadius={BorderRadius.lg} padding={Spacing.md} style={styles.favoritesSection}>
                 <View style={styles.favoritesHeader}>
                   <Feather name="star" size={16} color={theme.tertiary} />
@@ -454,9 +548,9 @@ export default function CheckInScreen() {
                   )}
                 </View>
               </GlassSurface>
+            ) : activeCategory ? (
+              renderCategorySection(activeCategory, 0)
             ) : null}
-
-            {getOrderedCategories().map((category, index) => renderCategorySection(category, index))}
           </>
         ) : viewMode === 'bodymap' ? (
           <View style={styles.bodyMapContainer}>
@@ -811,6 +905,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.md,
+  },
+  categoryStripContainer: {
+    flexGrow: 0,
+    flexShrink: 0,
+    marginBottom: Spacing.md,
+  },
+  categoryStrip: {
+    paddingHorizontal: ScreenPadding.horizontal,
+    gap: Spacing.xs,
+    alignItems: 'center',
+  },
+  categoryPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: BorderRadius.full,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F5E8ED',
+  },
+  categoryPillBtnActive: {
+    backgroundColor: '#C2185B',
+    borderColor: '#C2185B',
+  },
+  categoryCountBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
   categorySectionOuter: {
     marginBottom: CardSpacing.gap,
