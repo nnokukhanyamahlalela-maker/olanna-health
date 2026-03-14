@@ -49,11 +49,11 @@ export function useCalendarCycle(userId: string) {
           type: "ovulation",
         };
 
-        let fertileCursor = new Date(prediction.fertileWindowStart);
-        const fertileEnd = new Date(prediction.fertileWindowEnd);
+        let fertileCursor = new Date(prediction.fertileWindowStart + "T00:00:00");
+        const fertileEnd = new Date(prediction.fertileWindowEnd + "T00:00:00");
 
         while (fertileCursor <= fertileEnd) {
-          const key = fertileCursor.toISOString().split("T")[0];
+          const key = `${fertileCursor.getFullYear()}-${String(fertileCursor.getMonth() + 1).padStart(2, "0")}-${String(fertileCursor.getDate()).padStart(2, "0")}`;
           marks[key] = {
             ...(marks[key] || {}),
             marked: true,

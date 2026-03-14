@@ -181,7 +181,7 @@ export const generateSeedData = async (): Promise<void> => {
   for (let i = 0; i < 60; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const cycleDay = i % 28;
     
     // Menstrual phase (days 0-5)

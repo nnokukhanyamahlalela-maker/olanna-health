@@ -102,7 +102,7 @@ export function CycleReviewScreen({
     onConfirm({
       regularity: regularity === "" ? undefined : (regularity as CycleRegularity),
       lastPeriodStartDate: hasSetDate
-        ? lastPeriodDate.toISOString().split("T")[0]
+        ? `${lastPeriodDate.getFullYear()}-${String(lastPeriodDate.getMonth() + 1).padStart(2, "0")}-${String(lastPeriodDate.getDate()).padStart(2, "0")}`
         : "",
       averageCycleLength: avgCycleLength ? parseInt(avgCycleLength) : undefined,
       periodDuration: periodDuration ? parseInt(periodDuration) : undefined,

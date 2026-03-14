@@ -46,7 +46,8 @@ export async function pushCycleSnapshot(): Promise<void> {
 
     const deviceId = await getDeviceId();
     const logs = await storage.getDailyLogs();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const _now = new Date();
+    const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, "0")}-${String(_now.getDate()).padStart(2, "0")}`;
     const todayLog = logs.find((l) => l.date === todayStr);
 
     let moodLevel: string | null = null;
@@ -64,14 +65,14 @@ export async function pushCycleSnapshot(): Promise<void> {
     }
 
     const nextPeriodFrom = cycleData.nextPeriodStart;
-    const nextPeriodEnd = new Date(cycleData.nextPeriodStart);
+    const nextPeriodEnd = new Date(cycleData.nextPeriodStart + "T00:00:00");
     nextPeriodEnd.setDate(nextPeriodEnd.getDate() + cycleData.periodLength);
 
     const snapshot = {
       phase: cycleData.phase,
       phaseLabel: PHASE_LABELS[cycleData.phase] || cycleData.phase,
       nextPeriodFrom,
-      nextPeriodTo: nextPeriodEnd.toISOString().split("T")[0],
+      nextPeriodTo: `${nextPeriodEnd.getFullYear()}-${String(nextPeriodEnd.getMonth() + 1).padStart(2, "0")}-${String(nextPeriodEnd.getDate()).padStart(2, "0")}`,
       nextPeriodConfidence: "estimated",
       fertileWindowFrom: cycleData.fertileWindowStart,
       fertileWindowTo: cycleData.fertileWindowEnd,

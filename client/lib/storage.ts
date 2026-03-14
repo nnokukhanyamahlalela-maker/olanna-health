@@ -169,7 +169,7 @@ export const storage = {
 };
 
 export function calculateCycleData(profile: UserProfile): CycleData {
-  const lastPeriodStart = new Date(profile.lastPeriodStart);
+  const lastPeriodStart = new Date(profile.lastPeriodStart + "T00:00:00");
   const today = new Date();
   const daysSinceLastPeriod = Math.floor(
     (today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)
@@ -198,10 +198,10 @@ export function calculateCycleData(profile: UserProfile): CycleData {
     cycleLength: profile.cycleLength,
     periodLength: profile.periodLength,
     lastPeriodStart: profile.lastPeriodStart,
-    nextPeriodStart: nextPeriodStart.toISOString().split("T")[0],
-    ovulationDate: ovulationDate.toISOString().split("T")[0],
-    fertileWindowStart: fertileWindowStart.toISOString().split("T")[0],
-    fertileWindowEnd: fertileWindowEnd.toISOString().split("T")[0],
+    nextPeriodStart: `${nextPeriodStart.getFullYear()}-${String(nextPeriodStart.getMonth() + 1).padStart(2, "0")}-${String(nextPeriodStart.getDate()).padStart(2, "0")}`,
+    ovulationDate: `${ovulationDate.getFullYear()}-${String(ovulationDate.getMonth() + 1).padStart(2, "0")}-${String(ovulationDate.getDate()).padStart(2, "0")}`,
+    fertileWindowStart: `${fertileWindowStart.getFullYear()}-${String(fertileWindowStart.getMonth() + 1).padStart(2, "0")}-${String(fertileWindowStart.getDate()).padStart(2, "0")}`,
+    fertileWindowEnd: `${fertileWindowEnd.getFullYear()}-${String(fertileWindowEnd.getMonth() + 1).padStart(2, "0")}-${String(fertileWindowEnd.getDate()).padStart(2, "0")}`,
     phase,
     cycles: [],
   };

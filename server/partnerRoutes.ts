@@ -75,7 +75,23 @@ export function registerPartnerRoutes(app: Express): void {
     legacyHeaders: false,
   });
 
-  app.post("/api/partner/invite", async (req: Request, res: Response) => {
+  const inviteLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    message: { error: "Too many invite requests. Try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const revokeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: "Too many revoke attempts. Try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.post("/api/partner/invite", inviteLimiter, async (req: Request, res: Response) => {
     try {
       const deviceId = getDeviceId(req);
       if (!deviceId) return res.status(400).json({ error: "Missing device identifier" });
@@ -252,7 +268,7 @@ export function registerPartnerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/partner/revoke", async (req: Request, res: Response) => {
+  app.post("/api/partner/revoke", revokeLimiter, async (req: Request, res: Response) => {
     try {
       const deviceId = getDeviceId(req);
       if (!deviceId) return res.status(400).json({ error: "Missing device identifier" });
@@ -275,7 +291,7 @@ export function registerPartnerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/partner/revoke-emergency", async (req: Request, res: Response) => {
+  app.post("/api/partner/revoke-emergency", revokeLimiter, async (req: Request, res: Response) => {
     try {
       const deviceId = getDeviceId(req);
       if (!deviceId) return res.status(400).json({ error: "Missing device identifier" });

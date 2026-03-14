@@ -390,7 +390,7 @@ function ProfileScreen({
                       setShowPeriodPicker(Platform.OS === "ios");
                       if (date) {
                         setLastPeriodDate(date);
-                        setData({ ...data, lastPeriodStart: date.toISOString().split("T")[0] });
+                        setData({ ...data, lastPeriodStart: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` });
                       }
                     }}
                     maximumDate={new Date()}
@@ -695,10 +695,12 @@ export default function OnboardingScreen() {
   const handleComplete = async () => {
     setIsSaving(true);
     try {
-      const periodLength = onboardingData.periodLength || 5;
+      const rawCycleLength = typeof onboardingData.avgCycleLength === "number" && Number.isFinite(onboardingData.avgCycleLength) ? onboardingData.avgCycleLength : 28;
+      const rawPeriodLength = typeof onboardingData.periodLength === "number" && Number.isFinite(onboardingData.periodLength) ? onboardingData.periodLength : 5;
+      const cycleLength = Math.max(15, Math.min(60, rawCycleLength));
+      const periodLength = Math.max(1, Math.min(14, rawPeriodLength));
       const importedPeriodDays = onboardingData.periodDays || [];
 
-      // Determine lastPeriodStart from user input, imported data, or fallback to today
       let lastPeriodStart = onboardingData.lastPeriodStart || "";
       if (!lastPeriodStart && importedPeriodDays.length > 0) {
         const sorted = [...importedPeriodDays].sort();
@@ -706,17 +708,18 @@ export default function OnboardingScreen() {
         lastPeriodStart = mostRecentStart || sorted[sorted.length - 1];
       }
       if (!lastPeriodStart) {
-        lastPeriodStart = new Date().toISOString().split("T")[0];
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, "0");
+        const d = String(today.getDate()).padStart(2, "0");
+        lastPeriodStart = `${y}-${m}-${d}`;
       }
 
-      // Step 1: Build and persist the UserProfile to secure storage.
-      // This is the canonical persistent store — cycleProfileService
-      // hydrates from this on app restart.
       const profile: UserProfile = {
         id: generateId(),
         name: onboardingData.name.trim(),
-        dateOfBirth: onboardingData.dob || new Date(2000, 0, 1).toISOString().split("T")[0],
-        cycleLength: onboardingData.avgCycleLength || 28,
+        dateOfBirth: onboardingData.dob || "2000-01-01",
+        cycleLength,
         periodLength,
         lastPeriodStart,
         healthGoals: onboardingData.goals,
@@ -749,7 +752,7 @@ export default function OnboardingScreen() {
           for (let i = 0; i < duration; i++) {
             const day = new Date(start);
             day.setDate(day.getDate() + i);
-            flowDatesToLog.add(day.toISOString().split("T")[0]);
+            flowDatesToLog.add(`${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`);
           }
         };
 

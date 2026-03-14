@@ -226,19 +226,17 @@ export const fertilityTracking = {
     let peakDate: string | null = null;
     let confidence: "low" | "medium" | "high" = "low";
     
-    const startDateObj = new Date(cycleStart);
+    const startDateObj = new Date(cycleStart + "T00:00:00");
     
-    // Default rhythm method calculation
     const defaultOvulationDay = Math.round(cycleLength / 2) - 1;
     let ovulationDate = new Date(startDateObj);
     ovulationDate.setDate(ovulationDate.getDate() + defaultOvulationDay);
     
-    // Get LH test data for this cycle
     if (useLH) {
       const lhTests = await this.getLHTests(cycleStart, this.addDays(cycleStart, cycleLength));
       const peakLH = lhTests.find(t => t.result === "peak");
       if (peakLH) {
-        ovulationDate = new Date(peakLH.date);
+        ovulationDate = new Date(peakLH.date + "T00:00:00");
         ovulationDate.setDate(ovulationDate.getDate() + 1); // Ovulation typically 12-36h after peak
         indicators.push("LH surge detected");
         confidence = "high";
@@ -285,9 +283,9 @@ export const fertilityTracking = {
     fertileEnd.setDate(fertileEnd.getDate() + 1);
 
     return {
-      startDate: fertileStart.toISOString().split("T")[0],
-      endDate: fertileEnd.toISOString().split("T")[0],
-      peakFertilityDate: ovulationDate.toISOString().split("T")[0],
+      startDate: `${fertileStart.getFullYear()}-${String(fertileStart.getMonth() + 1).padStart(2, "0")}-${String(fertileStart.getDate()).padStart(2, "0")}`,
+      endDate: `${fertileEnd.getFullYear()}-${String(fertileEnd.getMonth() + 1).padStart(2, "0")}-${String(fertileEnd.getDate()).padStart(2, "0")}`,
+      peakFertilityDate: `${ovulationDate.getFullYear()}-${String(ovulationDate.getMonth() + 1).padStart(2, "0")}-${String(ovulationDate.getDate()).padStart(2, "0")}`,
       confidence,
       indicators,
     };
@@ -296,7 +294,7 @@ export const fertilityTracking = {
   detectBBTShift(logs: BBTEntry[]): { shiftDate: string; preBBT: number; postBBT: number } | null {
     if (logs.length < 6) return null;
     
-    const sorted = [...logs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sorted = [...logs].sort((a, b) => new Date(a.date + "T00:00:00").getTime() - new Date(b.date + "T00:00:00").getTime());
     
     // Look for a 0.2°C (0.4°F) sustained rise for at least 3 days
     for (let i = 3; i < sorted.length - 3; i++) {
@@ -318,8 +316,8 @@ export const fertilityTracking = {
   },
 
   addDays(dateStr: string, days: number): string {
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + "T00:00:00");
     date.setDate(date.getDate() + days);
-    return date.toISOString().split("T")[0];
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   },
 };

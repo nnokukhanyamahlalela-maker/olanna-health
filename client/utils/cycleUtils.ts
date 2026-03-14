@@ -49,10 +49,11 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
-/** Calculate the number of whole days between two dates (end - start). */
+/** Calculate the number of whole days between two dates (end - start). DST-safe. */
 function diffInDays(start: Date, end: Date): number {
-  const ms = end.getTime() - start.getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
+  const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const endMidnight = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+  return Math.round((endMidnight - startMidnight) / (1000 * 60 * 60 * 24));
 }
 
 /**

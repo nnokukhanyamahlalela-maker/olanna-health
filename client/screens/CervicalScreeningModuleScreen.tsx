@@ -50,8 +50,8 @@ export default function CervicalScreeningModuleScreen() {
     const screening: Screening = {
       id: generateId(),
       type: screeningType === "hpv" ? "hpv_test" : "pap_smear",
-      lastDate: lastPapDate.toISOString().split("T")[0],
-      nextDueDate: nextDueDate.toISOString().split("T")[0],
+      lastDate: `${lastPapDate.getFullYear()}-${String(lastPapDate.getMonth() + 1).padStart(2, "0")}-${String(lastPapDate.getDate()).padStart(2, "0")}`,
+      nextDueDate: `${nextDueDate.getFullYear()}-${String(nextDueDate.getMonth() + 1).padStart(2, "0")}-${String(nextDueDate.getDate()).padStart(2, "0")}`,
       reminderEnabled,
     };
 

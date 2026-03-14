@@ -79,7 +79,8 @@ export default function LogProductScreen() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const deviceId = await getDeviceId();
-      const today = new Date().toISOString().split("T")[0];
+      const _d = new Date();
+      const today = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, "0")}-${String(_d.getDate()).padStart(2, "0")}`;
       const baseUrl = getApiUrl();
       const response = await fetch(
         new URL("/api/product-logs", baseUrl).href,

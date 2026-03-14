@@ -8,12 +8,16 @@ function addDays(date: Date, days: number): Date {
 }
 
 function formatDate(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function diffInDays(start: Date, end: Date): number {
-  const milliseconds = end.getTime() - start.getTime();
-  return Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+  const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const endMidnight = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+  return Math.round((endMidnight - startMidnight) / (1000 * 60 * 60 * 24));
 }
 
 export function getCyclePhase(
@@ -76,7 +80,27 @@ export function generateCyclePrediction(params: {
 }): CyclePrediction {
   const { profile, effectiveLastPeriodStartDate, today = new Date() } = params;
 
-  const cycleStartDate = new Date(effectiveLastPeriodStartDate);
+  const cycleStartDate = new Date(effectiveLastPeriodStartDate + "T00:00:00");
+  if (isNaN(cycleStartDate.getTime())) {
+    return {
+      currentCycleDay: 1,
+      rawCycleDay: 1,
+      isLate: false,
+      daysLate: 0,
+      expectedPeriodDate: formatDate(today),
+      isPeriodDueSoon: false,
+      currentPhase: "Follicular" as CyclePhase,
+      nextPeriodStartDate: formatDate(today),
+      fertileWindowStart: formatDate(today),
+      fertileWindowEnd: formatDate(today),
+      ovulationDate: formatDate(today),
+      periodDates: [],
+      phaseRanges: [],
+      uiLabel: "Follicular Phase",
+      message: "Set your cycle details to get predictions.",
+      helperText: "Visit your profile to enter your last period date.",
+    };
+  }
   const daysSinceStart = diffInDays(cycleStartDate, today);
 
   const rawCycleDay = daysSinceStart + 1;
