@@ -150,3 +150,45 @@ id = "Wu5mQOSCa2R_z3o2Z8AWE"
 uri = "file://attached_assets/lotus_synopsis_no_icon.png"
 type = "image"
 title = "Synopsis Card - Icons Removed"
+
+[[outputs]]
+id = "Alxjzhxnlf_1vMQtoqX6E"
+uri = "file://screenshots/home_screen.png"
+type = "image"
+title = "Home Screen - The Lotus Cycle"
+
+[[outputs]]
+id = "xCvCzGTLN-lYceq57wTDF"
+uri = "file://screenshots/checkin_screen.png"
+type = "image"
+title = "Check-in - Core Cycle & Hormonal Symptoms"
+
+[[outputs]]
+id = "Xgu69GQ1-CzEweIlFPxbg"
+uri = "file://screenshots/flow_category.png"
+type = "image"
+title = "Check-in - Flow Category"
+
+[[outputs]]
+id = "ZAyz2EgcJiT-pjLE8YLsX"
+uri = "file://screenshots/pain_category.png"
+type = "image"
+title = "Check-in - Pain Mapping Category"
+
+[[outputs]]
+id = "rpjvdZrsqqKZdI6iBdqG0"
+uri = "file://screenshots/mood_category.png"
+type = "image"
+title = "Check-in - Emotional Category"
+
+[[outputs]]
+id = "Sisj1tiheDrHh9Y3SqqpZ"
+uri = "file://screenshots/bodymap.png"
+type = "image"
+title = "Check-in - Body Map View"
+
+[[outputs]]
+id = "PO9ThhmK6Uga9v319dgkq"
+uri = "file://screenshots/symptoms_selected.png"
+type = "image"
+title = "Check-in - Symptom Detail (Headache Severity)"
