@@ -367,145 +367,98 @@ export default function CheckInScreen() {
         </View>
       </View>
 
-      <View style={styles.viewTabs}>
-        <GlassSurface
-          borderRadius={PillSpacing.radius}
-          padding={0}
-          noPadding
-          style={viewMode === 'categories' ? { borderColor: "rgba(194,24,91,0.25)" } : undefined}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryStrip}
+        style={styles.categoryStripContainer}
+      >
+        <Pressable
+          onPress={() => { setViewMode('categories'); setActiveCategoryId(activeCategoryId === '__bodymap__' ? 'core-cycle' : activeCategoryId); }}
+          style={[
+            styles.viewModeChip,
+            viewMode === 'categories' ? styles.viewModeChipActive : undefined,
+          ]}
+          testID="tab-categories"
         >
-          <Pressable
-            onPress={() => setViewMode('categories')}
-            style={[
-              styles.viewTab,
-              viewMode === 'categories' ? { backgroundColor: "rgba(194,24,91,0.10)" } : undefined,
-            ]}
-            testID="tab-categories"
-          >
-            <Feather
-              name="grid"
-              size={16}
-              color={viewMode === 'categories' ? "#C2185B" : theme.textSecondary}
-            />
-            <ThemedText
-              type="small"
-              style={{ color: viewMode === 'categories' ? "#C2185B" : theme.textSecondary }}
-            >
-              Symptoms
-            </ThemedText>
-          </Pressable>
-        </GlassSurface>
-        <GlassSurface
-          borderRadius={PillSpacing.radius}
-          padding={0}
-          noPadding
-          style={viewMode === 'bodymap' ? { borderColor: "rgba(194,24,91,0.25)" } : undefined}
-        >
-          <Pressable
-            onPress={() => setViewMode('bodymap')}
-            style={[
-              styles.viewTab,
-              viewMode === 'bodymap' ? { backgroundColor: "rgba(194,24,91,0.10)" } : undefined,
-            ]}
-            testID="tab-bodymap"
-          >
-            <Feather
-              name="user"
-              size={16}
-              color={viewMode === 'bodymap' ? "#C2185B" : theme.textSecondary}
-            />
-            <ThemedText
-              type="small"
-              style={{ color: viewMode === 'bodymap' ? "#C2185B" : theme.textSecondary }}
-            >
-              Body Map
-            </ThemedText>
-          </Pressable>
-        </GlassSurface>
-      </View>
+          <Feather name="grid" size={14} color={viewMode === 'categories' ? '#C2185B' : theme.textSecondary} />
+          <ThemedText type="caption" style={{ color: viewMode === 'categories' ? '#C2185B' : theme.textSecondary, fontWeight: '600' }}>
+            Symptoms
+          </ThemedText>
+        </Pressable>
 
-      {viewMode === 'categories' ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryStrip}
-          style={styles.categoryStripContainer}
+        <Pressable
+          onPress={() => { setViewMode('bodymap'); setActiveCategoryId('__bodymap__'); }}
+          style={[
+            styles.viewModeChip,
+            viewMode === 'bodymap' ? styles.viewModeChipActive : undefined,
+          ]}
+          testID="tab-bodymap"
         >
-          {favorites.length > 0 ? (
-            <Pressable
-              onPress={() => setActiveCategoryId('__favorites__')}
-              style={[
-                styles.categoryPillBtn,
-                activeCategoryId === '__favorites__' ? styles.categoryPillBtnActive : undefined,
-              ]}
-              testID="category-pill-favorites"
-            >
-              <Feather
-                name="star"
-                size={14}
-                color={activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.tertiary}
-              />
-              <ThemedText
-                type="caption"
-                style={{
-                  color: activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.text,
-                  fontWeight: '600',
-                }}
-              >
-                Favourites
-              </ThemedText>
-            </Pressable>
-          ) : null}
-          {getOrderedCategories().map(cat => {
-            const isActive = activeCategoryId === cat.id;
-            const catCount = getCategoryLoggedCount(cat.id);
-            return (
+          <Feather name="user" size={14} color={viewMode === 'bodymap' ? '#C2185B' : theme.textSecondary} />
+          <ThemedText type="caption" style={{ color: viewMode === 'bodymap' ? '#C2185B' : theme.textSecondary, fontWeight: '600' }}>
+            Body Map
+          </ThemedText>
+        </Pressable>
+
+        {viewMode === 'categories' ? (
+          <View style={styles.categoryDivider} />
+        ) : null}
+
+        {viewMode === 'categories' ? (
+          <>
+            {favorites.length > 0 ? (
               <Pressable
-                key={cat.id}
-                onPress={() => setActiveCategoryId(cat.id)}
+                onPress={() => setActiveCategoryId('__favorites__')}
                 style={[
                   styles.categoryPillBtn,
-                  isActive ? styles.categoryPillBtnActive : undefined,
+                  activeCategoryId === '__favorites__' ? styles.categoryPillBtnActive : undefined,
                 ]}
-                testID={`category-pill-${cat.id}`}
+                testID="category-pill-favorites"
               >
-                <Feather
-                  name={cat.icon as any}
-                  size={14}
-                  color={isActive ? '#FFFFFF' : '#C2185B'}
-                />
-                <ThemedText
-                  type="caption"
-                  style={{
-                    color: isActive ? '#FFFFFF' : theme.text,
-                    fontWeight: '600',
-                  }}
-                  numberOfLines={1}
-                >
-                  {cat.name}
+                <Feather name="star" size={14} color={activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.tertiary} />
+                <ThemedText type="caption" style={{ color: activeCategoryId === '__favorites__' ? '#FFFFFF' : theme.text, fontWeight: '600' }}>
+                  Favourites
                 </ThemedText>
-                {catCount > 0 ? (
-                  <View style={[
-                    styles.categoryCountBadge,
-                    { backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(194,24,91,0.15)' },
-                  ]}>
-                    <ThemedText
-                      type="caption"
-                      style={{
-                        color: isActive ? '#FFFFFF' : '#C2185B',
-                        fontWeight: '700',
-                        fontSize: 10,
-                      }}
-                    >
-                      {catCount}
-                    </ThemedText>
-                  </View>
-                ) : null}
               </Pressable>
-            );
-          })}
-        </ScrollView>
-      ) : null}
+            ) : null}
+            {getOrderedCategories().map(cat => {
+              const isActive = activeCategoryId === cat.id;
+              const catCount = getCategoryLoggedCount(cat.id);
+              return (
+                <Pressable
+                  key={cat.id}
+                  onPress={() => setActiveCategoryId(cat.id)}
+                  style={[
+                    styles.categoryPillBtn,
+                    isActive ? styles.categoryPillBtnActive : undefined,
+                  ]}
+                  testID={`category-pill-${cat.id}`}
+                >
+                  <Feather name={cat.icon as any} size={14} color={isActive ? '#FFFFFF' : '#C2185B'} />
+                  <ThemedText
+                    type="caption"
+                    style={{ color: isActive ? '#FFFFFF' : theme.text, fontWeight: '600' }}
+                    numberOfLines={1}
+                  >
+                    {cat.name}
+                  </ThemedText>
+                  {catCount > 0 ? (
+                    <View style={[
+                      styles.categoryCountBadge,
+                      { backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(194,24,91,0.15)' },
+                    ]}>
+                      <ThemedText type="caption" style={{ color: isActive ? '#FFFFFF' : '#C2185B', fontWeight: '700', fontSize: 10 }}>
+                        {catCount}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </>
+        ) : null}
+      </ScrollView>
 
       <ScrollView
         contentContainerStyle={[
@@ -515,7 +468,7 @@ export default function CheckInScreen() {
         showsVerticalScrollIndicator={false}
       >
         {viewMode === 'categories' ? (
-          <>
+          <Animated.View key={activeCategoryId} entering={FadeInDown.duration(200)}>
             {activeCategoryId === '__favorites__' ? (
               <GlassSurface borderRadius={BorderRadius.lg} padding={Spacing.md} style={styles.favoritesSection}>
                 <View style={styles.favoritesHeader}>
@@ -529,9 +482,9 @@ export default function CheckInScreen() {
                     cat.items
                       .filter(item => favorites.includes(item.id))
                       .map(symptom => {
-                        const key = `${cat.id}-${symptom.id}`;
-                        const isSelected = selectedSymptoms.has(key);
-                        const log = selectedSymptoms.get(key);
+                        const symKey = `${cat.id}-${symptom.id}`;
+                        const isSelected = selectedSymptoms.has(symKey);
+                        const log = selectedSymptoms.get(symKey);
                         return (
                           <SymptomChip
                             key={`fav-${symptom.id}`}
@@ -551,7 +504,7 @@ export default function CheckInScreen() {
             ) : activeCategory ? (
               renderCategorySection(activeCategory, 0)
             ) : null}
-          </>
+          </Animated.View>
         ) : viewMode === 'bodymap' ? (
           <View style={styles.bodyMapContainer}>
             <ThemedText type="h3" style={styles.bodyMapTitle}>
@@ -870,8 +823,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: ScreenPadding.horizontal,
+    paddingBottom: Spacing.sm,
   },
   progressBadge: {
     flexDirection: 'row',
@@ -880,19 +833,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
-  },
-  viewTabs: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  viewTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    height: PillSpacing.height,
-    paddingHorizontal: PillSpacing.paddingHorizontal,
   },
   scrollContent: {
     paddingHorizontal: ScreenPadding.horizontal,
@@ -909,35 +849,55 @@ const styles = StyleSheet.create({
   categoryStripContainer: {
     flexGrow: 0,
     flexShrink: 0,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   categoryStrip: {
     paddingHorizontal: ScreenPadding.horizontal,
-    gap: Spacing.xs,
+    gap: 6,
     alignItems: 'center',
+  },
+  viewModeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  viewModeChipActive: {
+    borderColor: 'rgba(194,24,91,0.3)',
+    backgroundColor: 'rgba(194,24,91,0.08)',
+  },
+  categoryDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: '#E8D5DC',
+    marginHorizontal: 2,
   },
   categoryPillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    gap: 5,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     borderRadius: BorderRadius.full,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.85)',
     borderWidth: 1,
-    borderColor: '#F5E8ED',
+    borderColor: '#F0E0E8',
   },
   categoryPillBtnActive: {
     backgroundColor: '#C2185B',
     borderColor: '#C2185B',
   },
   categoryCountBadge: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
   },
   categorySectionOuter: {
     marginBottom: CardSpacing.gap,
