@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { StyleSheet, View, StatusBar, Image, Dimensions } from "react-native";
+import { StyleSheet, View, StatusBar, Image, Dimensions, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -16,12 +16,16 @@ import { storage } from "@/lib/storage";
 
 const splashGradient = require("@/assets/images/splash-gradient.png");
 const splashBrand = require("@/assets/images/splash-brand.png");
-const splashVideo = require("@/assets/videos/olanna-splash.mp4");
+
+const splashVideo = Platform.OS !== "web"
+  ? require("@/assets/videos/olanna-splash.mp4")
+  : null;
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const PHASE_DURATION = 2000;
-const FADE_DURATION = 600;
+const IS_WEB = Platform.OS === "web";
+const PHASE_DURATION = IS_WEB ? 1200 : 2000;
+const FADE_DURATION = 500;
 
 type SplashPhase = "gradient" | "brand" | "video";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -76,6 +80,23 @@ export default function IntroLogo() {
   });
 
   useEffect(() => {
+    if (IS_WEB) {
+      const timer = setTimeout(() => {
+        gradientOpacity.value = withTiming(0, { duration: FADE_DURATION, easing: Easing.inOut(Easing.ease) });
+        brandOpacity.value = withTiming(1, { duration: FADE_DURATION, easing: Easing.inOut(Easing.ease) });
+        setPhase("brand");
+      }, PHASE_DURATION);
+
+      const navTimer = setTimeout(() => {
+        navigate();
+      }, PHASE_DURATION + FADE_DURATION + 800);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(navTimer);
+      };
+    }
+
     const phaseOneTimer = setTimeout(() => {
       gradientOpacity.value = withTiming(0, { duration: FADE_DURATION, easing: Easing.inOut(Easing.ease) });
       brandOpacity.value = withTiming(1, { duration: FADE_DURATION, easing: Easing.inOut(Easing.ease) });
@@ -95,13 +116,13 @@ export default function IntroLogo() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "video") return;
+    if (IS_WEB || phase !== "video") return;
 
     const endSub = player.addListener("playToEnd", () => {
       navigate();
     });
 
-    const statusSub = player.addListener("statusChange", (newStatus) => {
+    const statusSub = player.addListener("statusChange", (newStatus: any) => {
       if (newStatus.status === "readyToPlay") {
         player.play();
       }
@@ -114,7 +135,7 @@ export default function IntroLogo() {
       player.play();
     }
 
-    const fallback = setTimeout(navigate, 30000);
+    const fallback = setTimeout(navigate, 6000);
 
     return () => {
       endSub.remove();
@@ -147,14 +168,16 @@ export default function IntroLogo() {
         <Image source={splashBrand} style={styles.fullImage} resizeMode="cover" />
       </Animated.View>
 
-      <Animated.View style={[StyleSheet.absoluteFill, videoStyle]}>
-        <VideoView
-          player={player}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          nativeControls={false}
-        />
-      </Animated.View>
+      {!IS_WEB ? (
+        <Animated.View style={[StyleSheet.absoluteFill, videoStyle]}>
+          <VideoView
+            player={player}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            nativeControls={false}
+          />
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
@@ -162,7 +185,7 @@ export default function IntroLogo() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "#1A0A2E",
   },
   fullImage: {
     width: SCREEN_WIDTH,
