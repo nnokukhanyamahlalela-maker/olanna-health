@@ -1,12 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { secureStorage } from "./secureStorage";
 
 const STORAGE_KEYS = {
   PRIVACY_SETTINGS: "@olanna_privacy_settings",
   ANONYMOUS_MODE: "@olanna_anonymous_mode",
   DATA_SHARING_CONSENT: "@olanna_data_sharing",
 };
+
+const SENSITIVE_KEYS = [
+  "@olanna_partner_token",
+  "@olanna_device_id",
+];
 
 export interface PrivacySettings {
   anonymousMode: boolean;
@@ -27,6 +33,10 @@ const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   offlineModePreferred: false,
   lowDataMode: false,
 };
+
+function isOlannaKey(key: string): boolean {
+  return key.startsWith("@olanna") || key.startsWith("olanna_");
+}
 
 export const privacyStorage = {
   async getPrivacySettings(): Promise<PrivacySettings> {
@@ -55,12 +65,12 @@ export const privacyStorage = {
 
   async exportAllData(): Promise<string> {
     const allKeys = await AsyncStorage.getAllKeys();
-    const olannaKeys = allKeys.filter(key => key.startsWith("@olanna"));
+    const olannaKeys = allKeys.filter(isOlannaKey);
     const pairs = await AsyncStorage.multiGet(olannaKeys);
     
     const exportData: Record<string, unknown> = {};
     pairs.forEach(([key, value]) => {
-      if (value) {
+      if (value && !SENSITIVE_KEYS.includes(key)) {
         try {
           exportData[key] = JSON.parse(value);
         } catch {
@@ -100,28 +110,68 @@ export const privacyStorage = {
 
   async deleteSpecificData(category: "cycle" | "symptoms" | "screenings" | "profile" | "all"): Promise<void> {
     const keyMappings: Record<string, string[]> = {
-      cycle: ["@olanna_cycle_data", "@olanna_daily_logs"],
-      symptoms: ["@olanna_symptom_logs", "@olanna_check_in", "@olanna_favorites", "@olanna_body_pain"],
+      cycle: [
+        "@olanna_cycle_data",
+        "@olanna_daily_logs",
+        "olanna_cycle_profile",
+        "olanna_cycle_logs",
+        "@olanna_fertility_data",
+        "@olanna_bbt_logs",
+        "@olanna_mucus_logs",
+        "@olanna_lh_tests",
+        "@olanna_hormone_logs",
+        "@olanna_ovulation_override",
+        "olanna_medication_logs",
+        "olanna_supplement_logs",
+      ],
+      symptoms: [
+        "@olanna_symptom_logs",
+        "@olanna_pain_points",
+        "@olanna_daily_checkins",
+        "@olanna_symptom_favorites",
+        "@olanna_symptom_hidden",
+        "@olanna_custom_symptoms",
+        "@olanna_category_order",
+      ],
       screenings: ["@olanna_screenings"],
-      profile: ["@olanna_user_profile", "@olanna_health_goals"],
-      all: [], // Will be populated with all keys
+      profile: [
+        "@olanna_user_profile",
+        "@olanna_health_goals",
+        "@olanna_onboarding_complete",
+        "@olanna_preferences",
+        "@olanna_accessibility",
+        "@olanna_app_language",
+      ],
+      all: [],
+    };
+
+    const secureKeyMappings: Record<string, string[]> = {
+      cycle: ["cycle_data", "daily_logs"],
+      profile: ["user_profile"],
     };
 
     if (category === "all") {
       const allKeys = await AsyncStorage.getAllKeys();
-      const olannaKeys = allKeys.filter(key => key.startsWith("@olanna"));
+      const olannaKeys = allKeys.filter(isOlannaKey);
       await AsyncStorage.multiRemove(olannaKeys);
+      await secureStorage.clearAllSecureData();
     } else {
       const keysToDelete = keyMappings[category] || [];
       if (keysToDelete.length > 0) {
         await AsyncStorage.multiRemove(keysToDelete);
+      }
+      const secureKeys = secureKeyMappings[category];
+      if (secureKeys) {
+        for (const key of secureKeys) {
+          await secureStorage.removeItem(key);
+        }
       }
     }
   },
 
   async getDataSummary(): Promise<Record<string, number>> {
     const allKeys = await AsyncStorage.getAllKeys();
-    const olannaKeys = allKeys.filter(key => key.startsWith("@olanna"));
+    const olannaKeys = allKeys.filter(isOlannaKey);
     
     const summary: Record<string, number> = {
       totalItems: olannaKeys.length,
@@ -135,17 +185,16 @@ export const privacyStorage = {
       if (value) {
         try {
           const parsed = JSON.parse(value);
-          if (key.includes("cycle") || key.includes("daily_logs")) {
+          if (key.includes("cycle") || key.includes("daily_logs") || key.includes("fertility") || key.includes("bbt") || key.includes("ovulation") || key.includes("mucus") || key.includes("lh_tests") || key.includes("hormone")) {
             summary.cycleRecords += Array.isArray(parsed) ? parsed.length : 1;
           }
-          if (key.includes("symptom") || key.includes("check_in")) {
+          if (key.includes("symptom") || key.includes("checkin") || key.includes("pain_point")) {
             summary.symptomLogs += Array.isArray(parsed) ? parsed.length : 1;
           }
           if (key.includes("screening")) {
             summary.screenings += Array.isArray(parsed) ? parsed.length : 1;
           }
         } catch {
-          // Skip unparseable values
         }
       }
     }
