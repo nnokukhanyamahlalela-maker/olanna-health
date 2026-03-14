@@ -16,6 +16,7 @@ import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
+import { privacyStorage } from "@/lib/privacyStorage";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -71,6 +72,28 @@ export default function ProfileScreen() {
   const loadProfile = async () => {
     const userProfile = await storage.getUserProfile();
     setProfile(userProfile);
+  };
+
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportData = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExporting(true);
+    try {
+      const shared = await privacyStorage.shareExportedData();
+      if (!shared) {
+        Alert.alert("Export", "Sharing is not available on this device. You can export from Privacy & Data settings.");
+      }
+    } catch {
+      Alert.alert("Export Failed", "Unable to export your data. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleComingSoon = (feature: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Alert.alert(feature, "This feature is coming soon.");
   };
 
   const handleLogout = async () => {
@@ -165,7 +188,7 @@ export default function ProfileScreen() {
             icon="users"
             label="Community"
             color="#6A5B7B"
-            onPress={() => {}}
+            onPress={() => handleComingSoon("Community")}
             isLast
             theme={theme}
             isDark={isDark}
@@ -198,7 +221,7 @@ export default function ProfileScreen() {
             icon="bell"
             label="Notifications"
             color="#D4764E"
-            onPress={() => {}}
+            onPress={() => handleComingSoon("Notifications")}
             theme={theme}
             isDark={isDark}
           />
@@ -214,7 +237,7 @@ export default function ProfileScreen() {
             icon="download"
             label="Export Data"
             color="#5A8A6A"
-            onPress={() => {}}
+            onPress={handleExportData}
             theme={theme}
             isDark={isDark}
           />
@@ -222,7 +245,7 @@ export default function ProfileScreen() {
             icon="help-circle"
             label="Help & Support"
             color="#6A7B8A"
-            onPress={() => {}}
+            onPress={() => handleComingSoon("Help & Support")}
             isLast
             theme={theme}
             isDark={isDark}

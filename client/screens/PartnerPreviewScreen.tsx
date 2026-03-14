@@ -36,7 +36,9 @@ export default function PartnerPreviewScreen() {
       if (res.ok) {
         setData(await res.json());
       }
-    } catch {}
+    } catch {
+      setData(null);
+    }
   };
 
   return (

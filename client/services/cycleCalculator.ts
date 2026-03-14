@@ -81,11 +81,6 @@ export function generateCyclePrediction(params: {
 
   const rawCycleDay = daysSinceStart + 1;
 
-  const currentCycleDay =
-    ((daysSinceStart % profile.averageCycleLength) + profile.averageCycleLength) %
-      profile.averageCycleLength +
-    1;
-
   const late = isLatePeriod(
     effectiveLastPeriodStartDate,
     profile.averageCycleLength,
@@ -93,6 +88,12 @@ export function generateCyclePrediction(params: {
   );
   const { isLate, daysLate } = late;
   const expectedPeriodDate = late.expectedPeriodDate;
+
+  const currentCycleDay = isLate
+    ? rawCycleDay
+    : ((daysSinceStart % profile.averageCycleLength) + profile.averageCycleLength) %
+        profile.averageCycleLength +
+      1;
 
   const basePhase = getCyclePhase(
     currentCycleDay,

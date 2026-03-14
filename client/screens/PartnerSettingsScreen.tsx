@@ -68,6 +68,7 @@ export default function PartnerSettingsScreen() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteExpiry, setInviteExpiry] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -83,7 +84,9 @@ export default function PartnerSettingsScreen() {
           await setPartnerLinked(true, data.linkedAt);
         }
       }
-    } catch {}
+    } catch {
+      setFetchError(true);
+    }
   };
 
   const fetchSettings = async () => {
@@ -106,12 +109,15 @@ export default function PartnerSettingsScreen() {
           precisionLevel: data.precisionLevel,
         });
       }
-    } catch {}
+    } catch {
+      setFetchError(true);
+    }
   };
 
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
+      setFetchError(false);
       Promise.all([fetchStatus(), fetchSettings()]).finally(() => setLoading(false));
     }, [])
   );
@@ -145,7 +151,9 @@ export default function PartnerSettingsScreen() {
       await Share.share({
         message: `Join me on Olanna Health! Enter this code in Partner Mode: ${inviteCode}`,
       });
-    } catch {}
+    } catch {
+      Alert.alert("Error", "Unable to share the invite code.");
+    }
   };
 
   const handleToggle = async (key: string, value: boolean) => {
@@ -159,7 +167,9 @@ export default function PartnerSettingsScreen() {
         headers: { "x-device-id": deviceId, "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: value }),
       });
-    } catch {}
+    } catch {
+      setSettings(settings);
+    }
   };
 
   const handlePrecision = async (level: string) => {
@@ -172,7 +182,9 @@ export default function PartnerSettingsScreen() {
         headers: { "x-device-id": deviceId, "Content-Type": "application/json" },
         body: JSON.stringify({ precisionLevel: level }),
       });
-    } catch {}
+    } catch {
+      setSettings((prev) => ({ ...prev, precisionLevel: settings.precisionLevel }));
+    }
   };
 
   const confirmRevoke = (emergency: boolean) => {
@@ -207,9 +219,39 @@ export default function PartnerSettingsScreen() {
         setStatus({ status: "none" });
         setInviteCode(null);
         await setPartnerLinked(false);
+      } else {
+        Alert.alert("Error", "Could not revoke partner access. Please try again.");
       }
-    } catch {}
+    } catch {
+      Alert.alert("Error", "Failed to revoke partner access. Please check your connection.");
+    }
   };
+
+  if (fetchError && !loading) {
+    return (
+      <AppGradient style={styles.container}>
+        <View style={{ paddingTop: headerHeight + Spacing.xl, paddingHorizontal: Spacing.lg, alignItems: "center" }}>
+          <Feather name="wifi-off" size={48} color={theme.textSecondary} />
+          <ThemedText type="h4" style={{ color: theme.text, marginTop: Spacing.lg, textAlign: "center" }}>
+            Unable to load partner settings
+          </ThemedText>
+          <ThemedText type="body" style={{ color: theme.textSecondary, marginTop: Spacing.sm, textAlign: "center" }}>
+            Please check your connection and try again.
+          </ThemedText>
+          <Pressable
+            onPress={() => {
+              setFetchError(false);
+              setLoading(true);
+              Promise.all([fetchStatus(), fetchSettings()]).finally(() => setLoading(false));
+            }}
+            style={{ marginTop: Spacing.lg, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.xl, backgroundColor: theme.primary, borderRadius: BorderRadius.lg }}
+          >
+            <ThemedText type="body" style={{ color: "#fff", fontWeight: "600" }}>Retry</ThemedText>
+          </Pressable>
+        </View>
+      </AppGradient>
+    );
+  }
 
   return (
     <AppGradient style={styles.container}>

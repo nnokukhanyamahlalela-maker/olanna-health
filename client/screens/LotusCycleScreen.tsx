@@ -505,9 +505,9 @@ export function LotusCycleScreen() {
 
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
-  const currentDay = data?.currentCycleDay || DEFAULT_CURRENT_DAY;
   const isLate = data?.isLate || false;
   const daysLate = data?.daysLate || 0;
+  const currentDay = isLate ? (data?.rawCycleDay || DEFAULT_CURRENT_DAY) : (data?.currentCycleDay || DEFAULT_CURRENT_DAY);
 
   const [selectedDay, setSelectedDay] = useState(DEFAULT_CURRENT_DAY);
   const prevCurrentDayRef = useRef(DEFAULT_CURRENT_DAY);

@@ -121,83 +121,91 @@ export function registerPartnerRoutes(app: Express): void {
 
       const codeHash = hashCode(code);
 
-      const [invite] = await db
-        .select()
-        .from(partnerInvites)
-        .where(
-          and(
-            eq(partnerInvites.inviteCodeHash, codeHash),
-            eq(partnerInvites.status, "pending")
+      const result = await db.transaction(async (tx) => {
+        const [invite] = await tx
+          .select()
+          .from(partnerInvites)
+          .where(
+            and(
+              eq(partnerInvites.inviteCodeHash, codeHash),
+              eq(partnerInvites.status, "pending")
+            )
           )
-        )
-        .limit(1);
+          .limit(1);
 
-      if (!invite) {
-        return res.status(404).json({ error: "Invalid or expired invite code" });
-      }
+        if (!invite) {
+          return { error: "Invalid or expired invite code", status: 404 };
+        }
 
-      if (new Date() > invite.expiresAt) {
-        await db
+        if (new Date() > invite.expiresAt) {
+          await tx
+            .update(partnerInvites)
+            .set({ status: "expired" })
+            .where(eq(partnerInvites.id, invite.id));
+          return { error: "Invite code has expired", status: 410 };
+        }
+
+        if (invite.primaryDeviceId === deviceId) {
+          return { error: "Cannot accept your own invite", status: 400 };
+        }
+
+        const [existingPrimaryLink] = await tx
+          .select()
+          .from(partnerLinks)
+          .where(and(eq(partnerLinks.primaryDeviceId, invite.primaryDeviceId), eq(partnerLinks.isActive, true)))
+          .limit(1);
+
+        if (existingPrimaryLink) {
+          return { error: "This user already has an active partner link", status: 409 };
+        }
+
+        const [existingPartnerLink] = await tx
+          .select()
+          .from(partnerLinks)
+          .where(and(eq(partnerLinks.partnerDeviceId, deviceId), eq(partnerLinks.isActive, true)))
+          .limit(1);
+
+        if (existingPartnerLink) {
+          return { error: "You are already linked to another partner", status: 409 };
+        }
+
+        const token = generateToken();
+
+        await tx
+          .update(partnerInvites)
+          .set({ status: "accepted" })
+          .where(eq(partnerInvites.id, invite.id));
+
+        const [link] = await tx
+          .insert(partnerLinks)
+          .values({
+            primaryDeviceId: invite.primaryDeviceId,
+            partnerDeviceId: deviceId,
+            partnerToken: token,
+          })
+          .returning();
+
+        await tx
           .update(partnerInvites)
           .set({ status: "expired" })
-          .where(eq(partnerInvites.id, invite.id));
-        return res.status(410).json({ error: "Invite code has expired" });
+          .where(
+            and(
+              eq(partnerInvites.primaryDeviceId, invite.primaryDeviceId),
+              eq(partnerInvites.status, "pending")
+            )
+          );
+
+        return { token, link, primaryDeviceId: invite.primaryDeviceId };
+      });
+
+      if ("error" in result) {
+        return res.status(result.status as number).json({ error: result.error });
       }
 
-      if (invite.primaryDeviceId === deviceId) {
-        return res.status(400).json({ error: "Cannot accept your own invite" });
-      }
+      await getOrCreateSettings(result.primaryDeviceId);
+      await logAudit(deviceId, "PARTNER_LINK_ACCEPTED", { primaryDeviceId: result.primaryDeviceId });
 
-      const [existingPrimaryLink] = await db
-        .select()
-        .from(partnerLinks)
-        .where(and(eq(partnerLinks.primaryDeviceId, invite.primaryDeviceId), eq(partnerLinks.isActive, true)))
-        .limit(1);
-
-      if (existingPrimaryLink) {
-        return res.status(409).json({ error: "This user already has an active partner link" });
-      }
-
-      const [existingPartnerLink] = await db
-        .select()
-        .from(partnerLinks)
-        .where(and(eq(partnerLinks.partnerDeviceId, deviceId), eq(partnerLinks.isActive, true)))
-        .limit(1);
-
-      if (existingPartnerLink) {
-        return res.status(409).json({ error: "You are already linked to another partner" });
-      }
-
-      const token = generateToken();
-
-      await db
-        .update(partnerInvites)
-        .set({ status: "accepted" })
-        .where(eq(partnerInvites.id, invite.id));
-
-      const [link] = await db
-        .insert(partnerLinks)
-        .values({
-          primaryDeviceId: invite.primaryDeviceId,
-          partnerDeviceId: deviceId,
-          partnerToken: token,
-        })
-        .returning();
-
-      await db
-        .update(partnerInvites)
-        .set({ status: "expired" })
-        .where(
-          and(
-            eq(partnerInvites.primaryDeviceId, invite.primaryDeviceId),
-            eq(partnerInvites.status, "pending")
-          )
-        );
-
-      await getOrCreateSettings(invite.primaryDeviceId);
-      await logAudit(deviceId, "PARTNER_LINK_ACCEPTED", { primaryDeviceId: invite.primaryDeviceId });
-
-      res.json({ partnerToken: token, linkedAt: link.createdAt });
+      res.json({ partnerToken: result.token, linkedAt: result.link.createdAt });
     } catch (err) {
       console.error("Partner accept error:", err);
       res.status(500).json({ error: "Failed to accept invite" });
