@@ -192,3 +192,9 @@ id = "PO9ThhmK6Uga9v319dgkq"
 uri = "file://screenshots/symptoms_selected.png"
 type = "image"
 title = "Check-in - Symptom Detail (Headache Severity)"
+
+[[outputs]]
+id = "htGAeoa_BnynRwO77-yIM"
+uri = "file://screenshots/phase_insights_final.png"
+type = "image"
+title = "Phase Insights - Menstrual Phase"
