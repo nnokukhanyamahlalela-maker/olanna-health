@@ -198,3 +198,9 @@ id = "htGAeoa_BnynRwO77-yIM"
 uri = "file://screenshots/phase_insights_final.png"
 type = "image"
 title = "Phase Insights - Menstrual Phase"
+
+[[outputs]]
+id = "6YzaYojWbAf-ECcbJ1c7N"
+uri = "file://screenshots/appstore-intro.png"
+type = "image"
+title = "App Store Intro Preview - Women's health, contextualised."
