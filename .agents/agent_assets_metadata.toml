@@ -204,3 +204,9 @@ id = "6YzaYojWbAf-ECcbJ1c7N"
 uri = "file://screenshots/appstore-intro.png"
 type = "image"
 title = "App Store Intro Preview - Women's health, contextualised."
+
+[[outputs]]
+id = "ONcxN_PCFP969Zo0bHE7l"
+uri = "file://encryption-documentation.pdf"
+type = "pdf"
+title = "Olanna Health — Encryption & Data Protection Documentation (PDF)"
