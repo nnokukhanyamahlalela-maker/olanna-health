@@ -19,8 +19,8 @@ import { useFocusEffect } from "@react-navigation/native";
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_TOTAL_HEIGHT = 88;
 
-const INACTIVE_COLOR = "#9B9993";
-const INACTIVE_LABEL = "#9B9993";
+const INACTIVE_COLOR = "#B4ACA4";
+const INACTIVE_LABEL = "#B4ACA4";
 
 const PHASE_KEY_MAP: Record<Phase, keyof typeof phaseTokens> = {
   menstrual: "menstrual",
@@ -33,32 +33,36 @@ const PHASE_KEY_MAP: Record<Phase, keyof typeof phaseTokens> = {
 // --- Icon components (filled/solid as per spec §5) ---
 
 function CycleIcon({ color, size }: { color: string; size: number }) {
-  // Filled 5-petal blossom with white center dot
+  // Ring/orbit with a small filled dot — represents the cycle phase wheel
   const s = size;
   const cx = s / 2;
   const cy = s / 2;
-  const ringR = s * 0.3;
-  const petalR = s * 0.18;
-  const petal2R = s * 0.15;
-  const centers: [number, number][] = [];
-  for (let i = 0; i < 5; i++) {
-    const a = ((-90 + i * 72) * Math.PI) / 180;
-    centers.push([cx + ringR * Math.cos(a), cy + ringR * Math.sin(a)]);
-  }
-  const frontCenters: [number, number][] = [];
-  for (let i = 0; i < 5; i++) {
-    const a = ((-90 + 36 + i * 72) * Math.PI) / 180;
-    frontCenters.push([cx + ringR * 0.88 * Math.cos(a), cy + ringR * 0.88 * Math.sin(a)]);
-  }
+  const ringR = s * 0.36;
+  const sw = s * 0.13;       // stroke width of ring
+  const dotR = s * 0.11;     // dot radius
+  // Dot positioned at top-right of ring
+  const dotX = cx + ringR * Math.cos((-45 * Math.PI) / 180);
+  const dotY = cy + ringR * Math.sin((-45 * Math.PI) / 180);
+  // Gap arc: hide a ~70° arc around the dot so the dot "sits on" the ring
+  const gapDeg = 70;
+  const startAngle = (-45 + gapDeg / 2) * (Math.PI / 180);
+  const endAngle  = (-45 - gapDeg / 2 + 360) * (Math.PI / 180);
+  const x1 = cx + ringR * Math.cos(startAngle);
+  const y1 = cy + ringR * Math.sin(startAngle);
+  const x2 = cx + ringR * Math.cos(endAngle);
+  const y2 = cy + ringR * Math.sin(endAngle);
   return (
     <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      {centers.map(([px, py], i) => (
-        <Circle key={`b${i}`} cx={px} cy={py} r={petalR} fill={color} />
-      ))}
-      {frontCenters.map(([px, py], i) => (
-        <Circle key={`f${i}`} cx={px} cy={py} r={petal2R} fill={color} opacity={0.75} />
-      ))}
-      <Circle cx={cx} cy={cy} r={s * 0.14} fill="white" />
+      {/* Open arc ring */}
+      <Path
+        d={`M ${x1} ${y1} A ${ringR} ${ringR} 0 1 1 ${x2} ${y2}`}
+        stroke={color}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Filled dot on the ring */}
+      <Circle cx={dotX} cy={dotY} r={dotR + sw * 0.3} fill={color} />
     </Svg>
   );
 }
@@ -149,50 +153,47 @@ function HealthIcon({ color, size }: { color: string; size: number }) {
 }
 
 function LearnIcon({ color, size }: { color: string; size: number }) {
+  // Two-column grid icon (two sets of horizontal lines side-by-side)
   const s = size;
-  const padX = s * 0.15;
-  const padY = s * 0.1;
-  const w = s - padX * 2;
-  const h = s - padY * 2;
-  const spineX = padX + w * 0.38;
-  const r = s * 0.12;
+  const pad = s * 0.1;
+  const w = s - pad * 2;
+  const h = s - pad * 2;
+  const r = s * 0.14;
+  const gutter = s * 0.07;
+  const colW = (w - gutter) / 2;
+  const lineH = s * 0.055;
+  const lineR = lineH / 2;
+  const rows = [0.22, 0.44, 0.66, 0.84]; // fraction of h
   return (
     <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      {/* Book body */}
-      <Rect x={padX} y={padY} width={w} height={h} rx={r} fill={color} />
-      {/* Spine line */}
-      <Rect x={spineX} y={padY} width={s * 0.045} height={h} fill="white" opacity={0.35} />
-      {/* Page lines on right half */}
-      <Line
-        x1={spineX + s * 0.1}
-        y1={padY + h * 0.32}
-        x2={padX + w - s * 0.06}
-        y2={padY + h * 0.32}
-        stroke="white"
-        strokeWidth={s * 0.05}
-        strokeLinecap="round"
-        opacity={0.5}
-      />
-      <Line
-        x1={spineX + s * 0.1}
-        y1={padY + h * 0.55}
-        x2={padX + w - s * 0.1}
-        y2={padY + h * 0.55}
-        stroke="white"
-        strokeWidth={s * 0.05}
-        strokeLinecap="round"
-        opacity={0.5}
-      />
-      <Line
-        x1={spineX + s * 0.1}
-        y1={padY + h * 0.73}
-        x2={padX + w - s * 0.14}
-        y2={padY + h * 0.73}
-        stroke="white"
-        strokeWidth={s * 0.05}
-        strokeLinecap="round"
-        opacity={0.4}
-      />
+      {/* Background card */}
+      <Rect x={pad} y={pad} width={w} height={h} rx={r} fill={color} />
+      {/* Left column lines */}
+      {rows.map((frac, i) => (
+        <Rect
+          key={`l${i}`}
+          x={pad + s * 0.06}
+          y={pad + h * frac}
+          width={colW - s * 0.04}
+          height={lineH}
+          rx={lineR}
+          fill="white"
+          opacity={i === 0 ? 0.9 : 0.55}
+        />
+      ))}
+      {/* Right column lines */}
+      {rows.map((frac, i) => (
+        <Rect
+          key={`r${i}`}
+          x={pad + colW + gutter + s * 0.02}
+          y={pad + h * frac}
+          width={colW - s * 0.04}
+          height={lineH}
+          rx={lineR}
+          fill="white"
+          opacity={i === 0 ? 0.9 : 0.55}
+        />
+      ))}
     </Svg>
   );
 }
@@ -279,7 +280,7 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, activeColor }: Ta
       testID={`tab-${routeName.toLowerCase()}`}
     >
       <View style={[styles.iconPill, { backgroundColor: pillBg }]}>
-        <TabIcon routeName={routeName} color={iconColor} size={24} />
+        <TabIcon routeName={routeName} color={iconColor} size={26} />
       </View>
       <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
     </Pressable>
@@ -363,9 +364,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   iconPill: {
-    width: 48,
-    height: 32,
-    borderRadius: 16,
+    width: 52,
+    height: 44,
+    borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
   },
