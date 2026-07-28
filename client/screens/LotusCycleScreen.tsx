@@ -21,6 +21,8 @@ import { neutral } from "@/constants/colors";
 import { storage, UserProfile } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { LannaMascot } from "@/components/LannaMascot";
+import { LannaInsightBadge } from "@/components/LannaInsightBadge";
+import { useLannaCheckIn } from "@/hooks/useLannaCheckIn";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -159,6 +161,7 @@ export function LotusCycleScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
+  const { activeNudge } = useLannaCheckIn();
 
   useFocusEffect(
     useCallback(() => {
@@ -217,6 +220,13 @@ export function LotusCycleScreen() {
             <Text style={styles.streakText}>{streakDays} day streak</Text>
           </View>
         </View>
+
+        {/* Lanna insight badge — shown when a nudge is active */}
+        {activeNudge && (
+          <View style={styles.badgeWrapper}>
+            <LannaInsightBadge nudge={activeNudge} currentPhase={currentPhase} />
+          </View>
+        )}
 
         {/* Cycle wheel */}
         <View style={styles.wheelSection}>
@@ -355,6 +365,11 @@ const styles = StyleSheet.create({
   legendLabel: {
     fontSize: 11,
     color: "#8A6F80",
+  },
+  badgeWrapper: {
+    width: "100%",
+    marginBottom: 8,
+    marginHorizontal: -20,
   },
   quickLogSection: {
     width: "100%",

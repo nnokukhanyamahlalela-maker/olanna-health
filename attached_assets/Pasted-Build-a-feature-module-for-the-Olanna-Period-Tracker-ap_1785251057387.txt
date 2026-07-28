@@ -1,0 +1,21 @@
+Build a feature module for the Olanna Period Tracker app called "Lanna's Check-In" — a mascot-driven health-seeking behavior system focused on four conditions: irregular periods, PMOS (formerly PCOS), endometriosis, and menopause/perimenopause. The goal is not just symptom logging, but nudging users toward timely care-seeking action (booking appointments, discussing symptoms with a provider, seeking screening) without shame or alarm.
+
+Core requirements:
+
+Pattern detection engine — track cycle length, symptom logs (pain severity, flow changes, mood, hot flashes, etc.) over rolling windows (3, 6, 12 cycles). Flag pattern deviations specific to each condition:
+Irregular periods: cycle length variance beyond a threshold across 3+ cycles
+PMOS: clustering of symptoms (acne, hirsutism, irregular cycles, weight change) matching Rotterdam-adjacent criteria
+Endometriosis: escalating pain scores, pain outside menstruation, or pain unresponsive to logged OTC relief over time
+Menopause: cycle gaps consistent with perimenopause plus vasomotor symptom logging (hot flashes, sleep disruption) in age-appropriate users
+Lanna's response tiers — three escalation levels, each with distinct mascot tone:
+Gentle awareness: casual in-app message noting a pattern, no urgency ("Hey, I've noticed your cycles have been a bit unpredictable lately — want to see what that might mean?")
+Suggested action: educational content plus a soft nudge to seek care, with plain-language "why this matters"
+Direct escalation: when thresholds suggest something warranting clinical attention, Lanna's tone shifts to clear and direct (drops the playful register), presents a one-tap "find care" or "book appointment" flow, and never gates this behind a paywall or subscription tier
+Avoidance-aware nudging — if a user has been flagged into tier 2 or 3 and hasn't logged a follow-up action (booked, dismissed, or postponed) within a set window, Lanna checks in once more without repeating pressure tactics or guilt language.
+Postponement respect — every escalation must have a "not now" option that doesn't disappear permanently; instead it resurfaces at a longer interval, since dismissal isn't disengagement.
+Localized care pathway — a lightweight directory/deep-link structure for South African context (clinics, gynecologists, telehealth options) that the "find care" button routes to; stub this with placeholder data if no live directory exists yet.
+Content layer — condition-specific educational micro-content (3–5 sentence explainers) tied to each detected pattern, written in the existing Olanna brand voice ("It's your cycle. We just help you understand it"), stored in an easily editable JSON/CMS-like structure so content can be updated without code changes.
+
+Explicitly avoid: diagnostic claims (Lanna suggests, never diagnoses), fear-based escalation language, and any subscription paywall on tier 3 (safety-relevant) nudges.
+
+Build this as a modular component that plugs into the existing Olanna Period Tracker app's current codebase and data models — inspect the existing project structure first to match the framework, conventions, and symptom-logging data models already in use.

@@ -34,8 +34,10 @@ import PMSCheckerScreen from "@/screens/PMSCheckerScreen";
 import SupplementsScreen from "@/screens/SupplementsScreen";
 import MedicationsScreen from "@/screens/MedicationsScreen";
 import GutHealthScreen from "@/screens/GutHealthScreen";
+import LannaCheckInScreen from "@/screens/LannaCheckInScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
+import type { ConditionId } from "@/data/lannaContent";
 
 export type RootStackParamList = {
   IntroLogo: undefined;
@@ -70,6 +72,7 @@ export type RootStackParamList = {
   Supplements: undefined;
   Medications: undefined;
   GutHealth: undefined;
+  LannaCheckIn: { conditionId: ConditionId };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -294,6 +297,14 @@ export default function RootStackNavigator() {
           animation: "fade",
           gestureEnabled: true,
           contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
+      <Stack.Screen
+        name="LannaCheckIn"
+        component={LannaCheckInScreen}
+        options={{
+          headerShown: false,
+          animation: "slide_from_bottom",
         }}
       />
     </Stack.Navigator>
