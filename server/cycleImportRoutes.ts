@@ -108,7 +108,17 @@ export function registerCycleImportRoutes(app: Express): void {
         });
       }
 
-      const response = await getOpenAI().chat.completions.create({
+      let aiClient: ReturnType<typeof getOpenAI>;
+      try {
+        aiClient = getOpenAI();
+      } catch (keyError: any) {
+        return res.status(503).json({
+          error: "ai_not_configured",
+          message: "AI features are not configured. Please set the OpenAI API key.",
+        });
+      }
+
+      const response = await aiClient.chat.completions.create({
         model: "gpt-4.1-mini",
         messages: [
           {

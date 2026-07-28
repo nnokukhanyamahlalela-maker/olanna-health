@@ -255,7 +255,19 @@ function setupErrorHandler(app: express.Application) {
   });
 }
 
+function checkAiConfiguration(): void {
+  if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+    console.warn(
+      "[AI] WARNING: AI_INTEGRATIONS_OPENAI_API_KEY is not set. " +
+        "AI chat, cycle insights, audio, and image features will return errors until the key is configured."
+    );
+  } else {
+    console.log("[AI] OpenAI API key is configured. AI features are enabled.");
+  }
+}
+
 (async () => {
+  checkAiConfiguration();
   setupCors(app);
   setupBodyParsing(app);
   setupRequestLogging(app);

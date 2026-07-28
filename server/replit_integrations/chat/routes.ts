@@ -103,7 +103,14 @@ export function registerChatRoutes(app: Express): void {
         content: m.content,
       }));
 
-      const completion = await getOpenAI().chat.completions.create({
+      let aiClient: ReturnType<typeof getOpenAI>;
+      try {
+        aiClient = getOpenAI();
+      } catch (keyError: any) {
+        return res.status(503).json({ error: "AI features are not configured. Please set the OpenAI API key." });
+      }
+
+      const completion = await aiClient.chat.completions.create({
         model: "gpt-4.1-mini",
         messages: chatMessages,
         max_completion_tokens: 2048,
