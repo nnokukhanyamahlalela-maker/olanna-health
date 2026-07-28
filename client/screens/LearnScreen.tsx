@@ -1,372 +1,310 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, FlatList, StyleSheet, TextInput, Pressable, ScrollView } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Text,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Feather } from "@expo/vector-icons";
 
-import { AppText } from "@/components/AppText";
-import { ArticleCard } from "@/components/ArticleCard";
-import { EmptyState } from "@/components/EmptyState";
-import { AppGradient } from "@/components/AppGradient";
-import { GlassSurface } from "@/components/GlassSurface";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding } from "@/constants/spacing";
-import { BorderRadius } from "@/constants/theme";
-import { AppFontFamily } from "@/constants/typography";
-import { getUserGoals, GoalId } from "@/utils/onboardingStorage";
-import { getLearnTopicOrder, LearnTopicId, LEARN_TOPIC_INFO } from "@/utils/personalization";
-import { articles as articlesData, TOPIC_CATEGORIES, Article } from "@/data/articles";
+import { LannaMascot } from "@/components/LannaMascot";
+import { storage, UserProfile } from "@/lib/storage";
+import { Phase, getPhaseForDay } from "@/constants/phaseConfig";
+import { phase as phaseTokens } from "@/constants/colors";
+import { articles as articlesData, Article } from "@/data/articles";
 import { LearnStackParamList } from "@/navigation/LearnStackNavigator";
+import { useLotusCycle } from "@/hooks/useLotusCycle";
 
 type NavigationProp = NativeStackNavigationProp<LearnStackParamList>;
 
-const categories = [
-  "All",
-  "Periods",
-  "PCOS",
-  "Endometriosis",
-  "Sexual Health",
-  "Fertility",
+const BG = "#FDF5F8";
+const TEXT_DARK = "#2D1F2B";
+const TEXT_MID = "#5A4252";
+const TEXT_SOFT = "#8A6F80";
+const PINK = "#F06B9A";
+
+// Category filters (per spec §6.4 — no topic-colored icons on article list)
+const FILTER_CHIPS = [
+  { id: "Cycle basics", label: "Cycle basics" },
+  { id: "PMOS", label: "PMOS" },
+  { id: "Nutrition", label: "Nutrition" },
+  { id: "Mental health", label: "Mental health" },
+  { id: "Periods", label: "Periods" },
+  { id: "PCOS", label: "PCOS" },
 ];
 
+// Tag pill colors (subtle, no icons)
+const TAG_COLORS: Record<string, string> = {
+  PMOS: "#D178B3",
+  PCOS: "#D178B3",
+  Nutrition: "#C9A0DC",
+  "Mental health": "#8D709A",
+  Periods: "#F06B9A",
+  Fertility: "#DE73DE",
+  "Cycle basics": "#92547D",
+};
+
+function TagPill({ label }: { label: string }) {
+  const color = TAG_COLORS[label] ?? "#8A6F80";
+  return (
+    <View style={[styles.tagPill, { backgroundColor: color + "22" }]}>
+      <Text style={[styles.tagPillText, { color }]}>{label}</Text>
+    </View>
+  );
+}
+
+// ─── Featured article card ────────────────────────────────────────────────────
+
+function FeaturedCard({
+  article,
+  phase,
+  phaseColor,
+  onPress,
+}: {
+  article: Article;
+  phase: Phase;
+  phaseColor: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={[styles.featuredCard, { backgroundColor: phaseColor + "22" }]}>
+      <View style={styles.featuredInner}>
+        <View style={[styles.forTodayBadge, { backgroundColor: phaseColor }]}>
+          <Text style={styles.forTodayText}>FOR TODAY</Text>
+        </View>
+        <Text style={styles.featuredTitle}>{article.title}</Text>
+        <Text style={styles.featuredReadTime}>{article.readTime}</Text>
+      </View>
+      <LannaMascot phase={phase} size={72} />
+    </Pressable>
+  );
+}
+
+// ─── Article row (no thumbnail, no color block per spec §6.4) ────────────────
+
+function ArticleRow({
+  article,
+  onPress,
+}: {
+  article: Article;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={styles.articleRow}>
+      <TagPill label={article.category} />
+      <Text style={styles.articleRowTitle}>{article.title}</Text>
+      <Text style={styles.articleRowReadTime}>{article.readTime}</Text>
+    </Pressable>
+  );
+}
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
+
 export default function LearnScreen() {
-  const { theme } = useTheme();
-  const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [userGoals, setUserGoals] = useState<GoalId[]>([]);
-  const [topicOrder, setTopicOrder] = useState<LearnTopicId[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { data: cycleData } = useLotusCycle(profile?.id ?? "");
 
   useEffect(() => {
-    const loadGoals = async () => {
-      const goals = await getUserGoals();
-      setUserGoals(goals);
-      setTopicOrder(getLearnTopicOrder(goals));
-    };
-    loadGoals();
+    (async () => {
+      try { setProfile(await storage.getUserProfile()); } catch {}
+    })();
   }, []);
 
-  const sortedArticles = useMemo(() => {
-    if (topicOrder.length === 0) return articlesData;
+  const cycleLength = profile?.cycleLength ?? 28;
+  const periodLength = profile?.periodLength ?? 5;
+  const currentDay = cycleData?.currentCycleDay ?? 1;
+  const currentPhase: Phase = getPhaseForDay(currentDay, cycleLength, periodLength);
+  const phaseKey = currentPhase === "ovulation" ? "ovulatory" : currentPhase === "late" ? "luteal" : currentPhase;
+  const phaseColor = (phaseTokens as any)[phaseKey]?.front ?? PINK;
 
-    const categoryPriority: Record<string, number> = {};
-    topicOrder.forEach((topicId, index) => {
-      const info = LEARN_TOPIC_INFO[topicId];
-      if (info && !categoryPriority[info.category]) {
-        categoryPriority[info.category] = index;
-      }
+  const filtered = useMemo(() => {
+    return articlesData.filter((a) => {
+      const matchSearch =
+        !searchQuery ||
+        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.summary.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchFilter = !selectedFilter || a.category === selectedFilter;
+      return matchSearch && matchFilter;
     });
+  }, [searchQuery, selectedFilter]);
 
-    return [...articlesData].sort((a, b) => {
-      const priorityA = categoryPriority[a.category] ?? 999;
-      const priorityB = categoryPriority[b.category] ?? 999;
-      return priorityA - priorityB;
-    });
-  }, [topicOrder]);
-
-  const filteredArticles = sortedArticles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || article.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const featuredArticle = filteredArticles.find((a) => a.featured) || filteredArticles[0];
-  const remainingArticles = filteredArticles.filter((a) => a !== featuredArticle);
+  const featuredArticle = filtered.find((a) => a.featured) ?? filtered[0];
+  const remaining = filtered.filter((a) => a !== featuredArticle);
 
   const handleArticlePress = (article: Article) => {
     navigation.navigate("ArticleDetail", { articleId: article.id });
   };
 
-  const renderHeader = () => (
-    <View style={styles.headerContent}>
-      <AppText variant="h1" color={theme.text}>
-        Learn
-      </AppText>
-      <AppText variant="caption" color={theme.textSecondary} style={styles.pageSubtitle}>
-        Evidence-based health education
-      </AppText>
-
-      <View style={styles.quickLinksRow}>
-        <Pressable
-          onPress={() => navigation.navigate("Glossary")}
-          testID="button-glossary"
-          style={styles.quickLinkPressable}
-        >
-          <GlassSurface style={styles.quickLinkCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
-            <View style={[styles.quickLinkIcon, { backgroundColor: "#6B4C8A40" }]}>
-              <Feather name="book" size={18} color="#6B4C8A" />
-            </View>
-            <AppText variant="label" color={theme.text}>
-              Glossary
-            </AppText>
-            <AppText variant="caption" color={theme.textSecondary}>
-              Health terms explained
-            </AppText>
-          </GlassSurface>
-        </Pressable>
-      </View>
-
-      <View style={styles.topicCardsContainer}>
-        <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
-          BROWSE BY TOPIC
-        </AppText>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.topicCardsList}
-        >
-          {TOPIC_CATEGORIES.map((topic) => (
-            <Pressable
-              key={topic.id}
-              onPress={() => setSelectedCategory(topic.label === "Periods 101" ? "Periods" : topic.label)}
-            >
-              <GlassSurface style={styles.topicCard} padding={Spacing.md} borderRadius={BorderRadius.md}>
-                <View style={[styles.topicIconCircle, { backgroundColor: topic.color + "40" }]}>
-                  <Feather name={topic.icon} size={20} color={topic.color} />
-                </View>
-                <AppText variant="label" color={theme.text} style={styles.topicCardTitle}>
-                  {topic.label}
-                </AppText>
-                <AppText variant="caption" color={theme.textSecondary} numberOfLines={2} style={styles.topicCardDesc}>
-                  {topic.description}
-                </AppText>
-              </GlassSurface>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
-
-      <GlassSurface noPadding borderRadius={BorderRadius.md} style={styles.searchContainer}>
-        <View style={styles.searchInner}>
-          <Feather name="search" size={18} color={theme.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Search articles..."
-            placeholderTextColor={theme.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            testID="input-article-search"
-          />
-          {searchQuery.length > 0 ? (
-            <Pressable onPress={() => setSearchQuery("")}>
-              <Feather name="x" size={18} color={theme.textSecondary} />
-            </Pressable>
-          ) : null}
-        </View>
-      </GlassSurface>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesList}
-      >
-        {categories.map((item) => {
-          const isSelected = selectedCategory === item;
-          return isSelected ? (
-            <Pressable key={item} onPress={() => setSelectedCategory(item)}>
-              <GlassSurface
-                noPadding
-                borderRadius={BorderRadius.full}
-                style={[styles.categoryChip, { backgroundColor: theme.primary + "DD" }]}
-              >
-                <View style={styles.categoryChipInner}>
-                  <AppText variant="caption" color="#FFFCFA">
-                    {item}
-                  </AppText>
-                </View>
-              </GlassSurface>
-            </Pressable>
-          ) : (
-            <Pressable
-              key={item}
-              onPress={() => setSelectedCategory(item)}
-              style={[styles.categoryChip, { borderColor: theme.border, borderWidth: 1 }]}
-            >
-              <View style={styles.categoryChipInner}>
-                <AppText variant="caption" color={theme.textSecondary}>
-                  {item}
-                </AppText>
-              </View>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      {featuredArticle ? (
-        <>
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
-            FEATURED
-          </AppText>
-          <ArticleCard
-            title={featuredArticle.title}
-            summary={featuredArticle.summary}
-            category={featuredArticle.category}
-            readTime={featuredArticle.readTime}
-            imageSource={featuredArticle.imageSource}
-            featured
-            onPress={() => handleArticlePress(featuredArticle)}
-          />
-          {remainingArticles.length > 0 ? (
-            <>
-              <View style={[styles.divider, { backgroundColor: theme.border }]} />
-              <AppText variant="caption" color={theme.textSecondary} style={styles.sectionLabel}>
-                MORE ARTICLES
-              </AppText>
-            </>
-          ) : null}
-        </>
-      ) : null}
-    </View>
-  );
-
-  const renderEmptyState = () => (
-    <EmptyState
-      image={require("../../assets/images/empty-search.png")}
-      title="No Articles Found"
-      description="Try adjusting your search or browse a different category."
-    />
-  );
-
-  const renderSeparator = () => (
-    <View style={[styles.articleDivider, { backgroundColor: theme.border }]} />
-  );
-
   return (
-    <AppGradient style={styles.container}>
+    <View style={[styles.root, { backgroundColor: BG }]}>
       <FlatList
-        data={remainingArticles}
+        data={remaining}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ArticleCard
-            title={item.title}
-            summary={item.summary}
-            category={item.category}
-            readTime={item.readTime}
-            imageSource={item.imageSource}
-            onPress={() => handleArticlePress(item)}
-          />
-        )}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={filteredArticles.length === 0 ? renderEmptyState : null}
-        contentContainerStyle={{
-          paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + 110,
-          paddingHorizontal: ScreenPadding.horizontal,
-          flexGrow: 1,
-        }}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingTop: insets.top + 20, paddingBottom: tabBarHeight + 24 },
+        ]}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={renderSeparator}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            {/* Title */}
+            <View style={styles.titleRow}>
+              <Text style={styles.pageTitle}>Learn</Text>
+              <Text style={styles.pageSubtitle}>Grounded in real research</Text>
+            </View>
+
+            {/* Search bar */}
+            <View style={styles.searchBar}>
+              <Text style={styles.searchIcon}>🔍</Text>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search articles"
+                placeholderTextColor={TEXT_SOFT}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery("")}>
+                  <Text style={styles.searchClear}>✕</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {/* Featured article */}
+            {featuredArticle && (
+              <FeaturedCard
+                article={featuredArticle}
+                phase={currentPhase}
+                phaseColor={phaseColor}
+                onPress={() => handleArticlePress(featuredArticle)}
+              />
+            )}
+
+            {/* Category filter chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterChips}
+            >
+              {FILTER_CHIPS.map((chip) => {
+                const isSelected = selectedFilter === chip.id;
+                return (
+                  <Pressable
+                    key={chip.id}
+                    onPress={() => setSelectedFilter(isSelected ? null : chip.id)}
+                    style={[
+                      styles.filterChip,
+                      isSelected && { backgroundColor: phaseColor, borderColor: phaseColor },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        isSelected && styles.filterChipTextActive,
+                      ]}
+                    >
+                      {chip.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            {/* Section label */}
+            {remaining.length > 0 && (
+              <Text style={styles.sectionLabel}>Recommended for you</Text>
+            )}
+          </View>
+        }
+        renderItem={({ item }) => (
+          <ArticleRow article={item} onPress={() => handleArticlePress(item)} />
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No articles found</Text>
+          </View>
+        }
       />
-    </AppGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerContent: {
-    marginBottom: Spacing.md,
-  },
-  pageSubtitle: {
-    marginTop: 4,
-    marginBottom: Spacing.xl,
-  },
-  quickLinksRow: {
+  root: { flex: 1 },
+  listContent: { paddingHorizontal: 20, gap: 0 },
+  header: { gap: 16, marginBottom: 12 },
+  titleRow: { gap: 2 },
+  pageTitle: { fontSize: 24, fontWeight: "700", color: TEXT_DARK },
+  pageSubtitle: { fontSize: 13, color: TEXT_SOFT },
+  searchBar: {
     flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
+    alignItems: "center",
+    backgroundColor: "#F0E4EB",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
   },
-  quickLinkPressable: {
-    flex: 1,
-  },
-  quickLinkCard: {
-    gap: 6,
-  },
-  quickLinkIcon: {
-    width: 36,
-    height: 36,
+  searchIcon: { fontSize: 16 },
+  searchInput: { flex: 1, fontSize: 15, color: TEXT_DARK },
+  searchClear: { fontSize: 14, color: TEXT_SOFT },
+  featuredCard: {
     borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  topicCardsContainer: {
-    marginBottom: Spacing.xl,
-  },
-  topicCardsList: {
-    gap: Spacing.sm,
-    paddingTop: Spacing.sm,
-  },
-  topicCard: {
-    width: 160,
-    gap: 6,
-  },
-  topicIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  topicCardTitle: {
-    fontSize: 14,
-  },
-  topicCardDesc: {
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  searchContainer: {
-    marginBottom: Spacing.lg,
-  },
-  searchInner: {
+    padding: 18,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: Spacing.md,
-    height: 44,
-    gap: Spacing.sm,
+    gap: 12,
   },
-  searchInput: {
-    flex: 1,
-    fontFamily: AppFontFamily.regular,
-    fontSize: 14,
-    fontWeight: "400",
-    height: "100%",
+  featuredInner: { flex: 1, gap: 8 },
+  forTodayBadge: {
+    alignSelf: "flex-start",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  categoriesList: {
-    gap: Spacing.sm,
-    paddingBottom: Spacing.sm,
-  },
-  categoryChip: {
-    borderRadius: BorderRadius.full,
-  },
-  categoryChipInner: {
+  forTodayText: { fontSize: 11, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
+  featuredTitle: { fontSize: 18, fontWeight: "700", color: TEXT_DARK, lineHeight: 24 },
+  featuredReadTime: { fontSize: 12, color: TEXT_SOFT },
+  filterChips: { gap: 8, paddingRight: 8 },
+  filterChip: {
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    paddingHorizontal: Spacing.md,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#EDD8E7",
+    backgroundColor: "transparent",
   },
-  divider: {
-    height: 1,
-    marginVertical: Spacing.xl,
+  filterChipText: { fontSize: 13, color: TEXT_MID, fontWeight: "500" },
+  filterChipTextActive: { color: "#FFFFFF", fontWeight: "700" },
+  sectionLabel: { fontSize: 15, fontWeight: "700", color: TEXT_DARK },
+  articleRow: {
+    paddingVertical: 14,
+    gap: 5,
   },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    letterSpacing: 2,
-    marginBottom: Spacing.lg,
+  tagPill: {
+    alignSelf: "flex-start",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
   },
-  articleDivider: {
-    height: 1,
-    marginLeft: 0,
-  },
+  tagPillText: { fontSize: 11, fontWeight: "600" },
+  articleRowTitle: { fontSize: 15, fontWeight: "600", color: TEXT_DARK, lineHeight: 21 },
+  articleRowReadTime: { fontSize: 12, color: TEXT_SOFT },
+  separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#EDD8E7" },
+  emptyState: { paddingVertical: 40, alignItems: "center" },
+  emptyText: { fontSize: 15, color: TEXT_SOFT },
 });

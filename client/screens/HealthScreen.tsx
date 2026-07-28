@@ -1,184 +1,155 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  Text,
+  RefreshControl,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Svg, { Rect, Path, Circle } from "react-native-svg";
 
-import { ThemedText } from "@/components/ThemedText";
-import { AppGradient } from "@/components/AppGradient";
-import { PrivacyBadge } from "@/components/PrivacyBadge";
-import { GlassSurface } from "@/components/GlassSurface";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, ScreenPadding } from "@/constants/spacing";
-import { BorderRadius, Fonts } from "@/constants/theme";
+import { LannaMascot } from "@/components/LannaMascot";
 import { storage, UserProfile } from "@/lib/storage";
+import { Phase, getPhaseForDay, phaseConfig } from "@/constants/phaseConfig";
+import { phase as phaseTokens } from "@/constants/colors";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
-import { PHASE_SELFCARE } from "@/lib/dailyDecode";
-import { phase as phaseColors } from "@/constants/colors";
-import type { CyclePhase } from "@/types/cycle";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const PHASE_DOT_COLOR: Record<string, string> = {
-  Menstrual: phaseColors.menstrual.solid,
-  Follicular: phaseColors.follicular.solid,
-  Ovulatory: phaseColors.ovulatory.solid,
-  Luteal: phaseColors.luteal.solid,
-  "Late Luteal": phaseColors.luteal.solid,
-};
+const BG = "#FDF5F8";
+const TEXT_DARK = "#2D1F2B";
+const TEXT_MID = "#5A4252";
+const TEXT_SOFT = "#8A6F80";
+const PINK = "#F06B9A";
 
-const PHASE_KEY_MAP: Record<string, keyof typeof PHASE_SELFCARE> = {
-  Menstrual: "menstrual",
-  Follicular: "follicular",
-  Ovulatory: "ovulation",
-  Luteal: "luteal",
-  "Late Luteal": "late",
-};
+// ─── Sleep bar chart ──────────────────────────────────────────────────────────
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const SLEEP_DATA = [
+  { day: "M", hours: 6.5 },
+  { day: "T", hours: 7.2 },
+  { day: "W", hours: 6.0 },
+  { day: "T", hours: 7.8 },
+  { day: "F", hours: 6.3 },
+  { day: "S", hours: 8.1 },
+  { day: "S", hours: 7.4 },
+];
 
-interface TrackerCardData {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: keyof typeof Feather.glyphMap;
-  color: string;
-  route?: keyof RootStackParamList;
-  comingSoon?: boolean;
-}
+const SLEEP_GOAL = 7.5;
 
-function TrackerCard({
-  item,
-  onPress,
-}: {
-  item: TrackerCardData;
-  onPress: () => void;
-}) {
-  const { theme } = useTheme();
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+function SleepChart({ phaseColor }: { phaseColor: string }) {
+  const chartW = 280;
+  const chartH = 100;
+  const barW = 24;
+  const maxH = 80;
+  const maxVal = 9;
+  const avg = SLEEP_DATA.reduce((a, b) => a + b.hours, 0) / SLEEP_DATA.length;
 
   return (
-    <AnimatedPressable
-      testID={`tracker-card-${item.id}`}
-      accessibilityRole="button"
-      accessibilityLabel={item.title + ". " + item.subtitle}
-      onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.96, { damping: 15, stiffness: 150 });
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1, { damping: 15, stiffness: 150 });
-      }}
-      style={[
-        styles.trackerCard,
-        animatedStyle,
-      ]}
-    >
-      <GlassSurface style={styles.trackerCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-        <View style={[styles.trackerIconWrap, { backgroundColor: item.color + "40" }]}>
-          <Feather name={item.icon} size={22} color={item.color} />
-        </View>
-        <ThemedText style={[styles.trackerTitle, { color: theme.text }]}>
-          {item.title}
-        </ThemedText>
-        <ThemedText style={[styles.trackerSubtitle, { color: theme.textSecondary }]}>
-          {item.comingSoon ? "Coming soon" : item.subtitle}
-        </ThemedText>
-      </GlassSurface>
-    </AnimatedPressable>
+    <View style={styles.chartCard}>
+      <Text style={styles.chartTitle}>Sleep this week</Text>
+      <Text style={styles.chartSubtitle}>
+        Avg {avg.toFixed(1)} hrs, a little {avg < SLEEP_GOAL ? "under" : "over"} your {SLEEP_GOAL} hr goal
+      </Text>
+      <Svg width={chartW} height={chartH + 20}>
+        {SLEEP_DATA.map((d, i) => {
+          const x = i * (barW + 16) + 8;
+          const h = (d.hours / maxVal) * maxH;
+          const y = maxH - h;
+          const isGoal = d.hours >= SLEEP_GOAL;
+          return (
+            <React.Fragment key={i}>
+              <Rect
+                x={x}
+                y={y}
+                width={barW}
+                height={h}
+                rx={6}
+                fill={isGoal ? phaseColor : phaseColor + "44"}
+              />
+            </React.Fragment>
+          );
+        })}
+        {SLEEP_DATA.map((d, i) => {
+          const x = i * (barW + 16) + 8 + barW / 2;
+          return (
+            <Path
+              key={`label-${i}`}
+              d={`M${x},${maxH + 8}`}
+            />
+          );
+        })}
+      </Svg>
+      {/* Day labels below */}
+      <View style={styles.sleepDayRow}>
+        {SLEEP_DATA.map((d, i) => (
+          <Text key={i} style={styles.sleepDayLabel}>{d.day}</Text>
+        ))}
+      </View>
+    </View>
   );
 }
 
-function InsightPlaceholderCard({
-  title,
-  icon,
-  color,
-}: {
-  title: string;
-  icon: keyof typeof Feather.glyphMap;
-  color: string;
-}) {
-  const { theme } = useTheme();
-  const scale = useSharedValue(1);
+// ─── Mood across cycle chart ──────────────────────────────────────────────────
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+function MoodChart({ phaseColor }: { phaseColor: string }) {
+  // Placeholder curve: mood score across 4 phases
+  const points = [
+    { x: 30, y: 70 },
+    { x: 90, y: 55 },
+    { x: 150, y: 40 },
+    { x: 210, y: 48 },
+    { x: 270, y: 75 },
+  ];
+  const pathD = points.reduce((acc, p, i) => {
+    if (i === 0) return `M${p.x},${p.y}`;
+    const prev = points[i - 1];
+    const cpx = (prev.x + p.x) / 2;
+    return `${acc} C${cpx},${prev.y} ${cpx},${p.y} ${p.x},${p.y}`;
+  }, "");
 
   return (
-    <AnimatedPressable
-      accessibilityRole="button"
-      accessibilityLabel={title + ". Coming soon"}
-      onPressIn={() => {
-        scale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1, { damping: 15, stiffness: 150 });
-      }}
-      style={[
-        styles.insightCard,
-        animatedStyle,
-      ]}
-    >
-      <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-        <View style={styles.insightCardRow}>
-          <View style={[styles.insightIconWrap, { backgroundColor: color + "40" }]}>
-            <Feather name={icon} size={20} color={color} />
-          </View>
-          <View style={styles.insightContent}>
-            <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
-              {title}
-            </ThemedText>
-            <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
-              Coming soon
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={18} color={theme.textSecondary} />
-        </View>
-      </GlassSurface>
-    </AnimatedPressable>
+    <View style={styles.chartCard}>
+      <Text style={styles.chartTitle}>Mood across your cycle</Text>
+      <Svg width={300} height={100}>
+        <Path d={pathD} stroke={phaseColor} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+        {points.map((p, i) => (
+          <Circle key={i} cx={p.x} cy={p.y} r={4} fill={phaseColor} />
+        ))}
+      </Svg>
+      <View style={styles.moodPhaseRow}>
+        {["Menstrual", "Follicular", "Ovulatory", "Luteal"].map((ph) => (
+          <Text key={ph} style={styles.moodPhaseLabel}>{ph}</Text>
+        ))}
+      </View>
+    </View>
   );
 }
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function HealthScreen() {
-  const { theme } = useTheme();
-  const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { data: cyclePrediction } = useLotusCycle(profile?.id || "");
+  const { data: cycleData } = useLotusCycle(profile?.id ?? "");
 
   const loadData = async () => {
     try {
-      const userProfile = await storage.getUserProfile();
-      setProfile(userProfile);
-    } catch (error) {
-      console.error("Failed to load data:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      const p = await storage.getUserProfile();
+      setProfile(p);
+    } catch {}
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -186,344 +157,160 @@ export default function HealthScreen() {
     setRefreshing(false);
   };
 
-  const trackers: TrackerCardData[] = [
-    {
-      id: "symptoms",
-      title: "Symptoms",
-      subtitle: "Log and track daily symptoms",
-      icon: "thermometer",
-      color: "#C2185B",
-      route: "CheckIn",
-    },
-    {
-      id: "supplements",
-      title: "Supplements",
-      subtitle: "Track your daily supplements",
-      icon: "sun",
-      color: "#5A8A3E",
-      route: "Supplements",
-    },
-    {
-      id: "medications",
-      title: "Medications",
-      subtitle: "Manage your medications",
-      icon: "package",
-      color: "#7B5EA7",
-      route: "Medications",
-    },
-    {
-      id: "gut-health",
-      title: "Gut Health",
-      subtitle: "Educational digestive wellness insights",
-      icon: "heart",
-      color: "#B8860B",
-      route: "GutHealth",
-    },
-    {
-      id: "sexual-health",
-      title: "Sexual Health",
-      subtitle: "STI screening and resources",
-      icon: "shield",
-      color: "#C2185B",
-      route: "SexualHealthModule",
-    },
-    {
-      id: "product-safety",
-      title: "Menstrual Product Safety",
-      subtitle: "Understand what your period products may contain.",
-      icon: "info",
-      color: "#7A6B63",
-      route: "ProductSafety",
-    },
-  ];
-
-  const handleTrackerPress = (item: TrackerCardData) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (item.comingSoon) {
-      return;
-    }
-    if (item.route) {
-      navigation.navigate(item.route as any);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <AppGradient style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ThemedText type="body">Loading...</ThemedText>
-        </View>
-      </AppGradient>
-    );
-  }
+  // Determine current phase
+  const cycleLength = profile?.cycleLength ?? 28;
+  const periodLength = profile?.periodLength ?? 5;
+  const currentDay = cycleData?.currentCycleDay ?? 1;
+  const currentPhase: Phase = getPhaseForDay(currentDay, cycleLength, periodLength);
+  const config = phaseConfig[currentPhase];
+  const phaseKey = currentPhase === "ovulation" ? "ovulatory" : currentPhase === "late" ? "luteal" : currentPhase;
+  const phaseColor = (phaseTokens as any)[phaseKey]?.front ?? "#F06B9A";
 
   return (
-    <AppGradient style={styles.container}>
+    <View style={[styles.root, { backgroundColor: BG }]}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={{
-          paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: insets.bottom + 110,
-          paddingHorizontal: ScreenPadding.horizontal,
-        }}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 20, paddingBottom: tabBarHeight + 24 },
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#F6BFD3"
-            accessibilityLabel="Pull to refresh health data"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={phaseColor} />
         }
       >
-        <ThemedText style={[styles.pageSubtitle, { color: theme.textSecondary }]}>
-          Your hormonal intelligence
-        </ThemedText>
-
-        <GlassSurface style={styles.phaseCard} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-          <View style={styles.phaseRow}>
-            <View
-              style={[
-                styles.phaseDot,
-                {
-                  backgroundColor: cyclePrediction
-                    ? PHASE_DOT_COLOR[cyclePrediction.currentPhase] ?? "#F6BFD3"
-                    : "#F6BFD3",
-                },
-              ]}
-            />
-            <ThemedText style={[styles.phaseLabel, { color: theme.text }]}>
-              {cyclePrediction ? cyclePrediction.currentPhase : "Current Phase"}
-            </ThemedText>
-            {cyclePrediction && (
-              <ThemedText style={[styles.phaseDayLabel, { color: theme.textSecondary }]}>
-                Day {cyclePrediction.rawCycleDay}
-              </ThemedText>
-            )}
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <LannaMascot phase={currentPhase} size={42} />
+          <View>
+            <Text style={styles.pageTitle}>Health</Text>
+            <Text style={styles.pageSubtitle}>Your patterns over time</Text>
           </View>
-          <ThemedText style={[styles.phaseInsight, { color: theme.textSecondary }]}>
-            {cyclePrediction
-              ? PHASE_SELFCARE[PHASE_KEY_MAP[cyclePrediction.currentPhase] ?? "follicular"]
-              : "Your hormones shift throughout each cycle, influencing mood, energy, and well-being."}
-          </ThemedText>
-        </GlassSurface>
+        </View>
 
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          TRACKERS
-        </ThemedText>
+        {/* Quarterly health check */}
+        <View style={[styles.quarterlyCard, { backgroundColor: phaseColor + "22" }]}>
+          <View style={[styles.quarterlyIcon, { backgroundColor: phaseColor }]}>
+            <Text style={styles.quarterlyIconText}>+</Text>
+          </View>
+          <View style={styles.quarterlyText}>
+            <Text style={[styles.quarterlyTitle, { color: phaseColor }]}>Quarterly health check</Text>
+            <Text style={styles.quarterlyBody}>Blood pressure and waist circumference</Text>
+            <Text style={styles.quarterlyMeta}>Last logged 4 months ago, due for a check</Text>
+          </View>
+        </View>
 
-        <View style={styles.trackerGrid}>
-          {trackers.map((item) => (
-            <TrackerCard
-              key={item.id}
-              item={item}
-              onPress={() => handleTrackerPress(item)}
-            />
+        {/* Patterns this month */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>Patterns this month</Text>
+          <View style={[styles.patternCard, { backgroundColor: phaseColor + "1A" }]}>
+            <Text style={[styles.patternTitle, { color: phaseColor }]}>Fatigue and cravings cluster</Text>
+            <Text style={styles.patternBody}>
+              Shown up together 4 times this month.{"\n"}Worth mentioning at your next check-up.
+            </Text>
+          </View>
+        </View>
+
+        {/* Sleep chart */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>Sleep this week</Text>
+          <SleepChart phaseColor={phaseColor} />
+        </View>
+
+        {/* Mood chart */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>Mood across your cycle</Text>
+          <MoodChart phaseColor={phaseColor} />
+        </View>
+
+        {/* Navigate to other trackers */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>More trackers</Text>
+          {[
+            { label: "Supplements", route: "Supplements" },
+            { label: "Medications", route: "Medications" },
+            { label: "Gut Health", route: "GutHealth" },
+          ].map((item) => (
+            <Pressable
+              key={item.route}
+              onPress={() => (navigation as any).navigate(item.route)}
+              style={[styles.trackerRow, { borderColor: phaseColor + "44" }]}
+            >
+              <Text style={styles.trackerRowLabel}>{item.label}</Text>
+              <Text style={styles.trackerRowArrow}>›</Text>
+            </Pressable>
           ))}
         </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          TOOLS
-        </ThemedText>
-
-        <View style={styles.insightsList}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.navigate("PMSChecker");
-            }}
-            testID="tool-pms-checker"
-          >
-            <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-              <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#E83E8C40" }]}>
-                  <Feather name="clipboard" size={20} color="#C2185B" />
-                </View>
-                <View style={styles.insightContent}>
-                  <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
-                    PMS Symptom Checker
-                  </ThemedText>
-                  <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
-                    Assess your symptoms and get personalised tips
-                  </ThemedText>
-                </View>
-                <Feather name="chevron-right" size={18} color={theme.textSecondary} />
-              </View>
-            </GlassSurface>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.navigate("CycleCalculator");
-            }}
-            testID="tool-cycle-calculator"
-          >
-            <GlassSurface style={styles.insightCardGlass} borderRadius={BorderRadius.lg} padding={Spacing.lg}>
-              <View style={styles.insightCardRow}>
-                <View style={[styles.insightIconWrap, { backgroundColor: "#D4502040" }]}>
-                  <Feather name="calendar" size={20} color="#D45020" />
-                </View>
-                <View style={styles.insightContent}>
-                  <ThemedText style={[styles.insightTitle, { color: theme.text }]}>
-                    Cycle Length Calculator
-                  </ThemedText>
-                  <ThemedText style={[styles.insightSub, { color: theme.textSecondary }]}>
-                    Predict your next period, ovulation and fertile window
-                  </ThemedText>
-                </View>
-                <Feather name="chevron-right" size={18} color={theme.textSecondary} />
-              </View>
-            </GlassSurface>
-          </Pressable>
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          INSIGHTS
-        </ThemedText>
-
-        <View style={styles.insightsList}>
-          <InsightPlaceholderCard
-            title="Hormone Patterns"
-            icon="trending-up"
-            color="#B8860B"
-          />
-          <InsightPlaceholderCard
-            title="PMS Trends"
-            icon="bar-chart-2"
-            color="#7B5EA7"
-          />
-        </View>
-
-        <PrivacyBadge message="Your health data is encrypted and stored locally on your device" />
       </ScrollView>
-    </AppGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pageSubtitle: {
-    fontFamily: Fonts.bodyLight,
-    fontSize: 14,
-    marginTop: 4,
-    marginBottom: Spacing.xl,
-  },
-  phaseCard: {
-    marginBottom: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  phaseRow: {
+  root: { flex: 1 },
+  content: { paddingHorizontal: 20, gap: 20 },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  pageTitle: { fontSize: 22, fontWeight: "700", color: TEXT_DARK },
+  pageSubtitle: { fontSize: 13, color: TEXT_SOFT },
+  quarterlyCard: {
+    borderRadius: 16,
+    padding: 14,
     flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  phaseDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  phaseLabel: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 15,
-    flex: 1,
-  },
-  phaseDayLabel: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
-  },
-  phaseInsight: {
-    fontFamily: Fonts.body,
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  sectionLabel: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 11,
-    letterSpacing: 2,
-    marginBottom: Spacing.lg,
-  },
-  trackerGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: 12,
-  },
-  trackerCard: {
-    width: "48%",
-    flexGrow: 1,
-    flexBasis: "46%",
-  },
-  trackerCardGlass: {
-    flex: 1,
-    gap: 6,
-  },
-  trackerIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.md,
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
   },
-  trackerTitle: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 14,
-  },
-  trackerSubtitle: {
-    fontFamily: Fonts.body,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  divider: {
-    height: 1,
-    marginVertical: Spacing.xl,
-  },
-  insightsList: {
-    gap: 12,
-  },
-  insightCard: {
-    minHeight: 52,
-  },
-  insightCardGlass: {
-    flex: 1,
-  },
-  insightCardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-  },
-  insightIconWrap: {
+  quarterlyIcon: {
     width: 40,
     height: 40,
-    borderRadius: BorderRadius.md,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  insightContent: {
-    flex: 1,
-    gap: 2,
+  quarterlyIconText: { fontSize: 22, color: "#FFFFFF", fontWeight: "700" },
+  quarterlyText: { flex: 1, gap: 2 },
+  quarterlyTitle: { fontSize: 14, fontWeight: "700" },
+  quarterlyBody: { fontSize: 13, color: TEXT_MID },
+  quarterlyMeta: { fontSize: 12, color: TEXT_SOFT },
+  sectionBlock: { gap: 10 },
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: TEXT_DARK },
+  patternCard: { borderRadius: 14, padding: 14, gap: 4 },
+  patternTitle: { fontSize: 14, fontWeight: "700" },
+  patternBody: { fontSize: 13, color: TEXT_DARK, lineHeight: 19 },
+  chartCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  insightTitle: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 15,
+  chartTitle: { fontSize: 14, fontWeight: "700", color: TEXT_DARK },
+  chartSubtitle: { fontSize: 12, color: TEXT_SOFT, marginBottom: 4 },
+  sleepDayRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    marginTop: -8,
   },
-  insightSub: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
+  sleepDayLabel: { fontSize: 11, color: TEXT_SOFT, width: 24, textAlign: "center" },
+  moodPhaseRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: -4,
   },
+  moodPhaseLabel: { fontSize: 10, color: TEXT_SOFT },
+  trackerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  trackerRowLabel: { fontSize: 15, color: TEXT_DARK, fontWeight: "500" },
+  trackerRowArrow: { fontSize: 22, color: TEXT_SOFT },
 });

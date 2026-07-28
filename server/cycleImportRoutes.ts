@@ -1,10 +1,19 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+      throw new Error("OpenAI API key not configured.");
+    }
+    _openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return _openai;
+}
 
 interface ExtractedCycleData {
   regularity: "regular" | "irregular" | "not_sure" | "";
@@ -99,7 +108,7 @@ export function registerCycleImportRoutes(app: Express): void {
         });
       }
 
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAI().chat.completions.create({
         model: "gpt-4.1-mini",
         messages: [
           {

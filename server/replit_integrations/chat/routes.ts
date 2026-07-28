@@ -3,10 +3,19 @@ import OpenAI from "openai";
 import { chatStorage } from "./storage";
 import { apiKeyAuth } from "../../middleware/apiAuth";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+let openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+      throw new Error("OpenAI API key not configured. Set AI_INTEGRATIONS_OPENAI_API_KEY.");
+    }
+    openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return openai;
+}
 
 export function registerChatRoutes(app: Express): void {
   // Get all conversations
@@ -94,7 +103,7 @@ export function registerChatRoutes(app: Express): void {
         content: m.content,
       }));
 
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAI().chat.completions.create({
         model: "gpt-4.1-mini",
         messages: chatMessages,
         max_completion_tokens: 2048,

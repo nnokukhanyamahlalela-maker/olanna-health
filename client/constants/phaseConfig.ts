@@ -1,4 +1,4 @@
-import { phase as phaseTokens, neutral } from "@/constants/colors";
+import { phase as phaseTokens } from "@/constants/colors";
 
 export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal" | "late";
 
@@ -8,79 +8,120 @@ export interface PhaseConfig {
   tagline: string;
   color: string;
   softBg: string;
+  front: string;
+  back: string;
+  bg: string;
+  skin: string;
+  ink: string;
   lotusVariant: "bud" | "rising" | "bloom" | "closing" | "waiting";
   accentColor: string;
   labelColor: string;
   iconName: string;
   startDay: number;
   endDay: number;
+  aboutText: string;
 }
 
 export const phaseConfig: Record<Phase, PhaseConfig> = {
   menstrual: {
     label: "Menstrual",
-    subtitle: "Rest and Release",
-    tagline: "Rest and Release",
-    color: phaseTokens.menstrual.solid,
-    softBg: phaseTokens.menstrual.softBg,
+    subtitle: "Rest and release",
+    tagline: "Rest and release",
+    color: phaseTokens.menstrual.front,
+    softBg: phaseTokens.menstrual.bg,
+    front: phaseTokens.menstrual.front,
+    back: phaseTokens.menstrual.back,
+    bg: phaseTokens.menstrual.bg,
+    skin: phaseTokens.menstrual.skin,
+    ink: phaseTokens.menstrual.ink,
     lotusVariant: "bud",
-    accentColor: phaseTokens.menstrual.gradientEnd,
-    labelColor: phaseTokens.menstrual.gradientMid,
+    accentColor: phaseTokens.menstrual.back,
+    labelColor: phaseTokens.menstrual.front,
     iconName: "droplet",
     startDay: 1,
     endDay: 4,
+    aboutText:
+      "Rest mode is activated, and that is valid. Your body is doing important work right now, so slow down where you can.",
   },
   follicular: {
     label: "Follicular",
-    subtitle: "Growth and Renewal",
-    tagline: "Growth and Renewal",
-    color: phaseTokens.follicular.solid,
-    softBg: phaseTokens.follicular.softBg,
+    subtitle: "Growth and renewal",
+    tagline: "Growth and renewal",
+    color: phaseTokens.follicular.front,
+    softBg: phaseTokens.follicular.bg,
+    front: phaseTokens.follicular.front,
+    back: phaseTokens.follicular.back,
+    bg: phaseTokens.follicular.bg,
+    skin: phaseTokens.follicular.skin,
+    ink: phaseTokens.follicular.ink,
     lotusVariant: "rising",
-    accentColor: phaseTokens.follicular.gradientMid,
-    labelColor: phaseTokens.follicular.gradientStart,
+    accentColor: phaseTokens.follicular.back,
+    labelColor: phaseTokens.follicular.front,
     iconName: "trending-up",
     startDay: 5,
     endDay: 13,
+    aboutText:
+      "Energy is quietly returning as your body preps for ovulation. A good window for new ideas and starting things.",
   },
   ovulation: {
     label: "Ovulatory",
-    subtitle: "Radiance and Expression",
-    tagline: "Radiance and Expression",
-    color: phaseTokens.ovulatory.solid,
-    softBg: phaseTokens.ovulatory.softBg,
+    subtitle: "Radiance and expression",
+    tagline: "Radiance and expression",
+    color: phaseTokens.ovulatory.front,
+    softBg: phaseTokens.ovulatory.bg,
+    front: phaseTokens.ovulatory.front,
+    back: phaseTokens.ovulatory.back,
+    bg: phaseTokens.ovulatory.bg,
+    skin: phaseTokens.ovulatory.skin,
+    ink: phaseTokens.ovulatory.ink,
     lotusVariant: "bloom",
-    accentColor: phaseTokens.ovulatory.gradientMid,
-    labelColor: phaseTokens.ovulatory.gradientStart,
+    accentColor: phaseTokens.ovulatory.back,
+    labelColor: phaseTokens.ovulatory.front,
     iconName: "sun",
     startDay: 14,
     endDay: 16,
+    aboutText:
+      "You are likely at your most energised and social right now, with confidence and communication both peaking.",
   },
   luteal: {
     label: "Luteal",
-    subtitle: "Boundaries and Reflection",
-    tagline: "Boundaries and Reflection",
-    color: phaseTokens.luteal.solid,
-    softBg: phaseTokens.luteal.softBg,
+    subtitle: "Boundaries and reflection",
+    tagline: "Boundaries and reflection",
+    color: phaseTokens.luteal.front,
+    softBg: phaseTokens.luteal.bg,
+    front: phaseTokens.luteal.front,
+    back: phaseTokens.luteal.back,
+    bg: phaseTokens.luteal.bg,
+    skin: phaseTokens.luteal.skin,
+    ink: phaseTokens.luteal.ink,
     lotusVariant: "closing",
-    accentColor: phaseTokens.luteal.gradientMid,
-    labelColor: phaseTokens.luteal.gradientStart,
+    accentColor: phaseTokens.luteal.back,
+    labelColor: phaseTokens.luteal.front,
     iconName: "moon",
     startDay: 17,
     endDay: 28,
+    aboutText:
+      "Your body is winding down toward your next cycle. Hormones are shifting, so patience with yourself matters here.",
   },
   late: {
     label: "Late Luteal",
-    subtitle: "Awaiting Your Cycle",
-    tagline: "Awaiting Your Cycle",
-    color: phaseTokens.luteal.solid,
-    softBg: phaseTokens.luteal.softBg,
+    subtitle: "Awaiting your cycle",
+    tagline: "Awaiting your cycle",
+    color: phaseTokens.luteal.front,
+    softBg: phaseTokens.luteal.bg,
+    front: phaseTokens.luteal.front,
+    back: phaseTokens.luteal.back,
+    bg: phaseTokens.luteal.bg,
+    skin: phaseTokens.luteal.skin,
+    ink: phaseTokens.luteal.ink,
     lotusVariant: "waiting",
-    accentColor: phaseTokens.luteal.gradientMid,
-    labelColor: phaseTokens.luteal.gradientStart,
+    accentColor: phaseTokens.luteal.back,
+    labelColor: phaseTokens.luteal.front,
     iconName: "clock",
     startDay: 0,
     endDay: 0,
+    aboutText:
+      "Your expected period date has passed. This is often perfectly normal — stress, sleep, or hormonal shifts can all affect timing.",
   },
 };
 
@@ -111,8 +152,8 @@ export function getPhaseForDay(day: number, cycleLength: number = 28, periodLeng
 }
 
 export function getPhaseColor(day: number, cycleLength: number = 28, periodLength: number = 5): string {
-  const phase = getPhaseForDay(day, cycleLength, periodLength);
-  return phaseConfig[phase].color;
+  const p = getPhaseForDay(day, cycleLength, periodLength);
+  return phaseConfig[p].color;
 }
 
 export function getDayAngle(currentDay: number, cycleLength: number): number {
@@ -124,7 +165,12 @@ export function getDaysUntilPeriod(selectedDay: number, cycleLength: number): nu
   return cycleLength - selectedDay;
 }
 
-export function getStatusText(selectedDay: number, cycleLength: number, periodLength: number = 5, isLate: boolean = false): string {
+export function getStatusText(
+  selectedDay: number,
+  cycleLength: number,
+  periodLength: number = 5,
+  isLate: boolean = false
+): string {
   if (isLate) {
     const daysLate = selectedDay - cycleLength;
     if (daysLate <= 1) return "Period expected today";
@@ -133,7 +179,7 @@ export function getStatusText(selectedDay: number, cycleLength: number, periodLe
   const daysUntil = getDaysUntilPeriod(selectedDay, cycleLength);
   if (daysUntil === 0) return "Period is expected today";
   if (daysUntil <= 2) return "Period starting soon";
-  const phase = getPhaseForDay(selectedDay, cycleLength, periodLength);
-  if (phase === "menstrual") return "Currently in your period";
+  const p = getPhaseForDay(selectedDay, cycleLength, periodLength);
+  if (p === "menstrual") return "Currently in your period";
   return `Period starts in ${daysUntil} days`;
 }

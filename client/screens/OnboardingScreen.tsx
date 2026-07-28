@@ -1,1093 +1,755 @@
-import React, { useState, useEffect, useRef } from "react";
-import { 
-  View, 
-  StyleSheet, 
-  TextInput, 
-  Platform, 
-  Pressable, 
-  Dimensions, 
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Dimensions,
   ScrollView,
   FlatList,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  withDelay,
-  withSpring,
-  Easing,
+import Animated, {
   FadeIn,
   FadeOut,
   SlideInRight,
+  SlideOutLeft,
 } from "react-native-reanimated";
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedText } from "@/components/ThemedText";
-import { 
-  ProgressDots, 
-  OnboardingGlassCard, 
-  PrimaryButton, 
-  PillSelect,
-  AnimatedHeading,
-  AnimatedSubtext,
-  ScreenshotImport,
-  CycleReviewScreen,
-} from "@/components/onboarding";
+
+import { LannaMascot } from "@/components/LannaMascot";
+import { ScreenshotImport, CycleReviewScreen } from "@/components/onboarding";
 import type { ExtractedCycleData } from "@/components/onboarding";
-import { Spacing, BorderRadius } from "@/constants/theme";
-import { 
-  OnboardingData, 
-  Goal, 
-  CycleRegularity,
-  HEALTH_GOALS, 
-  CYCLE_REGULARITY_OPTIONS,
-  ONBOARDING_GRADIENT,
-  BRAND_COLORS,
-  CAROUSEL_SCREENS,
-} from "@/constants/onboardingTokens";
-import { storage, UserProfile, DailyLog, generateId } from "@/lib/storage";
+import { storage, UserProfile, generateId } from "@/lib/storage";
 import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import type { CycleRegularity } from "@/constants/onboardingTokens";
 
-
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-type OnboardingStep = 
-  | "intro"
-  | "name"
-  | "greeting"
-  | "profile"
-  | "goals"
-  | "confirmation"
-  | "carousel";
+type OnboardingStep =
+  | "welcome"    // Hi, I'm Lanna
+  | "valueprop"  // Meet your four phases
+  | "name"       // What shall I call you?
+  | "personalize"// Does any of this apply?
+  | "lastperiod" // When did your last period start?
+  | "done";
 
-function GradientBackground({ children }: { children: React.ReactNode }) {
+// ─── Colors ──────────────────────────────────────────────────────────────────
+
+const PINK = "#F06B9A";
+const PINK_LIGHT = "#F9C4D7";
+const BG = "#FDF5F8";
+const TEXT_DARK = "#2D1F2B";
+const TEXT_MID = "#5A4252";
+const TEXT_SOFT = "#8A6F80";
+
+// ─── Shared button ────────────────────────────────────────────────────────────
+
+function PrimaryBtn({
+  label,
+  onPress,
+  disabled = false,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <LinearGradient
-      colors={["#FFDAB3", "#FFB5C5", "#E8C4E8", "#D4B8E8"]}
-      locations={[0, 0.35, 0.7, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.gradientBg}
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={[styles.primaryBtn, disabled && styles.primaryBtnDisabled]}
     >
-      {children}
-    </LinearGradient>
+      <Text style={styles.primaryBtnText}>{label}</Text>
+    </Pressable>
   );
 }
 
-function IntroScreen({ onComplete }: { onComplete: () => void }) {
-  const insets = useSafeAreaInsets();
-
+function SecondaryBtn({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <GradientBackground>
-      <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.introContent}>
-          <AnimatedHeading text="Hi." delay={200} />
-          <AnimatedHeading text="I'm Olanna." delay={600} />
+    <Pressable onPress={onPress} style={styles.secondaryBtn}>
+      <Text style={styles.secondaryBtnText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function BackBtn({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.backBtn}>
+      <Text style={styles.backBtnText}>‹</Text>
+    </Pressable>
+  );
+}
+
+function SkipBtn({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.skipBtn}>
+      <Text style={styles.skipBtnText}>Skip</Text>
+    </Pressable>
+  );
+}
+
+// ─── Step 1: Welcome / Lanna intro ───────────────────────────────────────────
+
+function WelcomeStep({ onNext }: { onNext: () => void }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.stepContainer, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={styles.stepCenter}>
+        <Text style={styles.welcomeTitle}>Hi, I'm Lanna</Text>
+        <View style={styles.mascotLarge}>
+          <LannaMascot phase="follicular" size={180} expression="bright" />
         </View>
-        <View style={styles.bottomActions}>
-          <PrimaryButton 
-            label="Continue" 
-            onPress={onComplete} 
-            icon="arrow-right"
-          />
-        </View>
+        <Text style={styles.welcomeSubtitle}>
+          I'll be walking alongside you,{"\n"}phase by phase, day by day.
+        </Text>
       </View>
-    </GradientBackground>
-  );
-}
-
-function NameScreen({ 
-  name, 
-  setName, 
-  onComplete,
-  onBack,
-}: { 
-  name: string;
-  setName: (name: string) => void;
-  onComplete: () => void;
-  onBack: () => void;
-}) {
-  const insets = useSafeAreaInsets();
-  const inputOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    inputOpacity.value = withDelay(800, withTiming(1, { duration: 500 }));
-  }, []);
-
-  const inputStyle = useAnimatedStyle(() => ({
-    opacity: inputOpacity.value,
-  }));
-
-  return (
-    <GradientBackground>
-      <KeyboardAwareScrollViewCompat
-        style={styles.flex1}
-        contentContainerStyle={[
-          styles.screenContent,
-          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
-        ]}
-      >
-        <View style={styles.topRow}>
-          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
-          </Pressable>
-        </View>
-        
-        <View style={styles.progressContainer}>
-          <ProgressDots currentStep={0} totalSteps={3} />
-        </View>
-
-        <View style={styles.questionSection}>
-          <AnimatedHeading text="And what shall I call you?" delay={200} style={styles.smallerHeading} />
-        </View>
-
-        <Animated.View style={[styles.formSection, inputStyle]}>
-          <OnboardingGlassCard>
-            <TextInput
-              style={styles.glassInput}
-              placeholder="Your name"
-              placeholderTextColor="rgba(45,31,43,0.4)"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={() => name.trim() && onComplete()}
-              accessibilityLabel="Enter your name"
-            />
-          </OnboardingGlassCard>
-        </Animated.View>
-
-        <View style={styles.bottomActionsScrollable}>
-          {name.trim().length > 0 ? (
-            <PrimaryButton 
-              label="Continue" 
-              onPress={onComplete} 
-              icon="arrow-right"
-            />
-          ) : null}
-        </View>
-      </KeyboardAwareScrollViewCompat>
-    </GradientBackground>
-  );
-}
-
-function GreetingScreen({ name, onComplete }: { name: string; onComplete: () => void }) {
-  const insets = useSafeAreaInsets();
-
-  useEffect(() => {
-    const timer = setTimeout(onComplete, 2500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <GradientBackground>
-      <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.introContent}>
-          <AnimatedHeading text={`Nice to meet you,`} delay={200} />
-          <AnimatedHeading text={name} delay={600} style={styles.nameHighlight} />
-        </View>
-      </View>
-    </GradientBackground>
-  );
-}
-
-type ProfileMode = "manual" | "import" | "review";
-
-function ProfileScreen({ 
-  data,
-  setData,
-  onComplete,
-  onBack,
-}: { 
-  data: OnboardingData;
-  setData: (data: OnboardingData) => void;
-  onComplete: () => void;
-  onBack: () => void;
-}) {
-  const insets = useSafeAreaInsets();
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [lastPeriodDate, setLastPeriodDate] = useState(new Date());
-  const [showPeriodPicker, setShowPeriodPicker] = useState(false);
-  const [mode, setMode] = useState<ProfileMode>("manual");
-  const [extractedData, setExtractedData] = useState<ExtractedCycleData | null>(null);
-  const formOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    formOpacity.value = withDelay(400, withTiming(1, { duration: 600 }));
-  }, []);
-
-  const formStyle = useAnimatedStyle(() => ({
-    opacity: formOpacity.value,
-  }));
-
-  const handleRegularityChange = (id: CycleRegularity) => {
-    setData({ ...data, cycleRegularity: id });
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const handleDataExtracted = (extracted: ExtractedCycleData) => {
-    setExtractedData(extracted);
-    setMode("review");
-  };
-
-  const handleReviewConfirm = (confirmed: {
-    regularity: CycleRegularity | undefined;
-    lastPeriodStartDate: string;
-    averageCycleLength: number | undefined;
-    periodDuration: number | undefined;
-    previousPeriodDatesCount: number;
-    periodDays: string[];
-    previousPeriodDates: string[];
-  }) => {
-    setData({
-      ...data,
-      cycleRegularity: confirmed.regularity,
-      lastPeriodStart: confirmed.lastPeriodStartDate || undefined,
-      avgCycleLength: confirmed.averageCycleLength,
-      periodLength: confirmed.periodDuration,
-      dataSource: "screenshot_upload",
-      periodDays: confirmed.periodDays,
-      previousPeriodDates: confirmed.previousPeriodDates,
-    });
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onComplete();
-  };
-
-  if (mode === "review" && extractedData) {
-    return (
-      <GradientBackground>
-        <CycleReviewScreen
-          data={extractedData}
-          onConfirm={handleReviewConfirm}
-          onReupload={() => {
-            setExtractedData(null);
-            setMode("import");
-          }}
-        />
-      </GradientBackground>
-    );
-  }
-
-  return (
-    <GradientBackground>
-      <ScrollView
-        style={styles.flex1}
-        contentContainerStyle={[
-          styles.screenContent,
-          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.topRow}>
-          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
-          </Pressable>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <ProgressDots currentStep={1} totalSteps={3} />
-        </View>
-
-        <View style={styles.questionSection}>
-          <AnimatedHeading text="Tell me about your cycle" delay={200} style={styles.smallerHeading} />
-        </View>
-
-        <Animated.View style={[styles.formSection, formStyle]}>
-          <View style={styles.modeToggle}>
-            <Pressable
-              onPress={() => setMode("manual")}
-              style={[
-                styles.modeTab,
-                mode === "manual" ? styles.modeTabActive : undefined,
-              ]}
-              testID="mode-manual"
-            >
-              <Feather
-                name="edit-3"
-                size={16}
-                color={mode === "manual" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary}
-              />
-              <ThemedText
-                style={[
-                  styles.modeTabText,
-                  { color: mode === "manual" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary },
-                ]}
-              >
-                Enter manually
-              </ThemedText>
-            </Pressable>
-            <Pressable
-              onPress={() => setMode("import")}
-              style={[
-                styles.modeTab,
-                mode === "import" ? styles.modeTabActive : undefined,
-              ]}
-              testID="mode-import"
-            >
-              <Feather
-                name="upload"
-                size={16}
-                color={mode === "import" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary}
-              />
-              <ThemedText
-                style={[
-                  styles.modeTabText,
-                  { color: mode === "import" ? BRAND_COLORS.hotPink : BRAND_COLORS.textSecondary },
-                ]}
-              >
-                Import from app
-              </ThemedText>
-            </Pressable>
-          </View>
-
-          {mode === "manual" ? (
-            <>
-              <View style={styles.inputGroup}>
-                <ThemedText style={styles.inputLabel}>How regular is your cycle?</ThemedText>
-                <PillSelect
-                  options={CYCLE_REGULARITY_OPTIONS}
-                  selected={data.cycleRegularity ? [data.cycleRegularity] : []}
-                  onToggle={(id) => handleRegularityChange(id as CycleRegularity)}
-                  multiSelect={false}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={styles.inputLabel}>When did your last period start?</ThemedText>
-                <Pressable
-                  onPress={() => setShowPeriodPicker(true)}
-                  style={styles.dateButton}
-                  accessibilityRole="button"
-                  accessibilityLabel="Select last period date"
-                >
-                  <ThemedText style={styles.dateText}>{formatDate(lastPeriodDate)}</ThemedText>
-                  <Feather name="calendar" size={20} color={BRAND_COLORS.textSecondary} />
-                </Pressable>
-                {showPeriodPicker ? (
-                  <DateTimePicker
-                    value={lastPeriodDate}
-                    mode="date"
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={(event, date) => {
-                      setShowPeriodPicker(Platform.OS === "ios");
-                      if (date) {
-                        setLastPeriodDate(date);
-                        setData({ ...data, lastPeriodStart: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` });
-                      }
-                    }}
-                    maximumDate={new Date()}
-                    textColor={BRAND_COLORS.textPrimary}
-                  />
-                ) : null}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={styles.inputLabel}>Average cycle length (days)</ThemedText>
-                <OnboardingGlassCard>
-                  <TextInput
-                    style={styles.glassInputSmall}
-                    placeholder="28"
-                    placeholderTextColor="rgba(45,31,43,0.4)"
-                    value={data.avgCycleLength?.toString() || ""}
-                    onChangeText={(text) => setData({ ...data, avgCycleLength: parseInt(text) || undefined })}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    accessibilityLabel="Enter average cycle length"
-                  />
-                </OnboardingGlassCard>
-              </View>
-            </>
-          ) : (
-            <ScreenshotImport
-              onDataExtracted={handleDataExtracted}
-              onManualEntry={() => setMode("manual")}
-            />
-          )}
-        </Animated.View>
-
-        <View style={styles.bottomActionsScrollable}>
-          {mode === "manual" ? (
-            <>
-              <PrimaryButton 
-                label="Continue" 
-                onPress={onComplete} 
-                icon="arrow-right"
-              />
-              <PrimaryButton 
-                label="Skip for now" 
-                onPress={onComplete} 
-                variant="secondary"
-              />
-            </>
-          ) : (
-            <PrimaryButton 
-              label="Skip for now" 
-              onPress={onComplete} 
-              variant="secondary"
-            />
-          )}
-        </View>
-      </ScrollView>
-    </GradientBackground>
-  );
-}
-
-function GoalsScreen({ 
-  selectedGoals, 
-  toggleGoal, 
-  onComplete,
-  onBack,
-}: { 
-  selectedGoals: Goal[];
-  toggleGoal: (id: Goal) => void;
-  onComplete: () => void;
-  onBack: () => void;
-}) {
-  const insets = useSafeAreaInsets();
-  const goalsOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    goalsOpacity.value = withDelay(600, withTiming(1, { duration: 600 }));
-  }, []);
-
-  const goalsStyle = useAnimatedStyle(() => ({
-    opacity: goalsOpacity.value,
-  }));
-
-  return (
-    <GradientBackground>
-      <ScrollView
-        style={styles.flex1}
-        contentContainerStyle={[
-          styles.screenContent,
-          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }
-        ]}
-      >
-        <View style={styles.topRow}>
-          <Pressable onPress={onBack} style={styles.backButton} hitSlop={8}>
-            <Feather name="chevron-left" size={28} color={BRAND_COLORS.textPrimary} />
-          </Pressable>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <ProgressDots currentStep={2} totalSteps={3} />
-        </View>
-
-        <View style={styles.questionSection}>
-          <AnimatedHeading 
-            text="And to what do I owe this pleasure?" 
-            delay={200} 
-            style={styles.smallerHeading}
-          />
-          <AnimatedSubtext text="Select all that apply" delay={500} />
-        </View>
-
-        <Animated.View style={[styles.goalsSection, goalsStyle]}>
-          <PillSelect
-            options={HEALTH_GOALS}
-            selected={selectedGoals}
-            onToggle={(id) => toggleGoal(id as Goal)}
-            multiSelect={true}
-          />
-        </Animated.View>
-
-        <View style={styles.bottomActionsScrollable}>
-          {selectedGoals.length > 0 ? (
-            <PrimaryButton 
-              label="Continue" 
-              onPress={onComplete} 
-              icon="heart"
-            />
-          ) : null}
-        </View>
-
-        <View style={styles.privacyNotice}>
-          <Feather name="shield" size={14} color={BRAND_COLORS.textSecondary} />
-          <ThemedText style={styles.privacyNoticeText}>
-            Your data stays on your device.
-          </ThemedText>
-        </View>
-      </ScrollView>
-    </GradientBackground>
-  );
-}
-
-function ConfirmationScreen({ onComplete }: { onComplete: () => void }) {
-  const insets = useSafeAreaInsets();
-  const lotusOpacity = useSharedValue(0);
-  const lotusScale = useSharedValue(0.8);
-
-  useEffect(() => {
-    lotusOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
-    lotusScale.value = withDelay(600, withSpring(1, { damping: 12, stiffness: 100 }));
-
-    const timer = setTimeout(onComplete, 2800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const lotusStyle = useAnimatedStyle(() => ({
-    opacity: lotusOpacity.value,
-    transform: [{ scale: lotusScale.value }],
-  }));
-
-  return (
-    <GradientBackground>
-      <View style={[styles.screenContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.introContent}>
-          <AnimatedHeading text="Perfect." delay={200} />
-          <AnimatedHeading text="Let's get started." delay={600} />
-        </View>
-        <Animated.View style={[styles.lotusContainer, lotusStyle]}>
-          <Feather name="heart" size={60} color={BRAND_COLORS.white} />
-        </Animated.View>
-      </View>
-    </GradientBackground>
-  );
-}
-
-function CarouselScreen({ 
-  onComplete,
-  isSaving,
-}: { 
-  onComplete: () => void;
-  isSaving: boolean;
-}) {
-  const insets = useSafeAreaInsets();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
-
-  const handleNext = () => {
-    if (currentIndex < CAROUSEL_SCREENS.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      onComplete();
-    }
-  };
-
-  const renderItem = ({ item, index }: { item: typeof CAROUSEL_SCREENS[0]; index: number }) => (
-    <View style={[styles.carouselSlide, { width: SCREEN_WIDTH }]}>
-      <View style={styles.carouselIconContainer}>
-        <View style={styles.carouselIconCircle}>
-          <Feather name={item.icon as any} size={48} color={BRAND_COLORS.hotPink} />
-        </View>
-      </View>
-      <View style={styles.carouselTextContainer}>
-        <ThemedText style={styles.carouselTitle}>{item.title}</ThemedText>
-        <ThemedText style={styles.carouselSubtitle}>{item.subtitle}</ThemedText>
-      </View>
+      <PrimaryBtn label="Nice to meet you" onPress={onNext} />
     </View>
   );
+}
 
-  const isLastSlide = currentIndex === CAROUSEL_SCREENS.length - 1;
+// ─── Step 2: Value prop carousel ─────────────────────────────────────────────
+
+const VALUE_SLIDES = [
+  {
+    title: "Meet your four phases",
+    body: "Menstrual, Follicular, Ovulatory and Luteal each come with their own mood, tips and a little companion to guide you through it.",
+    phases: ["menstrual", "follicular", "ovulation", "luteal"] as const,
+  },
+  {
+    title: "Know yourself better",
+    body: "Track symptoms, energy, and mood over time to reveal patterns only you could discover.",
+    phases: ["luteal", "menstrual", "follicular", "ovulation"] as const,
+  },
+  {
+    title: "Built for PMOS support",
+    body: "Tailored check-ins and insights for people navigating PMOS, endometriosis, and irregular cycles.",
+    phases: ["ovulation", "luteal", "menstrual", "follicular"] as const,
+  },
+];
+
+function ValuePropStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
+  const insets = useSafeAreaInsets();
+  const [slide, setSlide] = useState(0);
+  const current = VALUE_SLIDES[slide];
+
+  const goNext = () => {
+    if (slide < VALUE_SLIDES.length - 1) {
+      setSlide(slide + 1);
+    } else {
+      onNext();
+    }
+  };
 
   return (
-    <GradientBackground>
-      <View style={[styles.carouselContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <FlatList
-          ref={flatListRef}
-          data={CAROUSEL_SCREENS}
-          renderItem={renderItem}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={(e) => {
-            const newIndex = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-            setCurrentIndex(newIndex);
-          }}
-          keyExtractor={(item) => item.id.toString()}
-        />
-        
-        <View style={styles.carouselDots}>
-          {CAROUSEL_SCREENS.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.carouselDot,
-                index === currentIndex && styles.carouselDotActive,
-              ]}
-            />
+    <View style={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+      <SkipBtn onPress={onSkip} />
+      <View style={styles.stepCenter}>
+        {/* Four phase mascots in a row */}
+        <View style={styles.valuePropMascots}>
+          {current.phases.map((ph, i) => (
+            <View key={i} style={[styles.valuePropMascotCircle, { opacity: 0.7 + i * 0.08 }]}>
+              <LannaMascot phase={ph} size={58} />
+            </View>
           ))}
         </View>
-
-        <View style={styles.carouselActions}>
-          <PrimaryButton 
-            label={isLastSlide ? "Get Started" : "Next"}
-            onPress={handleNext}
-            loading={isSaving && isLastSlide}
-            icon={isLastSlide ? "heart" : "arrow-right"}
-          />
+        <Text style={styles.valuePropTitle}>{current.title}</Text>
+        <Text style={styles.valuePropBody}>{current.body}</Text>
+        {/* Dots */}
+        <View style={styles.dots}>
+          {VALUE_SLIDES.map((_, i) => (
+            <View key={i} style={[styles.dot, i === slide && styles.dotActive]} />
+          ))}
         </View>
       </View>
-    </GradientBackground>
+      <PrimaryBtn label={slide < VALUE_SLIDES.length - 1 ? "Next" : "Let's go"} onPress={goNext} />
+    </View>
   );
 }
 
-function findMostRecentPeriodStart(sortedDates: string[]): string | null {
-  if (sortedDates.length === 0) return null;
-  let currentStart = sortedDates[sortedDates.length - 1];
-  for (let i = sortedDates.length - 2; i >= 0; i--) {
-    const curr = new Date(sortedDates[i] + "T00:00:00");
-    const next = new Date(sortedDates[i + 1] + "T00:00:00");
-    const diffDays = (next.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
-    if (diffDays <= 1) {
-      currentStart = sortedDates[i];
-    } else {
-      break;
-    }
-  }
-  return currentStart;
+// ─── Step 3: Name input ───────────────────────────────────────────────────────
+
+function NameStep({
+  name,
+  setName,
+  onNext,
+  onBack,
+}: {
+  name: string;
+  setName: (s: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+      <BackBtn onPress={onBack} />
+      <View style={styles.stepCenter}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="menstrual" size={90} />
+        </View>
+        <Text style={styles.stepTitle}>And what shall I call you?</Text>
+        <Text style={styles.stepSubtitle}>Just your first name is perfect.</Text>
+        <TextInput
+          style={styles.nameInput}
+          placeholder="Your name"
+          placeholderTextColor={TEXT_SOFT}
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+          autoFocus
+          returnKeyType="done"
+          onSubmitEditing={() => name.trim() && onNext()}
+        />
+      </View>
+      <PrimaryBtn label="Continue" onPress={onNext} disabled={!name.trim()} />
+    </View>
+  );
 }
+
+// ─── Step 4: Personalization ──────────────────────────────────────────────────
+
+const PERSONALIZE_OPTIONS = [
+  { id: "pmos", label: "PMOS" },
+  { id: "endo", label: "Endometriosis" },
+  { id: "irregular", label: "Irregular cycles" },
+  { id: "ttc", label: "Trying to conceive" },
+  { id: "none", label: "None of these" },
+];
+
+function PersonalizeStep({
+  selected,
+  onToggle,
+  onNext,
+  onBack,
+}: {
+  selected: string[];
+  onToggle: (id: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+      keyboardShouldPersistTaps="handled"
+    >
+      <BackBtn onPress={onBack} />
+      <View style={{ alignItems: "center", marginBottom: 24 }}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="menstrual" size={80} />
+        </View>
+        <Text style={styles.stepTitle}>Does any of this apply?</Text>
+        <Text style={styles.stepSubtitle}>We'll tailor your check-ins around it.{"\n"}You can always change this later.</Text>
+      </View>
+      <View style={styles.optionsList}>
+        {PERSONALIZE_OPTIONS.map((opt) => {
+          const isSelected = selected.includes(opt.id);
+          return (
+            <Pressable
+              key={opt.id}
+              onPress={() => onToggle(opt.id)}
+              style={[styles.optionRow, isSelected && styles.optionRowSelected]}
+            >
+              <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
+                {opt.label}
+              </Text>
+              <View style={[styles.optionCheck, isSelected && styles.optionCheckSelected]}>
+                {isSelected && <Text style={styles.optionCheckMark}>✓</Text>}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View style={{ marginTop: 24 }}>
+        <PrimaryBtn label="Continue" onPress={onNext} disabled={selected.length === 0} />
+      </View>
+    </ScrollView>
+  );
+}
+
+// ─── Step 5: Last period date ─────────────────────────────────────────────────
+
+type LastPeriodMode = "pick" | "upload";
+
+function LastPeriodStep({
+  onNext,
+  onBack,
+  onDataExtracted,
+}: {
+  onNext: (date: string) => void;
+  onBack: () => void;
+  onDataExtracted: (data: ExtractedCycleData) => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [mode, setMode] = useState<LastPeriodMode>("pick");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const handleContinue = () => {
+    const iso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+    onNext(iso);
+  };
+
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+    >
+      <BackBtn onPress={onBack} />
+      <View style={{ alignItems: "center", marginBottom: 24 }}>
+        <Text style={styles.stepTitle}>When did your last{"\n"}period start?</Text>
+        <Text style={styles.stepSubtitle}>This helps me get your cycle right from day one.</Text>
+      </View>
+
+      {/* Toggle */}
+      <View style={styles.modeToggle}>
+        <Pressable
+          onPress={() => setMode("pick")}
+          style={[styles.modeTab, mode === "pick" && styles.modeTabActive]}
+        >
+          <Text style={[styles.modeTabText, mode === "pick" && styles.modeTabTextActive]}>Pick a date</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setMode("upload")}
+          style={[styles.modeTab, mode === "upload" && styles.modeTabActive]}
+        >
+          <Text style={[styles.modeTabText, mode === "upload" && styles.modeTabTextActive]}>Upload screenshot</Text>
+        </Pressable>
+      </View>
+
+      {mode === "pick" ? (
+        <View style={{ width: "100%" }}>
+          {/* Calendar picker inline */}
+          {Platform.OS === "ios" ? (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="inline"
+              onChange={(_, date) => date && setSelectedDate(date)}
+              maximumDate={new Date()}
+              style={{ width: "100%" }}
+            />
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setShowPicker(true)}
+                style={styles.datePickerBtn}
+              >
+                <Text style={styles.datePickerText}>{fmt(selectedDate)}</Text>
+              </Pressable>
+              {showPicker && (
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display="default"
+                  onChange={(_, date) => {
+                    setShowPicker(false);
+                    if (date) setSelectedDate(date);
+                  }}
+                  maximumDate={new Date()}
+                />
+              )}
+            </>
+          )}
+          <View style={[styles.dateConfirmCard, { backgroundColor: PINK_LIGHT + "80" }]}>
+            <Text style={styles.dateConfirmLabel}>Last period started</Text>
+            <Text style={[styles.dateConfirmValue, { color: PINK }]}>{fmt(selectedDate)}</Text>
+          </View>
+          <View style={{ marginTop: 12 }}>
+            <PrimaryBtn label="Continue" onPress={handleContinue} />
+          </View>
+        </View>
+      ) : (
+        <View style={{ width: "100%" }}>
+          <ScreenshotImport
+            onDataExtracted={onDataExtracted}
+            onManualEntry={() => setMode("pick")}
+          />
+          <Text style={styles.privacyNote}>We only extract dates — screenshots aren't stored</Text>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+// ─── Root OnboardingScreen ────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [step, setStep] = useState<OnboardingStep>("intro");
-  const [isSaving, setIsSaving] = useState(false);
+  const [step, setStep] = useState<OnboardingStep>("welcome");
+  const [name, setName] = useState("");
+  const [personalized, setPersonalized] = useState<string[]>([]);
+  const [lastPeriodDate, setLastPeriodDate] = useState<string | undefined>();
 
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    name: "",
-    goals: [],
-    avgCycleLength: 28,
-  });
-
-  const toggleGoal = (goalId: Goal) => {
-    setOnboardingData((prev) => ({
-      ...prev,
-      goals: prev.goals.includes(goalId) 
-        ? prev.goals.filter((id) => id !== goalId) 
-        : [...prev.goals, goalId],
-    }));
+  const togglePersonalize = (id: string) => {
+    if (id === "none") {
+      setPersonalized(["none"]);
+      return;
+    }
+    const without = personalized.filter((x) => x !== "none");
+    if (without.includes(id)) {
+      setPersonalized(without.filter((x) => x !== id));
+    } else {
+      setPersonalized([...without, id]);
+    }
   };
 
-  // --- Onboarding Save Handler ---
-  // This function establishes the user's baseline cycle profile,
-  // which becomes the single source of truth for cycle predictions
-  // until the user logs actual period data.
-  //
-  // Save order matters:
-  //   1. Persist UserProfile to secure storage (the canonical data store)
-  //   2. Populate cycleProfileService in-memory cache (for immediate screen reads)
-  //   3. Mark onboarding as complete
-  //   4. Create historical flow logs from onboarding data
-  //
-  // After navigation to the Main screen, useLotusCycle and useCalendarCycle
-  // will read from the cycleProfileService cache and display the correct
-  // phase and predictions immediately.
-  const handleComplete = async () => {
-    setIsSaving(true);
+  const finishOnboarding = async () => {
     try {
-      const rawCycleLength = typeof onboardingData.avgCycleLength === "number" && Number.isFinite(onboardingData.avgCycleLength) ? onboardingData.avgCycleLength : 28;
-      const rawPeriodLength = typeof onboardingData.periodLength === "number" && Number.isFinite(onboardingData.periodLength) ? onboardingData.periodLength : 5;
-      const cycleLength = Math.max(15, Math.min(60, rawCycleLength));
-      const periodLength = Math.max(1, Math.min(14, rawPeriodLength));
-      const importedPeriodDays = onboardingData.periodDays || [];
-
-      let lastPeriodStart = onboardingData.lastPeriodStart || "";
-      if (!lastPeriodStart && importedPeriodDays.length > 0) {
-        const sorted = [...importedPeriodDays].sort();
-        const mostRecentStart = findMostRecentPeriodStart(sorted);
-        lastPeriodStart = mostRecentStart || sorted[sorted.length - 1];
-      }
-      if (!lastPeriodStart) {
-        const today = new Date();
-        const y = today.getFullYear();
-        const m = String(today.getMonth() + 1).padStart(2, "0");
-        const d = String(today.getDate()).padStart(2, "0");
-        lastPeriodStart = `${y}-${m}-${d}`;
-      }
-
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const hasPMOS = personalized.includes("pmos");
+      const hasEndo = personalized.includes("endo");
       const profile: UserProfile = {
         id: generateId(),
-        name: onboardingData.name.trim(),
-        dateOfBirth: onboardingData.dob || "2000-01-01",
-        cycleLength,
-        periodLength,
-        lastPeriodStart,
-        healthGoals: onboardingData.goals,
-        hasPCOS: onboardingData.goals.includes("manage_pcos"),
-        hasEndometriosis: onboardingData.goals.includes("manage_endometriosis"),
+        name: name.trim() || "Friend",
+        cycleLength: 28,
+        periodLength: 5,
+        lastPeriodStart: lastPeriodDate,
+        hasPCOS: hasPMOS,
+        hasEndometriosis: hasEndo,
         createdAt: new Date().toISOString(),
       };
       await storage.setUserProfile(profile);
-
-      // Step 2: Mark onboarding as complete and set preferences
-      await storage.setOnboardingComplete(true);
-      await storage.setPreference("useLotusView", "true");
-
-      // Step 3: Create flow log entries for the user's reported period dates.
-      // These historical logs allow getEffectiveLastPeriodStart() to correctly
-      // identify the real period start from logged data.
-      // NOTE: Each addDailyLog call invalidates the cycleProfileService cache,
-      // so we do this BEFORE populating the cache in Step 4.
-      const flowDatesToLog = new Set<string>();
-      const previousPeriodDates = onboardingData.previousPeriodDates || [];
-
-      if (importedPeriodDays.length > 0) {
-        // Screenshot import: use the exact dates extracted from the image
-        importedPeriodDays.forEach((d) => flowDatesToLog.add(d));
-      } else {
-        // Manual entry: generate date ranges from start dates + period length
-        const addPeriodRange = (startDate: string, duration: number) => {
-          const start = new Date(startDate + "T00:00:00");
-          if (isNaN(start.getTime())) return;
-          for (let i = 0; i < duration; i++) {
-            const day = new Date(start);
-            day.setDate(day.getDate() + i);
-            flowDatesToLog.add(`${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`);
-          }
-        };
-
-        addPeriodRange(lastPeriodStart, periodLength);
-
-        previousPeriodDates.forEach((d) => {
-          addPeriodRange(d, periodLength);
+      if (lastPeriodDate) {
+        await saveOnboardingCycleProfile({
+          lastPeriodStart: lastPeriodDate,
+          avgCycleLength: 28,
+          periodLength: 5,
         });
       }
-
-      const now = new Date().toISOString();
-      const datesToLog = Array.from(flowDatesToLog);
-      for (const date of datesToLog) {
-        const log: DailyLog = {
-          id: generateId(),
-          date,
-          flow: "medium",
-          symptoms: [],
-          createdAt: now,
-        };
-        await storage.addDailyLog(log);
-      }
-
-      // Step 4: Populate the cycleProfileService in-memory cache LAST.
-      // This must come after all addDailyLog calls because each log save
-      // invalidates the cache. By setting it last, we guarantee the cache
-      // is populated and marked as hydrated right before navigation,
-      // so getCycleProfile() returns this data immediately on the Main screen.
-      await saveOnboardingCycleProfile({
-        userId: profile.id,
-        lastPeriodStartDate: lastPeriodStart,
-        averageCycleLength: profile.cycleLength,
-        averagePeriodLength: profile.periodLength,
-        onboardingSymptoms: onboardingData.goals.filter(
-          (g) => g === "manage_pcos" || g === "manage_endometriosis"
-        ),
-      });
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Main" }],
-      });
-    } catch (error) {
-      console.error("Failed to save profile:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsSaving(false);
+      (navigation as any).replace("Main");
+    } catch (e) {
+      console.error("[Onboarding] error saving:", e);
+      (navigation as any).replace("Main");
     }
   };
 
-  const goBack = () => {
+  const handleDataExtracted = (data: ExtractedCycleData) => {
+    if (data.lastPeriodStartDate) setLastPeriodDate(data.lastPeriodStartDate);
+    finishOnboarding();
+  };
+
+  const handleLastPeriodNext = (date: string) => {
+    setLastPeriodDate(date);
+    finishOnboarding();
+  };
+
+  const renderStep = () => {
     switch (step) {
+      case "welcome":
+        return <WelcomeStep onNext={() => setStep("valueprop")} />;
+      case "valueprop":
+        return (
+          <ValuePropStep
+            onNext={() => setStep("name")}
+            onSkip={() => setStep("name")}
+          />
+        );
       case "name":
-        setStep("intro");
-        break;
-      case "greeting":
-        setStep("name");
-        break;
-      case "profile":
-        setStep("greeting");
-        break;
-      case "goals":
-        setStep("profile");
-        break;
+        return (
+          <NameStep
+            name={name}
+            setName={setName}
+            onNext={() => setStep("personalize")}
+            onBack={() => setStep("valueprop")}
+          />
+        );
+      case "personalize":
+        return (
+          <PersonalizeStep
+            selected={personalized}
+            onToggle={togglePersonalize}
+            onNext={() => setStep("lastperiod")}
+            onBack={() => setStep("name")}
+          />
+        );
+      case "lastperiod":
+        return (
+          <LastPeriodStep
+            onNext={handleLastPeriodNext}
+            onBack={() => setStep("personalize")}
+            onDataExtracted={handleDataExtracted}
+          />
+        );
       default:
-        break;
+        return null;
     }
   };
 
-  switch (step) {
-    case "intro":
-      return <IntroScreen onComplete={() => setStep("name")} />;
-    
-    case "name":
-      return (
-        <NameScreen
-          name={onboardingData.name}
-          setName={(name) => setOnboardingData({ ...onboardingData, name })}
-          onComplete={() => setStep("greeting")}
-          onBack={goBack}
-        />
-      );
-    
-    case "greeting":
-      return (
-        <GreetingScreen
-          name={onboardingData.name}
-          onComplete={() => setStep("profile")}
-        />
-      );
-    
-    case "profile":
-      return (
-        <ProfileScreen
-          data={onboardingData}
-          setData={setOnboardingData}
-          onComplete={() => setStep("goals")}
-          onBack={goBack}
-        />
-      );
-    
-    case "goals":
-      return (
-        <GoalsScreen
-          selectedGoals={onboardingData.goals}
-          toggleGoal={toggleGoal}
-          onComplete={() => setStep("confirmation")}
-          onBack={goBack}
-        />
-      );
-    
-    case "confirmation":
-      return <ConfirmationScreen onComplete={() => setStep("carousel")} />;
-    
-    case "carousel":
-      return (
-        <CarouselScreen
-          onComplete={handleComplete}
-          isSaving={isSaving}
-        />
-      );
-    
-    default:
-      return <IntroScreen onComplete={() => setStep("name")} />;
-  }
+  return (
+    <View style={styles.root}>
+      {renderStep()}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  flex1: {
+  root: {
     flex: 1,
+    backgroundColor: BG,
   },
-  gradientBg: {
+  stepContainer: {
     flex: 1,
-  },
-  screenContainer: {
-    flex: 1,
-    paddingHorizontal: Spacing.xl,
-    justifyContent: "center",
-  },
-  screenContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.xl,
-  },
-  introContent: {
-    flex: 1,
-    justifyContent: "center",
-    gap: 8,
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    paddingHorizontal: 24,
     justifyContent: "space-between",
-    marginBottom: Spacing.sm,
   },
-  backButton: {
-    padding: 4,
-    width: 36,
-  },
-  progressContainer: {
-    marginBottom: Spacing.md,
-  },
-  questionSection: {
-    marginBottom: Spacing.lg,
-    gap: 8,
-  },
-  smallerHeading: {
-    fontSize: 28,
-    lineHeight: 36,
-  },
-  nameHighlight: {
-    color: BRAND_COLORS.textPrimary,
-  },
-  formSection: {
-    gap: Spacing.lg,
-  },
-  modeToggle: {
-    flexDirection: "row",
-    backgroundColor: BRAND_COLORS.glassWhite,
-    borderRadius: BorderRadius.xl,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: BRAND_COLORS.glassBorder,
-  },
-  modeTab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.lg,
-  },
-  modeTabActive: {
-    backgroundColor: "rgba(255,255,255,0.85)",
-  },
-  modeTabText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    letterSpacing: 0.2,
-  },
-  inputGroup: {
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
-  },
-  inputLabel: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 14,
-    color: BRAND_COLORS.textSecondary,
-    letterSpacing: 0.3,
-    marginBottom: 4,
-  },
-  glassInput: {
-    fontSize: 20,
-    color: BRAND_COLORS.textPrimary,
-    fontFamily: "Poppins_500Medium",
-    padding: 0,
-  },
-  glassInputSmall: {
-    fontSize: 18,
-    color: BRAND_COLORS.textPrimary,
-    fontFamily: "Poppins_500Medium",
-    padding: 0,
-  },
-  dateButton: {
-    backgroundColor: BRAND_COLORS.glassWhite,
-    borderRadius: BorderRadius.xl,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: BRAND_COLORS.glassBorder,
-  },
-  dateText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 16,
-    color: BRAND_COLORS.textPrimary,
-  },
-  bottomActions: {
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing["2xl"],
-    gap: 12,
-  },
-  bottomActionsScrollable: {
-    marginTop: "auto",
-    paddingTop: Spacing.lg,
-    gap: 12,
-  },
-  goalsSection: {
-    marginBottom: Spacing.xl,
-  },
-  lotusContainer: {
-    alignItems: "center",
-    marginTop: Spacing["2xl"],
-  },
-  carouselContainer: {
-    flex: 1,
-  },
-  carouselSlide: {
+  stepCenter: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: Spacing["2xl"],
+    gap: 16,
   },
-  carouselIconContainer: {
-    marginBottom: Spacing["2xl"],
-  },
-  carouselIconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: BRAND_COLORS.hotPink,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  carouselTextContainer: {
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    width: "100%",
-  },
-  carouselTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 28,
-    lineHeight: 38,
-    color: BRAND_COLORS.textPrimary,
+  // Welcome
+  welcomeTitle: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: TEXT_DARK,
     textAlign: "center",
-    marginBottom: Spacing.md,
-    letterSpacing: 0.3,
+    marginBottom: 8,
   },
-  carouselSubtitle: {
-    fontFamily: "Poppins_400Regular",
+  mascotLarge: {
+    marginVertical: 24,
+  },
+  welcomeSubtitle: {
     fontSize: 16,
-    color: BRAND_COLORS.textSecondary,
+    color: TEXT_MID,
     textAlign: "center",
     lineHeight: 24,
-    paddingHorizontal: Spacing.lg,
   },
-  carouselDots: {
+  // Value prop
+  valuePropMascots: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     gap: 8,
-    paddingVertical: Spacing.lg,
+    marginBottom: 24,
   },
-  carouselDot: {
+  valuePropMascotCircle: {
+    borderRadius: 40,
+    overflow: "hidden",
+  },
+  valuePropTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: TEXT_DARK,
+    textAlign: "center",
+  },
+  valuePropBody: {
+    fontSize: 15,
+    color: TEXT_MID,
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 8,
+  },
+  dots: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    backgroundColor: "#E0C8D8",
   },
-  carouselDotActive: {
-    width: 24,
-    backgroundColor: BRAND_COLORS.white,
+  dotActive: {
+    backgroundColor: PINK,
+    width: 18,
   },
-  carouselActions: {
-    paddingHorizontal: Spacing["2xl"],
-    paddingBottom: Spacing["2xl"],
+  // Name
+  mascotSmall: {
+    marginBottom: 16,
   },
-  privacyNotice: {
+  stepTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: TEXT_DARK,
+    textAlign: "center",
+  },
+  stepSubtitle: {
+    fontSize: 14,
+    color: TEXT_SOFT,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  nameInput: {
+    width: "100%",
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#EDD8E7",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: TEXT_DARK,
+    marginTop: 8,
+  },
+  // Personalize
+  optionsList: {
+    width: "100%",
+    gap: 10,
+  },
+  optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#EDD8E7",
+    backgroundColor: "#FFFFFF",
   },
-  privacyNoticeText: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.6)",
-    fontFamily: "Poppins_400Regular",
+  optionRowSelected: {
+    borderColor: PINK,
+    backgroundColor: "#FDF0F5",
+  },
+  optionLabel: {
+    fontSize: 15,
+    color: TEXT_DARK,
+    fontWeight: "500",
+  },
+  optionLabelSelected: {
+    color: PINK,
+    fontWeight: "600",
+  },
+  optionCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: "#EDD8E7",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  optionCheckSelected: {
+    borderColor: PINK,
+    backgroundColor: PINK,
+  },
+  optionCheckMark: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  // Last period
+  modeToggle: {
+    flexDirection: "row",
+    backgroundColor: "#F0E4EB",
+    borderRadius: 28,
+    padding: 3,
+    marginBottom: 20,
+    width: "100%",
+  },
+  modeTab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 26,
+    alignItems: "center",
+  },
+  modeTabActive: {
+    backgroundColor: PINK,
+  },
+  modeTabText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: TEXT_SOFT,
+  },
+  modeTabTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  datePickerBtn: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#EDD8E7",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
+  datePickerText: {
+    fontSize: 15,
+    color: TEXT_DARK,
+  },
+  dateConfirmCard: {
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 4,
+    marginTop: 8,
+  },
+  dateConfirmLabel: {
+    fontSize: 12,
+    color: TEXT_SOFT,
+  },
+  dateConfirmValue: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  privacyNote: {
+    fontSize: 12,
+    color: TEXT_SOFT,
+    textAlign: "center",
+    marginTop: 12,
+  },
+  // Shared buttons
+  primaryBtn: {
+    width: "100%",
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: PINK,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  primaryBtnDisabled: {
+    opacity: 0.4,
+  },
+  primaryBtnText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.2,
+  },
+  secondaryBtn: {
+    width: "100%",
+    height: 52,
+    borderRadius: 28,
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  secondaryBtnText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: TEXT_MID,
+  },
+  backBtn: {
+    alignSelf: "flex-start",
+    padding: 4,
+    marginBottom: 8,
+  },
+  backBtnText: {
+    fontSize: 32,
+    color: TEXT_DARK,
+    lineHeight: 32,
+  },
+  skipBtn: {
+    alignSelf: "flex-end",
+    padding: 8,
+  },
+  skipBtnText: {
+    fontSize: 15,
+    color: TEXT_SOFT,
   },
 });

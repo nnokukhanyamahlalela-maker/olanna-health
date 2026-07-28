@@ -1,0 +1,132 @@
+# Build prompt: Olanna Period Tracker — UI/UX implementation
+
+You are implementing the UI for **Olanna Period Tracker**, a women's health / cycle-tracking app by Olanna Health, with a specific focus on PMOS (formerly PCOS) support. A complete design system and set of approved screen prototypes already exist — **your job is to build to match them exactly, not to reinterpret or redesign them.** Where a reference image is provided for a screen, treat it as ground truth for layout, spacing, color, and component behavior. Where no reference exists, extend the same system using the rules below rather than introducing a new visual language.
+
+---
+
+## 1. Brand character: "Lanna"
+
+The app's mascot is a stylized lotus blossom named **Lanna**, used throughout as the phase companion and brand identity.
+
+**Construction (do not deviate):**
+- One consistent silhouette across every context: **five overlapping rounded petals fused into a single blossom head** — a back ring of 5 larger, darker-toned petal circles, and a front ring of 5 smaller, lighter-toned petal circles offset by 36°, all same-color fills with no stroke outlines (overlap creates the fused look, not borders).
+- The face sits directly on top of the petals, centered: almond/circular eyes with a small white highlight, soft brow, gentle blush, and a mouth whose shape encodes the expression (see below). No spiky lash lines — at most a single soft lash flick at the outer eye corner when a touch of femininity is wanted (used once, for the onboarding "Lanna" character, not on every mascot).
+- Phase is communicated **only** through color, facial expression, and a small optional accessory — **never** by changing the petal shape, count, or fan angle. This was tested extensively; changing the silhouette per phase read as inconsistent or, at worst, unsettling (looked like a hat). Keep the shape identical everywhere.
+
+**Per-phase expression and accessory:**
+
+| Phase | Expression | Accessory |
+|---|---|---|
+| Menstrual | Sleepy: closed downward-curved eyes, **flat neutral mouth** (not a smile — resting isn't the same as happy) | none |
+| Follicular | Curious: both eyes glancing to one side, one eyebrow raised higher than the other (mismatched, quizzical), small closed-lip half-smile | Small sprouting leaf at the shoulder of the blossom |
+| Ovulatory | Bright: centered eyes with a double sparkle highlight, both brows lifted evenly, full open grin | Small sun-ray marks around the blossom |
+| Luteal | Calm: soft downward-curved eyes (gentler than Menstrual's), small closed flat mouth | Small crescent moon at the shoulder |
+
+A `mascot_group(cx, cy, radius, phase, scale)`-style single reusable component should render all four states off one phase-parameter input — do not hand-build four separate mascot assets.
+
+**Additional expressions used elsewhere in the app** (same face-construction rules, applied to other characters — see §4): `calm`, `bright`, `curious`, `sleepy`, and a `wince` (tight scrunched-shut eyes, furrowed brow, small open downturned mouth) for pain/discomfort characters.
+
+---
+
+## 2. Color system
+
+Four phase colors, extracted from the existing app's own gradient/icon assets (not arbitrary), spaced at even hue intervals across one continuous rose→violet family so they read as one cohesive palette rather than four unrelated colors:
+
+```
+Menstrual:  front #F06B9A   back #A84B6C   bg #F9C4D7   skin #FCE1EB   ink #431E2B
+Follicular: front #D178B3   back #92547D   bg #EAC2DD   skin #F5E1EE   ink #3B2232
+Ovulatory:  front #DE73DE   back #9B509B   bg #F0C0F0   skin #F8E0F8   ink #3E203E
+Luteal:     front #C9A0DC   back #8D709A   bg #E9D9F1   skin #F4ECF8   ink #382D3E
+```
+
+Each phase's five tokens are generated the same way if you need to derive more: **back** = base hue mixed 30% toward black; **bg** = base hue mixed ~55–60% toward white; **skin** = base hue mixed ~78–80% toward white; **ink** = base hue mixed ~72% toward black.
+
+**The single most important construction rule in this system:** solid, full-opacity color is reserved **only** for small accents — today's marker on the wheel, primary CTA buttons, flagged/highlighted chips, the active nav icon. Every large surface (cards, section backgrounds, segmented-control active states) uses the *same* phase hue at **low opacity (0.25–0.55)** rather than a solid fill, a plain white card, or a gray card. This one rule is what makes every screen in this system feel like it belongs together — apply it to any new screen you build, not just the ones with a reference image.
+
+No hard borders on tinted surfaces. Differentiate sections/states by **opacity level**, not by adding a stroke outline. Corner radii are generous throughout (14–28px on cards and buttons, fully rounded/pill-shaped on buttons and segmented controls).
+
+Typography: system sans (Helvetica/Arial stack). Headings 16–24px bold, body 11–14px regular/medium, captions 9.5–11px.
+
+---
+
+## 3. The cycle wheel
+
+A ring of day-markers (one per day of the tracked cycle length) arranged around the current phase's mascot:
+
+- Each marker is a small filled circle colored by whichever phase that day falls into.
+- **Today's marker** is larger (roughly 40% bigger radius) with a soft matching-color halo ring around it.
+- The mascot for the **current** phase sits centered inside the ring, scaled to fill the inner circle **edge to edge with no white space** — no separate background disc showing through, no title text inside the ring.
+- Day count, phase name, and a one-line tagline (e.g. "Rest and release") sit **below** the wheel, not inside it.
+- Known simplification to flag to whoever owns cycle-data logic: this spec currently assumes an even split of the tracked cycle length across the four phases. Real cycles are not even (Menstrual is typically shorter than Luteal) — the production wheel should size each phase's arc/marker-run to the person's actual logged phase lengths.
+
+---
+
+## 4. Personified characters (Quick Log + symptoms)
+
+Every loggable item in the app — not just the phase — gets a small personified character built from the same face-construction rules as Lanna, rather than a generic icon:
+
+- **Quick Log (Flow, Mood, Pain, Energy):** the icon *is* the character — a water droplet, a heart, a bandage, a lightning bolt, each with a face built directly onto the shape. All four **inherit the current phase's expression and ink color** — on a Menstrual day all four look sleepy; on an Ovulatory day, all four look bright. Open product question, not yet resolved: should Pain always keep its own `wince` expression regardless of phase (since it represents a symptom, not the day's mood), overriding the phase-inherited rule? Decide before shipping; current spec has it fully phase-driven.
+- **Symptom characters (Check-in screen):** ~19 total across two groups — Physical/hormonal (Cramps, Bloating, Fatigue, Pelvic pain, Sugar cravings, Water retention, Headache, Nausea, Pelvic heaviness, Breast tenderness, Breast swelling, Migraine) and PMOS indicators (Excess hair growth, Hair thinning, Acne/oily skin, Irregular cycle, Skin darkening, Weight changes, Ovulation/fertility changes). Each has its own visual metaphor (e.g., Cramps = radiating pain lines around a wincing face; Headache = a small lightning bolt + wince; Sugar cravings = a happy sprinkled cookie).
+- **Tone rule, non-negotiable:** symptoms with body-image sensitivity (excess hair, hair thinning, acne, skin darkening, weight, fertility) use a **neutral `calm` expression only** — never distressed, ashamed, or sad. These are physiological facts being logged, not something to feel bad about.
+- The PMOS symptom list was checked against a current clinical source (Cleveland Clinic's PMOS overview) rather than assumed, but **it is not a diagnostic checklist** — get a clinical sanity-check from someone with clinical training before shipping, since a symptom list like this can shape how a person interprets their own body.
+- **Naming:** confirm "PMOS" vs "PCOS" in all UI copy before shipping, for consistency with Olanna Health's ongoing PMOS-renaming brand work — do not silently default to "PCOS."
+
+---
+
+## 5. Bottom navigation
+
+Five tabs — **Cycle, Calendar, Check-in, Health, Learn** — each icon is a **filled solid shape**, not an outlined/stroked icon, so the nav belongs visually to the same family as the mascots and cards:
+
+- **Cycle:** a small filled 5-petal blossom silhouette with a white center dot (a miniature of the same blossom construction), colored gray when inactive / phase-front-color when active.
+- **Calendar:** a solid filled rounded square with a lighter header band and two small "day" dots.
+- **Check-in:** a plain gray (or phase-colored when active) 5-petal blossom silhouette — no face — kept intentionally simple/flat to distinguish it from the full expressive mascot elsewhere.
+- **Health:** a filled heart, matching the Quick Log "Mood" character's shape.
+- **Learn:** a filled solid book block with a spine line and simple page-line marks.
+
+Active tab gets a soft rounded pill behind the icon at the same low-opacity phase-tint used throughout (§2's rule), plus the label text in the phase's front color; inactive tabs and labels are neutral gray (#9B9993 / #C9C4B8).
+
+---
+
+## 6. Screen-by-screen specs
+
+### 6.1 Home screen (reference image provided — match exactly)
+Order, top to bottom: header (name greeting + streak badge) → **wheel** (§3) → **"About this phase"** card (one short plain-language paragraph on what's happening physically/emotionally that phase, tinted card, no icon) → **Quick Log** row (§4) sitting just above the nav bar. Built as one template parameterized by `(phase, day)` — do not hand-build four separate screens for the four phases.
+
+### 6.2 Calendar (reference image provided; least-iterated screen in this system — treat as a solid starting point, not a finished pattern)
+Month grid, each day tinted by predicted phase; legend row naming all four phases; a selected-day detail card showing that day's mascot, cycle-day number, and a "Log this day" CTA in the phase color. Same even-phase-split caveat as the wheel applies here.
+
+### 6.3 Health (reference image provided)
+- Quarterly health check reminder card (blood pressure + waist circumference, tied to PMOS cardiometabolic risk research) with a due/overdue state.
+- "Patterns this month" insight card, same visual pattern as the Check-in pattern-insight card (§6.5).
+- Sleep-this-week bar chart (nights ≥7hrs in solid phase color, under in the light tint).
+- Mood-across-cycle line chart, x-axis labeled by phase name at the relevant points, not by weekday.
+- All chart data shown in the reference is placeholder — wire to real logged data.
+
+### 6.4 Learn (reference image provided)
+Search bar → a "FOR TODAY" featured article card carrying the actual current-phase mascot (this one keeps the mascot, since it's genuinely tied to today's phase) → category filter chips → a list of recommended articles as **plain text rows** (topic tag pill, title, read-time) with **no thumbnail icon or color block** — this was explicitly simplified down from an earlier version with topic-colored icons; do not re-add icons to this list.
+
+### 6.5 Check-in / symptom logging (reference image provided)
+Header with a small mascot badge (not the generic icon) + segmented control (Symptoms / Body map) → a "Noticed a pattern" insight card (soft phase tint, no icon, states a cross-symptom correlation in one to two sentences) → symptom sections as a grid of the personified characters from §4, with flagged/correlated symptoms visually emphasized (stronger tint + bold label) → full-width solid-color Save button.
+
+Long-screen concern, unresolved: with ~19 symptom characters plus the pattern card, this is a long scroll. Decide whether the PMOS-indicators section should be **collapsed/behind a toggle by default** (progressive disclosure for people who haven't indicated PMOS relevance during onboarding) versus always-visible as currently speced.
+
+### 6.6 Body map — **placeholder only, do not build the figure from the current reference**
+The region-tinting logic (tap a body region, it fills solid in the phase color with a soft ring; inline labels beside each region rather than a separate legend; front/back toggle; floating Save button) is solid and ready to build. **The human figure itself is unresolved** — multiple proportion attempts (realistic anatomy, chibi proportions, a simplified dress silhouette) were tried without reaching something both stakeholders were confident in. Before building this screen: either get an actual reference sketch/photo to match proportions against, or commission an illustrator for the figure and drop it into the existing region/layout logic. Do not ship the current placeholder figure as final.
+
+### 6.7 Onboarding (reference images provided for each step)
+1. **Welcome:** a four-color hero bloom (the four phase petal-colors fused into one flower, no background circles/halos behind it — those were explicitly removed), app name, "Get started" CTA.
+2. **"Hi, I'm Lanna":** the mascot alone (no background circle — removed in review), **bright/bubbly expression regardless of phase** (this screen is about the character's personality, not today's actual mood), heading fixed near the top of the screen, flower centered in the middle at large scale, supporting copy below, CTA at bottom.
+3. **Value prop carousel:** all four mascots staggered in a row, progress dots, skip link.
+4. **Name input:** small mascot up top, text field, Continue.
+5. **Personalization:** "Does any of this apply?" — multi-select (PMOS, Endometriosis, Irregular cycles, Trying to conceive, None of these) styled as filled/outlined selectable rows. This answer is what should gate whether §6.5's PMOS section is expanded or collapsed by default for that user.
+6. **Last period date:** segmented control toggling between **Pick a date** (month calendar grid, same visual language as §6.2) and **Upload screenshot** (dashed dropzone, upload icon, "we'll read the dates for you" copy, "Choose a photo" button, privacy reassurance line). No mascot on this screen — it was explicitly removed to keep a data-entry screen functional and uncluttered. **Flag to engineering:** the upload-screenshot mode implies OCR/image-parsing to extract dates — this is a real backend feature to scope, not just a UI toggle, and the "screenshots aren't stored" copy is a product promise that must be true of the actual data pipeline before shipping.
+
+Still needed to complete the onboarding flow (not yet designed): average cycle length input, and a notifications-permission ask. Build these using the same component language (§2's tint rule, same button/input styling) rather than platform-default styling.
+
+---
+
+## 7. What "consistency with the prototype" means in practice
+
+- If a reference image exists for a screen, match its **spacing, corner radii, color usage, and component hierarchy** — do not introduce new patterns (new card styles, new button shapes, new icon treatments) for screens that already have an approved reference.
+- If you must extend to a screen with no reference, reuse: the §2 tint rule, the same button/segmented-control/card shapes already established, the same mascot component, and the same typography scale. Do not invent a parallel visual language.
+- Where this document flags an item as a **placeholder** or **unresolved**, treat that as a blocker to raise with design/product before finalizing that piece — not something to silently resolve on your own judgment.

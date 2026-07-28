@@ -8,25 +8,15 @@ import {
   Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
-
-import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/ThemedText";
-import { AppGradient } from "@/components/AppGradient";
-import { GlassSurface } from "@/components/GlassSurface";
-import { LotusIcon } from "@/components/LotusIcon";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing } from "@/constants/spacing";
-import { BorderRadius, Fonts } from "@/constants/theme";
-import { brand, neutral, phase as phaseTokens } from "@/constants/colors";
+import { LannaMascot } from "@/components/LannaMascot";
+import { phase as phaseTokens } from "@/constants/colors";
 import { storage, DailyLog, UserProfile } from "@/lib/storage";
-
-import { phaseConfig, Phase } from "@/constants/phaseConfig";
+import { Phase, getPhaseForDay, phaseConfig } from "@/constants/phaseConfig";
 import type { CyclePhase, CycleProfile } from "@/types/cycle";
-import { toInternalPhase, toCyclePhase } from "@/types/cycle";
 import {
   generateCalendarMarkers,
   computeCycleDay,
@@ -38,18 +28,37 @@ import {
 import { PeriodLogSheet } from "@/components/PeriodLogSheet";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const CALENDAR_PADDING = 16 * 2 + 10 * 2;
-const DAY_SIZE = Math.floor((SCREEN_WIDTH - CALENDAR_PADDING) / 7);
-const GRID_WIDTH = DAY_SIZE * 7;
+const H_PAD = 20;
+const DAY_GAP = 4;
+const DAY_SIZE = Math.floor((SCREEN_WIDTH - H_PAD * 2 - DAY_GAP * 6) / 7);
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
 ];
+const WEEKDAYS = ["S","M","T","W","T","F","S"];
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const BG = "#FDF5F8";
+const TEXT_DARK = "#2D1F2B";
+const TEXT_SOFT = "#8A6F80";
 
-type FilterType = "all" | "period" | "fertile" | "pms";
+// Phase dot colors
+const PHASE_COLORS: Record<string, string> = {
+  Menstrual: "#F06B9A",
+  Follicular: "#D178B3",
+  Ovulatory: "#DE73DE",
+  "Ovulation": "#DE73DE",
+  Luteal: "#C9A0DC",
+  "Late Luteal": "#C9A0DC",
+};
+
+// Phase legend
+const LEGEND = [
+  { label: "Menstrual", color: "#F06B9A" },
+  { label: "Follicular", color: "#D178B3" },
+  { label: "Ovulatory", color: "#DE73DE" },
+  { label: "Luteal", color: "#C9A0DC" },
+];
 
 function formatDateKey(date: Date): string {
   const y = date.getFullYear();
@@ -66,47 +75,6 @@ function getFirstDayOfMonth(year: number, month: number): number {
   return new Date(year, month, 1).getDay();
 }
 
-interface DayCellInfo {
-  day: number;
-  dateKey: string;
-  isPeriod: boolean;
-  isFertile: boolean;
-  isOvulation: boolean;
-  isPMS: boolean;
-  isToday: boolean;
-  phase: CyclePhase;
-  dayInCycle: number;
-  hasFlowLog: boolean;
-}
-
-const PHASE_DECODE: Record<CyclePhase, { title: string; body: string; tip: string }> = {
-  Menstrual: {
-    title: "Menstrual Phase",
-    body: "Your body is shedding the uterine lining. Hormone levels are at their lowest. You may feel tired or experience cramping. This is a time for rest and gentle self-care.",
-    tip: "Warm drinks, light stretching, and extra sleep can ease discomfort.",
-  },
-  Follicular: {
-    title: "Follicular Phase",
-    body: "Oestrogen is rising as your body prepares a new egg. Energy levels climb and mood tends to lift. Skin often looks clearer and you may feel more sociable and creative.",
-    tip: "Great time for trying new activities, planning, and social events.",
-  },
-  Ovulatory: {
-    title: "Ovulatory Phase",
-    body: "An egg is released from the ovary. Oestrogen peaks and you may feel your most confident and energetic. This is your fertile window if you are trying to conceive.",
-    tip: "Channel your peak energy into workouts, presentations, or big conversations.",
-  },
-  Luteal: {
-    title: "Luteal Phase",
-    body: "Progesterone rises to prepare for possible pregnancy. You may notice PMS symptoms like bloating, mood shifts, or cravings as the phase progresses.",
-    tip: "Prioritise comfort foods, journalling, and winding down routines.",
-  },
-  "Late Luteal": {
-    title: "Late Luteal Phase",
-    body: "Your expected period date has passed. This can be perfectly normal — stress, sleep, travel, or hormonal shifts can all affect timing.",
-    tip: "Log your period when it arrives so your predictions stay accurate.",
-  },
-};
-
 function toCycleProfile(p: UserProfile): CycleProfile {
   return {
     userId: p.id,
@@ -117,19 +85,27 @@ function toCycleProfile(p: UserProfile): CycleProfile {
   };
 }
 
-interface SelectedDayInfo {
-  dayInCycle: number;
-  cycleLength: number;
-  phase: CyclePhase;
-  hasProfile: boolean;
-  isLate?: boolean;
-  daysLate?: number;
+// Phase text color for the selected day card label
+function phaseDisplayName(phase: CyclePhase): string {
+  if (phase === "Ovulatory" || (phase as string) === "Ovulation") return "Ovulatory";
+  return phase as string;
+}
+
+function phaseToInternal(phase: CyclePhase): Phase {
+  const map: Record<string, Phase> = {
+    Menstrual: "menstrual",
+    Follicular: "follicular",
+    Ovulatory: "ovulation",
+    Ovulation: "ovulation",
+    Luteal: "luteal",
+    "Late Luteal": "late",
+  };
+  return map[phase as string] ?? "follicular";
 }
 
 export default function CalendarScreen() {
-  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const today = new Date();
   const todayKey = formatDateKey(today);
@@ -137,22 +113,10 @@ export default function CalendarScreen() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(todayKey);
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
-
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+  const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
 
-  // CalendarScreen uses generateCalendarMarkers() directly (below) rather than
-  // useCalendarCycle, because it needs the full CalendarDayMarker[] array with
-  // isPeriod/isFertile/isPMS/hasFlowLog flags for its custom grid rendering.
-  // The useCalendarCycle hook provides a simpler markedDates record suitable
-  // for third-party calendar components.
-  //
-  // Both paths read from the same onboarding baseline (cycleProfileService)
-  // and apply getEffectiveLastPeriodStart to allow logged data to override.
-
-  // Load profile and logs for the calendar grid markers and daily decode
   const loadData = useCallback(async () => {
     try {
       const [userProfile, logs] = await Promise.all([
@@ -161,904 +125,255 @@ export default function CalendarScreen() {
       ]);
       setProfile(userProfile);
       setDailyLogs(logs);
-    } catch (error) {
-      console.error("[CalendarScreen] load error:", error);
-    }
+    } catch {}
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
-
-  const flowLogDates = useMemo(() => {
-    const set = new Set<string>();
-    dailyLogs.forEach((log) => {
-      if (log.flow) set.add(log.date);
-    });
-    return set;
-  }, [dailyLogs]);
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
   const calendarMarkers = useMemo(() => {
     if (!profile) return [];
     return generateCalendarMarkers(viewYear, viewMonth, toCycleProfile(profile), dailyLogs);
   }, [viewYear, viewMonth, profile, dailyLogs]);
 
-  const selectedDayInfo = useMemo<SelectedDayInfo | null>(() => {
-    if (!selectedDate) return null;
-    const hasFlow = flowLogDates.has(selectedDate);
+  // Build a map of dateKey -> phase color
+  const phaseDotMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    calendarMarkers.forEach((m) => {
+      map[m.dateKey] = PHASE_COLORS[m.phase as string] ?? "#D178B3";
+    });
+    return map;
+  }, [calendarMarkers]);
 
-    if (!profile) {
-      return {
-        dayInCycle: hasFlow ? 1 : 0,
-        cycleLength: 28,
-        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
-        hasProfile: false,
-      };
-    }
-
+  const selectedDayInfo = useMemo(() => {
+    if (!selectedDate || !profile) return null;
     const cp = toCycleProfile(profile);
     const effectiveStart = getEffectiveLastPeriodStart(cp, dailyLogs);
     const date = new Date(selectedDate + "T12:00:00");
     const dayInCycle = computeCycleDay(date, effectiveStart, profile.cycleLength);
-
-    if (dayInCycle <= 0) {
-      return {
-        dayInCycle: hasFlow ? 1 : 0,
-        cycleLength: profile.cycleLength,
-        phase: (hasFlow ? "Menstrual" : "Follicular") as CyclePhase,
-        hasProfile: true,
-      };
-    }
+    if (dayInCycle <= 0) return null;
 
     const rawDays = computeRawDaysSince(date, effectiveStart);
     const late = detectLatePhase(cp, dailyLogs);
-    const isDateLate = rawDays > profile.cycleLength && selectedDate === todayKey && late.isLate;
+    const isLate = rawDays > profile.cycleLength && selectedDate === todayKey && late.isLate;
 
-    const internalPhase = hasFlow
-      ? "menstrual" as const
-      : computePhase(dayInCycle, profile.cycleLength, profile.periodLength || 5);
+    const marker = calendarMarkers.find((m) => m.dateKey === selectedDate);
+    const phase = marker?.phase ?? "Follicular";
 
-    return {
-      dayInCycle: isDateLate ? rawDays + 1 : dayInCycle,
-      cycleLength: profile.cycleLength,
-      phase: isDateLate ? "Luteal" as CyclePhase : toCyclePhase(internalPhase),
-      hasProfile: true,
-      isLate: isDateLate,
-      daysLate: isDateLate ? late.daysLate : 0,
-    };
-  }, [selectedDate, profile, dailyLogs, flowLogDates]);
-
-  const selectedLog = useMemo(() => {
-    if (!selectedDate) return null;
-    return dailyLogs.find((log) => log.date === selectedDate) || null;
-  }, [selectedDate, dailyLogs]);
+    return { dayInCycle, cycleLength: profile.cycleLength, phase: phase as CyclePhase, isLate };
+  }, [selectedDate, profile, dailyLogs, calendarMarkers]);
 
   const navigateMonth = (delta: number) => {
-    let newMonth = viewMonth + delta;
-    let newYear = viewYear;
-    if (newMonth < 0) {
-      newMonth = 11;
-      newYear -= 1;
-    } else if (newMonth > 11) {
-      newMonth = 0;
-      newYear += 1;
-    }
-    setViewMonth(newMonth);
-    setViewYear(newYear);
+    let m = viewMonth + delta;
+    let y = viewYear;
+    if (m < 0) { m = 11; y -= 1; }
+    if (m > 11) { m = 0; y += 1; }
+    setViewMonth(m);
+    setViewYear(y);
   };
 
-  const calendarRows: (DayCellInfo | null)[][] = useMemo(() => {
-    const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
-    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    const todayStr = formatDateKey(today);
-    const cells: (DayCellInfo | null)[] = [];
-    for (let i = 0; i < firstDay; i++) cells.push(null);
-    if (calendarMarkers.length > 0) {
-      for (const m of calendarMarkers) {
-        cells.push({
-          day: m.day,
-          dateKey: m.dateKey,
-          isPeriod: m.isPeriod,
-          isFertile: m.isFertile,
-          isOvulation: m.isOvulation,
-          isPMS: m.isPMS,
-          isToday: m.isToday,
-          phase: m.phase,
-          dayInCycle: m.dayInCycle,
-          hasFlowLog: m.hasFlowLog,
-        });
-      }
-    } else {
-      for (let d = 1; d <= daysInMonth; d++) {
-        const date = new Date(viewYear, viewMonth, d);
-        const dateKey = formatDateKey(date);
-        cells.push({
-          day: d,
-          dateKey,
-          isPeriod: false,
-          isFertile: false,
-          isOvulation: false,
-          isPMS: false,
-          isToday: dateKey === todayStr,
-          phase: "Follicular" as CyclePhase,
-          dayInCycle: 0,
-          hasFlowLog: false,
-        });
-      }
-    }
-    while (cells.length % 7 !== 0) cells.push(null);
-    const rows: (DayCellInfo | null)[][] = [];
-    for (let i = 0; i < cells.length; i += 7) {
-      rows.push(cells.slice(i, i + 7));
-    }
-    return rows;
-  }, [viewYear, viewMonth, calendarMarkers]);
+  const daysInMonth = getDaysInMonth(viewYear, viewMonth);
+  const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
 
-  const getDayBgColor = (info: DayCellInfo): string | undefined => {
-    if (filter !== "all") {
-      if (filter === "period" && info.isPeriod)
-        return phaseTokens.menstrual.solid;
-      if (filter === "fertile" && (info.isFertile || info.isOvulation))
-        return phaseTokens.ovulatory.solid;
-      if (filter === "pms" && info.isPMS) return phaseTokens.luteal.solid;
-      return undefined;
-    }
-    if (info.isPeriod) return phaseTokens.menstrual.solid;
-    if (info.isOvulation) return phaseTokens.ovulatory.solid;
-    if (info.isFertile) return phaseTokens.ovulatory.softBg;
-    if (info.isPMS) return phaseTokens.luteal.softBg;
-    return undefined;
-  };
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const getDayDotColor = (info: DayCellInfo): string | undefined => {
-    if (filter !== "all") {
-      if (filter === "period" && info.isPeriod) return phaseTokens.menstrual.solid;
-      if (filter === "fertile" && info.isOvulation) return phaseTokens.ovulatory.solid;
-      if (filter === "fertile" && info.isFertile) return phaseTokens.ovulatory.softBg;
-      if (filter === "pms" && info.isPMS) return phaseTokens.luteal.solid;
-      return undefined;
-    }
-    if (info.isPeriod) return phaseTokens.menstrual.solid;
-    if (info.isOvulation) return phaseTokens.ovulatory.solid;
-    if (info.isFertile) return phaseTokens.ovulatory.gradientStart;
-    if (info.isPMS) return phaseTokens.luteal.solid;
-    return undefined;
-  };
-
-  const shouldShow = (info: DayCellInfo): boolean => {
-    if (filter === "all") return true;
-    if (filter === "period") return info.isPeriod;
-    if (filter === "fertile") return info.isFertile || info.isOvulation;
-    if (filter === "pms") return info.isPMS;
-    return true;
-  };
-
-  const filterChips: { key: FilterType; label: string; color: string; inactiveColor: string }[] = [
-    { key: "period", label: "Period", color: phaseTokens.menstrual.solid, inactiveColor: isDark ? "#F472B6" : "#B8396E" },
-    { key: "fertile", label: "Fertile", color: phaseTokens.ovulatory.solid, inactiveColor: isDark ? "#F59E0B" : "#B8730A" },
-    { key: "pms", label: "PMS", color: phaseTokens.luteal.solid, inactiveColor: isDark ? "#D8B4FE" : "#7B1FA2" },
-    { key: "all", label: "All", color: isDark ? "#FFFFFF" : neutral.textSecondary, inactiveColor: isDark ? "#FFFFFF" : neutral.textSecondary },
-  ];
-
-  const textColor = isDark ? "#FFFFFF" : neutral.textPrimary;
-  const subtextColor = isDark ? "rgba(255,255,255,0.55)" : neutral.textTertiary;
+  const selectedInternalPhase = selectedDayInfo
+    ? phaseToInternal(selectedDayInfo.phase)
+    : "follicular";
+  const selectedConfig = phaseConfig[selectedInternalPhase];
+  const selectedPhaseColor = selectedConfig.front;
 
   return (
-    <AppGradient style={styles.container}>
+    <View style={[styles.root, { backgroundColor: BG }]}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={{
-          paddingTop: headerHeight + 12,
-          paddingBottom: insets.bottom + 100,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 20, paddingBottom: tabBarHeight + 24 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Month header */}
-        <View style={styles.monthHeader}>
-          <Pressable
-            onPress={() => navigateMonth(-1)}
-            style={styles.navButton}
-            accessibilityLabel="Previous month"
-            testID="calendar-prev-month"
-          >
-            <Feather name="chevron-left" size={22} color={textColor} />
+        {/* Month nav */}
+        <View style={styles.monthNav}>
+          <Pressable onPress={() => navigateMonth(-1)} style={styles.navBtn}>
+            <Text style={styles.navArrow}>‹</Text>
           </Pressable>
-          <ThemedText style={[styles.monthTitle, { color: textColor }]}>
-            {MONTHS[viewMonth]} {viewYear}
-          </ThemedText>
-          <Pressable
-            onPress={() => navigateMonth(1)}
-            style={styles.navButton}
-            accessibilityLabel="Next month"
-            testID="calendar-next-month"
-          >
-            <Feather name="chevron-right" size={22} color={textColor} />
+          <Text style={styles.monthTitle}>{MONTHS[viewMonth]} {viewYear}</Text>
+          <Pressable onPress={() => navigateMonth(1)} style={styles.navBtn}>
+            <Text style={styles.navArrow}>›</Text>
           </Pressable>
         </View>
 
-        {/* Calendar card — uses plain View to avoid GlassSurface overflow clipping on native iOS */}
-        <View style={[styles.calendarCard, { backgroundColor: isDark ? "rgba(42, 23, 48, 0.42)" : "rgba(255, 255, 255, 0.38)", borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(255, 255, 255, 0.55)" }]}>
-          {/* Weekday headers */}
-          <View style={styles.weekdayRow}>
-            {WEEKDAYS.map((wd) => (
-              <View key={wd} style={styles.weekdayCell}>
-                <Text style={[styles.weekdayText, { color: subtextColor }]}>
-                  {wd}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Day grid — rendered as explicit rows to avoid flexWrap issues on native iOS */}
-          <View style={styles.dayGrid}>
-            {calendarRows.map((row, rowIdx) => (
-              <View key={`row-${rowIdx}`} style={styles.dayRow}>
-                {row.map((info, colIdx) => {
-                  if (!info) {
-                    return <View key={`empty-${rowIdx}-${colIdx}`} style={styles.dayCell} />;
-                  }
-
-                  const bgColor = getDayBgColor(info);
-                  const dotColor = getDayDotColor(info);
-                  const isSelected = selectedDate === info.dateKey;
-                  const show = shouldShow(info);
-                  const isDimmed = filter !== "all" && !show;
-                  const dayTextColor =
-                    isSelected
-                      ? "#FFFFFF"
-                      : info.isToday
-                      ? brand.primary
-                      : isDimmed
-                      ? isDark
-                        ? "rgba(255,255,255,0.35)"
-                        : "rgba(0,0,0,0.4)"
-                      : show && bgColor
-                      ? isDark
-                        ? "#FFFFFF"
-                        : neutral.textPrimary
-                      : isDark
-                      ? "rgba(255,255,255,0.8)"
-                      : neutral.textPrimary;
-
-                  const bgOpacity = filter === "all" ? "B3" : "CC";
-
-                  return (
-                    <Pressable
-                      key={info.dateKey}
-                      style={styles.dayCell}
-                      onPress={() => {
-                        setSelectedDate(info.dateKey);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }}
-                      testID={`calendar-day-${info.day}`}
-                    >
-                      <View
-                        style={[
-                          styles.dayCircle,
-                          show && bgColor
-                            ? { backgroundColor: bgColor + (isSelected ? "" : bgOpacity) }
-                            : undefined,
-                          isSelected
-                            ? { backgroundColor: brand.primary }
-                            : undefined,
-                          info.isToday && !isSelected
-                            ? {
-                                borderWidth: 2,
-                                borderColor: brand.primary,
-                              }
-                            : undefined,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.dayText,
-                            {
-                              color: dayTextColor,
-                              fontWeight: info.isToday || isSelected ? "700" : "500",
-                            },
-                          ]}
-                        >
-                          {info.day}
-                        </Text>
-                      </View>
-                      {info.hasFlowLog && !isSelected ? (
-                        <View style={styles.petalIndicator}>
-                          <LotusIcon size={12} color={phaseTokens.menstrual.solid} variant="mini" />
-                        </View>
-                      ) : dotColor && !isSelected ? (
-                        <View style={[styles.phaseDot, { backgroundColor: dotColor }]} />
-                      ) : null}
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ))}
-          </View>
+        {/* Weekday headers */}
+        <View style={styles.weekdayRow}>
+          {WEEKDAYS.map((d, i) => (
+            <View key={i} style={styles.weekdayCell}>
+              <Text style={styles.weekdayLabel}>{d}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Filter pills */}
-        <View style={styles.filterRow}>
-          {filterChips.map((chip) => {
-            const active = filter === chip.key;
+        {/* Day grid */}
+        <View style={styles.dayGrid}>
+          {cells.map((d, i) => {
+            if (!d) return <View key={`empty-${i}`} style={styles.dayCell} />;
+            const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+            const isToday = dateKey === todayKey;
+            const isSelected = dateKey === selectedDate;
+            const phaseColor = phaseDotMap[dateKey];
+
             return (
               <Pressable
-                key={chip.key}
+                key={dateKey}
+                style={styles.dayCell}
                 onPress={() => {
-                  setFilter(chip.key);
-                  Haptics.selectionAsync();
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedDate(dateKey);
                 }}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: active
-                      ? chip.color
-                      : isDark
-                      ? "rgba(42,23,48,0.35)"
-                      : "rgba(255,255,255,0.25)",
-                    borderColor: active
-                      ? chip.color
-                      : isDark
-                      ? "rgba(255,255,255,0.10)"
-                      : "rgba(255,255,255,0.40)",
-                  },
-                ]}
-                testID={`filter-${chip.key}`}
               >
-                <Text
+                <View
                   style={[
-                    styles.filterLabel,
-                    { color: active ? "#FFFFFF" : chip.inactiveColor },
+                    styles.dayCellInner,
+                    phaseColor && { backgroundColor: phaseColor + "33" },
+                    isSelected && phaseColor && { backgroundColor: phaseColor },
                   ]}
                 >
-                  {chip.label}
-                </Text>
+                  <Text
+                    style={[
+                      styles.dayNumber,
+                      isToday && !isSelected && { color: "#F06B9A", fontWeight: "700" },
+                      isSelected && { color: "#FFFFFF", fontWeight: "700" },
+                    ]}
+                  >
+                    {d}
+                  </Text>
+                </View>
               </Pressable>
             );
           })}
         </View>
 
-        {/* Daily Cycle Decode */}
-        {selectedDayInfo ? (
-          <GlassSurface style={styles.decodeCard} noPadding>
-            {selectedDayInfo.dayInCycle > 0 ? (
-              (() => {
-                const isLateState = selectedDayInfo.isLate === true;
-                const ip: Phase = isLateState ? "late" : toInternalPhase(selectedDayInfo.phase);
-                const pc = phaseConfig[ip];
-                const decode = isLateState
-                  ? {
-                      title: "Awaiting Your Cycle",
-                      body: `Your cycle is ${selectedDayInfo.daysLate || 0} day${(selectedDayInfo.daysLate || 0) === 1 ? "" : "s"} past its expected length of ${selectedDayInfo.cycleLength} days. This can be perfectly normal — stress, sleep, travel, or hormonal shifts can all affect timing. If you have concerns, consider reaching out to your healthcare provider.`,
-                      tip: "Log your period when it arrives so your predictions stay accurate.",
-                    }
-                  : PHASE_DECODE[selectedDayInfo.phase];
-                return (
-                  <>
-                    <View style={styles.decodeHeader}>
-                      <View
-                        style={[
-                          styles.decodeBadge,
-                          { backgroundColor: pc.softBg },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.decodeBadgeText,
-                            { color: pc.labelColor },
-                          ]}
-                        >
-                          {isLateState
-                            ? `Day ${selectedDayInfo.dayInCycle} \u2022 ${selectedDayInfo.daysLate} day${(selectedDayInfo.daysLate || 0) === 1 ? "" : "s"} late`
-                            : `Day ${selectedDayInfo.dayInCycle}`
-                          }
-                        </Text>
-                      </View>
-                      <Text style={[styles.decodePhase, { color: pc.labelColor }]}>
-                        {decode.title}
-                      </Text>
-                    </View>
-
-                    <Text style={[styles.decodeBody, { color: textColor }]}>
-                      {decode.body}
-                    </Text>
-
-                    <View
-                      style={[
-                        styles.decodeTipBox,
-                        { backgroundColor: pc.softBg },
-                      ]}
-                    >
-                      <Feather
-                        name={isLateState ? "clock" : "zap"}
-                        size={14}
-                        color={pc.labelColor}
-                      />
-                      <Text
-                        style={[
-                          styles.decodeTipText,
-                          {
-                            color: isDark
-                              ? "#FFFFFF"
-                              : neutral.textPrimary,
-                          },
-                        ]}
-                      >
-                        {decode.tip}
-                      </Text>
-                    </View>
-                  </>
-                );
-              })()
-            ) : (
-              <View style={styles.decodePrompt}>
-                <View style={styles.decodePromptRow}>
-                  <View
-                    style={[
-                      styles.decodeBadge,
-                      { backgroundColor: phaseTokens.menstrual.softBg, flexDirection: "row", alignItems: "center" },
-                    ]}
-                  >
-                    <Feather name="calendar" size={12} color={phaseTokens.menstrual.solid} />
-                    <Text
-                      style={[
-                        styles.decodeBadgeText,
-                        { color: phaseTokens.menstrual.solid, marginLeft: 4 },
-                      ]}
-                    >
-                      {new Date((selectedDate || todayKey) + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "long" })}
-                    </Text>
-                  </View>
-                  <Text style={[styles.decodeBody, { color: subtextColor, flex: 1, marginBottom: 0 }]}>
-                    Log your period to see cycle phase insights and personalised tips for this day.
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {/* Day log details if available */}
-            {selectedLog ? (
-              <View style={styles.logSection}>
-                <Text style={[styles.logSectionTitle, { color: subtextColor }]}>
-                  Your log
-                </Text>
-                <View style={styles.logRow}>
-                  {selectedLog.flow ? (
-                    <View
-                      style={[
-                        styles.logPill,
-                        { backgroundColor: phaseTokens.menstrual.softBg },
-                      ]}
-                    >
-                      <Feather
-                        name="droplet"
-                        size={13}
-                        color={phaseTokens.menstrual.solid}
-                      />
-                      <Text
-                        style={[
-                          styles.logPillText,
-                          { color: textColor, textTransform: "capitalize" },
-                        ]}
-                      >
-                        {selectedLog.flow}
-                      </Text>
-                    </View>
-                  ) : null}
-                  {selectedLog.mood ? (
-                    <View
-                      style={[
-                        styles.logPill,
-                        { backgroundColor: phaseTokens.ovulatory.softBg },
-                      ]}
-                    >
-                      <Feather
-                        name="smile"
-                        size={13}
-                        color={phaseTokens.ovulatory.solid}
-                      />
-                      <Text
-                        style={[
-                          styles.logPillText,
-                          { color: textColor, textTransform: "capitalize" },
-                        ]}
-                      >
-                        {selectedLog.mood}
-                      </Text>
-                    </View>
-                  ) : null}
-                  {selectedLog.energy ? (
-                    <View
-                      style={[
-                        styles.logPill,
-                        { backgroundColor: phaseTokens.follicular.softBg },
-                      ]}
-                    >
-                      <Feather
-                        name="zap"
-                        size={13}
-                        color={phaseTokens.follicular.solid}
-                      />
-                      <Text style={[styles.logPillText, { color: textColor }]}>
-                        Energy {selectedLog.energy}/5
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-                {selectedLog.symptoms.length > 0 ? (
-                  <View style={styles.symptomRow}>
-                    {selectedLog.symptoms.slice(0, 4).map((s, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.symptomPill,
-                          { backgroundColor: phaseTokens.luteal.softBg },
-                        ]}
-                      >
-                        <Text
-                          style={[styles.symptomPillText, { color: textColor }]}
-                        >
-                          {s}
-                        </Text>
-                      </View>
-                    ))}
-                    {selectedLog.symptoms.length > 4 ? (
-                      <Text style={[styles.symptomMore, { color: subtextColor }]}>
-                        +{selectedLog.symptoms.length - 4}
-                      </Text>
-                    ) : null}
-                  </View>
-                ) : null}
-              </View>
-            ) : null}
-
-            <Pressable
-              testID="button-log-period"
-              onPress={() => setPeriodSheetVisible(true)}
-              style={({ pressed }) => [
-                styles.logPeriodButton,
-                {
-                  backgroundColor: pressed
-                    ? phaseTokens.menstrual.solid + "20"
-                    : phaseTokens.menstrual.solid + "12",
-                },
-              ]}
-            >
-              <Feather
-                name="droplet"
-                size={16}
-                color={phaseTokens.menstrual.solid}
-              />
-              <Text
-                style={[
-                  styles.logPeriodText,
-                  { color: phaseTokens.menstrual.solid },
-                ]}
-              >
-                {selectedLog?.flow ? "Edit period log" : "Log your period"}
-              </Text>
-              <Feather
-                name="chevron-right"
-                size={16}
-                color={phaseTokens.menstrual.solid}
-              />
-            </Pressable>
-          </GlassSurface>
-        ) : null}
-
-        {/* About your cycle */}
-        <GlassSurface style={styles.statsCard} noPadding>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>
-            About your cycle
-          </Text>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Feather
-                name="repeat"
-                size={18}
-                color={subtextColor}
-                style={{ marginBottom: 4 }}
-              />
-              <Text style={[styles.statLabel, { color: subtextColor }]}>
-                Average cycle{"\n"}length
-              </Text>
-              <Text style={[styles.statValue, { color: brand.primary }]}>
-                {profile?.cycleLength || 28} days
-              </Text>
+        {/* Legend */}
+        <View style={styles.legendRow}>
+          {LEGEND.map((p) => (
+            <View key={p.label} style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: p.color }]} />
+              <Text style={styles.legendLabel}>{p.label}</Text>
             </View>
-            <View
-              style={[
-                styles.statDivider,
-                { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : neutral.border },
-              ]}
-            />
-            <View style={styles.statItem}>
-              <Feather
-                name="droplet"
-                size={18}
-                color={phaseTokens.menstrual.solid}
-                style={{ marginBottom: 4 }}
-              />
-              <Text style={[styles.statLabel, { color: subtextColor }]}>
-                Average period{"\n"}length
+          ))}
+        </View>
+
+        {/* Selected day card */}
+        {selectedDate && selectedDayInfo && (
+          <View style={[styles.selectedCard, { backgroundColor: selectedConfig.bg + "CC" }]}>
+            <View style={styles.selectedCardLeft}>
+              <LannaMascot phase={selectedInternalPhase} size={56} />
+            </View>
+            <View style={styles.selectedCardRight}>
+              <Text style={styles.selectedDateLabel}>
+                {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-GB", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
               </Text>
-              <Text style={[styles.statValue, { color: brand.primary }]}>
-                {profile?.periodLength || 5}-
-                {(profile?.periodLength || 5) + 1} days
+              <Text style={[styles.selectedPhaseLabel, { color: selectedPhaseColor }]}>
+                {phaseDisplayName(selectedDayInfo.phase)} phase
               </Text>
+              <Text style={styles.selectedCycleDay}>
+                Cycle day {selectedDayInfo.dayInCycle} of {selectedDayInfo.cycleLength}
+              </Text>
+              <Pressable
+                style={[styles.logDayBtn, { backgroundColor: selectedPhaseColor }]}
+                onPress={() => setPeriodSheetVisible(true)}
+              >
+                <Text style={styles.logDayBtnText}>Log this day</Text>
+              </Pressable>
             </View>
           </View>
-        </GlassSurface>
+        )}
       </ScrollView>
 
       <PeriodLogSheet
         visible={periodSheetVisible}
-        date={selectedDate || todayKey}
-        existingLog={selectedLog || null}
-        onSave={() => {
-          setPeriodSheetVisible(false);
-          loadData();
-        }}
-        onDismiss={() => setPeriodSheetVisible(false)}
-        onDelete={() => {
-          setPeriodSheetVisible(false);
-          loadData();
-        }}
+        onClose={() => { setPeriodSheetVisible(false); loadData(); }}
+        selectedDate={selectedDate}
       />
-    </AppGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  monthHeader: {
+  root: { flex: 1 },
+  content: { paddingHorizontal: H_PAD, gap: 12 },
+  monthNav: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    gap: 20,
+    justifyContent: "space-between",
+    marginBottom: 4,
   },
-  navButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  monthTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: 22,
-    letterSpacing: 0.2,
-  },
-  calendarCard: {
-    paddingHorizontal: 10,
-    paddingVertical: 14,
-    marginBottom: 16,
-    borderRadius: 20,
-  },
+  navBtn: { padding: 8 },
+  navArrow: { fontSize: 28, color: TEXT_DARK, lineHeight: 28 },
+  monthTitle: { fontSize: 18, fontWeight: "700", color: TEXT_DARK },
   weekdayRow: {
     flexDirection: "row",
-    width: GRID_WIDTH,
-    alignSelf: "center",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   weekdayCell: {
     width: DAY_SIZE,
     alignItems: "center",
+    marginHorizontal: DAY_GAP / 2,
   },
-  weekdayText: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 12,
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
-  },
+  weekdayLabel: { fontSize: 12, color: TEXT_SOFT, fontWeight: "500" },
   dayGrid: {
-    alignSelf: "center",
-  },
-  dayRow: {
     flexDirection: "row",
-    width: GRID_WIDTH,
+    flexWrap: "wrap",
   },
   dayCell: {
     width: DAY_SIZE,
     height: DAY_SIZE,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 2,
-  },
-  dayCircle: {
-    width: DAY_SIZE - 8,
-    height: DAY_SIZE - 8,
-    borderRadius: (DAY_SIZE - 8) / 2,
+    marginHorizontal: DAY_GAP / 2,
+    marginVertical: DAY_GAP / 2,
     alignItems: "center",
     justifyContent: "center",
   },
-  dayText: {
-    fontFamily: Fonts.numeric,
-    fontSize: 15,
-  },
-  phaseDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginTop: 2,
-  },
-  petalIndicator: {
-    marginTop: 1,
+  dayCellInner: {
+    width: DAY_SIZE - 4,
+    height: DAY_SIZE - 4,
+    borderRadius: (DAY_SIZE - 4) / 2,
     alignItems: "center",
     justifyContent: "center",
   },
-  filterRow: {
+  dayNumber: { fontSize: 13, color: TEXT_DARK },
+  legendRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 10,
-    marginBottom: 20,
-  },
-  filterChip: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  filterLabel: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 13,
-    letterSpacing: 0.2,
-  },
-  decodeCard: {
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-  },
-  decodePrompt: {
-    marginBottom: 4,
-  },
-  decodePromptRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  decodeHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
-  decodeBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  decodeBadgeText: {
-    fontFamily: Fonts.heading,
-    fontSize: 13,
-  },
-  decodePhase: {
-    fontFamily: Fonts.heading,
-    fontSize: 16,
-  },
-  decodeBody: {
-    fontFamily: Fonts.body,
-    fontSize: 14,
-    lineHeight: 21,
-    marginBottom: 14,
-  },
-  decodeTipBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    padding: 12,
-    borderRadius: 14,
-  },
-  decodeTipText: {
-    fontFamily: Fonts.body,
-    fontSize: 13,
-    lineHeight: 19,
-    flex: 1,
-  },
-  logSection: {
-    marginTop: 16,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(0,0,0,0.06)",
-    paddingTop: 14,
-  },
-  logSectionTitle: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 12,
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
-    marginBottom: 8,
-  },
-  logRow: {
-    flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 12,
+    marginTop: 4,
   },
-  logPill: {
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendLabel: { fontSize: 11, color: TEXT_SOFT },
+  selectedCard: {
+    borderRadius: 18,
+    padding: 16,
     flexDirection: "row",
+    gap: 14,
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
+    marginTop: 4,
   },
-  logPillText: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 12,
-  },
-  symptomRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
+  selectedCardLeft: { alignItems: "center", justifyContent: "center" },
+  selectedCardRight: { flex: 1, gap: 4 },
+  selectedDateLabel: { fontSize: 14, fontWeight: "700", color: TEXT_DARK },
+  selectedPhaseLabel: { fontSize: 13, fontWeight: "600" },
+  selectedCycleDay: { fontSize: 12, color: TEXT_SOFT },
+  logDayBtn: {
     marginTop: 8,
-  },
-  symptomPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  symptomPillText: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
-  },
-  symptomMore: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
-    alignSelf: "center",
-  },
-  statsCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
+    alignSelf: "flex-start",
   },
-  sectionTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: 17,
-    marginBottom: 14,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statLabel: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 6,
-    lineHeight: 16,
-  },
-  statValue: {
-    fontFamily: Fonts.heading,
-    fontSize: 20,
-  },
-  statDivider: {
-    width: 1,
-    height: 60,
-    marginHorizontal: 12,
-  },
-  logPeriodButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    marginTop: 12,
-    borderRadius: 14,
-  },
-  logPeriodText: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 14,
-    flex: 1,
-  },
+  logDayBtnText: { fontSize: 13, fontWeight: "700", color: "#FFFFFF" },
 });

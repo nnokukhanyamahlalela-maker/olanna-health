@@ -2,9 +2,19 @@ import fs from "node:fs";
 import OpenAI, { toFile } from "openai";
 import { Buffer } from "node:buffer";
 
-export const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+let _openaiInstance: OpenAI | null = null;
+export function getOpenAI(): OpenAI {
+  if (!_openaiInstance) {
+    _openaiInstance = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return _openaiInstance;
+}
+/** @deprecated Use getOpenAI() instead */
+export const openai = new Proxy({} as OpenAI, {
+  get: (_t, prop) => (getOpenAI() as any)[prop],
 });
 
 /**

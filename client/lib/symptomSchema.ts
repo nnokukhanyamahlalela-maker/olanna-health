@@ -308,7 +308,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
   },
   {
     id: 'pcos',
-    name: 'PCOS Indicators',
+    name: 'PMOS Indicators',
     icon: 'activity',
     color: '#B5EAD7',
     isPCOS: true,

@@ -1,0 +1,3 @@
+- [npm CVE overrides](npm-cve-overrides.md) — tar@7.5.11 and shell-quote@1.8.x are blocked; use overrides tar@7.5.22 + shell-quote@1.9.0
+- [OpenAI lazy init](openai-lazy-init.md) — all OpenAI clients must be lazily initialized; eager `new OpenAI()` at module level crashes without API key
+- [storage API](storage-api.md) — use `storage.setUserProfile()` not `saveUserProfile()`; backend has no DATABASE_URL yet so only frontend storage works

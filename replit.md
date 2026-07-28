@@ -1,45 +1,35 @@
 # Olanna Health
 
-## Overview
-Olanna Health is a femtech mobile application for African women, particularly in South Africa, focused on sexual and reproductive health. It integrates menstrual and fertility tracking with comprehensive health tools, grounded in evidence-based research and South African health guidelines. The project aims to provide a sophisticated, refined, and culturally relevant wellness experience, empowering women with personalized health insights and support.
+A cycle-tracking and hormonal health app for women, with a focus on PMOS (Polycystic Morphology Ovarian Syndrome) and endometriosis support.
 
-## User Preferences
-- Evidence-based health information following South African guidelines (SAHCS, SASOG)
-- "Soft, grounded, intelligent" aesthetic with earthy pastels (blush, clay, gold, sage)
-- Privacy-focused with local data storage and trust indicators
-- Light-only theme (no dark mode)
-- Lotus flower visualization with option to switch to cycle wheel
-- African-centered design with subtle cultural patterns
+## Stack
 
-## System Architecture
-Olanna Health is built with a React Native frontend (using Expo) and an Express.js backend with TypeScript. Sensitive health data is encrypted via `expo-secure-store` (with AsyncStorage fallback on web), while non-sensitive preferences use AsyncStorage. The UI/UX emphasizes an "Editorial Elegance meets African Wellness" brand philosophy with a "soft, grounded, intelligent" aesthetic, muted color palette (Pink Primary #F6BFD3, Warm White #FFFFFF), Poppins font, and Feather icons.
+- **Frontend:** Expo (React Native for iOS/Android/Web), React Navigation
+- **Backend:** Express + Drizzle ORM + PostgreSQL
+- **Key entry:** `client/App.tsx` → `RootStackNavigator` → `MainTabNavigator` → 5 tab screens
 
-Key features and architectural decisions include:
-- **Core Tracking**: Menstrual and fertility tracking with customizable Lotus flower or cycle wheel visualizations. Daily logging for flow, symptoms, mood, and energy. Auto-detection of period start dates and dynamic cycle predictions based on logged data.
-- **Health Modules**: Dedicated modules for conditions like PCOS and Endometriosis, offering symptom tracking and lifestyle management. Sexual health features include STI and cervical screening reminders based on SAHCS and SASOG guidelines.
-- **Health Tools**: Includes a PMS Symptom Checker with personalized results and lifestyle recommendations, and a Cycle Length Calculator for period, ovulation, and fertile window prediction. Health tab trackers include Supplements (`client/screens/SupplementsScreen.tsx`, AsyncStorage key `olanna_supplement_logs`) and Medications (`client/screens/MedicationsScreen.tsx`, AsyncStorage key `olanna_medication_logs`) with local persistence, form-based logging (name, dosage, frequency), and today's entries display. Gut Health (`client/screens/GutHealthScreen.tsx`) provides educational digestive wellness content with four glass cards (about gut health, common experiences, supportive habits, associated foods) and a medical disclaimer — all content uses legally safe, non-medical language.
-- **Educational Content**: An evidence-based education library with articles across 5 categories: Periods, PCOS, Endometriosis, Sexual Health, and Fertility. Sexual Health articles cover STI screening (SAHCS guidelines, testing locations, frequency) and cervical screening (Pap smears, HPV, SASOG guidelines). Fertility articles cover the fertile window (ovulation signs, tracking methods) and fertility after 30 (age-related changes, AMH testing, egg freezing). Articles feature hero images and organized content with references. The Lotus Cycle screen includes a collapsible "How the Lotus Cycle Works" synopsis explaining the four lotus stages (Bud, Rising, Bloom, Closing) and their connection to menstrual phases.
-- **Navigation**: Uses React Navigation with a 5-tab bottom navigation (Cycle, Calendar, Check-in, Health, Learn).
-- **Calendar Screen**: Custom-built calendar grid with phase-colored day backgrounds, filter options, a "Daily Cycle Decode" section, and "About Your Cycle" stats card, all within a glass card aesthetic.
-- **Design System**: A token-based color system in `client/constants/colors.ts` ensures consistent branding, phase-specific colors, and WCAG AA compliant readability. `AppGradient` is used for brand backgrounds. Phase boundaries are dynamically calculated in `getPhaseForDay(day, cycleLength, periodLength)` from `client/constants/phaseConfig.ts` — all screens (CycleScreen, CalendarScreen, HomeScreen) and `calculateCycleData()` in `storage.ts` use this single function for consistent phase determination based on the user's actual cycle and period lengths. A "Late Luteal" phase is detected when `rawCycleDay > averageCycleLength` — `CyclePrediction` includes `rawCycleDay`, `isLate`, `daysLate`, and `expectedPeriodDate` fields computed in `generateCyclePrediction`. It uses luteal colors/styling with label "Late Luteal" and subtitle "Awaiting Your Cycle". The `Phase` type includes `"late"` alongside the four standard phases. `getPhaseForDay` does NOT return "late" (it wraps via modulo); the prediction's `isLate` flag detects it from raw elapsed days. All three main screens use the prediction's `isLate`/`daysLate`/`rawCycleDay` fields directly: LotusCycleScreen and HomeScreen derive late state from the `useLotusCycle` hook's prediction; CalendarScreen's Daily Cycle Decode section shows "Day 37 • 9 days late" format with reassuring "Awaiting Your Cycle" messaging and a clock icon. Day counting continues past cycle length (e.g., Day 37 not wrapped to Day 9).
-- **Cycle Data Architecture**: Modular design with canonical types: (1) `client/types/cycle.ts` — `CyclePhase`, `CycleProfile` (with `onboardingSymptoms?` and `onboardingPreferences?`), `CycleLog` (id, userId, periodStartDate, createdAt), `CyclePrediction`, `CalendarDayMarker`, `FlowLog`, plus mapping helpers; (2) `client/services/cycleCalculator.ts` — pure calculation with `generateCyclePrediction({profile, effectiveLastPeriodStartDate, today?})`, `getCyclePhase()`, and `getLotusPhaseContent(phase)`; (3) `client/services/cycleProfileService.ts` — in-memory cache backed by persistent storage with `getCycleProfile(userId)`, `saveOnboardingCycleProfile()`, `invalidateCycleProfileCache()`; (4) `client/hooks/useLotusCycle.ts` — `useLotusCycle(userId)` hook returning `{ data: CyclePrediction | null, loading }` with `useFocusEffect` refresh; (5) `client/hooks/useCalendarCycle.ts` — `useCalendarCycle(userId)` hook returning `{ markedDates, loading }` with `useFocusEffect` refresh. `cycleStorage.ts` provides an alternative AsyncStorage-based persistence layer (keys: `olanna_cycle_profile`, `olanna_cycle_logs`).
-- **Cycle Synchronization**: `getEffectiveLastPeriodStart()` in `utils/cycleUtils.ts` derives the real period start from flow logs (not just the profile's `lastPeriodStart`). Screens load profile + logs on focus and compute cycle state inline — logging a period on the Calendar immediately reflects on the Cycle wheel as Day 1 Menstrual. Period logs support editing (pre-filled flow/mood/notes, "Update" button), mood-only saves, flow toggle-off (tap to deselect), and deletion via "Remove this entry" button (`storage.removeDailyLog`). Symptom detail modal includes a "Clear this one" button for removing previously logged severity symptoms.
-- **iOS Liquid Glass UI**: Utilizes a `GlassSurface` component for a frosted glass aesthetic across the app, supporting different tint levels and adapting for dark mode, providing a consistent modern look.
-- **Visualizations**: iOS-style cycle screen with an interactive circular cycle wheel, dynamic phase-specific lotus flower images, a "Phase Explainer" card with educational content, and a scrollable "Phase Insights" section with Vibes, Movement, Foods, and Self-Care cards driven by the selected day's phase via shared `PHASE_*` exports from `dailyDecode.ts`.
-- **Theming**: Light-only theme system with WCAG AA compliant contrast. Theme colors are defined in `client/constants/themeColors.ts` and provided via `ThemeProvider`.
-- **Symptom Tracking**: A robust system supporting 15 categories and over 200 symptoms, including a SeveritySlider, BodyMap (with front/back toggle, non-overlapping labeled SVG zones on a 100x145 viewBox, 44pt minimum touch targets, severity color-coding, pain summary list with "The body report" heading, and Olanna-tone copy), TagSelector, and customizable check-in screens.
-- **Onboarding**: A conversational 8-step onboarding flow with a state machine, including intro splashes, name input, profile setup, goal selection, and a feature carousel. It uses a warm gradient palette and iOS-style glass cards. The profile (cycle details) step has a mode toggle: "Enter manually" for traditional form input, or "Import from app" to upload a screenshot from another period-tracking app. Screenshot import uses OpenAI Vision (gpt-4.1-mini) via `server/cycleImportRoutes.ts` to extract cycle data (regularity, last period date, cycle length, period duration, individual period days). The extraction prompt recognizes popular apps: StarDust, Flo, Lively, Harmony. Extracted data is shown on a `CycleReviewScreen` for user confirmation/editing before saving. On completion, `handleComplete` creates `DailyLog` entries with `flow: "medium"` for all imported period dates (from `periodDays` array or derived from `lastPeriodStart + periodLength`), ensuring the Calendar and Cycle screens immediately reflect the imported data. Components: `client/components/onboarding/ScreenshotImport.tsx`, `client/components/onboarding/CycleReviewScreen.tsx`.
-- **Goals-Based Personalization**: User-selected health goals from onboarding drive personalized content ordering and prioritization across the application.
-- **Security**: Features encrypted local storage for sensitive data (`expo-secure-store`), API rate limiting, input validation, HTTPS enforcement, and a PostgreSQL database with Drizzle ORM. Partner tokens and device IDs are redacted from data exports. Partner invite, revoke, and emergency-revoke routes have per-IP rate limiting. Cycle length is clamped to 15–60 days and period length to 1–14 days in both onboarding and profile editing.
-- **Timezone Safety**: All date-key generation uses local-timezone formatting (`getFullYear/getMonth/getDate`) instead of `toISOString().split('T')[0]` (which produces UTC dates). All `YYYY-MM-DD` string parsing uses `new Date(dateStr + "T00:00:00")` to ensure local-timezone interpretation. The `cycleCalculator` includes an Invalid Date guard returning safe defaults.
-- **Privacy**: Includes a comprehensive privacy policy, device-scoped product logs, and a privacy-first Partner Mode with strict allowlists, invite codes, and an audit log for sharing cycle snapshots. Data deletion covers AsyncStorage keys (both `@olanna_` and `olanna_` prefixes) plus SecureStore encrypted data. Category-specific deletion maps to all actual storage keys including fertility tracking, medications, supplements, and symptom customization.
-- **About & Legal**: Dedicated About Olanna Health, Terms of Service, and Privacy Policy screens accessible from Profile → About section. All legal content reflects current app features (no AI assistant references). Terms reference South African law (POPIA, Consumer Protection Act). Contact: admin@olanna.health.
+## Running the app
 
-## External Dependencies
-- **React Native**: Frontend framework.
-- **Expo**: Development platform for React Native.
-- **Express.js**: Backend framework.
-- **TypeScript**: For server-side development.
-- **AsyncStorage**: For local data persistence.
-- **React Navigation**: For in-app navigation.
-- **Feather Icons**: Icon library.
+- **Frontend:** `npm run expo:dev` (workflow: Start Frontend)
+- **Backend:** `npm run server:dev` (workflow: Start Backend — requires `DATABASE_URL`)
+
+## Architecture notes
+
+- All 5 tab screens redesigned to match approved mockups (Cycle, Calendar, Check-in, Health, Learn)
+- Design system: 4 phase color tokens (`menstrual #F06B9A`, `follicular #D178B3`, `ovulatory #DE73DE`, `luteal #C9A0DC`)
+- Mascot "Lanna": parametric SVG with 5 expressions, phase-driven colors — see `client/components/LannaMascot.tsx`
+- Bottom nav: filled SVG icons, active = circular pill + phase color — see `client/components/CustomTabBar.tsx`
+- Large surfaces use phase tint at 0.22–0.33 opacity, never solid fills
+- `PMOS` (not PCOS) throughout all UI labels; medical articles keep clinical "PCOS" terminology
+
+## npm quirks
+
+- `tar@7.5.11` and `shell-quote@1.8.x` are blocked by Replit security policy (CVE).
+  Overrides set in `package.json`: `tar → 7.5.22`, `shell-quote → 1.9.0`
+- Use `npm install --legacy-peer-deps` if you need to add packages
+
+## User preferences
+
+- Use PMOS (not PCOS) in all UI-facing copy; medical content may keep the clinical term
+- Phase colors drive all tinting — never use arbitrary pinks
+- Body map figure is a placeholder — do not finalize it
