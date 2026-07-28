@@ -5,6 +5,9 @@ import { spawn } from "child_process";
 let _openaiInstance: OpenAI | null = null;
 export function getOpenAI(): OpenAI {
   if (!_openaiInstance) {
+    if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+      throw new Error("OpenAI API key not configured. Set AI_INTEGRATIONS_OPENAI_API_KEY.");
+    }
     _openaiInstance = new OpenAI({
       apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
       baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,

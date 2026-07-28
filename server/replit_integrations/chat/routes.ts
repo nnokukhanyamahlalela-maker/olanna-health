@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 import { chatStorage } from "./storage";
 import { apiKeyAuth } from "../../middleware/apiAuth";
+import { isOpenAIConfigError, openAIConfigErrorBody } from "../openaiErrors";
 
 let openai: OpenAI | null = null;
 function getOpenAI(): OpenAI {
@@ -123,6 +124,9 @@ export function registerChatRoutes(app: Express): void {
       res.json({ userMessage: { role: "user", content }, assistantMessage: { role: "assistant", content: assistantContent, id: assistantMessage.id } });
     } catch (error) {
       console.error("Error sending message:", error);
+      if (isOpenAIConfigError(error)) {
+        return res.status(503).json(openAIConfigErrorBody());
+      }
       res.status(500).json({ error: "Failed to send message" });
     }
   });

@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
+import { isOpenAIConfigError, openAIConfigErrorBody } from "./replit_integrations/openaiErrors";
 
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI {
@@ -210,6 +211,14 @@ export function registerCycleImportRoutes(app: Express): void {
       res.json(result);
     } catch (error: any) {
       console.error("[CycleImport] Analysis error:", error);
+
+      if (isOpenAIConfigError(error)) {
+        return res.status(503).json({
+          error: "ai_not_configured",
+          message:
+            "AI features are unavailable. Please enter your cycle details manually instead.",
+        });
+      }
 
       if (error?.status === 429) {
         return res.status(429).json({

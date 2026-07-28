@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { chatStorage } from "../chat/storage";
-import { openai, speechToText, voiceChatWithTextModel, convertWebmToWav } from "./client";
+import { getOpenAI, openai, speechToText, voiceChatWithTextModel, convertWebmToWav } from "./client";
+import { isOpenAIConfigError, openAIConfigErrorBody } from "../openaiErrors";
 
 // Note: Set express.json({ limit: "50mb" }) for audio payloads.
 // Note: Use convertWebmToWav() to convert browser WebM to WAV before API calls.
@@ -68,6 +69,12 @@ export function registerAudioRoutes(app: Express): void {
         return res.status(400).json({ error: "Audio data (base64) is required" });
       }
 
+      try {
+        getOpenAI();
+      } catch {
+        return res.status(503).json({ error: "AI features are not configured. Please set the OpenAI API key." });
+      }
+
       // 1. Transcribe user audio
       const audioBuffer = Buffer.from(audio, "base64");
       const userTranscript = await speechToText(audioBuffer, inputFormat);
@@ -124,6 +131,8 @@ export function registerAudioRoutes(app: Express): void {
       if (res.headersSent) {
         res.write(`data: ${JSON.stringify({ type: "error", error: "Failed to process voice message" })}\n\n`);
         res.end();
+      } else if (isOpenAIConfigError(error)) {
+        res.status(503).json(openAIConfigErrorBody());
       } else {
         res.status(500).json({ error: "Failed to process voice message" });
       }
@@ -140,6 +149,12 @@ export function registerAudioRoutes(app: Express): void {
 
       if (!audio) {
         return res.status(400).json({ error: "Audio data (base64) is required" });
+      }
+
+      try {
+        getOpenAI();
+      } catch {
+        return res.status(503).json({ error: "AI features are not configured. Please set the OpenAI API key." });
       }
 
       // Get conversation history
@@ -184,6 +199,8 @@ export function registerAudioRoutes(app: Express): void {
       if (res.headersSent) {
         res.write(`data: ${JSON.stringify({ type: "error", error: "Voice stream failed" })}\n\n`);
         res.end();
+      } else if (isOpenAIConfigError(error)) {
+        res.status(503).json(openAIConfigErrorBody());
       } else {
         res.status(500).json({ error: "Voice stream failed" });
       }
