@@ -23,6 +23,7 @@ import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { LannaMascot } from "@/components/LannaMascot";
 import { LannaInsightBadge } from "@/components/LannaInsightBadge";
 import { useLannaCheckIn } from "@/hooks/useLannaCheckIn";
+import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -103,28 +104,35 @@ function CycleWheel({
 
 // ─── Quick Log mascots ───────────────────────────────────────────────────────
 
-const QUICK_LOG_ITEMS = [
-  { id: "flow", label: "Flow", emoji: "💧", bg: "#DAEEF8" },
-  { id: "mood", label: "Mood", emoji: "❤️", bg: "#FAE3E8" },
-  { id: "pain", label: "Pain", emoji: "🩹", bg: "#F4EDE0" },
-  { id: "energy", label: "Energy", emoji: "⚡", bg: "#FBF4D6" },
+const QUICK_LOG_ITEMS: Array<{
+  id: "flow" | "mood" | "pain" | "energy";
+  label: string;
+  bg: string;
+}> = [
+  { id: "flow",   label: "Flow",   bg: "#DAEEF8" },
+  { id: "mood",   label: "Mood",   bg: "#FAE3E8" },
+  { id: "pain",   label: "Pain",   bg: "#F4EDE0" },
+  { id: "energy", label: "Energy", bg: "#FBF4D6" },
 ];
 
 function QuickLogRow({ onPress }: { onPress: (id: string) => void }) {
   return (
     <View style={styles.quickLogRow}>
-      {QUICK_LOG_ITEMS.map((item) => (
-        <Pressable
-          key={item.id}
-          onPress={() => onPress(item.id)}
-          style={styles.quickLogItem}
-        >
-          <View style={[styles.quickLogCard, { backgroundColor: item.bg }]}>
-            <Text style={styles.quickLogEmoji}>{item.emoji}</Text>
-          </View>
-          <Text style={styles.quickLogLabel}>{item.label}</Text>
-        </Pressable>
-      ))}
+      {QUICK_LOG_ITEMS.map((item) => {
+        const MascotComponent = QUICK_LOG_MASCOTS[item.id];
+        return (
+          <Pressable
+            key={item.id}
+            onPress={() => onPress(item.id)}
+            style={styles.quickLogItem}
+          >
+            <View style={[styles.quickLogCard, { backgroundColor: item.bg }]}>
+              <MascotComponent size={52} />
+            </View>
+            <Text style={styles.quickLogLabel}>{item.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

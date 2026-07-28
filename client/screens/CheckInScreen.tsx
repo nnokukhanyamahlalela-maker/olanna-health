@@ -29,6 +29,7 @@ import {
   saveFavoriteSymptoms,
 } from '@/lib/symptomStorage';
 import { LannaMascot } from '@/components/LannaMascot';
+import { SymptomCharacter } from '@/components/SymptomCharacter';
 import { Phase, getPhaseForDay } from '@/constants/phaseConfig';
 import { phase as phaseTokens } from '@/constants/colors';
 
@@ -42,35 +43,6 @@ const TEXT_DARK = '#2D1F2B';
 const TEXT_MID = '#5A4252';
 const TEXT_SOFT = '#8A6F80';
 
-// ─── Symptom character icons ──────────────────────────────────────────────────
-// Each symptom gets an emoji icon; tone rules from spec §4 are encoded here.
-
-const SYMPTOM_ICONS: Record<string, string> = {
-  cramps: '☀️',
-  bloating: '😶',
-  fatigue: '🌧️',
-  'pelvic-pain': '🔵',
-  'sugar-cravings': '🍪',
-  'water-retention': '💧',
-  headache: '⚡',
-  nausea: '🤢',
-  'pelvic-heaviness': '🪨',
-  'breast-tenderness': '🌸',
-  'breast-swelling': '🌸',
-  migraine: '⚡',
-  // PMOS — neutral calm expression only
-  'excess-hair': '🌿',
-  'hair-thinning': '🍃',
-  'acne-skin': '✨',
-  'irregular-cycle': '📅',
-  'skin-darkening': '🌙',
-  'weight-changes': '⚖️',
-  'ovulation-fertility': '🌱',
-};
-
-function getSymptomIcon(id: string): string {
-  return SYMPTOM_ICONS[id] ?? '•';
-}
 
 // ─── SymptomCard ──────────────────────────────────────────────────────────────
 
@@ -102,7 +74,7 @@ function SymptomCard({
         { backgroundColor: bg, borderColor, borderWidth: isSelected ? 1.5 : 0 },
       ]}
     >
-      <Text style={styles.symptomEmoji}>{getSymptomIcon(symptom.id)}</Text>
+      <SymptomCharacter symptomId={symptom.id} size={44} />
       <Text
         style={[
           styles.symptomLabel,
@@ -433,8 +405,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  symptomEmoji: {
-    fontSize: 26,
+  symptomCharacter: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   symptomLabel: {
     fontSize: 11,
