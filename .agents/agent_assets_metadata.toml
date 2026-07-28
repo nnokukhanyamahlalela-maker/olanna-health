@@ -210,3 +210,27 @@ id = "ONcxN_PCFP969Zo0bHE7l"
 uri = "file://encryption-documentation.pdf"
 type = "pdf"
 title = "Olanna Health — Encryption & Data Protection Documentation (PDF)"
+
+[[outputs]]
+id = "-0HZF1bp8mvMdvNdwqv14"
+uri = "file://attached_assets/flower_menstrual.png"
+type = "image"
+title = "Menstrual — sleepy 🌸"
+
+[[outputs]]
+id = "ToEDhlmdJ3oFViAhqY8GA"
+uri = "file://attached_assets/flower_follicular.png"
+type = "image"
+title = "Follicular — curious 🌸"
+
+[[outputs]]
+id = "OCYy_Kbm5ufCZiujpx07Z"
+uri = "file://attached_assets/flower_ovulatory.png"
+type = "image"
+title = "Ovulatory — bright 🌸"
+
+[[outputs]]
+id = "GjT3ecUKCpejVVriuAHiu"
+uri = "file://attached_assets/flower_luteal.png"
+type = "image"
+title = "Luteal — calm 🌸"
