@@ -119,6 +119,14 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 
 // ─── Step 2: Value prop carousel ─────────────────────────────────────────────
 
+// phase → circle background colour (pastel tint matching mascot phase)
+const PHASE_CIRCLE_BG: Record<string, string> = {
+  menstrual:  "#F9C8DC",
+  follicular: "#C084BE",
+  ovulation:  "#D96CD9",
+  luteal:     "#B49ACC",
+};
+
 const VALUE_SLIDES = [
   {
     title: "Meet your four phases",
@@ -154,11 +162,17 @@ function ValuePropStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => v
     <View style={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
       <SkipBtn onPress={onSkip} />
       <View style={styles.stepCenter}>
-        {/* Four phase mascots in a row */}
+        {/* Four phase mascots in a row – each inside its phase-coloured circle */}
         <View style={styles.valuePropMascots}>
           {current.phases.map((ph, i) => (
-            <View key={i} style={[styles.valuePropMascotCircle, { opacity: 0.7 + i * 0.08 }]}>
-              <LannaMascot phase={ph} size={58} />
+            <View
+              key={i}
+              style={[
+                styles.valuePropMascotCircle,
+                { backgroundColor: PHASE_CIRCLE_BG[ph] ?? "#EDD8E7" },
+              ]}
+            >
+              <LannaMascot phase={ph} size={62} />
             </View>
           ))}
         </View>
@@ -535,8 +549,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   valuePropMascotCircle: {
+    width: 80,
+    height: 80,
     borderRadius: 40,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
   },
   valuePropTitle: {
     fontSize: 24,
