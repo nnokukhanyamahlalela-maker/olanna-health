@@ -35,11 +35,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type OnboardingStep =
-  | "welcome"    // Hi, I'm Lanna
-  | "valueprop"  // Meet your four phases
-  | "name"       // What shall I call you?
-  | "personalize"// Does any of this apply?
-  | "lastperiod" // When did your last period start?
+  | "welcome"     // Hi, I'm Lanna
+  | "valueprop"   // Meet your four phases
+  | "name"        // What shall I call you?
+  | "personalize" // Does any of this apply?
+  | "cyclelength" // How long is your cycle?
+  | "lastperiod"  // When did your last period start?
   | "done";
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
@@ -398,6 +399,77 @@ function LastPeriodStep({
   );
 }
 
+// ─── Step 5: Cycle length picker ─────────────────────────────────────────────
+
+const CYCLE_LENGTHS = Array.from({ length: 25 }, (_, i) => i + 21); // 21–45
+
+function CycleLengthStep({
+  value,
+  onChange,
+  onNext,
+  onBack,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+      <BackBtn onPress={onBack} />
+      <View style={styles.stepCenter}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="follicular" size={80} />
+        </View>
+        <Text style={styles.stepTitle}>How long is your cycle?</Text>
+        <Text style={styles.stepSubtitle}>
+          Count day 1 of your period to the day before the next.{"\n"}Most cycles are 24–35 days.
+        </Text>
+
+        {/* Value display */}
+        <View style={styles.cycleLengthDisplay}>
+          <Text style={styles.cycleLengthNumber}>{value}</Text>
+          <Text style={styles.cycleLengthUnit}>days</Text>
+        </View>
+
+        {/* +/− stepper */}
+        <View style={styles.stepperRow}>
+          <Pressable
+            onPress={() => value > 21 && onChange(value - 1)}
+            style={[styles.stepperBtn, value <= 21 && styles.stepperBtnDisabled]}
+          >
+            <Text style={styles.stepperBtnText}>−</Text>
+          </Pressable>
+          <View style={styles.stepperTrack}>
+            {CYCLE_LENGTHS.map((n) => (
+              <Pressable key={n} onPress={() => onChange(n)} style={styles.stepperPip}>
+                <View
+                  style={[
+                    styles.stepperPipDot,
+                    n === value && styles.stepperPipDotActive,
+                    Math.abs(n - value) === 1 && styles.stepperPipDotNear,
+                  ]}
+                />
+              </Pressable>
+            ))}
+          </View>
+          <Pressable
+            onPress={() => value < 45 && onChange(value + 1)}
+            style={[styles.stepperBtn, value >= 45 && styles.stepperBtnDisabled]}
+          >
+            <Text style={styles.stepperBtnText}>+</Text>
+          </Pressable>
+        </View>
+
+        <Text style={styles.stepSubtitle}>Not sure? 28 is a great starting point.</Text>
+      </View>
+      <PrimaryBtn label="Continue" onPress={onNext} />
+    </View>
+  );
+}
+
 // ─── Root OnboardingScreen ────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
@@ -405,6 +477,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [name, setName] = useState("");
   const [personalized, setPersonalized] = useState<string[]>([]);
+  const [cycleLength, setCycleLength] = useState(28);
   const [lastPeriodDate, setLastPeriodDate] = useState<string | undefined>();
 
   const togglePersonalize = (id: string) => {
@@ -428,7 +501,7 @@ export default function OnboardingScreen() {
       const profile: UserProfile = {
         id: generateId(),
         name: name.trim() || "Friend",
-        cycleLength: 28,
+        cycleLength,
         periodLength: 5,
         lastPeriodStart: lastPeriodDate,
         hasPCOS: hasPMOS,
@@ -439,7 +512,7 @@ export default function OnboardingScreen() {
       if (lastPeriodDate) {
         await saveOnboardingCycleProfile({
           lastPeriodStart: lastPeriodDate,
-          avgCycleLength: 28,
+          avgCycleLength: cycleLength,
           periodLength: 5,
         });
       }
@@ -485,15 +558,24 @@ export default function OnboardingScreen() {
           <PersonalizeStep
             selected={personalized}
             onToggle={togglePersonalize}
-            onNext={() => setStep("lastperiod")}
+            onNext={() => setStep("cyclelength")}
             onBack={() => setStep("name")}
+          />
+        );
+      case "cyclelength":
+        return (
+          <CycleLengthStep
+            value={cycleLength}
+            onChange={setCycleLength}
+            onNext={() => setStep("lastperiod")}
+            onBack={() => setStep("personalize")}
           />
         );
       case "lastperiod":
         return (
           <LastPeriodStep
             onNext={handleLastPeriodNext}
-            onBack={() => setStep("personalize")}
+            onBack={() => setStep("cyclelength")}
             onDataExtracted={handleDataExtracted}
           />
         );
@@ -719,6 +801,76 @@ const styles = StyleSheet.create({
     color: TEXT_SOFT,
     textAlign: "center",
     marginTop: 12,
+  },
+  // Cycle length step
+  cycleLengthDisplay: {
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  cycleLengthNumber: {
+    fontSize: 64,
+    fontWeight: "700",
+    color: PINK,
+    lineHeight: 72,
+  },
+  cycleLengthUnit: {
+    fontSize: 16,
+    color: TEXT_SOFT,
+    marginTop: -4,
+  },
+  stepperRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+  },
+  stepperBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: PINK_LIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepperBtnDisabled: {
+    opacity: 0.35,
+  },
+  stepperBtnText: {
+    fontSize: 24,
+    color: PINK,
+    fontWeight: "600",
+    lineHeight: 28,
+  },
+  stepperTrack: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 32,
+  },
+  stepperPip: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 32,
+  },
+  stepperPipDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E0C8D8",
+  },
+  stepperPipDotNear: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: PINK_LIGHT,
+  },
+  stepperPipDotActive: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: PINK,
   },
   // Shared buttons
   primaryBtn: {

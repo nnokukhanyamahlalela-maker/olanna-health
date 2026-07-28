@@ -18,7 +18,7 @@ import {
   phaseConfig,
 } from "@/constants/phaseConfig";
 import { neutral } from "@/constants/colors";
-import { storage, UserProfile } from "@/lib/storage";
+import { storage, UserProfile, DailyLog } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { LannaMascot } from "@/components/LannaMascot";
 import { LannaInsightBadge } from "@/components/LannaInsightBadge";
@@ -159,6 +159,33 @@ function PhaseLegend() {
   );
 }
 
+// ─── Streak helper ───────────────────────────────────────────────────────────
+
+/** Count consecutive days (ending today or yesterday) that have a log entry. */
+function calcStreak(logs: DailyLog[]): number {
+  if (!logs.length) return 0;
+  const dated = new Set(logs.map((l) => l.date.slice(0, 10)));
+  const today = new Date();
+  let streak = 0;
+  // Allow the streak to start from today or yesterday (so it survives the
+  // morning before the user has logged today's entry).
+  const startOffset = dated.has(toISO(today)) ? 0 : 1;
+  for (let i = startOffset; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    if (dated.has(toISO(d))) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function toISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export function LotusCycleScreen() {
@@ -167,6 +194,7 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [streakDays, setStreakDays] = useState(0);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
   const { activeNudge } = useLannaCheckIn();
@@ -176,9 +204,13 @@ export function LotusCycleScreen() {
       let active = true;
       (async () => {
         try {
-          const userProfile = await storage.getUserProfile();
+          const [userProfile, logs] = await Promise.all([
+            storage.getUserProfile(),
+            storage.getDailyLogs(),
+          ]);
           if (!active) return;
           setProfile(userProfile);
+          setStreakDays(calcStreak(logs));
         } catch (e) {
           console.error("[LotusCycleScreen] load error:", e);
         }
@@ -201,9 +233,6 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
-  // Streak: placeholder — wire to real streak data
-  const streakDays = 5;
-
   const handleQuickLog = (id: string) => {
     (navigation as any).navigate("CheckIn");
   };
@@ -223,10 +252,12 @@ export function LotusCycleScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>{greeting}</Text>
-          <View style={styles.streakBadge}>
-            <Text style={styles.streakEmoji}>🔥</Text>
-            <Text style={styles.streakText}>{streakDays} day streak</Text>
-          </View>
+          {streakDays > 0 && (
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakEmoji}>🔥</Text>
+              <Text style={styles.streakText}>{streakDays} day streak</Text>
+            </View>
+          )}
         </View>
 
         {/* Lanna insight badge — shown when a nudge is active */}

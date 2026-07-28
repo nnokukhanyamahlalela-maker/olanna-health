@@ -151,31 +151,30 @@ export function MoodMascot({ size }: MascotProps) {
 // ─── Pain — bandage, pained face ─────────────────────────────────────────────
 
 export function PainMascot({ size }: MascotProps) {
-  // Bandage: horizontal oval, 88×52 viewbox
+  // Bandage centred in a square 88×88 viewBox (18px padding top+bottom)
   return (
-    <Svg width={size * 1.3} height={size * 0.8} viewBox="0 0 88 52">
-      {/* Outer bandage (tan rounded ends) */}
-      <Rect x={2} y={8} width={84} height={36} rx={18} ry={18} fill="#D4A882" />
+    <Svg width={size} height={size} viewBox="0 0 88 88">
+      {/* Outer bandage (tan rounded ends) — shifted down 18px to centre */}
+      <Rect x={2} y={26} width={84} height={36} rx={18} ry={18} fill="#D4A882" />
       {/* White center strip */}
-      <Rect x={26} y={5} width={36} height={42} rx={5} ry={5} fill="#F8F4F0" />
+      <Rect x={26} y={23} width={36} height={42} rx={5} ry={5} fill="#F8F4F0" />
       {/* Red cross lines on left pad */}
-      <Line x1={13} y1={20} x2={13} y2={32} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
-      <Line x1={7} y1={26} x2={19} y2={26} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
+      <Line x1={13} y1={38} x2={13} y2={50} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
+      <Line x1={7} y1={44} x2={19} y2={44} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
       {/* Red cross lines on right pad */}
-      <Line x1={75} y1={20} x2={75} y2={32} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
-      <Line x1={69} y1={26} x2={81} y2={26} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
-      {/* Pained face in white center */}
+      <Line x1={75} y1={38} x2={75} y2={50} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
+      <Line x1={69} y1={44} x2={81} y2={44} stroke="#CC4040" strokeWidth={3.5} strokeLinecap="round" />
       {/* Worried brow lines */}
-      <Path d="M 35 16 Q 38 14 41 16" stroke="#8B5E40" strokeWidth={1.8} fill="none" strokeLinecap="round" />
-      <Path d="M 47 16 Q 50 14 53 16" stroke="#8B5E40" strokeWidth={1.8} fill="none" strokeLinecap="round" />
+      <Path d="M 35 34 Q 38 32 41 34" stroke="#8B5E40" strokeWidth={1.8} fill="none" strokeLinecap="round" />
+      <Path d="M 47 34 Q 50 32 53 34" stroke="#8B5E40" strokeWidth={1.8} fill="none" strokeLinecap="round" />
       {/* Eyes — pained: closed tight arcs pointing DOWN */}
-      <Path d="M 34 22 Q 38 26 42 22" stroke="#8B5E40" strokeWidth={2} fill="none" strokeLinecap="round" />
-      <Path d="M 46 22 Q 50 26 54 22" stroke="#8B5E40" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 34 40 Q 38 44 42 40" stroke="#8B5E40" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 46 40 Q 50 44 54 40" stroke="#8B5E40" strokeWidth={2} fill="none" strokeLinecap="round" />
       {/* Tear drops */}
-      <Ellipse cx={38} cy={28} rx={1.5} ry={2} fill="#89B8D4" opacity={0.8} />
-      <Ellipse cx={50} cy={28} rx={1.5} ry={2} fill="#89B8D4" opacity={0.8} />
+      <Ellipse cx={38} cy={46} rx={1.5} ry={2} fill="#89B8D4" opacity={0.8} />
+      <Ellipse cx={50} cy={46} rx={1.5} ry={2} fill="#89B8D4" opacity={0.8} />
       {/* Frown */}
-      <Frown cx={44} cy={34} w={10} stroke="#8B5E40" />
+      <Frown cx={44} cy={52} w={10} stroke="#8B5E40" />
     </Svg>
   );
 }
