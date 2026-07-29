@@ -98,25 +98,21 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const doReset = async () => {
+      await storage.clearAllData();
+      navigation.replace("Onboarding" as any);
+    };
     if (Platform.OS === "web") {
-      if (window.confirm("Are you sure you want to log out? All data will be cleared.")) {
-        await storage.clearAllData();
-        setProfile(null);
+      if (window.confirm("Reset all app data? This removes your profile, cycle history, and logs. It cannot be undone.")) {
+        await doReset();
       }
     } else {
       Alert.alert(
-        "Log Out",
-        "Are you sure you want to log out? All data will be cleared.",
+        "Reset App Data",
+        "This will remove your profile, cycle history, and all logs. It cannot be undone.",
         [
           { text: "Cancel", style: "cancel" },
-          {
-            text: "Log Out",
-            style: "destructive",
-            onPress: async () => {
-              await storage.clearAllData();
-              setProfile(null);
-            },
-          },
+          { text: "Reset Everything", style: "destructive", onPress: doReset },
         ]
       );
     }
@@ -289,8 +285,8 @@ export default function ProfileScreen() {
       {profile ? (
         <GlassSurface noPadding borderRadius={BorderRadius.xl} style={styles.logoutSection}>
           <MenuItem
-            icon="log-out"
-            label="Log Out"
+            icon="trash-2"
+            label="Reset App Data"
             color={theme.error}
             showChevron={false}
             onPress={handleLogout}
