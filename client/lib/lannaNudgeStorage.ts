@@ -59,7 +59,7 @@ export interface NudgeState {
   isDismissedPermanently: boolean;
 }
 
-type NudgeStateMap = Record<ConditionId, NudgeState>;
+type NudgeStateMap = Partial<Record<ConditionId, NudgeState>>;
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
@@ -126,6 +126,7 @@ export async function getNudgeState(
 export async function getAllNudgeStates(): Promise<NudgeStateMap> {
   return loadState();
 }
+
 
 /**
  * Determine whether a nudge for this condition should be shown right now.

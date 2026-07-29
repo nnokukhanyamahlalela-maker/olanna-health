@@ -498,12 +498,15 @@ export default function OnboardingScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const hasPMOS = personalized.includes("pmos");
       const hasEndo = personalized.includes("endo");
+      const profileId = generateId();
       const profile: UserProfile = {
-        id: generateId(),
+        id: profileId,
         name: name.trim() || "Friend",
+        dateOfBirth: "",
         cycleLength,
         periodLength: 5,
-        lastPeriodStart: lastPeriodDate,
+        lastPeriodStart: lastPeriodDate ?? "",
+        healthGoals: [],
         hasPCOS: hasPMOS,
         hasEndometriosis: hasEndo,
         createdAt: new Date().toISOString(),
@@ -511,9 +514,10 @@ export default function OnboardingScreen() {
       await storage.setUserProfile(profile);
       if (lastPeriodDate) {
         await saveOnboardingCycleProfile({
-          lastPeriodStart: lastPeriodDate,
-          avgCycleLength: cycleLength,
-          periodLength: 5,
+          userId: profileId,
+          lastPeriodStartDate: lastPeriodDate,
+          averageCycleLength: cycleLength,
+          averagePeriodLength: 5,
         });
       }
       (navigation as any).replace("Main");

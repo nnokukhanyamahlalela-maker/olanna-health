@@ -226,7 +226,7 @@ function TabIcon({
 }
 
 function useCurrentPhaseColor() {
-  const [phaseColor, setPhaseColor] = React.useState(phaseTokens.menstrual.front);
+  const [phaseColor, setPhaseColor] = React.useState<string>(phaseTokens.menstrual.front);
 
   React.useEffect(() => {
     (async () => {

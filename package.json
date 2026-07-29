@@ -84,6 +84,7 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "24.10.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "~19.1.0",
     "@types/supertest": "^7.2.1",
     "babel-plugin-module-resolver": "^5.0.2",

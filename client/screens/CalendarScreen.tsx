@@ -117,6 +117,11 @@ export default function CalendarScreen() {
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [periodSheetVisible, setPeriodSheetVisible] = useState(false);
 
+  const selectedLog = useMemo(
+    () => dailyLogs.find((l) => l.date === selectedDate) ?? null,
+    [dailyLogs, selectedDate]
+  );
+
   const loadData = useCallback(async () => {
     try {
       const [userProfile, logs] = await Promise.all([
@@ -296,8 +301,10 @@ export default function CalendarScreen() {
 
       <PeriodLogSheet
         visible={periodSheetVisible}
-        onClose={() => { setPeriodSheetVisible(false); loadData(); }}
-        selectedDate={selectedDate}
+        date={selectedDate ?? todayKey}
+        existingLog={selectedLog}
+        onSave={() => { setPeriodSheetVisible(false); loadData(); }}
+        onDismiss={() => { setPeriodSheetVisible(false); loadData(); }}
       />
     </View>
   );

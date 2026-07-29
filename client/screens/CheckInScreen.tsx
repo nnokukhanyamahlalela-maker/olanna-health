@@ -293,6 +293,7 @@ export default function CheckInScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + 80 }]}
         >
           <BodyMap
+            date={today}
             painPoints={painPoints}
             onAddPainPoint={(pp) => setPainPoints((prev) => [...prev, { ...pp, id: `${today}-pain-${Date.now()}`, timestamp: Date.now() }])}
             onRemovePainPoint={(id) => setPainPoints((prev) => prev.filter((p) => p.id !== id))}
