@@ -64,7 +64,7 @@ function useIntroNavigation() {
 // ─── Native: full-screen video ────────────────────────────────────────────────
 
 const VIDEO_SOURCE  = require("@/assets/videos/olanna-intro.mp4");
-const FALLBACK_MS   = 5_000;
+const FALLBACK_MS   = 15_000; // last-resort only; error listener handles failures fast
 
 function NativeIntro() {
   const { doNavigate } = useIntroNavigation();
@@ -81,10 +81,24 @@ function NativeIntro() {
   });
 
   useEffect(() => {
-    const sub = player.addListener("playToEnd", () => { doNavigate(); });
+    const endSub = player.addListener("playToEnd", () => { doNavigate(); });
+
+    // Navigate immediately if the player enters an error state so the user
+    // is never stuck waiting for the full fallback timer on older devices.
+    // expo-video emits { status: string, error?: Error } as the event payload.
+    const statusSub = player.addListener("statusChange", (event: any) => {
+      if (event?.status === "error" || !!event?.error) {
+        doNavigate();
+      }
+    });
+
+    // Last-resort timer — only fires if neither playToEnd nor statusChange
+    // ever triggers (e.g. a completely silent hang).
     fallback.current = setTimeout(doNavigate, FALLBACK_MS);
+
     return () => {
-      sub.remove();
+      endSub.remove();
+      statusSub.remove();
       if (fallback.current) clearTimeout(fallback.current);
     };
   }, [player, doNavigate]);
