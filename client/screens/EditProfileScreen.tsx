@@ -57,7 +57,14 @@ export default function EditProfileScreen() {
       setDateOfBirth(new Date(profile.dateOfBirth + "T12:00:00"));
       setCycleLength(profile.cycleLength.toString());
       setPeriodLength(profile.periodLength.toString());
-      setLastPeriodStart(new Date(profile.lastPeriodStart + "T12:00:00"));
+      // Guard against an empty lastPeriodStart (users who skipped the period
+      // step during onboarding). Parsing "" + "T12:00:00" produces Invalid
+      // Date, which the DateTimePicker renders incorrectly and handleSave
+      // would persist as "NaN-NaN-NaN". Fall back to today so the picker
+      // shows a sensible default the user can adjust.
+      if (profile.lastPeriodStart) {
+        setLastPeriodStart(new Date(profile.lastPeriodStart + "T12:00:00"));
+      }
       setSelectedGoals(profile.healthGoals);
     }
   };
