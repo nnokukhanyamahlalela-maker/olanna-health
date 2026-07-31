@@ -26,6 +26,7 @@ import { LannaMascot } from "@/components/LannaMascot";
 import { ScreenshotImport, CycleReviewScreen } from "@/components/onboarding";
 import type { ExtractedCycleData } from "@/components/onboarding";
 import { storage, UserProfile, generateId } from "@/lib/storage";
+import { maybeRequestPermission } from "@/lib/notificationService";
 import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import type { CycleRegularity } from "@/constants/onboardingTokens";
@@ -563,6 +564,9 @@ export default function OnboardingScreen() {
         });
       }
       (navigation as any).replace("Main");
+      // Request notification permission after onboarding — delay so the
+      // navigation settles before the OS dialog appears.
+      setTimeout(() => { maybeRequestPermission().catch(() => {}); }, 1500);
     } catch (e) {
       console.error("[Onboarding] error saving:", e);
       (navigation as any).replace("Main");

@@ -39,6 +39,7 @@ import SupplementsScreen from "@/screens/SupplementsScreen";
 import MedicationsScreen from "@/screens/MedicationsScreen";
 import GutHealthScreen from "@/screens/GutHealthScreen";
 import LannaCheckInScreen from "@/screens/LannaCheckInScreen";
+import NotificationSettingsScreen from "@/screens/NotificationSettingsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 import type { ConditionId } from "@/data/lannaContent";
@@ -55,6 +56,7 @@ export type RootStackParamList = {
   EditProfile: undefined;
   PrivacySettings: undefined;
   PrivacyStatement: undefined;
+  NotificationSettings: undefined;
   // FertilityTracking route is hidden behind FEATURES.FERTILITY_TRACKING_ENABLED.
   // Keep the type so existing references compile while the screen is unreachable.
   FertilityTracking: undefined;
@@ -148,6 +150,13 @@ export default function RootStackNavigator() {
         component={PrivacySettingsScreen}
         options={{
           headerTitle: "Privacy & Data",
+        }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+        options={{
+          headerTitle: "Notifications",
         }}
       />
       <Stack.Screen

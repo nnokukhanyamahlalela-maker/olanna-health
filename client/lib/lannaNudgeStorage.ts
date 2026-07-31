@@ -57,6 +57,10 @@ export interface NudgeState {
   followUpSentAt: string | null;
   /** Whether the user has permanently dismissed (unlikely) */
   isDismissedPermanently: boolean;
+  /** The tier at which a push notification was last sent (to avoid re-firing) */
+  lastNotifiedTier: NudgeTier | null;
+  /** When the push notification was last sent */
+  lastNotifiedAt: string | null;
 }
 
 type NudgeStateMap = Partial<Record<ConditionId, NudgeState>>;
@@ -109,6 +113,8 @@ function defaultState(conditionId: ConditionId, tier: NudgeTier): NudgeState {
     followUpSent: false,
     followUpSentAt: null,
     isDismissedPermanently: false,
+    lastNotifiedTier: null,
+    lastNotifiedAt: null,
   };
 }
 
@@ -251,6 +257,21 @@ export async function dismissNudgePermanently(
     lastActionAt: today(),
   };
 
+  await saveState(state);
+}
+
+/** Record that a push notification was sent for a pattern at the given tier. */
+export async function recordPatternNotification(
+  conditionId: ConditionId,
+  tier: NudgeTier
+): Promise<void> {
+  const state = await loadState();
+  const existing = state[conditionId] ?? defaultState(conditionId, tier);
+  state[conditionId] = {
+    ...existing,
+    lastNotifiedTier: tier,
+    lastNotifiedAt: today(),
+  };
   await saveState(state);
 }
 

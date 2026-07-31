@@ -235,7 +235,7 @@ export default function ProfileScreen() {
             icon="bell"
             label="Notifications"
             color="#D4764E"
-            onPress={() => handleComingSoon("Notifications")}
+            onPress={() => navigation.navigate("NotificationSettings")}
             theme={theme}
             isDark={isDark}
           />

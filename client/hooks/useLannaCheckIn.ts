@@ -15,8 +15,10 @@ import {
   postponeNudge,
   markNudgeActioned,
   getAllNudgeStates,
+  recordPatternNotification,
   NudgeState,
 } from "@/lib/lannaNudgeStorage";
+import { fireThresholdPatternAlert } from "@/lib/notificationScheduler";
 import type { ConditionId } from "@/data/lannaContent";
 
 export interface ActiveNudge {
@@ -73,6 +75,18 @@ export function useLannaCheckIn(): UseLannaCheckInResult {
       });
 
       setAllPatterns(patterns);
+
+      // Fire threshold alert push notification for any newly-detected Tier-3 patterns.
+      // De-duplicated by lastNotifiedTier in nudge state — fires once per escalation.
+      for (const pattern of patterns) {
+        if (pattern.tier === 3) {
+          const ns = nudgeStates[pattern.conditionId];
+          if (!ns?.lastNotifiedTier || ns.lastNotifiedTier < 3) {
+            fireThresholdPatternAlert(pattern.conditionId).catch(() => {});
+            recordPatternNotification(pattern.conditionId, 3).catch(() => {});
+          }
+        }
+      }
 
       // Find the highest-priority nudge that should be shown
       for (const pattern of patterns) {

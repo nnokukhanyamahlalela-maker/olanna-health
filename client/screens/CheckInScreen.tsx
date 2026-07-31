@@ -28,6 +28,7 @@ import {
   getFavoriteSymptoms,
   saveFavoriteSymptoms,
 } from '@/lib/symptomStorage';
+import { maybeRequestPermission } from '@/lib/notificationService';
 import { LannaMascot } from '@/components/LannaMascot';
 import { SymptomCharacter } from '@/components/SymptomCharacter';
 import { HealthSummarySheet } from '@/components/HealthSummarySheet';
@@ -175,6 +176,8 @@ export default function CheckInScreen() {
       const phase: CyclePhase = (cycleData?.phase as CyclePhase) || 'follicular';
       const decode = generateDailyDecode({ symptoms, phase, hasPCOS: profile?.hasPCOS || false });
       navigation.navigate('DailyDecode', { decode });
+      // Request notification permission after the first log — fires only once
+      maybeRequestPermission().catch(() => {});
     } catch {
       Alert.alert('Could not save', 'Please try again.', [{ text: 'OK' }]);
     }

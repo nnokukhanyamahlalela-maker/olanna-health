@@ -177,7 +177,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
         await mergeAndSave("energy", selectedEnergy);
       } else if (domain === "pain" && selectedPain !== null) {
         const painOpt = PAIN_OPTIONS.find((o) => o.id === selectedPain);
-        await mergeAndSave("pain", selectedPain, painOpt?.symptoms ?? []);
+        await mergeAndSave("pain", selectedPain, [...(painOpt?.symptoms ?? [])]);
       }
       setSaved(true);
       onSaved?.();

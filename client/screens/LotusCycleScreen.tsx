@@ -27,6 +27,13 @@ import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 import { HealthSummarySheet } from "@/components/HealthSummarySheet";
 import { QuickLogSheet, QuickLogDomain } from "@/components/QuickLogSheet";
+import {
+  maybeSchedulePhaseReminder,
+  maybeScheduleLapsedUserNudge,
+  maybeScheduleHealthSummaryReminder,
+  maybeFireMilestoneNudge,
+  milestoneKeyFromLabel,
+} from "@/lib/notificationScheduler";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -239,7 +246,35 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
-  const milestone = calcMilestone(dailyLogs, 0);
+  // Estimate cycles completed since the user's first period start.
+  const cycleCount = profile?.lastPeriodStart && profile?.createdAt
+    ? Math.max(0, Math.floor(
+        (Date.now() - new Date(profile.createdAt).getTime()) /
+        (1000 * 60 * 60 * 24 * (profile.cycleLength || 28))
+      ))
+    : 0;
+  const milestone = calcMilestone(dailyLogs, cycleCount);
+
+  // Schedule background notifications whenever profile or logs are freshly loaded.
+  // Each scheduler function is idempotent — safe to call on every focus.
+  useEffect(() => {
+    if (!profile) return;
+    const cycleData = data ?? null;
+    const lastLogDate = dailyLogs.length > 0
+      ? [...dailyLogs].sort((a, b) => b.date.localeCompare(a.date))[0].date
+      : null;
+
+    maybeSchedulePhaseReminder(profile, cycleData as any, dailyLogs).catch(() => {});
+    maybeScheduleLapsedUserNudge(lastLogDate).catch(() => {});
+    maybeScheduleHealthSummaryReminder(dailyLogs).catch(() => {});
+  }, [profile?.id, dailyLogs.length, data?.currentPhase]);
+
+  // Fire a one-time milestone nudge when a new milestone is reached.
+  useEffect(() => {
+    if (!milestone?.label) return;
+    const key = milestoneKeyFromLabel(milestone.label);
+    if (key) maybeFireMilestoneNudge(key, milestone.label).catch(() => {});
+  }, [milestone?.label]);
 
   const handleQuickLog = (id: string) => {
     setQuickLogDomain(id as QuickLogDomain);

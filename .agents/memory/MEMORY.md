@@ -2,3 +2,4 @@
 - [OpenAI lazy init](openai-lazy-init.md) — all OpenAI clients must be lazily initialized; eager `new OpenAI()` at module level crashes without API key
 - [storage API](storage-api.md) — use `storage.setUserProfile()` not `saveUserProfile()`; DATABASE_URL is runtime-managed by Replit (do not set manually)
 - [Lanna Check-In module](lanna-checkin-module.md) — pattern engine + nudge storage + screen added; LannaCheckIn in RootStack, badge on LotusCycleScreen
+- [Notification system](notification-system.md) — 6-category local push system; expo-notifications ~0.32.17; permission fired once post-onboarding or post-first-log
