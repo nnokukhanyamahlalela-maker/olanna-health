@@ -64,7 +64,7 @@ function useIntroNavigation() {
 // ─── Native: full-screen video ────────────────────────────────────────────────
 
 const VIDEO_SOURCE  = require("@/assets/videos/olanna-intro.mp4");
-const FALLBACK_MS   = 15_000;
+const FALLBACK_MS   = 5_000;
 
 function NativeIntro() {
   const { doNavigate } = useIntroNavigation();
