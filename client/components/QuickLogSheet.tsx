@@ -81,7 +81,7 @@ async function mergeAndSave(
   domain: QuickLogDomain,
   value: string | number,
   symptoms?: string[]
-): Promise<void> {
+): Promise<DailyLog> {
   const today = new Date().toISOString().split("T")[0];
   const allLogs = await storage.getDailyLogs();
   const existing = allLogs.find((l) => l.date === today);
@@ -109,6 +109,7 @@ async function mergeAndSave(
   };
 
   await storage.addDailyLog(merged);
+  return merged;
 }
 
 // ─── Option pill ──────────────────────────────────────────────────────────────
@@ -143,7 +144,8 @@ interface Props {
   visible: boolean;
   domain: QuickLogDomain;
   onDismiss: () => void;
-  onSaved?: () => void;
+  /** Called after the log is persisted. Receives the domain and the merged log. */
+  onSaved?: (domain: QuickLogDomain, log: import("@/lib/storage").DailyLog) => void;
 }
 
 export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
@@ -169,18 +171,19 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setSaving(true);
     try {
+      let savedLog: DailyLog | null = null;
       if (domain === "flow" && selectedFlow) {
-        await mergeAndSave("flow", selectedFlow);
+        savedLog = await mergeAndSave("flow", selectedFlow);
       } else if (domain === "mood" && selectedMood) {
-        await mergeAndSave("mood", selectedMood);
+        savedLog = await mergeAndSave("mood", selectedMood);
       } else if (domain === "energy" && selectedEnergy !== null) {
-        await mergeAndSave("energy", selectedEnergy);
+        savedLog = await mergeAndSave("energy", selectedEnergy);
       } else if (domain === "pain" && selectedPain !== null) {
         const painOpt = PAIN_OPTIONS.find((o) => o.id === selectedPain);
-        await mergeAndSave("pain", selectedPain, [...(painOpt?.symptoms ?? [])]);
+        savedLog = await mergeAndSave("pain", selectedPain, [...(painOpt?.symptoms ?? [])]);
       }
       setSaved(true);
-      onSaved?.();
+      if (savedLog) onSaved?.(domain, savedLog);
       setTimeout(() => {
         setSaved(false);
         setSaving(false);

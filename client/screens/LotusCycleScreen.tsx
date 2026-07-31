@@ -27,6 +27,8 @@ import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 import { HealthSummarySheet } from "@/components/HealthSummarySheet";
 import { QuickLogSheet, QuickLogDomain } from "@/components/QuickLogSheet";
+import { LannaReactionCard } from "@/components/LannaReactionCard";
+import { buildLannaReaction } from "@/lib/lannaQuickReaction";
 import {
   maybeSchedulePhaseReminder,
   maybeScheduleLapsedUserNudge,
@@ -207,6 +209,8 @@ export function LotusCycleScreen() {
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [quickLogVisible, setQuickLogVisible] = useState(false);
   const [quickLogDomain, setQuickLogDomain] = useState<QuickLogDomain>("flow");
+  const [reactionVisible, setReactionVisible] = useState(false);
+  const [reactionMessage, setReactionMessage] = useState("");
 
   const { data, loading } = useLotusCycle(profile?.id || "");
   const { activeNudge } = useLannaCheckIn();
@@ -397,10 +401,37 @@ export function LotusCycleScreen() {
         visible={quickLogVisible}
         domain={quickLogDomain}
         onDismiss={() => setQuickLogVisible(false)}
-        onSaved={() => {
-          // Refresh so the milestone badge reflects the new log immediately
-          storage.getDailyLogs().then(setDailyLogs).catch(() => {});
+        onSaved={(domain, savedLog) => {
+          // Capture whether today already had a log BEFORE the save refreshed state.
+          // This must be read from pre-save dailyLogs so pattern logic is not
+          // masked by the upserted single-log-per-date storage model.
+          const today = new Date().toISOString().split("T")[0];
+          const hadExistingTodayLog = dailyLogs.some(
+            (l) => l.date.slice(0, 10) === today
+          );
+
+          // Refresh logs for milestone badge, then build pattern-aware reaction
+          storage.getDailyLogs().then((fresh) => {
+            setDailyLogs(fresh);
+            // Use up to 7 most-recent logs (already includes today's save)
+            const recent = [...fresh]
+              .sort((a, b) => b.date.localeCompare(a.date))
+              .slice(0, 7);
+            const msg = buildLannaReaction(
+              recent,
+              { domain, log: savedLog },
+              hadExistingTodayLog
+            );
+            setReactionMessage(msg);
+            setReactionVisible(true);
+          }).catch(() => {});
         }}
+      />
+      <LannaReactionCard
+        visible={reactionVisible}
+        message={reactionMessage}
+        phase={currentPhase}
+        onDismiss={() => setReactionVisible(false)}
       />
     </View>
   );
