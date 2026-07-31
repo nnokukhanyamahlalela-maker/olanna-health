@@ -13,7 +13,11 @@ import CervicalScreeningModuleScreen from "@/screens/CervicalScreeningModuleScre
 import EditProfileScreen from "@/screens/EditProfileScreen";
 import PrivacySettingsScreen from "@/screens/PrivacySettingsScreen";
 import PrivacyStatementScreen from "@/screens/PrivacyStatementScreen";
+// FertilityTrackingScreen is imported only when the feature flag is on.
+// Keep this import here so TypeScript still type-checks the screen file;
+// the route is conditionally registered below.
 import FertilityTrackingScreen from "@/screens/FertilityTrackingScreen";
+import { FEATURES } from "@/constants/features";
 import InsightsScreen from "@/screens/InsightsScreen";
 import CheckInScreen from "@/screens/CheckInScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
@@ -51,6 +55,8 @@ export type RootStackParamList = {
   EditProfile: undefined;
   PrivacySettings: undefined;
   PrivacyStatement: undefined;
+  // FertilityTracking route is hidden behind FEATURES.FERTILITY_TRACKING_ENABLED.
+  // Keep the type so existing references compile while the screen is unreachable.
   FertilityTracking: undefined;
   Insights: undefined;
   CheckIn: undefined;
@@ -151,13 +157,14 @@ export default function RootStackNavigator() {
           headerTitle: "Privacy Statement",
         }}
       />
-      <Stack.Screen
-        name="FertilityTracking"
-        component={FertilityTrackingScreen}
-        options={{
-          headerTitle: "Fertility Tracking",
-        }}
-      />
+      {/* Fertility Tracking — hidden until the feature is researched and ready */}
+      {FEATURES.FERTILITY_TRACKING_ENABLED && (
+        <Stack.Screen
+          name="FertilityTracking"
+          component={FertilityTrackingScreen}
+          options={{ headerTitle: "Fertility Tracking" }}
+        />
+      )}
       <Stack.Screen
         name="Insights"
         component={InsightsScreen}

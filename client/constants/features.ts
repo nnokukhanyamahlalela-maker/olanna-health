@@ -11,4 +11,11 @@
  */
 export const FEATURES = {
   PERIMENOPAUSE_ENABLED: false,
+  /**
+   * FERTILITY_TRACKING_ENABLED — hidden until fertility tracking is a
+   * researched, supported use case. All screen code and service logic in
+   * FertilityTrackingScreen.tsx and client/lib/fertilityTracking.ts remain
+   * intact; only the navigation registration is gated here.
+   */
+  FERTILITY_TRACKING_ENABLED: false,
 } as const;

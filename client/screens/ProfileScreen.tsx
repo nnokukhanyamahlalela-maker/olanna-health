@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { AppGradient } from "@/components/AppGradient";
 import { GlassSurface } from "@/components/GlassSurface";
+import { HealthSummarySheet } from "@/components/HealthSummarySheet";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
@@ -64,6 +65,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [summaryVisible, setSummaryVisible] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -192,6 +194,21 @@ export default function ProfileScreen() {
         </GlassSurface>
       </View>
 
+      {/* My Health Summary — primary CTA, reachable from Profile */}
+      <View style={styles.section}>
+        <GlassSurface noPadding borderRadius={BorderRadius.xl}>
+          <MenuItem
+            icon="clipboard"
+            label="My Health Summary"
+            color="#F06B9A"
+            onPress={() => setSummaryVisible(true)}
+            isLast
+            theme={theme}
+            isDark={isDark}
+          />
+        </GlassSurface>
+      </View>
+
       <View style={styles.section}>
         <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
           Settings
@@ -301,6 +318,10 @@ export default function ProfileScreen() {
         Version 1.0.0
       </ThemedText>
       </KeyboardAwareScrollViewCompat>
+      <HealthSummarySheet
+        visible={summaryVisible}
+        onDismiss={() => setSummaryVisible(false)}
+      />
     </AppGradient>
   );
 }

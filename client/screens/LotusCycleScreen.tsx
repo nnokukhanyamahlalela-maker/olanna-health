@@ -26,6 +26,7 @@ import { useLannaCheckIn } from "@/hooks/useLannaCheckIn";
 import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 import { HealthSummarySheet } from "@/components/HealthSummarySheet";
+import { QuickLogSheet, QuickLogDomain } from "@/components/QuickLogSheet";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -160,31 +161,31 @@ function PhaseLegend() {
   );
 }
 
-// ─── Streak helper ───────────────────────────────────────────────────────────
+// ─── Milestone helper ─────────────────────────────────────────────────────────
 
-/** Count consecutive days (ending today or yesterday) that have a log entry. */
-function calcStreak(logs: DailyLog[]): number {
-  if (!logs.length) return 0;
-  const dated = new Set(logs.map((l) => l.date.slice(0, 10)));
-  const today = new Date();
-  let streak = 0;
-  // Allow the streak to start from today or yesterday (so it survives the
-  // morning before the user has logged today's entry).
-  const startOffset = dated.has(toISO(today)) ? 0 : 1;
-  for (let i = startOffset; i < 365; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    if (dated.has(toISO(d))) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
+/**
+ * Data-collection milestones — tied only to how much has been logged,
+ * never to symptom severity, "good" days, or health outcomes.
+ * Returns the most recent milestone reached, or null if none yet.
+ */
+interface MilestoneData {
+  label: string;
+  emoji: string;
 }
 
-function toISO(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function calcMilestone(logs: DailyLog[], cycleCount: number): MilestoneData | null {
+  const uniqueDays = new Set(logs.map((l) => l.date.slice(0, 10))).size;
+
+  if (cycleCount >= 3)    return { emoji: "🌺", label: "3 cycles logged" };
+  if (cycleCount >= 2)    return { emoji: "💜", label: "2 cycles logged" };
+  if (uniqueDays >= 90)   return { emoji: "🌙", label: "90 days of data" };
+  if (uniqueDays >= 60)   return { emoji: "💫", label: "60 days of data" };
+  if (cycleCount >= 1)    return { emoji: "✨", label: "1 cycle logged" };
+  if (uniqueDays >= 28)   return { emoji: "🌸", label: "28 days tracked" };
+  if (uniqueDays >= 14)   return { emoji: "🌿", label: "14 days tracked" };
+  if (uniqueDays >= 7)    return { emoji: "🌱", label: "7 days tracked" };
+  if (uniqueDays >= 1)    return { emoji: "🌱", label: "First log!" };
+  return null;
 }
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
@@ -195,8 +196,10 @@ export function LotusCycleScreen() {
   const navigation = useNavigation();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [streakDays, setStreakDays] = useState(0);
+  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [summaryVisible, setSummaryVisible] = useState(false);
+  const [quickLogVisible, setQuickLogVisible] = useState(false);
+  const [quickLogDomain, setQuickLogDomain] = useState<QuickLogDomain>("flow");
 
   const { data, loading } = useLotusCycle(profile?.id || "");
   const { activeNudge } = useLannaCheckIn();
@@ -212,7 +215,7 @@ export function LotusCycleScreen() {
           ]);
           if (!active) return;
           setProfile(userProfile);
-          setStreakDays(calcStreak(logs));
+          setDailyLogs(logs);
         } catch (e) {
           console.error("[LotusCycleScreen] load error:", e);
         }
@@ -235,8 +238,11 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
+  const milestone = calcMilestone(dailyLogs, data?.cycles?.length ?? 0);
+
   const handleQuickLog = (id: string) => {
-    (navigation as any).navigate("CheckIn");
+    setQuickLogDomain(id as QuickLogDomain);
+    setQuickLogVisible(true);
   };
 
   return (
@@ -254,10 +260,10 @@ export function LotusCycleScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>{greeting}</Text>
-          {streakDays > 0 && (
-            <View style={styles.streakBadge}>
-              <Text style={styles.streakEmoji}>🔥</Text>
-              <Text style={styles.streakText}>{streakDays} day streak</Text>
+          {milestone && (
+            <View style={styles.milestoneBadge}>
+              <Text style={styles.milestoneEmoji}>{milestone.emoji}</Text>
+              <Text style={styles.milestoneText}>{milestone.label}</Text>
             </View>
           )}
         </View>
@@ -327,6 +333,15 @@ export function LotusCycleScreen() {
         visible={summaryVisible}
         onDismiss={() => setSummaryVisible(false)}
       />
+      <QuickLogSheet
+        visible={quickLogVisible}
+        domain={quickLogDomain}
+        onDismiss={() => setQuickLogVisible(false)}
+        onSaved={() => {
+          // Refresh so the milestone badge reflects the new log immediately
+          storage.getDailyLogs().then(setDailyLogs).catch(() => {});
+        }}
+      />
     </View>
   );
 }
@@ -352,22 +367,22 @@ const styles = StyleSheet.create({
     color: "#2D1F2B",
     letterSpacing: 0.1,
   },
-  streakBadge: {
+  milestoneBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(240,107,154,0.12)",
+    backgroundColor: "rgba(180,154,204,0.18)",
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
     gap: 5,
   },
-  streakEmoji: {
+  milestoneEmoji: {
     fontSize: 13,
   },
-  streakText: {
+  milestoneText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#A84B6C",
+    color: "#6A5B7B",
   },
   wheelSection: {
     alignItems: "center",

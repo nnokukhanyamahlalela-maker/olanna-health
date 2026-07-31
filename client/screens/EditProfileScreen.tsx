@@ -21,7 +21,8 @@ const healthGoals = [
   { id: "track_period", label: "Track my period" },
   { id: "manage_pcos", label: "Manage PCOS" },
   { id: "manage_endo", label: "Manage Endometriosis" },
-  { id: "fertility", label: "Track fertility" },
+  // "Track fertility" is hidden behind FEATURES.FERTILITY_TRACKING_ENABLED.
+  // The goal ID is preserved in storage for any users who selected it previously.
   { id: "sexual_health", label: "Sexual health" },
   { id: "wellness", label: "General wellness" },
 ];
