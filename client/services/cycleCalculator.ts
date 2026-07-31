@@ -1,6 +1,56 @@
 import { CyclePhase, CyclePrediction, CycleProfile } from "../types/cycle";
 import { isLatePeriod } from "../utils/cycleUtils";
 
+/**
+ * Minimal shape required by countLoggedCycles — a subset of DailyLog so
+ * the function can be used without importing the full storage module.
+ */
+interface FlowEntry {
+  date: string;
+  flow?: string | null;
+}
+
+/**
+ * Count the number of distinct menstrual cycles the user has actually logged,
+ * derived from flow entries in their daily logs.
+ *
+ * A new cycle is counted each time a flow day appears after a gap of more
+ * than `minGapDays` days with no flow (default 14 — long enough to skip
+ * any spotting mid-cycle but short enough to catch a new period).
+ *
+ * Spotting-only days are intentionally excluded so that mid-cycle spotting
+ * does not inflate the count.
+ *
+ * Returns 0 when no flow has been logged at all.
+ */
+export function countLoggedCycles(
+  logs: FlowEntry[],
+  minGapDays = 14
+): number {
+  const flowDates = [
+    ...new Set(
+      logs
+        .filter((l) => l.flow && l.flow !== "spotting")
+        .map((l) => l.date.slice(0, 10))
+    ),
+  ].sort(); // ascending ISO order
+
+  if (flowDates.length === 0) return 0;
+
+  let cycles = 1;
+  for (let i = 1; i < flowDates.length; i++) {
+    const prev = new Date(flowDates[i - 1] + "T12:00:00");
+    const curr = new Date(flowDates[i] + "T12:00:00");
+    const gap = Math.round(
+      (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (gap > minGapDays) {
+      cycles++;
+    }
+  }
+  return cycles;
+}
+
 function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setDate(next.getDate() + days);

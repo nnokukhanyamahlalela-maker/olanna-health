@@ -41,6 +41,7 @@ import {
   maybeFireMilestoneNudge,
   milestoneKeyFromLabel,
 } from "@/lib/notificationScheduler";
+import { countLoggedCycles } from "@/services/cycleCalculator";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -363,13 +364,8 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
-  // Estimate cycles completed since the user's first period start.
-  const cycleCount = profile?.lastPeriodStart && profile?.createdAt
-    ? Math.max(0, Math.floor(
-        (Date.now() - new Date(profile.createdAt).getTime()) /
-        (1000 * 60 * 60 * 24 * (profile.cycleLength || 28))
-      ))
-    : 0;
+  // Count cycles from actual logged period start events (flow days) in dailyLogs.
+  const cycleCount = countLoggedCycles(dailyLogs);
   const milestone = calcMilestone(dailyLogs, cycleCount);
 
   // Schedule background notifications whenever profile or logs are freshly loaded.
