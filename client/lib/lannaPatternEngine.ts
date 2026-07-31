@@ -70,7 +70,7 @@ function logsForSymptoms(logs: SymptomLog[], ids: string[]): SymptomLog[] {
 
 function userAgeYears(profile: UserProfile): number | null {
   if (!profile.dateOfBirth) return null;
-  const dob = new Date(profile.dateOfBirth);
+  const dob = new Date(profile.dateOfBirth + "T12:00:00");
   const now = new Date();
   return Math.floor((now.getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
 }

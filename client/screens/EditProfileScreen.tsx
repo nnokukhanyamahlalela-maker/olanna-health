@@ -54,10 +54,10 @@ export default function EditProfileScreen() {
     if (profile) {
       setOriginalProfile(profile);
       setName(profile.name);
-      setDateOfBirth(new Date(profile.dateOfBirth));
+      setDateOfBirth(new Date(profile.dateOfBirth + "T12:00:00"));
       setCycleLength(profile.cycleLength.toString());
       setPeriodLength(profile.periodLength.toString());
-      setLastPeriodStart(new Date(profile.lastPeriodStart));
+      setLastPeriodStart(new Date(profile.lastPeriodStart + "T12:00:00"));
       setSelectedGoals(profile.healthGoals);
     }
   };

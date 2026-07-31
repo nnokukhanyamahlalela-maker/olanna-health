@@ -235,7 +235,7 @@ function useCurrentPhaseColor() {
         if (!profile) return;
         // Quick phase estimate from last period start
         if (profile.lastPeriodStart) {
-          const start = new Date(profile.lastPeriodStart);
+          const start = new Date(profile.lastPeriodStart + "T12:00:00");
           const now = new Date();
           const daysSince = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
           const cycleDay = (daysSince % (profile.cycleLength || 28)) + 1;

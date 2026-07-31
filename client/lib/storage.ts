@@ -169,7 +169,7 @@ export const storage = {
 };
 
 export function calculateCycleData(profile: UserProfile): CycleData {
-  const lastPeriodStart = new Date(profile.lastPeriodStart + "T00:00:00");
+  const lastPeriodStart = new Date(profile.lastPeriodStart + "T12:00:00");
   const today = new Date();
   const daysSinceLastPeriod = Math.floor(
     (today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)

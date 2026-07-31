@@ -72,7 +72,7 @@ export default function CycleCalculatorScreen() {
       const loadProfile = async () => {
         const profile = await storage.getUserProfile();
         if (profile) {
-          setLastPeriodDate(new Date(profile.lastPeriodStart));
+          setLastPeriodDate(new Date(profile.lastPeriodStart + "T12:00:00"));
           setCycleLength(String(profile.cycleLength));
           setPeriodLength(String(profile.periodLength));
         }

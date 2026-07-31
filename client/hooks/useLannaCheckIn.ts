@@ -196,14 +196,14 @@ function buildCycleDataFromLogs(
   const cycleLength = profile.cycleLength || 28;
   const periodLength = profile.periodLength || 5;
 
-  const nextPeriodDate = new Date(lastPeriodStart);
+  const nextPeriodDate = new Date(lastPeriodStart + "T12:00:00");
   nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleLength);
 
-  const ovulationDate = new Date(lastPeriodStart);
+  const ovulationDate = new Date(lastPeriodStart + "T12:00:00");
   ovulationDate.setDate(ovulationDate.getDate() + Math.round(cycleLength * 0.45));
 
   const now = new Date();
-  const lastStart = new Date(lastPeriodStart);
+  const lastStart = new Date(lastPeriodStart + "T12:00:00");
   const daysSince = Math.max(
     1,
     Math.floor((now.getTime() - lastStart.getTime()) / (1000 * 60 * 60 * 24))

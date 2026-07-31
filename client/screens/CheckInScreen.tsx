@@ -137,7 +137,7 @@ export default function CheckInScreen() {
         }
         const profile = await storage.getUserProfile();
         if (profile?.lastPeriodStart) {
-          const start = new Date(profile.lastPeriodStart);
+          const start = new Date(profile.lastPeriodStart + "T12:00:00");
           const daysSince = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
           const cycleDay = (daysSince % (profile.cycleLength || 28)) + 1;
           setCurrentPhase(getPhaseForDay(cycleDay, profile.cycleLength || 28, profile.periodLength || 5));
