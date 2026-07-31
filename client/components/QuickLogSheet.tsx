@@ -157,6 +157,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
   const [selectedEnergy, setSelectedEnergy] = useState<number | null>(null);
   const [saving,         setSaving]         = useState(false);
   const [saved,          setSaved]          = useState(false);
+  const [saveError,      setSaveError]      = useState<string | null>(null);
 
   const meta = DOMAIN_META[domain];
 
@@ -193,6 +194,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
     } catch (e) {
       console.error("[QuickLogSheet] save error:", e);
       setSaving(false);
+      setSaveError("Could not save. Please try again.");
     }
   };
 
@@ -201,6 +203,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
     setSelectedMood(null);
     setSelectedPain(null);
     setSelectedEnergy(null);
+    setSaveError(null);
   };
 
   const handleDismiss = () => {
@@ -323,6 +326,11 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
           )}
         </Pressable>
 
+        {/* Save error */}
+        {saveError && (
+          <Text style={styles.errorText}>{saveError}</Text>
+        )}
+
         {/* Dismiss link */}
         <Pressable onPress={handleDismiss} style={styles.cancelBtn}>
           <Text style={styles.cancelText}>Not right now</Text>
@@ -435,5 +443,11 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 14,
     color: "#8A6F80",
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 13,
+    color: "#C0394B",
+    textAlign: "center",
   },
 });
