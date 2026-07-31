@@ -256,6 +256,17 @@ export default function ProfileScreen() {
             isDark={isDark}
           />
           <MenuItem
+            icon="refresh-cw"
+            label="Re-do Setup"
+            color="#C2185B"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("ResetupOnboarding");
+            }}
+            theme={theme}
+            isDark={isDark}
+          />
+          <MenuItem
             icon="help-circle"
             label="Help & Support"
             color="#6A7B8A"
