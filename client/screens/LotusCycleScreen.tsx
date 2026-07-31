@@ -224,6 +224,7 @@ export function LotusCycleScreen() {
     }, [])
   );
 
+  const hasCycleDate = !!(profile?.lastPeriodStart);
   const cycleLength = profile?.cycleLength || DEFAULT_CYCLE_LENGTH;
   const periodLength = profile?.periodLength || 5;
   const isLate = data?.isLate || false;
@@ -238,7 +239,7 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
-  const milestone = calcMilestone(dailyLogs, data?.cycles?.length ?? 0);
+  const milestone = calcMilestone(dailyLogs, 0);
 
   const handleQuickLog = (id: string) => {
     setQuickLogDomain(id as QuickLogDomain);
@@ -260,7 +261,7 @@ export function LotusCycleScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>{greeting}</Text>
-          {milestone && (
+          {milestone && hasCycleDate && (
             <View style={styles.milestoneBadge}>
               <Text style={styles.milestoneEmoji}>{milestone.emoji}</Text>
               <Text style={styles.milestoneText}>{milestone.label}</Text>
@@ -269,38 +270,62 @@ export function LotusCycleScreen() {
         </View>
 
         {/* Lanna insight badge — shown when a nudge is active */}
-        {activeNudge && (
+        {activeNudge && hasCycleDate && (
           <View style={styles.badgeWrapper}>
             <LannaInsightBadge nudge={activeNudge} currentPhase={currentPhase} />
           </View>
         )}
 
-        {/* Cycle wheel */}
-        <View style={styles.wheelSection}>
-          <CycleWheel
-            cycleLength={cycleLength}
-            periodLength={periodLength}
-            currentDay={clampedDay}
-          />
-        </View>
+        {!hasCycleDate ? (
+          /* ── No cycle date: friendly setup prompt ── */
+          <View style={styles.noCycleDateSection}>
+            <View style={styles.noCycleDateWheel}>
+              <LannaMascot phase="follicular" size={120} expression="bright" />
+            </View>
+            <Text style={styles.noCycleDateTitle}>Let's set your cycle</Text>
+            <Text style={styles.noCycleDateBody}>
+              Add the date your last period started so I can track where you are in your cycle.
+            </Text>
+            <Pressable
+              onPress={() => (navigation as any).navigate("EditProfile")}
+              style={({ pressed }) => [
+                styles.noCycleDateBtn,
+                { opacity: pressed ? 0.82 : 1 },
+              ]}
+            >
+              <Text style={styles.noCycleDateBtnText}>Set period date →</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            {/* Cycle wheel */}
+            <View style={styles.wheelSection}>
+              <CycleWheel
+                cycleLength={cycleLength}
+                periodLength={periodLength}
+                currentDay={clampedDay}
+              />
+            </View>
 
-        {/* Day + phase label */}
-        <View style={styles.phaseInfo}>
-          <Text style={styles.dayText}>Day {clampedDay} of {cycleLength}</Text>
-          <Text style={[styles.phaseName, { color: config.front }]}>{config.label} phase</Text>
-          <Text style={styles.phaseTagline}>{config.tagline}</Text>
-        </View>
+            {/* Day + phase label */}
+            <View style={styles.phaseInfo}>
+              <Text style={styles.dayText}>Day {clampedDay} of {cycleLength}</Text>
+              <Text style={[styles.phaseName, { color: config.front }]}>{config.label} phase</Text>
+              <Text style={styles.phaseTagline}>{config.tagline}</Text>
+            </View>
 
-        {/* About this phase card */}
-        <View style={[styles.aboutCard, { backgroundColor: config.bg + "CC" }]}>
-          <Text style={[styles.aboutCardTitle, { color: config.ink }]}>About this phase</Text>
-          <Text style={[styles.aboutCardBody, { color: config.ink + "CC" }]}>
-            {config.aboutText}
-          </Text>
-        </View>
+            {/* About this phase card */}
+            <View style={[styles.aboutCard, { backgroundColor: config.bg + "CC" }]}>
+              <Text style={[styles.aboutCardTitle, { color: config.ink }]}>About this phase</Text>
+              <Text style={[styles.aboutCardBody, { color: config.ink + "CC" }]}>
+                {config.aboutText}
+              </Text>
+            </View>
 
-        {/* Phase legend */}
-        <PhaseLegend />
+            {/* Phase legend */}
+            <PhaseLegend />
+          </>
+        )}
 
         {/* Quick Log */}
         <View style={styles.quickLogSection}>
@@ -523,6 +548,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#F06B9A",
     fontWeight: "600",
+  },
+  noCycleDateSection: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 32,
+    gap: 12,
+  },
+  noCycleDateWheel: {
+    marginBottom: 8,
+  },
+  noCycleDateTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#2D1F2B",
+    letterSpacing: 0.1,
+    textAlign: "center",
+  },
+  noCycleDateBody: {
+    fontSize: 15,
+    color: "#5A4252",
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 12,
+  },
+  noCycleDateBtn: {
+    marginTop: 8,
+    backgroundColor: "#F06B9A",
+    borderRadius: 14,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+  },
+  noCycleDateBtnText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
 });
 

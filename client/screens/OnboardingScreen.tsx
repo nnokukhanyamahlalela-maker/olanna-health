@@ -534,7 +534,8 @@ export default function OnboardingScreen() {
     }
   };
 
-  const finishOnboarding = async () => {
+  const finishOnboarding = async (resolvedPeriodDate?: string) => {
+    const periodDate = resolvedPeriodDate ?? lastPeriodDate;
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const hasPMOS = personalized.includes("pmos");
@@ -546,17 +547,17 @@ export default function OnboardingScreen() {
         dateOfBirth: "",
         cycleLength,
         periodLength: 5,
-        lastPeriodStart: lastPeriodDate ?? "",
+        lastPeriodStart: periodDate ?? "",
         healthGoals: [],
         hasPCOS: hasPMOS,
         hasEndometriosis: hasEndo,
         createdAt: new Date().toISOString(),
       };
       await storage.setUserProfile(profile);
-      if (lastPeriodDate) {
+      if (periodDate) {
         await saveOnboardingCycleProfile({
           userId: profileId,
-          lastPeriodStartDate: lastPeriodDate,
+          lastPeriodStartDate: periodDate,
           averageCycleLength: cycleLength,
           averagePeriodLength: 5,
         });
@@ -569,13 +570,14 @@ export default function OnboardingScreen() {
   };
 
   const handleDataExtracted = (data: ExtractedCycleData) => {
-    if (data.lastPeriodStartDate) setLastPeriodDate(data.lastPeriodStartDate);
-    finishOnboarding();
+    const extracted = data.lastPeriodStartDate || undefined;
+    if (extracted) setLastPeriodDate(extracted);
+    finishOnboarding(extracted);
   };
 
   const handleLastPeriodNext = (date: string) => {
     setLastPeriodDate(date);
-    finishOnboarding();
+    finishOnboarding(date);
   };
 
   const renderStep = () => {
