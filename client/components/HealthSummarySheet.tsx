@@ -4,6 +4,11 @@
  * A bottom sheet that shows a compiled health summary the user can copy or
  * share with a healthcare provider. Privacy toggle hides personal notes by
  * default — users explicitly opt in before sharing free-text entries.
+ *
+ * When the backend AI is configured, an "Enhance with AI" button appears that
+ * sends the structured summary to the server and displays a 2–3 paragraph
+ * clinical narrative. Falls back to the templated summary if AI is unavailable
+ * or if the call fails.
  */
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -31,6 +36,7 @@ import {
   summaryToShareText,
   HealthSummary,
 } from "@/lib/buildHealthSummary";
+import { getApiUrl } from "@/lib/query-client";
 
 // ─── Colours ─────────────────────────────────────────────────────────────────
 const PINK = "#F06B9A";
@@ -87,6 +93,14 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
   const [includeNotes, setIncludeNotes] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // AI enhancement state
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
+  /** Whether the current narrative was generated while includeNotes was on. */
+  const [aiNarrativeIncludedNotes, setAiNarrativeIncludedNotes] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -104,16 +118,63 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
     }
   }, []);
 
+  /** Check whether the backend AI endpoint is available. */
+  const checkAiAvailable = useCallback(async () => {
+    try {
+      const baseUrl = getApiUrl();
+      const res = await fetch(
+        new URL("/api/health-summary/ai-available", baseUrl).href,
+        { method: "GET" }
+      );
+      if (res.ok) {
+        const json = await res.json();
+        setAiAvailable(Boolean(json.available));
+      }
+    } catch {
+      setAiAvailable(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (visible) {
       setCopied(false);
       setIncludeNotes(false);
+      setAiNarrative(null);
+      setAiNarrativeIncludedNotes(false);
+      setAiError(null);
       load();
+      checkAiAvailable();
     }
-  }, [visible, load]);
+  }, [visible, load, checkAiAvailable]);
+
+  /**
+   * When the user turns off "Include personal notes", automatically clear any
+   * AI narrative that was generated with notes on. This prevents note-derived
+   * content from leaking into the share/copy payload.
+   */
+  useEffect(() => {
+    if (!includeNotes && aiNarrativeIncludedNotes && aiNarrative) {
+      setAiNarrative(null);
+      setAiNarrativeIncludedNotes(false);
+      setAiError(
+        "AI summary was generated with personal notes and has been removed. Re-generate with notes off for a shareable AI summary."
+      );
+    }
+  }, [includeNotes, aiNarrativeIncludedNotes, aiNarrative]);
+
+  /**
+   * Build the share text. The AI narrative is only included when it is safe to
+   * share: either it was generated without notes, or notes are currently on.
+   * (The effect above clears it when that invariant is violated, so this is a
+   * belt-and-suspenders guard.)
+   */
+  const canShareNarrative =
+    aiNarrative !== null && (includeNotes || !aiNarrativeIncludedNotes);
 
   const shareText = summary
-    ? summaryToShareText(summary, includeNotes)
+    ? canShareNarrative
+      ? `AI CLINICAL SUMMARY\n\n${aiNarrative}\n\n─────────────────────────────\n\n${summaryToShareText(summary, includeNotes)}`
+      : summaryToShareText(summary, includeNotes)
     : "";
 
   const handleCopy = async () => {
@@ -132,6 +193,50 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
           : { message: shareText, title: "My Olanna Health Summary" }
       );
     } catch {}
+  };
+
+  const handleEnhanceWithAI = async () => {
+    if (!summary) return;
+    setAiLoading(true);
+    setAiError(null);
+    setAiNarrative(null);
+    try {
+      const baseUrl = getApiUrl();
+      const payload = {
+        ...summary,
+        includeNotes,
+        // Only send personal notes if the privacy toggle is on
+        personalNotes: includeNotes ? summary.personalNotes : [],
+      };
+      const res = await fetch(
+        new URL("/api/health-summary/enhance", baseUrl).href,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      const json = await res.json();
+      if (!res.ok) {
+        const msg =
+          json?.error === "ai_not_configured"
+            ? "AI is not available right now. Your templated summary is ready to share."
+            : json?.error || "Could not enhance summary. Please try again.";
+        setAiError(msg);
+        return;
+      }
+      if (json.narrative) {
+        setAiNarrative(json.narrative);
+        setAiNarrativeIncludedNotes(includeNotes);
+      } else {
+        setAiError("AI returned an empty response. Your templated summary is ready to share.");
+      }
+    } catch (e) {
+      console.error("[HealthSummarySheet] AI enhance error:", e);
+      setAiError("Could not reach the server. Check your connection and try again.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   function formatDate(dateStr: string) {
@@ -185,10 +290,68 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
               showsVerticalScrollIndicator={false}
               bounces={false}
             >
-              {/* Blurb */}
-              <View style={styles.blurbCard}>
-                <Text style={styles.blurbText}>{summary.blurb}</Text>
-              </View>
+              {/* AI Narrative card — shown once enhancement completes */}
+              {aiNarrative ? (
+                <View style={styles.aiCard}>
+                  <View style={styles.aiCardHeader}>
+                    <Feather name="cpu" size={14} color={PINK} />
+                    <Text style={styles.aiCardTitle}>AI Clinical Summary</Text>
+                  </View>
+                  <Text style={styles.aiCardText}>{aiNarrative}</Text>
+                  <Pressable
+                    onPress={() => {
+                      setAiNarrative(null);
+                      setAiNarrativeIncludedNotes(false);
+                      setAiError(null);
+                    }}
+                    style={styles.aiClearBtn}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.aiClearText}>Remove AI summary</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                /* Blurb — shown when no AI narrative yet */
+                <View style={styles.blurbCard}>
+                  <Text style={styles.blurbText}>{summary.blurb}</Text>
+                </View>
+              )}
+
+              {/* AI error notice */}
+              {aiError && (
+                <View style={styles.aiErrorCard}>
+                  <Feather name="alert-circle" size={14} color={TEXT_SOFT} />
+                  <Text style={styles.aiErrorText}>{aiError}</Text>
+                </View>
+              )}
+
+              {/* Enhance with AI button — visible when AI is available and no narrative yet */}
+              {aiAvailable && !aiNarrative && (
+                <Pressable
+                  onPress={handleEnhanceWithAI}
+                  disabled={aiLoading}
+                  style={({ pressed }) => [
+                    styles.aiEnhanceBtn,
+                    { opacity: pressed || aiLoading ? 0.7 : 1 },
+                  ]}
+                >
+                  {aiLoading ? (
+                    <>
+                      <ActivityIndicator color={PINK} size="small" />
+                      <Text style={styles.aiEnhanceBtnText}>
+                        Generating clinical summary…
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Feather name="cpu" size={15} color={PINK} />
+                      <Text style={styles.aiEnhanceBtnText}>
+                        Enhance with AI
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+              )}
 
               {/* Overview */}
               <SectionHeader title="OVERVIEW" />
@@ -432,6 +595,77 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: TEXT_DARK,
   },
+  // ── AI narrative card ────────────────────────────────────────────────────
+  aiCard: {
+    backgroundColor: "rgba(240,107,154,0.07)",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(240,107,154,0.22)",
+    padding: 14,
+    marginBottom: 8,
+    gap: 8,
+  },
+  aiCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  aiCardTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: PINK,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  aiCardText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: TEXT_DARK,
+  },
+  aiClearBtn: {
+    alignSelf: "flex-start",
+    marginTop: 2,
+  },
+  aiClearText: {
+    fontSize: 12,
+    color: TEXT_SOFT,
+    textDecorationLine: "underline",
+  },
+  // ── AI error notice ──────────────────────────────────────────────────────
+  aiErrorCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: "#FBF5F8",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 4,
+  },
+  aiErrorText: {
+    flex: 1,
+    fontSize: 13,
+    color: TEXT_SOFT,
+    lineHeight: 18,
+  },
+  // ── Enhance with AI button ────────────────────────────────────────────────
+  aiEnhanceBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: PINK,
+    borderRadius: 25,
+    height: 46,
+    marginBottom: 8,
+  },
+  aiEnhanceBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: PINK,
+    letterSpacing: 0.1,
+  },
+  // ── Shared cards ─────────────────────────────────────────────────────────
   sectionHeader: {
     fontSize: 11,
     fontWeight: "700",
@@ -561,7 +795,7 @@ const styles = StyleSheet.create({
     color: TEXT_SOFT,
     textAlign: "center",
     lineHeight: 17,
-    marginTop: 12,
+    marginTop: 8,
     paddingHorizontal: 8,
   },
 });
