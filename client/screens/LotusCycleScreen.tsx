@@ -131,11 +131,63 @@ const QUICK_LOG_ITEMS: Array<{
   { id: "energy", label: "Energy", bg: "#FBF4D6" },
 ];
 
-function QuickLogRow({ onPress }: { onPress: (id: string) => void }) {
+// ─── Today quick-log summary ─────────────────────────────────────────────────
+
+interface TodayQuickLog {
+  flow?: string;
+  mood?: string;
+  pain?: string;
+  energy?: string;
+}
+
+const ENERGY_LABELS: Record<number, string> = {
+  1: "Very Low",
+  2: "Low",
+  3: "Medium",
+  4: "High",
+  5: "Very High",
+};
+
+function getTodayQuickLog(logs: DailyLog[]): TodayQuickLog {
+  const today = new Date().toISOString().split("T")[0];
+  const todayLog = logs.find((l) => l.date.slice(0, 10) === today);
+  if (!todayLog) return {};
+
+  const result: TodayQuickLog = {};
+
+  if (todayLog.flow) {
+    result.flow = todayLog.flow.charAt(0).toUpperCase() + todayLog.flow.slice(1);
+  }
+  if (todayLog.mood) {
+    result.mood = todayLog.mood.charAt(0).toUpperCase() + todayLog.mood.slice(1);
+  }
+  if (todayLog.energy != null) {
+    result.energy = ENERGY_LABELS[todayLog.energy] ?? String(todayLog.energy);
+  }
+  // Derive pain level from symptom IDs written by QuickLogSheet
+  if (todayLog.symptoms.includes("deep-pelvic-pain")) {
+    result.pain = "Severe";
+  } else if (todayLog.symptoms.includes("pelvic-heaviness")) {
+    result.pain = "Moderate";
+  } else if (todayLog.symptoms.includes("cramps")) {
+    result.pain = "Mild";
+  }
+
+  return result;
+}
+
+function QuickLogRow({
+  onPress,
+  todayLog,
+}: {
+  onPress: (id: string) => void;
+  todayLog: TodayQuickLog;
+}) {
   return (
     <View style={styles.quickLogRow}>
       {QUICK_LOG_ITEMS.map((item) => {
         const MascotComponent = QUICK_LOG_MASCOTS[item.id];
+        const loggedValue = todayLog[item.id];
         return (
           <Pressable
             key={item.id}
@@ -144,8 +196,12 @@ function QuickLogRow({ onPress }: { onPress: (id: string) => void }) {
           >
             <View style={[styles.quickLogCard, { backgroundColor: item.bg }]}>
               <MascotComponent size={52} />
+              {loggedValue && <View style={styles.quickLogLoggedDot} />}
             </View>
             <Text style={styles.quickLogLabel}>{item.label}</Text>
+            {loggedValue ? (
+              <Text style={styles.quickLogLoggedValue}>{loggedValue}</Text>
+            ) : null}
           </Pressable>
         );
       })}
@@ -460,7 +516,7 @@ export function LotusCycleScreen() {
         {/* Quick Log */}
         <View style={styles.quickLogSection}>
           <Text style={styles.sectionTitle}>Quick log</Text>
-          <QuickLogRow onPress={handleQuickLog} />
+          <QuickLogRow onPress={handleQuickLog} todayLog={getTodayQuickLog(dailyLogs)} />
         </View>
 
         {/* Health Summary CTA */}
@@ -668,6 +724,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     color: "#5A4252",
+  },
+  quickLogLoggedDot: {
+    position: "absolute",
+    bottom: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#6AB494",
+  },
+  quickLogLoggedValue: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#6AB494",
+    letterSpacing: 0.1,
   },
   summaryCta: {
     width: "100%",
