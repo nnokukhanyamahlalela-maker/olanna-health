@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Pressable, Alert, Platform } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -67,14 +67,15 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [summaryVisible, setSummaryVisible] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    const userProfile = await storage.getUserProfile();
-    setProfile(userProfile);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      storage.getUserProfile().then((userProfile) => {
+        if (active) setProfile(userProfile);
+      });
+      return () => { active = false; };
+    }, [])
+  );
 
   const [exporting, setExporting] = useState(false);
 

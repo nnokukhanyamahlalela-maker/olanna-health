@@ -16,6 +16,7 @@ import { GlassSurface } from "@/components/GlassSurface";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { storage, UserProfile } from "@/lib/storage";
+import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
 
 const healthGoals = [
   { id: "track_period", label: "Track my period" },
@@ -84,6 +85,12 @@ export default function EditProfileScreen() {
         hasEndometriosis: selectedGoals.includes("manage_endo"),
       };
       await storage.setUserProfile(updatedProfile);
+      await saveOnboardingCycleProfile({
+        userId: updatedProfile.id,
+        lastPeriodStartDate: updatedProfile.lastPeriodStart,
+        averageCycleLength: updatedProfile.cycleLength,
+        averagePeriodLength: updatedProfile.periodLength,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.goBack();
     } catch (error) {
