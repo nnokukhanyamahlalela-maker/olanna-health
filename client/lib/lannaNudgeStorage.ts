@@ -279,3 +279,61 @@ export async function recordPatternNotification(
 export async function clearAllNudgeState(): Promise<void> {
   await AsyncStorage.removeItem(STORAGE_KEY);
 }
+
+// ─── Threshold card state ─────────────────────────────────────────────────────
+// The threshold card is a lightweight on-Home nudge that appears when ≥3
+// consecutive high-severity pain days are detected.  It stores the date of
+// the threshold event it was dismissed for; a new event (different date) will
+// show the card again.
+
+const THRESHOLD_CARD_KEY = "@olanna_threshold_card_state";
+
+interface ThresholdCardPersistedState {
+  /** The ISO date of the threshold event the user most recently dismissed */
+  dismissedForDate: string | null;
+}
+
+async function loadThresholdState(): Promise<ThresholdCardPersistedState> {
+  try {
+    const raw = await AsyncStorage.getItem(THRESHOLD_CARD_KEY);
+    return raw ? JSON.parse(raw) : { dismissedForDate: null };
+  } catch {
+    return { dismissedForDate: null };
+  }
+}
+
+/**
+ * Returns true if the threshold card should be shown for a given threshold
+ * event date (ISO date string of the most recent consecutive-pain day).
+ * Returns false when the user has already dismissed this exact event.
+ */
+export async function shouldShowThresholdCard(
+  thresholdEventDate: string
+): Promise<boolean> {
+  const state = await loadThresholdState();
+  if (!state.dismissedForDate) return true;
+  // Show again only when this event date is strictly newer than the dismissed one
+  return thresholdEventDate > state.dismissedForDate;
+}
+
+/**
+ * Record that the user dismissed the threshold card for the given event date.
+ * The card will not reappear until a newer threshold event occurs.
+ */
+export async function dismissThresholdCard(
+  thresholdEventDate: string
+): Promise<void> {
+  try {
+    const payload: ThresholdCardPersistedState = {
+      dismissedForDate: thresholdEventDate,
+    };
+    await AsyncStorage.setItem(THRESHOLD_CARD_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.error("[LannaNudge] Failed to save threshold card state:", e);
+  }
+}
+
+/** Clear threshold card state (for testing / logout) */
+export async function clearThresholdCardState(): Promise<void> {
+  await AsyncStorage.removeItem(THRESHOLD_CARD_KEY);
+}

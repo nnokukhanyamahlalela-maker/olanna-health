@@ -22,7 +22,12 @@ import { storage, UserProfile, DailyLog } from "@/lib/storage";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { LannaMascot } from "@/components/LannaMascot";
 import { LannaInsightBadge } from "@/components/LannaInsightBadge";
+import { LannaThresholdCard } from "@/components/LannaThresholdCard";
 import { useLannaCheckIn } from "@/hooks/useLannaCheckIn";
+import {
+  shouldShowThresholdCard,
+  dismissThresholdCard,
+} from "@/lib/lannaNudgeStorage";
 import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 import { HealthSummarySheet } from "@/components/HealthSummarySheet";
@@ -170,6 +175,56 @@ function PhaseLegend() {
   );
 }
 
+// ─── Threshold detection helper ──────────────────────────────────────────────
+
+/**
+ * Returns the ISO date of the most recent consecutive high-severity pain day
+ * if the user has logged severe pain ("deep-pelvic-pain" symptom) for 3 or
+ * more consecutive calendar days ending on the most recent log date.
+ * Returns null when the threshold is not met.
+ *
+ * "high-severity" = QuickLog "Severe" selection, which writes "deep-pelvic-pain"
+ * to DailyLog.symptoms.
+ */
+function detectConsecutiveHighPain(logs: DailyLog[]): string | null {
+  if (logs.length === 0) return null;
+
+  // Deduplicate to one entry per calendar day; keep only severe-pain days.
+  const painDates = [
+    ...new Set(
+      logs
+        .filter((l) => l.symptoms.includes("deep-pelvic-pain"))
+        .map((l) => l.date.slice(0, 10))
+    ),
+  ].sort((a, b) => b.localeCompare(a)); // descending — most recent first
+
+  if (painDates.length < 3) return null;
+
+  // The streak MUST be anchored to the most recent pain date.
+  // Walk backwards from painDates[0]; any gap before reaching 3 means no
+  // active streak — return null immediately rather than scanning further back.
+  let streak = 1;
+  for (let i = 1; i < painDates.length; i++) {
+    const newer = new Date(painDates[i - 1] + "T12:00:00");
+    const older = new Date(painDates[i] + "T12:00:00");
+    const daysDiff = Math.round(
+      (newer.getTime() - older.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysDiff === 1) {
+      streak++;
+      if (streak >= 3) {
+        // Streak is anchored to painDates[0] — use it as the event date so
+        // dismissal tracking always maps to the latest pain day in the run.
+        return painDates[0];
+      }
+    } else {
+      // Gap found before streak reached 3: no current active streak.
+      return null;
+    }
+  }
+  return null;
+}
+
 // ─── Milestone helper ─────────────────────────────────────────────────────────
 
 /**
@@ -211,6 +266,8 @@ export function LotusCycleScreen() {
   const [quickLogDomain, setQuickLogDomain] = useState<QuickLogDomain>("flow");
   const [reactionVisible, setReactionVisible] = useState(false);
   const [reactionMessage, setReactionMessage] = useState("");
+  const [thresholdCardVisible, setThresholdCardVisible] = useState(false);
+  const [thresholdEventDate, setThresholdEventDate] = useState<string | null>(null);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
   const { activeNudge } = useLannaCheckIn();
@@ -280,6 +337,28 @@ export function LotusCycleScreen() {
     if (key) maybeFireMilestoneNudge(key, milestone.label).catch(() => {});
   }, [milestone?.label]);
 
+  // Threshold card: detect ≥3 consecutive high-severity pain days and check
+  // dismissed state so we only show the card for new threshold events.
+  useEffect(() => {
+    const eventDate = detectConsecutiveHighPain(dailyLogs);
+    if (!eventDate) {
+      setThresholdCardVisible(false);
+      setThresholdEventDate(null);
+      return;
+    }
+    setThresholdEventDate(eventDate);
+    shouldShowThresholdCard(eventDate)
+      .then((show) => setThresholdCardVisible(show))
+      .catch(() => setThresholdCardVisible(false));
+  }, [dailyLogs]);
+
+  const handleThresholdDismiss = () => {
+    setThresholdCardVisible(false);
+    if (thresholdEventDate) {
+      dismissThresholdCard(thresholdEventDate).catch(() => {});
+    }
+  };
+
   const handleQuickLog = (id: string) => {
     setQuickLogDomain(id as QuickLogDomain);
     setQuickLogVisible(true);
@@ -308,8 +387,9 @@ export function LotusCycleScreen() {
           )}
         </View>
 
-        {/* Lanna insight badge — shown when a nudge is active */}
-        {activeNudge && hasCycleDate && (
+        {/* Lanna insight badge — shown when a nudge is active and the
+            threshold card is NOT also visible (they share the same CTA) */}
+        {activeNudge && hasCycleDate && !thresholdCardVisible && (
           <View style={styles.badgeWrapper}>
             <LannaInsightBadge nudge={activeNudge} currentPhase={currentPhase} />
           </View>
@@ -345,6 +425,17 @@ export function LotusCycleScreen() {
                 currentDay={clampedDay}
               />
             </View>
+
+            {/* Threshold nudge card — lighter-touch entry point to Check-In.
+                Only visible when ≥3 consecutive high-severity pain days are
+                detected and the user has not yet dismissed this event. */}
+            {thresholdCardVisible && (
+              <LannaThresholdCard
+                currentPhase={currentPhase}
+                onDismiss={handleThresholdDismiss}
+                conditionId={activeNudge?.pattern.conditionId ?? "endometriosis"}
+              />
+            )}
 
             {/* Day + phase label */}
             <View style={styles.phaseInfo}>
