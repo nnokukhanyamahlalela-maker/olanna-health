@@ -36,7 +36,15 @@ export function useVoiceStream(callbacks: StreamCallbacks = {}) {
         body: JSON.stringify({ audio: base64Audio }),
       });
 
-      if (!response.ok) throw new Error("Voice request failed");
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        if (response.status === 503 && errorBody.error === "ai_not_configured") {
+          throw new Error(
+            "AI features are currently unavailable — please try again later."
+          );
+        }
+        throw new Error("Voice request failed");
+      }
 
       const streamReader = response.body?.getReader();
       if (!streamReader) throw new Error("No response body");

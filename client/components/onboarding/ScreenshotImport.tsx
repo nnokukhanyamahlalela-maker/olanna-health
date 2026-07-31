@@ -195,6 +195,11 @@ export function ScreenshotImport({
 
       if (!res.ok) {
         const errorBody = await res.json().catch(() => ({}));
+        if (res.status === 503 && errorBody.error === "ai_not_configured") {
+          throw new Error(
+            "AI features are currently unavailable — please try again later."
+          );
+        }
         throw new Error(
           errorBody.message ||
             "We couldn't read cycle data from this screenshot. Try a clearer image, or enter your details manually."
