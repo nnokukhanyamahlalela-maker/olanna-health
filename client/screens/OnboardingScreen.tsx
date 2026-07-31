@@ -39,6 +39,7 @@ type OnboardingStep =
   | "valueprop"   // Meet your four phases
   | "name"        // What shall I call you?
   | "personalize" // Does any of this apply?
+  | "ttcnote"     // Warm note shown only when user selects "Trying to conceive"
   | "cyclelength" // How long is your cycle?
   | "lastperiod"  // When did your last period start?
   | "done";
@@ -288,6 +289,46 @@ function PersonalizeStep({
       <View style={{ marginTop: 24 }}>
         <PrimaryBtn label="Continue" onPress={onNext} disabled={selected.length === 0} />
       </View>
+    </ScrollView>
+  );
+}
+
+// ─── Step 4b: TTC warm note (only shown when user selects "Trying to conceive") ─
+
+function TTCNoteStep({
+  onNext,
+  onBack,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+      keyboardShouldPersistTaps="handled"
+    >
+      <BackBtn onPress={onBack} />
+      <View style={{ flex: 1, justifyContent: "center", gap: 24 }}>
+        <View style={{ alignItems: "center", marginBottom: 8 }}>
+          <View style={styles.mascotSmall}>
+            <LannaMascot phase="follicular" size={80} expression="bright" />
+          </View>
+        </View>
+        <Text style={styles.stepTitle}>One thing to know</Text>
+        <View style={styles.ttcCard}>
+          <Text style={styles.ttcBody}>
+            Olanna is built for tracking symptoms, pain, and cycle patterns — not for fertility or ovulation monitoring. There's no conception timing, basal body temperature logging, or LH surge tracking here yet.
+          </Text>
+          <Text style={[styles.ttcBody, { marginTop: 12 }]}>
+            If you're trying to conceive and you have PMOS, endometriosis, or irregular cycles, your symptoms are still worth logging here — your patterns matter, and your provider or a fertility specialist can use that data.
+          </Text>
+          <Text style={[styles.ttcBody, { marginTop: 12 }]}>
+            We'd gently encourage looping in a specialist sooner rather than later. You deserve care that's tailored to your situation.
+          </Text>
+        </View>
+      </View>
+      <PrimaryBtn label="Got it, let's continue" onPress={onNext} />
     </ScrollView>
   );
 }
@@ -562,8 +603,15 @@ export default function OnboardingScreen() {
           <PersonalizeStep
             selected={personalized}
             onToggle={togglePersonalize}
-            onNext={() => setStep("cyclelength")}
+            onNext={() => personalized.includes("ttc") ? setStep("ttcnote") : setStep("cyclelength")}
             onBack={() => setStep("name")}
+          />
+        );
+      case "ttcnote":
+        return (
+          <TTCNoteStep
+            onNext={() => setStep("cyclelength")}
+            onBack={() => setStep("personalize")}
           />
         );
       case "cyclelength":
@@ -673,6 +721,18 @@ const styles = StyleSheet.create({
   // Name
   mascotSmall: {
     marginBottom: 16,
+  },
+  ttcCard: {
+    backgroundColor: "rgba(209,120,179,0.10)",
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "rgba(209,120,179,0.20)",
+  },
+  ttcBody: {
+    fontSize: 15,
+    lineHeight: 23,
+    color: TEXT_DARK,
   },
   stepTitle: {
     fontSize: 24,

@@ -13,6 +13,7 @@
 import { UserProfile, CycleData } from "./storage";
 import { SymptomLog } from "./symptomSchema";
 import type { ConditionId, NudgeTier } from "../data/lannaContent";
+import { FEATURES } from "@/constants/features";
 
 // ─── Output types ─────────────────────────────────────────────────────────────
 
@@ -401,8 +402,12 @@ export function runPatternEngine(input: PatternEngineInput): DetectedPattern[] {
   const endo = detectEndometriosis(profile, symptomLogs, today);
   if (endo) results.push(endo);
 
-  const menopause = detectMenopause(profile, cycleData, symptomLogs, today);
-  if (menopause) results.push(menopause);
+  // Perimenopause detection is feature-flagged off until menopause research
+  // is complete. The detectMenopause function and all its content remain intact.
+  if (FEATURES.PERIMENOPAUSE_ENABLED) {
+    const menopause = detectMenopause(profile, cycleData, symptomLogs, today);
+    if (menopause) results.push(menopause);
+  }
 
   // Sort: tier 3 first, then 2, then 1; within tier sort by confidence desc
   return results.sort((a, b) => {
