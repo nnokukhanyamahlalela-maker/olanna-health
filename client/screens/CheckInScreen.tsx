@@ -30,6 +30,7 @@ import {
 } from '@/lib/symptomStorage';
 import { LannaMascot } from '@/components/LannaMascot';
 import { SymptomCharacter } from '@/components/SymptomCharacter';
+import { HealthSummarySheet } from '@/components/HealthSummarySheet';
 import { Phase, getPhaseForDay } from '@/constants/phaseConfig';
 import { phase as phaseTokens } from '@/constants/colors';
 
@@ -121,6 +122,7 @@ export default function CheckInScreen() {
   const [selectedSymptoms, setSelectedSymptoms] = useState<Map<string, SymptomLog>>(new Map());
   const [painPoints, setPainPoints] = useState<BodyPainPoint[]>([]);
   const [currentPhase, setCurrentPhase] = useState<Phase>('follicular');
+  const [summaryVisible, setSummaryVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -301,7 +303,7 @@ export default function CheckInScreen() {
         </ScrollView>
       )}
 
-      {/* Save button */}
+      {/* Save button + Summary CTA */}
       <View style={[styles.saveBar, { paddingBottom: tabBarHeight + 8 }]}>
         <Pressable
           onPress={handleSave}
@@ -309,7 +311,18 @@ export default function CheckInScreen() {
         >
           <Text style={styles.saveBtnText}>Save today's check-in</Text>
         </Pressable>
+        <Pressable
+          onPress={() => setSummaryVisible(true)}
+          style={styles.summaryPill}
+        >
+          <Text style={styles.summaryPillText}>📋 My Health Summary</Text>
+        </Pressable>
       </View>
+
+      <HealthSummarySheet
+        visible={summaryVisible}
+        onDismiss={() => setSummaryVisible(false)}
+      />
     </View>
   );
 }
@@ -435,5 +448,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.2,
+  },
+  summaryPill: {
+    marginTop: 10,
+    alignSelf: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(240,107,154,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(240,107,154,0.22)',
+  },
+  summaryPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#A84B6C',
+    letterSpacing: 0.1,
   },
 });

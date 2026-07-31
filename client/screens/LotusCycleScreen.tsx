@@ -25,6 +25,7 @@ import { LannaInsightBadge } from "@/components/LannaInsightBadge";
 import { useLannaCheckIn } from "@/hooks/useLannaCheckIn";
 import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
+import { HealthSummarySheet } from "@/components/HealthSummarySheet";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -195,6 +196,7 @@ export function LotusCycleScreen() {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [streakDays, setStreakDays] = useState(0);
+  const [summaryVisible, setSummaryVisible] = useState(false);
 
   const { data, loading } = useLotusCycle(profile?.id || "");
   const { activeNudge } = useLannaCheckIn();
@@ -299,7 +301,32 @@ export function LotusCycleScreen() {
           <Text style={styles.sectionTitle}>Quick log</Text>
           <QuickLogRow onPress={handleQuickLog} />
         </View>
+
+        {/* Health Summary CTA */}
+        <Pressable
+          onPress={() => setSummaryVisible(true)}
+          style={({ pressed }) => [
+            styles.summaryCta,
+            { opacity: pressed ? 0.82 : 1 },
+          ]}
+        >
+          <View style={styles.summaryCtaInner}>
+            <Text style={styles.summaryCtaIcon}>📋</Text>
+            <View style={styles.summaryCtaText}>
+              <Text style={styles.summaryCtaTitle}>My Health Summary</Text>
+              <Text style={styles.summaryCtaSub}>
+                Share your cycle data with your provider
+              </Text>
+            </View>
+            <Text style={styles.summaryCtaArrow}>→</Text>
+          </View>
+        </Pressable>
       </ScrollView>
+
+      <HealthSummarySheet
+        visible={summaryVisible}
+        onDismiss={() => setSummaryVisible(false)}
+      />
     </View>
   );
 }
@@ -444,6 +471,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     color: "#5A4252",
+  },
+  summaryCta: {
+    width: "100%",
+    marginTop: 16,
+    marginBottom: 4,
+    borderRadius: 16,
+    backgroundColor: "rgba(240,107,154,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(240,107,154,0.22)",
+  },
+  summaryCtaInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    gap: 12,
+  },
+  summaryCtaIcon: {
+    fontSize: 22,
+  },
+  summaryCtaText: {
+    flex: 1,
+    gap: 2,
+  },
+  summaryCtaTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#2D1F2B",
+    letterSpacing: 0.1,
+  },
+  summaryCtaSub: {
+    fontSize: 12,
+    color: "#8A6F80",
+  },
+  summaryCtaArrow: {
+    fontSize: 16,
+    color: "#F06B9A",
+    fontWeight: "600",
   },
 });
 
