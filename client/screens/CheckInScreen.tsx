@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/RootStackNavigator';
 import { generateDailyDecode, CyclePhase } from '@/lib/dailyDecode';
-import { storage, calculateCycleDataWithLogs } from '@/lib/storage';
+import { storage, calculateCycleDataWithLogs, generateId } from '@/lib/storage';
 import { BodyMap } from '@/components/BodyMap';
 import {
   SYMPTOM_CATEGORIES,
@@ -171,7 +171,31 @@ export default function CheckInScreen() {
     try {
       const symptoms = Array.from(selectedSymptoms.values());
       await saveDailyCheckIn({ date: today, symptoms, painPoints, completedAt: Date.now() });
+
       const [profile, logs] = await Promise.all([storage.getUserProfile(), storage.getDailyLogs()]);
+
+      // Merge check-in symptom IDs into today's DailyLog, preserving any quick-log
+      // fields (flow, mood, energy, etc.) that the user set earlier in the day.
+      const existing = logs.find((l) => l.date === today);
+      const checkInSymptomIds = symptoms.map((s) => s.symptomId);
+      // Keep any symptoms from the existing log that weren't touched by this check-in,
+      // then append the full set the user selected just now.
+      const preservedSymptoms = (existing?.symptoms ?? []).filter(
+        (id) => !checkInSymptomIds.includes(id),
+      );
+      const mergedSymptoms = [...preservedSymptoms, ...checkInSymptomIds];
+
+      const mergedLog = {
+        id: existing?.id ?? generateId(),
+        date: today,
+        createdAt: existing?.createdAt ?? new Date().toISOString(),
+        // Spread existing first so ALL quick-log fields (flow, mood, energy, sleep…)
+        // are preserved, then only overwrite the symptoms field.
+        ...(existing ?? {}),
+        symptoms: mergedSymptoms,
+      };
+      await storage.addDailyLog(mergedLog);
+
       const cycleData = profile ? calculateCycleDataWithLogs(profile, logs) : null;
       const phase: CyclePhase = (cycleData?.phase as CyclePhase) || 'follicular';
       const decode = generateDailyDecode({ symptoms, phase, hasPCOS: profile?.hasPCOS || false });
