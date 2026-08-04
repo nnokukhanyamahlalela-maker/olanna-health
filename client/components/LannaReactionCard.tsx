@@ -30,10 +30,23 @@ interface Props {
   /** Current cycle phase — drives Lanna's expression */
   phase?: Phase;
   onDismiss: () => void;
+  /**
+   * Height of the bottom tab bar in points.
+   * Pass this so the card is guaranteed to sit above the tab bar on all
+   * devices — including older iPhones (no home indicator) and Android devices
+   * with system gesture navigation, where the tab bar extends beyond the
+   * safe-area inset.
+   */
+  tabBarHeight?: number;
 }
 
-export function LannaReactionCard({ visible, message, phase = "follicular", onDismiss }: Props) {
+export function LannaReactionCard({ visible, message, phase = "follicular", onDismiss, tabBarHeight = 0 }: Props) {
   const insets = useSafeAreaInsets();
+  // Use whichever is larger: the tab bar height or the device's safe-area
+  // bottom inset. This covers devices where the tab bar extends beyond the
+  // safe-area (older iPhones, Android gesture-nav bars) AND notchless devices
+  // where the safe-area inset is zero.
+  const effectiveBottom = Math.max(tabBarHeight, insets.bottom);
   const translateY = useSharedValue(120);
   const opacity = useSharedValue(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,7 +100,7 @@ export function LannaReactionCard({ visible, message, phase = "follicular", onDi
 
   return (
     <Pressable
-      style={[styles.overlay, { paddingBottom: insets.bottom + 24 }]}
+      style={[styles.overlay, { paddingBottom: effectiveBottom + 24 }]}
       onPress={handleTap}
     >
       <Animated.View style={[styles.card, animatedStyle]}>

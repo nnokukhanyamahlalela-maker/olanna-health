@@ -575,6 +575,7 @@ export function LotusCycleScreen() {
         message={reactionMessage}
         phase={currentPhase}
         onDismiss={() => setReactionVisible(false)}
+        tabBarHeight={tabBarHeight}
       />
     </View>
   );
