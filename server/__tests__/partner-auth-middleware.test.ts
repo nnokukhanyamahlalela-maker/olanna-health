@@ -129,4 +129,33 @@ describe("partnerTokenAuth middleware", () => {
     expect(req.partnerLink).toEqual(fakeLink);
     expect(res.status).not.toHaveBeenCalled();
   });
+
+  it("returns 503 JSON when the database query exceeds the timeout", async () => {
+    // Return a promise that never resolves, simulating a stalled connection pool.
+    mockLimit.mockReturnValue(new Promise(() => {}));
+
+    vi.useFakeTimers();
+
+    const req = makeReq("a-valid-looking-partner-token-1234");
+    const res = makeRes();
+    const next = vi.fn();
+
+    const authPromise = partnerTokenAuth(
+      req as Request,
+      res as Response,
+      next as NextFunction
+    );
+
+    // Advance all pending timers (including the timeout in withTimeout).
+    await vi.runAllTimersAsync();
+    await authPromise;
+
+    vi.useRealTimers();
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: expect.any(String) })
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 });
