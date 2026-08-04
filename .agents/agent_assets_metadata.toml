@@ -234,3 +234,17 @@ id = "GjT3ecUKCpejVVriuAHiu"
 uri = "file://attached_assets/flower_luteal.png"
 type = "image"
 title = "Luteal — calm 🌸"
+
+[[outputs]]
+id = "XnLWY3t-FgvfpUWSOn6U2"
+uri = "file://olanna-health-preview.pdf"
+type = "pdf"
+title = "Olanna Health — App Preview"
+description = "7-section screen reference: splash, onboarding, all four phase home screens, check-in & quick log, health summary & calendar, brand swatches, and notifications."
+
+[[outputs]]
+id = "pe9sSuBnteyKf5_-OrqTS"
+uri = "file://olanna-health-live-preview.pdf"
+type = "pdf"
+title = "Olanna Health — Live Build Preview"
+description = "7 pages of live screenshots: splash, onboarding (welcome → value props → name → personalise → cycle setup), home/lotus wheel, calendar, health insights, learn, and back cover."
