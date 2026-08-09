@@ -275,9 +275,9 @@ export async function recordPatternNotification(
   await saveState(state);
 }
 
-/** Clear all nudge state (for testing / logout) */
+/** Clear all nudge state (for testing / logout / account reset) */
 export async function clearAllNudgeState(): Promise<void> {
-  await AsyncStorage.removeItem(STORAGE_KEY);
+  await AsyncStorage.multiRemove([STORAGE_KEY, THRESHOLD_CARD_KEY]);
 }
 
 // ─── Threshold card state ─────────────────────────────────────────────────────

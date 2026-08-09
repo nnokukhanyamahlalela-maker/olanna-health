@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { secureStorage } from "./secureStorage";
+import { clearAllNudgeState } from "./lannaNudgeStorage";
 import { getPhaseForDay } from "@/constants/phaseConfig";
 import { generateCyclePrediction } from "@/services/cycleCalculator";
 import { invalidateCycleProfileCache } from "@/services/cycleProfileService";
@@ -143,6 +144,7 @@ export const storage = {
   async clearAllData(): Promise<void> {
     await secureStorage.clearAllSecureData();
     await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
+    await clearAllNudgeState();
     invalidateCycleProfileCache();
   },
 
