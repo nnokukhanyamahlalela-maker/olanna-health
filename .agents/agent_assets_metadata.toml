@@ -248,3 +248,115 @@ uri = "file://olanna-health-live-preview.pdf"
 type = "pdf"
 title = "Olanna Health — Live Build Preview"
 description = "7 pages of live screenshots: splash, onboarding (welcome → value props → name → personalise → cycle setup), home/lotus wheel, calendar, health insights, learn, and back cover."
+
+[[outputs]]
+id = "NekGmC4LwLZAv4XfrNx_v"
+uri = "file://screenshots/01-splash.png"
+type = "image"
+title = "01 — Splash"
+description = "Branded splash screen"
+
+[[outputs]]
+id = "ew73DKhdBaBB763kbu3Va"
+uri = "file://screenshots/02-welcome.png"
+type = "image"
+title = "02 — Welcome"
+description = "Hi, I'm Lanna welcome screen"
+
+[[outputs]]
+id = "HcZtGVV8JK36RytcKcJOf"
+uri = "file://screenshots/03-valueprop-1.png"
+type = "image"
+title = "03 — Value Prop 1"
+description = "Meet your four phases"
+
+[[outputs]]
+id = "6UUhphnnopmXxOocFZVQb"
+uri = "file://screenshots/04-valueprop-2.png"
+type = "image"
+title = "04 — Value Prop 2"
+description = "Know yourself better"
+
+[[outputs]]
+id = "gDDxB0_-NusuoSAVzfHap"
+uri = "file://screenshots/05-valueprop-3.png"
+type = "image"
+title = "05 — Value Prop 3"
+description = "Built for PMOS support"
+
+[[outputs]]
+id = "hgN0rUEOre-1VIqLm9FkU"
+uri = "file://screenshots/06-name.png"
+type = "image"
+title = "06 — Name entry"
+description = "Onboarding name input"
+
+[[outputs]]
+id = "dZJa1KPWuU6aYQ7_Ka-3y"
+uri = "file://screenshots/07-personalise.png"
+type = "image"
+title = "07 — Personalise"
+description = "Conditions selection screen"
+
+[[outputs]]
+id = "kqMk265wUjg7rDQpn8UUp"
+uri = "file://screenshots/11-home-tab.png"
+type = "image"
+title = "08 — Cycle length"
+description = "Cycle length stepper"
+
+[[outputs]]
+id = "x4gN0pleeIacXux6HxXjb"
+uri = "file://screenshots/12-checkin-tab.png"
+type = "image"
+title = "09 — Last period date"
+description = "Last period date picker"
+
+[[outputs]]
+id = "dD15SdiH-NYxITwXc8lje"
+uri = "file://screenshots/17-quicklog-flow.png"
+type = "image"
+title = "10 — Home: Lotus Cycle wheel"
+description = "Main home screen with lotus wheel, phase info and quick log row"
+
+[[outputs]]
+id = "WJ0UAyLi8G2otmnlv2F5p"
+uri = "file://screenshots/18-checkin-full.png"
+type = "image"
+title = "11 — Calendar"
+description = "Phase-coded calendar with daily Lanna card"
+
+[[outputs]]
+id = "GBy7EtsTZrKIY5bt1XfeX"
+uri = "file://screenshots/14-learn-tab.png"
+type = "image"
+title = "12 — Health insights"
+description = "Health screen with patterns, sleep chart and mood graph"
+
+[[outputs]]
+id = "yyTJq0DI1zHGaPtw0GoLn"
+uri = "file://screenshots/15-profile-tab.png"
+type = "image"
+title = "13 — Learn"
+description = "Article library with topic filters"
+
+[[outputs]]
+id = "bgmMx48NLyB0e2zQcHu_J"
+uri = "file://screenshots/16-home-with-data.png"
+type = "image"
+title = "14 — Home (data loaded)"
+description = "Home screen after data loaded"
+
+[[outputs]]
+id = "OJLyfdp3iwJ2gLv0zTO9a"
+uri = "file://screenshots/19-profile-final.png"
+type = "image"
+title = "15 — Learn (final)"
+description = "Learn screen final state"
+
+[[outputs]]
+id = "JbgzdMVyQ2MN3PKC40Gdw"
+uri = "file://landing/index.html"
+type = "unspecified"
+title = "Olanna Health — Landing Page (index.html)"
+description = "Complete promotional landing page. Single HTML file with inline CSS and SVG. Includes blinking Lanna flower, hero gradient, features, 4 phases, phone mockups with live screenshots, and download CTA."

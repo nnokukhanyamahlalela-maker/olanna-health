@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olanna Health — Your cycle companion</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --coral:   #FF9A6B;
+      --hot:     #FF3F9E;
+      --pink:    #F7B0C8;
+      --lavender:#C9A0DC;
+      --rose:    #8B3A5A;
+      --dark:    #2D1B26;
+      --muted:   #7A5068;
+      --bg:      #FFF5F8;
+      --card:    #FFFFFF;
+      --grad: linear-gradient(135deg, #FF9A6B 0%, #FF3F9E 40%, #E06BD4 70%, #C9A0DC 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(255,245,248,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,63,158,0.1);
+    }
+    .nav-logo {
+      font-size: 1.3rem; font-weight: 800; letter-spacing: 0.06em;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-cta {
+      background: var(--grad); color: #fff; border: none; border-radius: 100px;
+      padding: 10px 26px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.02em;
+      box-shadow: 0 4px 16px rgba(255,63,158,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none; display: inline-block;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,63,158,0.45); }
+
+    /* ── HERO ─────────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: var(--grad);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    /* soft bokeh blobs */
+    .hero::before, .hero::after {
+      content: ""; position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .hero::before {
+      width: 600px; height: 600px;
+      background: rgba(255,255,255,0.12);
+      top: -200px; left: -200px;
+    }
+    .hero::after {
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.08);
+      bottom: -100px; right: -100px;
+    }
+
+    /* ── LANNA FLOWER SVG ─────────────────────────────────────────────────── */
+    .flower-wrap {
+      position: relative; display: inline-block;
+      margin-bottom: 36px;
+      filter: drop-shadow(0 20px 60px rgba(0,0,0,0.18));
+      cursor: pointer;
+    }
+    .flower-wrap:hover svg { animation-play-state: running; }
+
+    /* Blink: eyes squish to 0 height and bounce back */
+    @keyframes blink {
+      0%   { transform: scaleY(1); }
+      92%  { transform: scaleY(1); }
+      94%  { transform: scaleY(0.05); }
+      96%  { transform: scaleY(1.15); }
+      98%  { transform: scaleY(0.85); }
+      100% { transform: scaleY(1); }
+    }
+    /* Gentle float for the whole flower */
+    @keyframes float {
+      0%,100% { transform: translateY(0px); }
+      50%      { transform: translateY(-10px); }
+    }
+    .lanna-svg { animation: float 4s ease-in-out infinite; display: block; }
+    .lanna-eyes { transform-origin: 50% 50%; animation: blink 3.5s ease-in-out infinite; }
+
+    /* ── HERO TEXT ────────────────────────────────────────────────────────── */
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      max-width: 680px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.12);
+    }
+    .hero h1 em { font-style: normal; opacity: 0.85; }
+    .hero p {
+      margin-top: 20px;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,0.85);
+      max-width: 480px;
+      line-height: 1.6;
+    }
+    .hero-btns { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      background: #fff; color: var(--hot);
+      border: none; border-radius: 100px;
+      padding: 16px 36px; font-size: 1rem; font-weight: 800;
+      cursor: pointer; letter-spacing: 0.01em;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(0,0,0,0.2); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.18); color: #fff;
+      border: 2px solid rgba(255,255,255,0.5); border-radius: 100px;
+      padding: 16px 36px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.15s;
+      text-decoration: none; backdrop-filter: blur(8px);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.28); transform: translateY(-3px); }
+
+    /* scroll hint */
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,0.6); font-size: 0.78rem; letter-spacing: 0.1em;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .scroll-hint span { display: block; width: 1px; height: 36px;
+      background: rgba(255,255,255,0.4);
+      animation: scrollLine 1.8s ease-in-out infinite; }
+    @keyframes scrollLine { 0%,100% { opacity: 0; transform: scaleY(0) translateY(-50%); }
+                             50% { opacity: 1; transform: scaleY(1) translateY(0); } }
+
+    /* ── SECTIONS ─────────────────────────────────────────────────────────── */
+    section { padding: 96px 24px; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 800; letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--dark); max-width: 540px;
+    }
+    .section-sub {
+      margin-top: 14px; font-size: 1rem; color: var(--muted);
+      line-height: 1.7; max-width: 460px;
+    }
+    .centered { text-align: center; }
+    .centered .section-title, .centered .section-sub { margin-left: auto; margin-right: auto; }
+
+    /* ── FEATURES ─────────────────────────────────────────────────────────── */
+    #features { background: #fff; }
+    .features-grid {
+      display: grid; gap: 28px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      max-width: 1080px; margin: 56px auto 0;
+    }
+    .feat-card {
+      background: var(--bg); border-radius: 24px; padding: 36px 30px;
+      border: 1px solid rgba(255,63,158,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(255,63,158,0.12); }
+    .feat-icon {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: var(--grad); display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 22px;
+      box-shadow: 0 4px 16px rgba(255,63,158,0.3);
+    }
+    .feat-card h3 { font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+    .feat-card p { font-size: 0.92rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── PHASES ───────────────────────────────────────────────────────────── */
+    #phases { background: var(--bg); }
+    .phases-grid {
+      display: grid; gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      max-width: 1080px; margin: 56px auto 0;
+    }
+    .phase-card {
+      background: #fff; border-radius: 24px; padding: 32px 24px;
+      border: 1px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .phase-card::before {
+      content: ""; position: absolute; inset: 0;
+      border-radius: 24px; opacity: 0.06;
+    }
+    .phase-menstrual::before { background: #F06B9A; }
+    .phase-follicular::before { background: #D178B3; }
+    .phase-ovulatory::before { background: #FF9A6B; }
+    .phase-luteal::before { background: #C9A0DC; }
+    .phase-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
+    .phase-img {
+      width: 72px; height: 72px; border-radius: 50%;
+      object-fit: cover; margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .phase-tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px; margin-bottom: 10px;
+    }
+    .phase-menstrual .phase-tag  { background: #FDE8F0; color: #C4406E; }
+    .phase-follicular .phase-tag { background: #F5E5F5; color: #8B4A9A; }
+    .phase-ovulatory .phase-tag  { background: #FEF0E5; color: #C45A00; }
+    .phase-luteal .phase-tag     { background: #F0EAF8; color: #6B3D9A; }
+    .phase-card h3 { font-size: 1.05rem; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+    .phase-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── PHONE MOCKUPS ────────────────────────────────────────────────────── */
+    #preview { background: #fff; }
+    .phones-row {
+      display: flex; justify-content: center; align-items: flex-end;
+      gap: 20px; flex-wrap: wrap;
+      margin-top: 56px; padding-bottom: 20px;
+    }
+    .phone-wrap {
+      position: relative; flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+    .phone-wrap:hover { transform: translateY(-12px) scale(1.03); }
+    .phone-wrap.center { z-index: 2; }
+    .phone-frame {
+      width: 200px;
+      background: #1A1A2E;
+      border-radius: 30px;
+      padding: 10px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08) inset;
+      position: relative;
+    }
+    .phone-wrap.center .phone-frame { width: 230px; }
+    .phone-notch {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 6px; background: #333; border-radius: 3px; z-index: 3;
+    }
+    .phone-screen {
+      width: 100%; border-radius: 22px; overflow: hidden;
+      aspect-ratio: 9/19.5; background: #FFF5F8;
+      display: block; object-fit: cover; object-position: top;
+    }
+    .phone-label {
+      text-align: center; margin-top: 16px;
+      font-size: 0.78rem; color: var(--muted); font-weight: 600;
+    }
+
+    /* ── QUOTE ────────────────────────────────────────────────────────────── */
+    #quote {
+      background: var(--grad); text-align: center; padding: 80px 24px;
+    }
+    #quote blockquote {
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 800; color: #fff; line-height: 1.35;
+      max-width: 680px; margin: 0 auto;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.1);
+      letter-spacing: -0.01em;
+    }
+    #quote cite {
+      display: block; margin-top: 20px;
+      font-size: 0.88rem; color: rgba(255,255,255,0.65);
+      font-style: normal; letter-spacing: 0.08em;
+    }
+
+    /* ── DOWNLOAD ─────────────────────────────────────────────────────────── */
+    #download { background: var(--bg); text-align: center; }
+    .download-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+    .store-btn {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--dark); color: #fff;
+      border-radius: 14px; padding: 14px 24px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .store-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,0.2); }
+    .store-btn svg { width: 28px; height: 28px; fill: #fff; flex-shrink: 0; }
+    .store-btn-text { text-align: left; }
+    .store-btn-text .sup { font-size: 0.65rem; opacity: 0.7; display: block; }
+    .store-btn-text .main { font-size: 1rem; font-weight: 800; display: block; }
+
+    /* ── FOOTER ───────────────────────────────────────────────────────────── */
+    footer {
+      background: var(--dark); color: rgba(255,255,255,0.4);
+      text-align: center; padding: 32px 24px;
+      font-size: 0.8rem; letter-spacing: 0.04em;
+    }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    /* ── UTILS ────────────────────────────────────────────────────────────── */
+    .max-w { max-width: 1080px; margin-left: auto; margin-right: auto; }
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      section { padding: 64px 20px; }
+      .phone-wrap:not(.center) { display: none; }
+      .phone-wrap.center .phone-frame { width: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">OLANNA HEALTH</div>
+  <a href="#download" class="nav-cta">Download free</a>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+
+  <!-- Lanna mascot — blinking SVG flower -->
+  <div class="flower-wrap" title="Hi, I'm Lanna 👋">
+    <svg class="lanna-svg" width="180" height="180" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="petalGrad" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#CF5C8A"/>
+          <stop offset="100%" stop-color="#8B3A5A"/>
+        </radialGradient>
+        <radialGradient id="centerGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#F88FC0"/>
+          <stop offset="100%" stop-color="#E05490"/>
+        </radialGradient>
+        <radialGradient id="faceGrad" cx="40%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#FAD0E4"/>
+          <stop offset="100%" stop-color="#F0AECB"/>
+        </radialGradient>
+        <filter id="softShadow">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00000030"/>
+        </filter>
+      </defs>
+
+      <!-- 6 Petals rotated 60° each -->
+      <g filter="url(#softShadow)">
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(0  100 100)"/>
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(60  100 100)"/>
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(120 100 100)"/>
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(180 100 100)"/>
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(240 100 100)"/>
+        <ellipse cx="100" cy="100" rx="32" ry="52" fill="url(#petalGrad)" transform="rotate(300 100 100)"/>
+      </g>
+
+      <!-- Center ball -->
+      <circle cx="100" cy="100" r="46" fill="url(#centerGrad)" filter="url(#softShadow)"/>
+
+      <!-- Face oval -->
+      <ellipse cx="100" cy="104" rx="33" ry="29" fill="url(#faceGrad)"/>
+
+      <!-- EYES — blink animation applied here -->
+      <g class="lanna-eyes">
+        <!-- Left eye: squint / closed-looking curve -->
+        <path d="M 82 98 Q 88 93 94 98" stroke="#5A2040" stroke-width="3.5"
+              stroke-linecap="round" fill="none"/>
+        <!-- Right eye -->
+        <path d="M 106 98 Q 112 93 118 98" stroke="#5A2040" stroke-width="3.5"
+              stroke-linecap="round" fill="none"/>
+      </g>
+
+      <!-- Blush dots -->
+      <ellipse cx="78"  cy="107" rx="6"  ry="4"  fill="#F06B9A" opacity="0.4"/>
+      <ellipse cx="122" cy="107" rx="6"  ry="4"  fill="#F06B9A" opacity="0.4"/>
+
+      <!-- Tiny smile -->
+      <path d="M 93 112 Q 100 118 107 112" stroke="#8B3A5A" stroke-width="2.5"
+            stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
+
+  <h1>Your cycle,<br/><em>finally explained.</em></h1>
+  <p>Lanna tracks your phases, spots your patterns, and shows up for every day of your cycle — no guilt, no noise, just you.</p>
+
+  <div class="hero-btns">
+    <a href="#download" class="btn-primary">Download free</a>
+    <a href="#preview"  class="btn-secondary">See the app →</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span></span>
+    SCROLL
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="max-w">
+    <div class="centered">
+      <p class="section-label">Why Olanna</p>
+      <h2 class="section-title">Built different, for you</h2>
+      <p class="section-sub">Most period apps track. Lanna understands — and actually tells you something useful.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🌸</div>
+        <h3>Phase-aware, every day</h3>
+        <p>Each morning Lanna greets you with your current phase, what to expect from your body, and personalised guidance — not a generic reminder.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <h3>One-tap logging</h3>
+        <p>Log flow, mood, pain, energy, and sleep in under 20 seconds. No long forms. No judgement. Lanna does the pattern-matching for you.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <h3>Patterns that matter</h3>
+        <p>When fatigue and cravings show up together three cycles in a row, Lanna flags it — the kind of signal worth mentioning at your next check-up.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <h3>Private by design</h3>
+        <p>AI summaries stay on your device until you share them. Toggle off any category. Your data is yours — Lanna never sells it.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💊</div>
+        <h3>PCOS &amp; Endo aware</h3>
+        <p>Irregular cycles, missed periods, extra pain — Lanna adjusts her tracking and guidance to match what your body actually does.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Health summary for your GP</h3>
+        <p>AI-generated, shareable. One tap exports a structured health summary your doctor can actually use — ready for every appointment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PHASES ─────────────────────────────────────────────────────────────────── -->
+<section id="phases">
+  <div class="max-w">
+    <div class="centered">
+      <p class="section-label">Your four phases</p>
+      <h2 class="section-title">Every phase has its own rhythm</h2>
+      <p class="section-sub">Lanna gives each one a name, a mood, and a companion — so nothing catches you off guard.</p>
+    </div>
+
+    <div class="phases-grid">
+      <div class="phase-card phase-menstrual">
+        <img class="phase-img" src="../client/assets/images/lotus-menstrual.png" alt="Menstrual phase icon"/>
+        <div class="phase-tag">Menstrual</div>
+        <h3>Rest &amp; release</h3>
+        <p>Rest mode is activated, and that is valid. Your body is doing important work right now — slow down where you can.</p>
+      </div>
+      <div class="phase-card phase-follicular">
+        <img class="phase-img" src="../client/assets/images/lotus-follicular.png" alt="Follicular phase icon"/>
+        <div class="phase-tag">Follicular</div>
+        <h3>Rise &amp; explore</h3>
+        <p>Energy is climbing. This is your window for new ideas, starting projects, and saying yes to things that excite you.</p>
+      </div>
+      <div class="phase-card phase-ovulatory">
+        <img class="phase-img" src="../client/assets/images/lotus-ovulation.png" alt="Ovulatory phase icon"/>
+        <div class="phase-tag">Ovulatory</div>
+        <h3>Peak &amp; connect</h3>
+        <p>You are at your most magnetic. Communication feels effortless. Great time for important conversations and collaboration.</p>
+      </div>
+      <div class="phase-card phase-luteal">
+        <img class="phase-img" src="../client/assets/images/lotus-luteal.png" alt="Luteal phase icon"/>
+        <div class="phase-tag">Luteal</div>
+        <h3>Wind down &amp; reflect</h3>
+        <p>Energy softens. Nesting instincts kick in. This phase wants cosy tasks, clear boundaries, and a little extra self-care.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── APP PREVIEW ────────────────────────────────────────────────────────────── -->
+<section id="preview">
+  <div class="max-w">
+    <div class="centered">
+      <p class="section-label">The app</p>
+      <h2 class="section-title">See Lanna in action</h2>
+      <p class="section-sub">Beautiful, calm, and built to fit into your morning — not interrupt it.</p>
+    </div>
+
+    <div class="phones-row">
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <img class="phone-screen" src="../screenshots/18-checkin-full.png" alt="Calendar screen"/>
+        </div>
+        <p class="phone-label">Phase calendar</p>
+      </div>
+
+      <div class="phone-wrap center">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <img class="phone-screen" src="../screenshots/17-quicklog-flow.png" alt="Home — Lotus cycle wheel"/>
+        </div>
+        <p class="phone-label">Lotus cycle home</p>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <img class="phone-screen" src="../screenshots/14-learn-tab.png" alt="Health insights"/>
+        </div>
+        <p class="phone-label">Health insights</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── QUOTE ──────────────────────────────────────────────────────────────────── -->
+<section id="quote">
+  <blockquote>
+    "It's your cycle.<br/>We just help you understand it."
+    <cite>— Lanna, your companion</cite>
+  </blockquote>
+</section>
+
+<!-- ── DOWNLOAD ───────────────────────────────────────────────────────────────── -->
+<section id="download">
+  <div class="max-w centered">
+    <p class="section-label">Download</p>
+    <h2 class="section-title">Free on iOS &amp; Android</h2>
+    <p class="section-sub">No subscription needed to get started. Lanna walks alongside you from day one.</p>
+
+    <div class="download-btns">
+      <!-- App Store -->
+      <a href="#" class="store-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        <div class="store-btn-text">
+          <span class="sup">Download on the</span>
+          <span class="main">App Store</span>
+        </div>
+      </a>
+
+      <!-- Google Play -->
+      <a href="#" class="store-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.36.6 1.24 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8zM5 6.49v11.02L15.03 12 5 6.49z"/>
+        </svg>
+        <div class="store-btn-text">
+          <span class="sup">Get it on</span>
+          <span class="main">Google Play</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────────── -->
+<footer>
+  <p>© 2026 Olanna Health &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a> &nbsp;·&nbsp; <a href="#">Contact</a></p>
+</footer>
+
+</body>
+</html>
