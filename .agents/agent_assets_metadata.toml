@@ -360,3 +360,31 @@ uri = "file://landing/index.html"
 type = "unspecified"
 title = "Olanna Health — Landing Page (index.html)"
 description = "Complete promotional landing page. Single HTML file with inline CSS and SVG. Includes blinking Lanna flower, hero gradient, features, 4 phases, phone mockups with live screenshots, and download CTA."
+
+[[outputs]]
+id = "Ts4AuwhWxRx6oBQVonW_x"
+uri = "file://attached_assets/mascot/lanna_menstrual.svg"
+type = "image"
+title = "Menstrual — Bud"
+description = "Small muted-lavender petals · sleepy closed-line eyes · flat mouth"
+
+[[outputs]]
+id = "ArWlPgXf5mQCrzgtRTg9E"
+uri = "file://attached_assets/mascot/lanna_follicular.svg"
+type = "image"
+title = "Follicular — Opening"
+description = "Medium soft-coral petals · curious offset eyes · gentle upturned mouth"
+
+[[outputs]]
+id = "pueXnX51g5c7iQiVYdMHf"
+uri = "file://attached_assets/mascot/lanna_ovulation.svg"
+type = "image"
+title = "Ovulatory — Full Bloom"
+description = "Largest saturated-coral petals · bright eyes with glint · wide smile"
+
+[[outputs]]
+id = "9sE2eNvwRijDaPjj92zE1"
+uri = "file://attached_assets/mascot/lanna_luteal.svg"
+type = "image"
+title = "Luteal — Settling"
+description = "Soft-teal petals · 72% opacity · 16° rotation droop · calm small eyes"
