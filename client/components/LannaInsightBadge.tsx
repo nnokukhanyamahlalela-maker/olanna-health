@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     lineHeight: 18,
   },
   cta: {

@@ -19,8 +19,8 @@ import { useFocusEffect } from "@react-navigation/native";
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_TOTAL_HEIGHT = 88;
 
-const INACTIVE_COLOR = "#B4ACA4";
-const INACTIVE_LABEL = "#B4ACA4";
+const INACTIVE_COLOR = "#9490C8";
+const INACTIVE_LABEL = "#9490C8";
 
 const PHASE_KEY_MAP: Record<Phase, keyof typeof phaseTokens> = {
   menstrual: "menstrual",
@@ -345,9 +345,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FAF8F3",
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#EDD8E7",
+    borderTopColor: "#D8D6F0",
   },
   tabsRow: {
     flex: 1,

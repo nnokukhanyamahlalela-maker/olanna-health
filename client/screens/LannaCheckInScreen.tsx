@@ -53,10 +53,10 @@ import type { Phase } from "@/constants/phaseConfig";
 type Props = NativeStackScreenProps<RootStackParamList, "LannaCheckIn">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const BG = "#FDF5F8";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_MID = "#5A4252";
-const TEXT_SOFT = "#8A6F80";
+const BG = "#EEEDFE";
+const TEXT_DARK = "#26215C";
+const TEXT_MID = "#4A4580";
+const TEXT_SOFT = "#6B6591";
 
 // ─── Tier visual config ────────────────────────────────────────────────────────
 
@@ -66,9 +66,9 @@ const TIER_CONFIG: Record<
 > = {
   1: {
     mascotPhase: "follicular",
-    cardBg: "#F5EDF3",
-    accentColor: "#D178B3",
-    ctaBg: "#D178B3",
+    cardBg: "#FAF8F3",
+    accentColor: "#E8A070",
+    ctaBg: "#E8A070",
   },
   2: {
     mascotPhase: "luteal",
@@ -196,7 +196,7 @@ export default function LannaCheckInScreen({ route }: Props) {
             Taking that step matters. I'll check back in a few months to see how you're going.
           </Text>
           <Pressable
-            style={[styles.primaryBtn, { backgroundColor: "#D178B3" }]}
+            style={[styles.primaryBtn, { backgroundColor: "#D85A30" }]}
             onPress={() => navigation.goBack()}
           >
             <Text style={styles.primaryBtnText}>Back to home</Text>

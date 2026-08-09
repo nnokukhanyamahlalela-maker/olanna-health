@@ -39,11 +39,11 @@ import {
 import { getApiUrl } from "@/lib/query-client";
 
 // ─── Colours ─────────────────────────────────────────────────────────────────
-const PINK = "#F06B9A";
-const BG_SHEET = "#FFFFFF";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_MID = "#5A4252";
-const TEXT_SOFT = "#8A6F80";
+const PINK = "#D85A30";
+const BG_SHEET = "#FAF8F3";
+const TEXT_DARK = "#26215C";
+const TEXT_MID = "#4A4580";
+const TEXT_SOFT = "#6B6591";
 const DIVIDER = "#F0E4EC";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────

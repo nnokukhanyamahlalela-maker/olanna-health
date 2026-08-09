@@ -201,7 +201,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="clipboard"
             label="My Health Summary"
-            color="#F06B9A"
+            color="#D85A30"
             onPress={() => setSummaryVisible(true)}
             isLast
             theme={theme}

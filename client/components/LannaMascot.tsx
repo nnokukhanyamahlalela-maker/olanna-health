@@ -1,349 +1,212 @@
 /**
- * LannaMascot — single parametric SVG component for all phase mascots.
+ * LannaMascot — Gen Z rebrand
  *
- * Construction (per spec §1):
- * - Back ring: 5 larger petal circles (back color) at 0°,72°,144°,216°,288°
- * - Front ring: 5 smaller petal circles (front color) offset 36°
- * - Face centered: eyes, brow, blush, mouth encode phase expression
+ * Four phase states, each changing petal colour, size, and angle:
+ *   Menstrual  = Bud       — small muted-lavender petals, resting face (closed eyes, flat mouth)
+ *   Follicular = Opening   — medium soft-coral petals, alert face (gentle smile)
+ *   Ovulatory  = Full bloom — largest saturated-coral petals, bright face (full smile + glint)
+ *   Luteal     = Settling  — medium soft-teal petals, slight rotation for droop, calm face
  *
- * Phase expressions:
- *   menstrual  — sleepy: closed downward-curved eyes, flat neutral mouth
- *   follicular — curious: mismatched eyebrows, one eye glancing aside, small half-smile
- *   ovulation  — bright: sparkle eyes, lifted brows, open grin
- *   luteal     — calm: gentle downward-curved eyes, small closed flat mouth
+ * Face ink is always deep plum #26215C so Lanna is recognisable across all phases.
+ * Only petal colour, petal size, and rotation change.
  */
 
 import React from "react";
-import Svg, {
-  Circle,
-  Ellipse,
-  Path,
-  G,
-  Line,
-} from "react-native-svg";
+import Svg, { Circle, Path, G, Ellipse } from "react-native-svg";
 import { Phase } from "@/constants/phaseConfig";
-import { phase as phaseTokens } from "@/constants/colors";
 
-export type MascotExpression =
-  | "sleepy"
-  | "curious"
-  | "bright"
-  | "calm"
-  | "wince";
+export type MascotExpression = "sleepy" | "curious" | "bright" | "calm" | "wince";
 
-type PhaseKey = "menstrual" | "follicular" | "ovulatory" | "luteal";
+const INK = "#26215C"; // deep plum — always used for eyes and mouth
 
-const PHASE_KEY_MAP: Record<Phase, PhaseKey> = {
-  menstrual: "menstrual",
-  follicular: "follicular",
-  ovulation: "ovulatory",
-  luteal: "luteal",
-  late: "luteal",
+interface PhaseMascotConfig {
+  backColor:       string;
+  frontColor:      string;
+  backRingRatio:   number; // × size
+  backPetalRatio:  number;
+  frontRingRatio:  number;
+  frontPetalRatio: number;
+  petalOpacity:    number;
+  rotateOffset:    number; // extra degrees — creates droop for luteal
+  expression:      MascotExpression;
+  skinColor:       string;
+}
+
+const PHASE_CONFIG: Record<string, PhaseMascotConfig> = {
+  menstrual: {
+    // Bud: small, closed, muted lavender
+    backColor:       "#9490C8",
+    frontColor:      "#B8B4E8",
+    backRingRatio:   0.27,
+    backPetalRatio:  0.145,
+    frontRingRatio:  0.20,
+    frontPetalRatio: 0.105,
+    petalOpacity:    1,
+    rotateOffset:    0,
+    expression:      "sleepy",
+    skinColor:       "#E8E6F8",
+  },
+  follicular: {
+    // Opening: medium, soft coral
+    backColor:       "#C07848",
+    frontColor:      "#E8A070",
+    backRingRatio:   0.34,
+    backPetalRatio:  0.185,
+    frontRingRatio:  0.26,
+    frontPetalRatio: 0.135,
+    petalOpacity:    1,
+    rotateOffset:    0,
+    expression:      "curious",
+    skinColor:       "#FAE8DC",
+  },
+  ovulation: {
+    // Full bloom: largest, saturated coral — most vibrant
+    backColor:       "#B04020",
+    frontColor:      "#D85A30",
+    backRingRatio:   0.41,
+    backPetalRatio:  0.225,
+    frontRingRatio:  0.31,
+    frontPetalRatio: 0.165,
+    petalOpacity:    1,
+    rotateOffset:    0,
+    expression:      "bright",
+    skinColor:       "#FAE0D0",
+  },
+  luteal: {
+    // Settling: medium, soft teal, drooped 16° rotation, lower opacity
+    backColor:       "#4A9080",
+    frontColor:      "#7ABFB0",
+    backRingRatio:   0.32,
+    backPetalRatio:  0.170,
+    frontRingRatio:  0.245,
+    frontPetalRatio: 0.122,
+    petalOpacity:    0.72,
+    rotateOffset:    16,
+    expression:      "calm",
+    skinColor:       "#D8F0EC",
+  },
 };
 
-const PHASE_EXPRESSION_MAP: Record<Phase, MascotExpression> = {
-  menstrual: "sleepy",
-  follicular: "curious",
-  ovulation: "bright",
-  luteal: "calm",
-  late: "calm",
-};
+// ─── Petal ring renderer ──────────────────────────────────────────────────────
 
-function petals(
-  cx: number,
-  cy: number,
-  ringR: number,
-  petalR: number,
-  fill: string,
-  offsetDeg: number,
-  opacity = 1
-) {
-  const els: React.ReactNode[] = [];
+function PetalRing({
+  cx, cy, ringR, petalR, fill, baseOffsetDeg, extraRotation, opacity,
+}: {
+  cx: number; cy: number; ringR: number; petalR: number;
+  fill: string; baseOffsetDeg: number; extraRotation: number; opacity: number;
+}) {
+  const petals: React.ReactNode[] = [];
   for (let i = 0; i < 5; i++) {
-    const angleDeg = offsetDeg + i * 72;
+    const angleDeg = baseOffsetDeg + extraRotation + i * 72;
     const rad = (angleDeg * Math.PI) / 180;
     const px = cx + ringR * Math.cos(rad);
     const py = cy + ringR * Math.sin(rad);
-    els.push(
-      <Circle
-        key={i}
-        cx={px}
-        cy={py}
-        r={petalR}
-        fill={fill}
-        opacity={opacity}
-      />
+    petals.push(
+      <Circle key={i} cx={px} cy={py} r={petalR} fill={fill} opacity={opacity} />
     );
   }
-  return els;
+  return <G>{petals}</G>;
 }
 
+// ─── Face expressions ─────────────────────────────────────────────────────────
+
 function FaceExpression({
-  cx,
-  cy,
-  size,
-  expression,
-  skinColor,
-  inkColor,
+  cx, cy, size, expression, skinColor,
 }: {
-  cx: number;
-  cy: number;
-  size: number;
-  expression: MascotExpression;
-  skinColor: string;
-  inkColor: string;
+  cx: number; cy: number; size: number;
+  expression: MascotExpression; skinColor: string;
 }) {
-  const s = size;
-  // Face circle
-  const faceR = s * 0.22;
-  // Eye positions
-  const eyeOffX = s * 0.065;
-  const eyeOffY = s * 0.02;
-  const eyeW = s * 0.055;
-  const eyeH = s * 0.038;
-  const blushR = s * 0.048;
-  const blushOffX = s * 0.11;
-  const blushOffY = s * 0.065;
+  const faceR    = size * 0.21;
+  const eyeOffX  = size * 0.062;
+  const eyeOffY  = size * 0.015;
+  const eyeR     = size * 0.028;
+  const lineW    = size * 0.048; // half-width of closed-eye line
+  const lx       = cx - eyeOffX;
+  const rx       = cx + eyeOffX;
+  const ey       = cy - eyeOffY;
+  const mouthY   = cy + size * 0.075;
+  const sw       = size * 0.015;  // stroke width
 
-  const lx = cx - eyeOffX;
-  const rx = cx + eyeOffX;
-  const ey = cy - eyeOffY;
-
-  let leftEye: React.ReactNode;
+  let leftEye:  React.ReactNode;
   let rightEye: React.ReactNode;
-  let mouth: React.ReactNode;
-  let brows: React.ReactNode;
+  let mouth:    React.ReactNode;
 
   switch (expression) {
+
+    // ── Menstrual: sleepy ─────────────────────────────────────────────────────
     case "sleepy": {
-      // Closed downward-curved eyes (half-ellipse arcs, curved down)
+      // Two horizontal line segments (eyes closed)
       leftEye = (
         <Path
-          d={`M ${lx - eyeW} ${ey} Q ${lx} ${ey + eyeH * 1.4} ${lx + eyeW} ${ey}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.018}
-          fill="none"
-          strokeLinecap="round"
+          d={`M ${lx - lineW} ${ey} L ${lx + lineW} ${ey}`}
+          stroke={INK} strokeWidth={sw * 1.1} strokeLinecap="round" fill="none"
         />
       );
       rightEye = (
         <Path
-          d={`M ${rx - eyeW} ${ey} Q ${rx} ${ey + eyeH * 1.4} ${rx + eyeW} ${ey}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.018}
-          fill="none"
-          strokeLinecap="round"
+          d={`M ${rx - lineW} ${ey} L ${rx + lineW} ${ey}`}
+          stroke={INK} strokeWidth={sw * 1.1} strokeLinecap="round" fill="none"
         />
       );
       // Flat neutral mouth
       mouth = (
-        <Line
-          x1={cx - s * 0.055}
-          y1={cy + s * 0.075}
-          x2={cx + s * 0.055}
-          y2={cy + s * 0.075}
-          stroke={inkColor}
-          strokeWidth={s * 0.016}
-          strokeLinecap="round"
+        <Path
+          d={`M ${cx - size * 0.042} ${mouthY} L ${cx + size * 0.042} ${mouthY}`}
+          stroke={INK} strokeWidth={sw} strokeLinecap="round" fill="none"
         />
       );
-      // No prominent brows
-      brows = null;
       break;
     }
+
+    // ── Follicular: curious ───────────────────────────────────────────────────
     case "curious": {
-      // Eyes glancing to one side (right iris offset leftward)
-      const irisR = eyeH * 0.6;
-      leftEye = (
-        <G>
-          <Ellipse cx={lx} cy={ey} rx={eyeW} ry={eyeH} fill={inkColor} />
-          <Circle cx={lx - irisR * 0.7} cy={ey - irisR * 0.4} r={irisR * 0.55} fill="white" />
-        </G>
-      );
-      rightEye = (
-        <G>
-          <Ellipse cx={rx} cy={ey} rx={eyeW} ry={eyeH} fill={inkColor} />
-          <Circle cx={rx - irisR * 0.7} cy={ey - irisR * 0.4} r={irisR * 0.55} fill="white" />
-        </G>
-      );
-      // Small closed-lip half-smile
+      // One eye slightly higher (raised brow feel), gentle upturn mouth
+      leftEye  = <Circle cx={lx} cy={ey - size * 0.008} r={eyeR} fill={INK} />;
+      rightEye = <Circle cx={rx} cy={ey}                 r={eyeR * 0.85} fill={INK} />;
       mouth = (
         <Path
-          d={`M ${cx - s * 0.05} ${cy + s * 0.068} Q ${cx} ${cy + s * 0.1} ${cx + s * 0.05} ${cy + s * 0.068}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.016}
-          fill="none"
-          strokeLinecap="round"
+          d={`M ${cx - size * 0.044} ${mouthY} Q ${cx} ${mouthY + size * 0.026} ${cx + size * 0.044} ${mouthY}`}
+          stroke={INK} strokeWidth={sw} strokeLinecap="round" fill="none"
         />
-      );
-      // Mismatched brows — left higher
-      brows = (
-        <G>
-          <Path
-            d={`M ${lx - eyeW * 0.9} ${ey - eyeH * 2.0} Q ${lx} ${ey - eyeH * 2.7} ${lx + eyeW * 0.9} ${ey - eyeH * 1.8}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.015}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Path
-            d={`M ${rx - eyeW * 0.9} ${ey - eyeH * 1.5} Q ${rx} ${ey - eyeH * 2.0} ${rx + eyeW * 0.9} ${ey - eyeH * 1.5}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.015}
-            fill="none"
-            strokeLinecap="round"
-          />
-        </G>
       );
       break;
     }
+
+    // ── Ovulatory: bright ─────────────────────────────────────────────────────
     case "bright": {
-      const irisR = eyeH * 0.62;
+      // Larger dots with a white glint, wide confident smile
       leftEye = (
         <G>
-          <Ellipse cx={lx} cy={ey} rx={eyeW} ry={eyeH} fill={inkColor} />
-          <Circle cx={lx - irisR * 0.45} cy={ey - irisR * 0.55} r={irisR * 0.5} fill="white" />
-          <Circle cx={lx + irisR * 0.35} cy={ey - irisR * 0.2} r={irisR * 0.28} fill="white" opacity={0.75} />
+          <Circle cx={lx} cy={ey} r={eyeR * 1.18} fill={INK} />
+          <Circle cx={lx + eyeR * 0.44} cy={ey - eyeR * 0.44} r={eyeR * 0.36} fill={skinColor} />
         </G>
       );
       rightEye = (
         <G>
-          <Ellipse cx={rx} cy={ey} rx={eyeW} ry={eyeH} fill={inkColor} />
-          <Circle cx={rx - irisR * 0.45} cy={ey - irisR * 0.55} r={irisR * 0.5} fill="white" />
-          <Circle cx={rx + irisR * 0.35} cy={ey - irisR * 0.2} r={irisR * 0.28} fill="white" opacity={0.75} />
+          <Circle cx={rx} cy={ey} r={eyeR * 1.18} fill={INK} />
+          <Circle cx={rx + eyeR * 0.44} cy={ey - eyeR * 0.44} r={eyeR * 0.36} fill={skinColor} />
         </G>
       );
-      // Open grin
       mouth = (
         <Path
-          d={`M ${cx - s * 0.07} ${cy + s * 0.058} Q ${cx} ${cy + s * 0.115} ${cx + s * 0.07} ${cy + s * 0.058}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.016}
-          fill={inkColor}
-          opacity={0.15}
-          strokeLinecap="round"
+          d={`M ${cx - size * 0.056} ${mouthY - size * 0.006} Q ${cx} ${mouthY + size * 0.044} ${cx + size * 0.056} ${mouthY - size * 0.006}`}
+          stroke={INK} strokeWidth={sw * 1.2} strokeLinecap="round" fill="none"
         />
-      );
-      // Lifted brows
-      brows = (
-        <G>
-          <Path
-            d={`M ${lx - eyeW * 0.9} ${ey - eyeH * 2.2} Q ${lx} ${ey - eyeH * 3.0} ${lx + eyeW * 0.9} ${ey - eyeH * 2.2}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.015}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Path
-            d={`M ${rx - eyeW * 0.9} ${ey - eyeH * 2.2} Q ${rx} ${ey - eyeH * 3.0} ${rx + eyeW * 0.9} ${ey - eyeH * 2.2}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.015}
-            fill="none"
-            strokeLinecap="round"
-          />
-        </G>
       );
       break;
     }
+
+    // ── Luteal: calm (default) ────────────────────────────────────────────────
+    default:
     case "calm": {
-      // Gentle downward-curved eyes (softer arc than sleepy)
-      leftEye = (
-        <Path
-          d={`M ${lx - eyeW * 0.9} ${ey - eyeH * 0.2} Q ${lx} ${ey + eyeH * 1.1} ${lx + eyeW * 0.9} ${ey - eyeH * 0.2}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.018}
-          fill="none"
-          strokeLinecap="round"
-        />
-      );
-      rightEye = (
-        <Path
-          d={`M ${rx - eyeW * 0.9} ${ey - eyeH * 0.2} Q ${rx} ${ey + eyeH * 1.1} ${rx + eyeW * 0.9} ${ey - eyeH * 0.2}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.018}
-          fill="none"
-          strokeLinecap="round"
-        />
-      );
-      // Small closed flat mouth
-      mouth = (
-        <Line
-          x1={cx - s * 0.045}
-          y1={cy + s * 0.075}
-          x2={cx + s * 0.045}
-          y2={cy + s * 0.075}
-          stroke={inkColor}
-          strokeWidth={s * 0.015}
-          strokeLinecap="round"
-        />
-      );
-      brows = null;
-      break;
-    }
-    case "wince": {
-      // Scrunched shut eyes
-      leftEye = (
-        <G>
-          <Path
-            d={`M ${lx - eyeW} ${ey} L ${lx + eyeW} ${ey + eyeH}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.02}
-            strokeLinecap="round"
-          />
-          <Path
-            d={`M ${lx - eyeW} ${ey + eyeH} L ${lx + eyeW} ${ey}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.016}
-            strokeLinecap="round"
-            opacity={0.5}
-          />
-        </G>
-      );
-      rightEye = (
-        <G>
-          <Path
-            d={`M ${rx - eyeW} ${ey} L ${rx + eyeW} ${ey + eyeH}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.02}
-            strokeLinecap="round"
-          />
-          <Path
-            d={`M ${rx - eyeW} ${ey + eyeH} L ${rx + eyeW} ${ey}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.016}
-            strokeLinecap="round"
-            opacity={0.5}
-          />
-        </G>
-      );
-      // Downturned open mouth
+      // Smaller dots, barely-there upturn
+      leftEye  = <Circle cx={lx} cy={ey} r={eyeR * 0.84} fill={INK} />;
+      rightEye = <Circle cx={rx} cy={ey} r={eyeR * 0.84} fill={INK} />;
       mouth = (
         <Path
-          d={`M ${cx - s * 0.055} ${cy + s * 0.088} Q ${cx} ${cy + s * 0.06} ${cx + s * 0.055} ${cy + s * 0.088}`}
-          stroke={inkColor}
-          strokeWidth={s * 0.016}
-          fill="none"
-          strokeLinecap="round"
+          d={`M ${cx - size * 0.036} ${mouthY} Q ${cx} ${mouthY + size * 0.016} ${cx + size * 0.036} ${mouthY}`}
+          stroke={INK} strokeWidth={sw * 0.9} strokeLinecap="round" fill="none"
         />
-      );
-      // Furrowed brow
-      brows = (
-        <G>
-          <Path
-            d={`M ${lx - eyeW * 0.9} ${ey - eyeH * 1.8} Q ${lx} ${ey - eyeH * 1.3} ${lx + eyeW * 0.9} ${ey - eyeH * 1.8}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.018}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Path
-            d={`M ${rx - eyeW * 0.9} ${ey - eyeH * 1.8} Q ${rx} ${ey - eyeH * 1.3} ${rx + eyeW * 0.9} ${ey - eyeH * 1.8}`}
-            stroke={inkColor}
-            strokeWidth={s * 0.018}
-            fill="none"
-            strokeLinecap="round"
-          />
-        </G>
       );
       break;
     }
@@ -351,26 +214,11 @@ function FaceExpression({
 
   return (
     <G>
-      {/* Face disc */}
+      {/* Face circle */}
       <Circle cx={cx} cy={cy} r={faceR} fill={skinColor} />
-      {/* Blush */}
-      <Ellipse
-        cx={cx - blushOffX}
-        cy={cy + blushOffY}
-        rx={blushR}
-        ry={blushR * 0.65}
-        fill="#F06B9A"
-        opacity={0.28}
-      />
-      <Ellipse
-        cx={cx + blushOffX}
-        cy={cy + blushOffY}
-        rx={blushR}
-        ry={blushR * 0.65}
-        fill="#F06B9A"
-        opacity={0.28}
-      />
-      {brows}
+      {/* Subtle blush */}
+      <Ellipse cx={cx - size * 0.105} cy={cy + size * 0.055} rx={size * 0.036} ry={size * 0.020} fill={INK} opacity={0.07} />
+      <Ellipse cx={cx + size * 0.105} cy={cy + size * 0.055} rx={size * 0.036} ry={size * 0.020} fill={INK} opacity={0.07} />
       {leftEye}
       {rightEye}
       {mouth}
@@ -378,41 +226,50 @@ function FaceExpression({
   );
 }
 
+// ─── Public component ─────────────────────────────────────────────────────────
+
 interface LannaMascotProps {
-  phase: Phase;
-  size?: number;
-  expression?: MascotExpression; // override if needed
+  phase:       Phase;
+  size?:       number;
+  /** Kept for API compatibility — phase drives the expression in the new design. */
+  expression?: MascotExpression;
 }
 
-export function LannaMascot({ phase, size = 120, expression }: LannaMascotProps) {
-  const pk = PHASE_KEY_MAP[phase];
-  const tokens = phaseTokens[pk];
-  const expr = expression ?? PHASE_EXPRESSION_MAP[phase];
-
-  const s = size;
-  const cx = s / 2;
-  const cy = s / 2;
-
-  // Ring radii (relative to size)
-  const backRingR = s * 0.3;
-  const backPetalR = s * 0.22;
-  const frontRingR = s * 0.27;
-  const frontPetalR = s * 0.185;
+export function LannaMascot({ phase, size = 100 }: LannaMascotProps) {
+  // Map "late" and "ovulation" to config keys
+  const key  = phase === "late" ? "luteal" : phase === "ovulation" ? "ovulation" : phase;
+  const cfg  = PHASE_CONFIG[key] ?? PHASE_CONFIG.menstrual;
+  const cx   = size / 2;
+  const cy   = size / 2;
 
   return (
-    <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      {/* Back petal ring */}
-      {petals(cx, cy, backRingR, backPetalR, tokens.back, -90)}
-      {/* Front petal ring (offset 36°) */}
-      {petals(cx, cy, frontRingR, frontPetalR, tokens.front, -90 + 36)}
-      {/* Face */}
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {/* Back ring (deeper colour, larger petals) */}
+      <PetalRing
+        cx={cx} cy={cy}
+        ringR={cfg.backRingRatio * size}
+        petalR={cfg.backPetalRatio * size}
+        fill={cfg.backColor}
+        baseOffsetDeg={-90}
+        extraRotation={cfg.rotateOffset}
+        opacity={cfg.petalOpacity}
+      />
+      {/* Front ring (lighter colour, smaller petals, offset 36°) */}
+      <PetalRing
+        cx={cx} cy={cy}
+        ringR={cfg.frontRingRatio * size}
+        petalR={cfg.frontPetalRatio * size}
+        fill={cfg.frontColor}
+        baseOffsetDeg={-90 + 36}
+        extraRotation={cfg.rotateOffset}
+        opacity={cfg.petalOpacity}
+      />
+      {/* Face — ink always deep plum */}
       <FaceExpression
-        cx={cx}
-        cy={cy}
-        size={s}
-        expression={expr}
-        skinColor={tokens.skin}
-        inkColor={tokens.ink}
+        cx={cx} cy={cy}
+        size={size}
+        expression={cfg.expression}
+        skinColor={cfg.skinColor}
       />
     </Svg>
   );

@@ -39,11 +39,11 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ViewMode = 'symptoms' | 'bodymap';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
-const PINK = '#F06B9A';
-const BG = '#FDF5F8';
-const TEXT_DARK = '#2D1F2B';
-const TEXT_MID = '#5A4252';
-const TEXT_SOFT = '#8A6F80';
+const PINK = '#D85A30';   // coral CTA
+const BG = '#EEEDFE';     // lavender base
+const TEXT_DARK = '#26215C';
+const TEXT_MID = '#4A4580';
+const TEXT_SOFT = '#6B6591';
 
 
 // ─── SymptomCard ──────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ function SymptomCard({
     ? phaseColor + '33'
     : isCorrelated
     ? phaseColor + '1A'
-    : '#F5EDF3';
+    : '#FAF8F3';
   const borderColor = isSelected ? phaseColor : 'transparent';
 
   return (
@@ -230,7 +230,6 @@ export default function CheckInScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerLeft}>
-          <LannaMascot phase={currentPhase} size={36} />
           <View>
             <Text style={styles.headerTitle}>Check-in</Text>
             <Text style={styles.headerDate}>{dateLabel}</Text>
@@ -334,7 +333,7 @@ export default function CheckInScreen() {
       <View style={[styles.saveBar, { paddingBottom: tabBarHeight + 8 }]}>
         <Pressable
           onPress={handleSave}
-          style={[styles.saveBtn, { backgroundColor: phaseColor }]}
+          style={[styles.saveBtn, { backgroundColor: '#D85A30' }]}
         >
           <Text style={styles.saveBtnText}>Save today's check-in</Text>
         </Pressable>
@@ -390,7 +389,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 20,
     marginBottom: 14,
-    backgroundColor: '#EDD8E7',
+    backgroundColor: '#D8D6F0',
     borderRadius: 28,
     padding: 3,
   },
@@ -459,9 +458,9 @@ const styles = StyleSheet.create({
   saveBar: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F3',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#EDD8E7',
+    borderTopColor: '#D8D6F0',
   },
   saveBtn: {
     width: '100%',
@@ -482,14 +481,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(240,107,154,0.10)',
+    backgroundColor: 'rgba(148,144,200,0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(240,107,154,0.22)',
+    borderColor: 'rgba(148,144,200,0.22)',
   },
   summaryPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#A84B6C',
+    color: '#4A4580',
     letterSpacing: 0.1,
   },
 });

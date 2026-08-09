@@ -48,13 +48,13 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DEFAULT_CYCLE_LENGTH = 28;
 const DEFAULT_CURRENT_DAY = 1;
 
-// Phase dot colors (front color per phase)
+// Phase dot colors — new brand palette
 const PHASE_DOT_COLORS: Record<Phase, string> = {
-  menstrual: "#F06B9A",
-  follicular: "#D178B3",
-  ovulation: "#DE73DE",
-  luteal: "#C9A0DC",
-  late: "#C9A0DC",
+  menstrual:  "#D85A30",  // coral (period days)
+  follicular: "#E8A070",  // soft coral
+  ovulation:  "#0F6E56",  // teal (fertile/ovulation)
+  luteal:     "#7ABFB0",  // soft teal
+  late:       "#7ABFB0",
 };
 
 // ─── Cycle Wheel ────────────────────────────────────────────────────────────
@@ -126,10 +126,10 @@ const QUICK_LOG_ITEMS: Array<{
   label: string;
   bg: string;
 }> = [
-  { id: "flow",   label: "Flow",   bg: "#DAEEF8" },
-  { id: "mood",   label: "Mood",   bg: "#FAE3E8" },
-  { id: "pain",   label: "Pain",   bg: "#F4EDE0" },
-  { id: "energy", label: "Energy", bg: "#FBF4D6" },
+  { id: "flow",   label: "Flow",   bg: "#FAF8F3" },
+  { id: "mood",   label: "Mood",   bg: "#F0EFF8" },
+  { id: "pain",   label: "Pain",   bg: "#FAF8F3" },
+  { id: "energy", label: "Energy", bg: "#F0EFF8" },
 ];
 
 // ─── Today quick-log summary ─────────────────────────────────────────────────
@@ -213,10 +213,10 @@ function QuickLogRow({
 // ─── Phase legend ────────────────────────────────────────────────────────────
 
 const PHASE_LEGEND = [
-  { label: "Menstrual", color: "#F06B9A" },
-  { label: "Follicular", color: "#D178B3" },
-  { label: "Ovulatory", color: "#DE73DE" },
-  { label: "Luteal", color: "#C9A0DC" },
+  { label: "Menstrual",  color: "#D85A30" },
+  { label: "Follicular", color: "#E8A070" },
+  { label: "Ovulatory",  color: "#0F6E56" },
+  { label: "Luteal",     color: "#7ABFB0" },
 ] as const;
 
 function PhaseLegend() {
@@ -294,6 +294,33 @@ interface MilestoneData {
   emoji: string;
 }
 
+/**
+ * Returns the current logging streak in consecutive calendar days.
+ * If today has not been logged yet the streak is measured from yesterday,
+ * so the badge persists throughout the day.
+ */
+function calcStreak(logs: DailyLog[]): number {
+  if (logs.length === 0) return 0;
+  const logDates = new Set(logs.map((l) => l.date.slice(0, 10)));
+  const d = new Date();
+  const fmt = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+  // If today isn't logged yet, slide window back one day
+  if (!logDates.has(fmt(d))) {
+    d.setDate(d.getDate() - 1);
+  }
+  let streak = 0;
+  while (logDates.has(fmt(d))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
 function calcMilestone(logs: DailyLog[], cycleCount: number): MilestoneData | null {
   const uniqueDays = new Set(logs.map((l) => l.date.slice(0, 10))).size;
 
@@ -367,6 +394,7 @@ export function LotusCycleScreen() {
   // Count cycles from actual logged period start events (flow days) in dailyLogs.
   const cycleCount = countLoggedCycles(dailyLogs);
   const milestone = calcMilestone(dailyLogs, cycleCount);
+  const streak    = calcStreak(dailyLogs);
 
   // Schedule background notifications whenever profile or logs are freshly loaded.
   // Each scheduler function is idempotent — safe to call on every focus.
@@ -417,7 +445,7 @@ export function LotusCycleScreen() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: "#FDF5F8" }]}>
+    <View style={[styles.root, { backgroundColor: "#EEEDFE" }]}>
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -431,12 +459,16 @@ export function LotusCycleScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>{greeting}</Text>
-          {milestone && hasCycleDate && (
+          {streak >= 2 ? (
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakText}>🔥 {streak} day streak</Text>
+            </View>
+          ) : milestone && hasCycleDate ? (
             <View style={styles.milestoneBadge}>
               <Text style={styles.milestoneEmoji}>{milestone.emoji}</Text>
               <Text style={styles.milestoneText}>{milestone.label}</Text>
             </View>
-          )}
+          ) : null}
         </View>
 
         {/* Lanna insight badge — shown when a nudge is active and the
@@ -491,15 +523,18 @@ export function LotusCycleScreen() {
 
             {/* Day + phase label */}
             <View style={styles.phaseInfo}>
+              {/* Teal phase status pill */}
+              <View style={styles.phasePill}>
+                <Text style={styles.phasePillText}>{config.label} phase</Text>
+              </View>
               <Text style={styles.dayText}>Day {clampedDay} of {cycleLength}</Text>
-              <Text style={[styles.phaseName, { color: config.front }]}>{config.label} phase</Text>
               <Text style={styles.phaseTagline}>{config.tagline}</Text>
             </View>
 
-            {/* About this phase card */}
-            <View style={[styles.aboutCard, { backgroundColor: config.bg + "CC" }]}>
-              <Text style={[styles.aboutCardTitle, { color: config.ink }]}>About this phase</Text>
-              <Text style={[styles.aboutCardBody, { color: config.ink + "CC" }]}>
+            {/* About this phase card — flat cream, always deep-plum text */}
+            <View style={styles.aboutCard}>
+              <Text style={styles.aboutCardTitle}>About this phase</Text>
+              <Text style={styles.aboutCardBody}>
                 {config.aboutText}
               </Text>
             </View>
@@ -515,7 +550,18 @@ export function LotusCycleScreen() {
           <QuickLogRow onPress={handleQuickLog} todayLog={getTodayQuickLog(dailyLogs)} />
         </View>
 
-        {/* Health Summary CTA */}
+        {/* Log Today — single dominant coral CTA per screen */}
+        <Pressable
+          onPress={() => handleQuickLog("flow")}
+          style={({ pressed }) => [
+            styles.logTodayBtn,
+            { opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <Text style={styles.logTodayBtnText}>Log Today</Text>
+        </Pressable>
+
+        {/* Health Summary CTA — secondary, no coral */}
         <Pressable
           onPress={() => setSummaryVisible(true)}
           style={({ pressed }) => [
@@ -585,6 +631,7 @@ export function LotusCycleScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: "#EEEDFE",
   },
   content: {
     paddingHorizontal: 20,
@@ -600,13 +647,28 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 26,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
   },
+  // Streak badge (shown when streak ≥ 2)
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(216,90,48,0.12)",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  streakText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#D85A30",
+  },
+  // Milestone badge (fallback when no streak yet)
   milestoneBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(180,154,204,0.18)",
+    backgroundColor: "rgba(148,144,200,0.15)",
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -618,7 +680,7 @@ const styles = StyleSheet.create({
   milestoneText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#6A5B7B",
+    color: "#4A4580",
   },
   wheelSection: {
     alignItems: "center",
@@ -627,12 +689,27 @@ const styles = StyleSheet.create({
   phaseInfo: {
     alignItems: "center",
     marginBottom: 20,
-    gap: 4,
+    gap: 6,
+  },
+  // Teal phase status pill
+  phasePill: {
+    backgroundColor: "#0F6E56",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginBottom: 2,
+  },
+  phasePillText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FAF8F3",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
   },
   dayText: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.2,
   },
   phaseName: {
@@ -642,24 +719,28 @@ const styles = StyleSheet.create({
   },
   phaseTagline: {
     fontSize: 13,
-    color: "#8A6F80",
+    color: "#6B6591",
     letterSpacing: 0.1,
   },
+  // Flat cream card — no phase tinting
   aboutCard: {
     width: "100%",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     gap: 6,
+    backgroundColor: "#FAF8F3",
   },
   aboutCardTitle: {
     fontSize: 14,
     fontWeight: "700",
+    color: "#26215C",
     letterSpacing: 0.2,
   },
   aboutCardBody: {
     fontSize: 14,
     lineHeight: 21,
+    color: "#4A4580",
   },
   legendRow: {
     width: "100%",
@@ -681,7 +762,7 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 11,
-    color: "#8A6F80",
+    color: "#6B6591",
   },
   badgeWrapper: {
     width: "100%",
@@ -695,7 +776,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
   },
   quickLogRow: {
@@ -721,7 +802,7 @@ const styles = StyleSheet.create({
   quickLogLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#5A4252",
+    color: "#4A4580",
   },
   quickLogLoggedDot: {
     position: "absolute",
@@ -730,22 +811,40 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#6AB494",
+    backgroundColor: "#0F6E56",
   },
   quickLogLoggedValue: {
     fontSize: 10,
     fontWeight: "600",
-    color: "#6AB494",
+    color: "#0F6E56",
     letterSpacing: 0.1,
   },
-  summaryCta: {
+  // Single dominant coral CTA — one per screen
+  logTodayBtn: {
     width: "100%",
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "#D85A30",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 16,
     marginBottom: 4,
+  },
+  logTodayBtnText: {
+    color: "#FAECE7",
+    fontSize: 17,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+  // Health summary CTA — secondary surface, no coral
+  summaryCta: {
+    width: "100%",
+    marginTop: 12,
+    marginBottom: 4,
     borderRadius: 16,
-    backgroundColor: "rgba(240,107,154,0.10)",
+    backgroundColor: "rgba(148,144,200,0.10)",
     borderWidth: 1,
-    borderColor: "rgba(240,107,154,0.22)",
+    borderColor: "rgba(148,144,200,0.22)",
   },
   summaryCtaInner: {
     flexDirection: "row",
@@ -763,16 +862,16 @@ const styles = StyleSheet.create({
   summaryCtaTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
   },
   summaryCtaSub: {
     fontSize: 12,
-    color: "#8A6F80",
+    color: "#6B6591",
   },
   summaryCtaArrow: {
     fontSize: 16,
-    color: "#F06B9A",
+    color: "#26215C",
     fontWeight: "600",
   },
   noCycleDateSection: {
@@ -787,26 +886,26 @@ const styles = StyleSheet.create({
   noCycleDateTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
     textAlign: "center",
   },
   noCycleDateBody: {
     fontSize: 15,
-    color: "#5A4252",
+    color: "#4A4580",
     textAlign: "center",
     lineHeight: 22,
     paddingHorizontal: 12,
   },
   noCycleDateBtn: {
     marginTop: 8,
-    backgroundColor: "#F06B9A",
+    backgroundColor: "#D85A30",
     borderRadius: 14,
     paddingHorizontal: 28,
     paddingVertical: 14,
   },
   noCycleDateBtnText: {
-    color: "#FFFFFF",
+    color: "#FAECE7",
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.2,

@@ -88,8 +88,8 @@ function PermissionBanner({ onGrant }: { onGrant: () => void }) {
   return (
     <GlassSurface style={styles.permissionBanner} noPadding>
       <View style={styles.permissionBannerInner}>
-        <View style={[styles.settingIcon, { backgroundColor: "#F06B9A15" }]}>
-          <Feather name="bell-off" size={20} color="#F06B9A" />
+        <View style={[styles.settingIcon, { backgroundColor: "#D85A3018" }]}>
+          <Feather name="bell-off" size={20} color="#D85A30" />
         </View>
         <View style={styles.settingContent}>
           <ThemedText type="body" style={[styles.settingTitle, { color: theme.text }]}>
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: "#F06B9A",
+    backgroundColor: "#D85A30",
     alignItems: "center",
   },
   grantBtnText: {

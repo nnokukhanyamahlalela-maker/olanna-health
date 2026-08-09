@@ -123,7 +123,7 @@ const nStyles = StyleSheet.create({
 
 // ─── Web / fallback: animated blossom ────────────────────────────────────────
 
-const PHASE_COLORS  = ["#F06B9A", "#D178B3", "#DE73DE", "#C9A0DC"];
+const PHASE_COLORS  = ["#D85A30", "#E8A070", "#B8B4E8", "#7ABFB0"];
 const BLINK_MS      = 1_000;
 const WEB_DURATION  = 3_000;
 const FADE_OUT_MS   = 400;

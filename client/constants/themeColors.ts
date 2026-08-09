@@ -48,7 +48,7 @@ export const lightTheme: ThemeColors = {
   surface: "#FFFFFF",
   surfaceElevated: "#FFFFFF",
   
-  textPrimary: "#2D1F2B",
+  textPrimary: "#26215C",
   textSecondary: "#4A3345",
   textTertiary: "#5A4550",
   textOnGradient: "#FFFFFF",

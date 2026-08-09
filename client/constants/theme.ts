@@ -156,7 +156,7 @@ const VogueColors = {
   // Neutrals
   bgMain: "#FFF7FA",
   whiteSoft: "rgba(255, 255, 255, 0.85)",
-  textPrimary: "#2D1F2B",
+  textPrimary: "#26215C",
   textSecondary: "#4A3345",
   
   // Phase Colors
@@ -308,7 +308,7 @@ export const ThemePresets = {
 
 export const Colors = {
   light: {
-    text: "#2D1F2B",
+    text: "#26215C",
     textSecondary: "#3D2838",
     background: VogueColors.cream,
     backgroundRoot: VogueColors.cream,

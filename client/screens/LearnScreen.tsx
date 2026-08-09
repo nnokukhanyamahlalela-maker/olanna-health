@@ -23,11 +23,11 @@ import { useLotusCycle } from "@/hooks/useLotusCycle";
 
 type NavigationProp = NativeStackNavigationProp<LearnStackParamList>;
 
-const BG = "#FDF5F8";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_MID = "#5A4252";
-const TEXT_SOFT = "#8A6F80";
-const PINK = "#F06B9A";
+const BG = "#EEEDFE";
+const TEXT_DARK = "#26215C";
+const TEXT_MID = "#4A4580";
+const TEXT_SOFT = "#6B6591";
+const PINK = "#D85A30";
 
 // Category filters (per spec §6.4 — no topic-colored icons on article list)
 const FILTER_CHIPS = [
@@ -41,13 +41,13 @@ const FILTER_CHIPS = [
 
 // Tag pill colors (subtle, no icons)
 const TAG_COLORS: Record<string, string> = {
-  PMOS: "#D178B3",
-  PCOS: "#D178B3",
-  Nutrition: "#C9A0DC",
-  "Mental health": "#8D709A",
-  Periods: "#F06B9A",
-  Fertility: "#DE73DE",
-  "Cycle basics": "#92547D",
+  PMOS: "#E8A070",
+  PCOS: "#E8A070",
+  Nutrition: "#7ABFB0",
+  "Mental health": "#4A4580",
+  Periods: "#D85A30",
+  Fertility: "#0F6E56",
+  "Cycle basics": "#9490C8",
 };
 
 function TagPill({ label }: { label: string }) {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#EDD8E7",
+    borderColor: "#D8D6F0",
     backgroundColor: "transparent",
   },
   filterChipText: { fontSize: 13, color: TEXT_MID, fontWeight: "500" },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   tagPillText: { fontSize: 11, fontWeight: "600" },
   articleRowTitle: { fontSize: 15, fontWeight: "600", color: TEXT_DARK, lineHeight: 21 },
   articleRowReadTime: { fontSize: 12, color: TEXT_SOFT },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#EDD8E7" },
+  separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#D8D6F0" },
   emptyState: { paddingVertical: 40, alignItems: "center" },
   emptyText: { fontSize: 15, color: TEXT_SOFT },
 });

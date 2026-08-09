@@ -1,3 +1,4 @@
+- [Gen Z rebrand tokens](gen-z-rebrand.md) — new brand system: lavender #EEEDFE bg, plum #26215C ink, coral #D85A30 CTA (one per screen), teal #0F6E56 phase tags
 - [npm CVE overrides](npm-cve-overrides.md) — tar@7.5.11 and shell-quote@1.8.x are blocked; use overrides tar@7.5.22 + shell-quote@1.9.0
 - [OpenAI lazy init](openai-lazy-init.md) — all OpenAI clients must be lazily initialized; eager `new OpenAI()` at module level crashes without API key
 - [storage API](storage-api.md) — use `storage.setUserProfile()` not `saveUserProfile()`; DATABASE_URL is runtime-managed by Replit (do not set manually)

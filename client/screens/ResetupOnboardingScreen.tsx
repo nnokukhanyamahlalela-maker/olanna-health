@@ -44,12 +44,12 @@ type ResetupStep =
 
 // ─── Colors (match OnboardingScreen palette) ──────────────────────────────────
 
-const PINK = "#F06B9A";
-const PINK_LIGHT = "#F9C4D7";
-const BG = "#FDF5F8";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_MID = "#5A4252";
-const TEXT_SOFT = "#8A6F80";
+const PINK = "#D85A30";
+const PINK_LIGHT = "#FAECE7";
+const BG = "#EEEDFE";
+const TEXT_DARK = "#26215C";
+const TEXT_MID = "#4A4580";
+const TEXT_SOFT = "#6B6591";
 
 // ─── Shared buttons ───────────────────────────────────────────────────────────
 
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#EDD8E7",
+    borderColor: "#D8D6F0",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     fontSize: 16,
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#EDD8E7",
+    borderColor: "#D8D6F0",
     backgroundColor: "#FFFFFF",
   },
   optionRowSelected: {
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: "#EDD8E7",
+    borderColor: "#D8D6F0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#EDD8E7",
+    borderColor: "#D8D6F0",
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginBottom: 12,

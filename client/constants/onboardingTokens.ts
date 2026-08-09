@@ -60,7 +60,7 @@ export const BRAND_COLORS = {
   hotPink: "#E85A9C",
   softPink: "#F6BFD3",
   white: "#FFFFFF",
-  textPrimary: "#2D1F2B",
+  textPrimary: "#26215C",
   textSecondary: "#4A3345",
   glassWhite: "rgba(255,255,255,0.25)",
   glassBorder: "rgba(255,255,255,0.4)",

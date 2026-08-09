@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FDF5F8",
+    backgroundColor: "#FAF8F3",
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "rgba(240,107,154,0.28)",
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2D1F2B",
+    color: "#26215C",
     lineHeight: 20,
     letterSpacing: 0.1,
   },

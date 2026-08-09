@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
   },
   body: {

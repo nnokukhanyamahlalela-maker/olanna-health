@@ -364,7 +364,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const PINK = "#F06B9A";
+const CORAL = "#D85A30";
 
 const styles = StyleSheet.create({
   scrim: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.35)",
   },
   sheet: {
-    backgroundColor: "#FDF5F8",
+    backgroundColor: "#FAF8F3",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(90,66,82,0.25)",
+    backgroundColor: "rgba(38,33,92,0.18)",
     marginBottom: 20,
   },
   header: {
@@ -394,12 +394,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
     letterSpacing: 0.1,
   },
   subtitle: {
     fontSize: 14,
-    color: "#8A6F80",
+    color: "#6B6591",
     lineHeight: 20,
   },
   optionsContainer: {
@@ -417,13 +417,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: "rgba(240,107,154,0.08)",
+    backgroundColor: "rgba(38,33,92,0.06)",
     borderWidth: 1.5,
-    borderColor: "rgba(240,107,154,0.18)",
+    borderColor: "rgba(38,33,92,0.12)",
   },
   pillSelected: {
-    backgroundColor: "rgba(240,107,154,0.18)",
-    borderColor: PINK,
+    backgroundColor: "rgba(216,90,48,0.14)",
+    borderColor: CORAL,
   },
   pillEmoji: {
     fontSize: 18,
@@ -431,28 +431,28 @@ const styles = StyleSheet.create({
   pillLabel: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#5A4252",
+    color: "#4A4580",
   },
   pillLabelSelected: {
     fontWeight: "700",
-    color: "#2D1F2B",
+    color: "#26215C",
   },
   saveBtn: {
     marginTop: 24,
     height: 52,
     borderRadius: 16,
-    backgroundColor: PINK,
+    backgroundColor: CORAL,
     alignItems: "center",
     justifyContent: "center",
   },
   saveBtnDisabled: {
-    backgroundColor: "rgba(240,107,154,0.35)",
+    backgroundColor: "rgba(216,90,48,0.35)",
   },
   saveBtnSaved: {
-    backgroundColor: "#6AB494",
+    backgroundColor: "#0F6E56",
   },
   saveBtnText: {
-    color: "#fff",
+    color: "#FAECE7",
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.2,
@@ -464,12 +464,12 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 14,
-    color: "#8A6F80",
+    color: "#6B6591",
   },
   errorText: {
     marginTop: 10,
     fontSize: 13,
-    color: "#C0394B",
+    color: "#B04020",
     textAlign: "center",
   },
 });

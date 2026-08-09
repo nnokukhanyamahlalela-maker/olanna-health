@@ -38,26 +38,26 @@ const MONTHS = [
 ];
 const WEEKDAYS = ["S","M","T","W","T","F","S"];
 
-const BG = "#FDF5F8";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_SOFT = "#8A6F80";
+const BG = "#EEEDFE";
+const TEXT_DARK = "#26215C";
+const TEXT_SOFT = "#6B6591";
 
-// Phase dot colors
+// Phase dot colors — coral for period, teal for ovulation, lavender/teal for others
 const PHASE_COLORS: Record<string, string> = {
-  Menstrual: "#F06B9A",
-  Follicular: "#D178B3",
-  Ovulatory: "#DE73DE",
-  "Ovulation": "#DE73DE",
-  Luteal: "#C9A0DC",
-  "Late Luteal": "#C9A0DC",
+  Menstrual:    "#D85A30",  // coral — period days
+  Follicular:   "#B8B4E8",  // muted lavender
+  Ovulatory:    "#0F6E56",  // teal — fertile/ovulation days
+  "Ovulation":  "#0F6E56",  // teal
+  Luteal:       "#7ABFB0",  // soft teal
+  "Late Luteal": "#7ABFB0",
 };
 
 // Phase legend
 const LEGEND = [
-  { label: "Menstrual", color: "#F06B9A" },
-  { label: "Follicular", color: "#D178B3" },
-  { label: "Ovulatory", color: "#DE73DE" },
-  { label: "Luteal", color: "#C9A0DC" },
+  { label: "Menstrual",  color: "#D85A30" },
+  { label: "Follicular", color: "#B8B4E8" },
+  { label: "Ovulatory",  color: "#0F6E56" },
+  { label: "Luteal",     color: "#7ABFB0" },
 ];
 
 function formatDateKey(date: Date): string {
@@ -144,7 +144,7 @@ export default function CalendarScreen() {
   const phaseDotMap = useMemo(() => {
     const map: Record<string, string> = {};
     calendarMarkers.forEach((m) => {
-      map[m.dateKey] = PHASE_COLORS[m.phase as string] ?? "#D178B3";
+      map[m.dateKey] = PHASE_COLORS[m.phase as string] ?? "#E8A070";
     });
     return map;
   }, [calendarMarkers]);
@@ -246,7 +246,7 @@ export default function CalendarScreen() {
                   <Text
                     style={[
                       styles.dayNumber,
-                      isToday && !isSelected && { color: "#F06B9A", fontWeight: "700" },
+                      isToday && !isSelected && { color: "#D85A30", fontWeight: "700" },
                       isSelected && { color: "#FFFFFF", fontWeight: "700" },
                     ]}
                   >

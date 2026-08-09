@@ -22,11 +22,11 @@ import { useLotusCycle } from "@/hooks/useLotusCycle";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const BG = "#FDF5F8";
-const TEXT_DARK = "#2D1F2B";
-const TEXT_MID = "#5A4252";
-const TEXT_SOFT = "#8A6F80";
-const PINK = "#F06B9A";
+const BG = "#EEEDFE";
+const TEXT_DARK = "#26215C";
+const TEXT_MID = "#4A4580";
+const TEXT_SOFT = "#6B6591";
+const PINK = "#D85A30";
 
 // ─── Sleep bar chart ──────────────────────────────────────────────────────────
 
@@ -164,7 +164,7 @@ export default function HealthScreen() {
   const currentPhase: Phase = getPhaseForDay(currentDay, cycleLength, periodLength);
   const config = phaseConfig[currentPhase];
   const phaseKey = currentPhase === "ovulation" ? "ovulatory" : currentPhase === "late" ? "luteal" : currentPhase;
-  const phaseColor = (phaseTokens as any)[phaseKey]?.front ?? "#F06B9A";
+  const phaseColor = (phaseTokens as any)[phaseKey]?.front ?? "#D85A30";
 
   return (
     <View style={[styles.root, { backgroundColor: BG }]}>
