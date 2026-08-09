@@ -10,7 +10,7 @@
  * can read it. Previous pain quick-log symptoms are replaced on each save.
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Modal,
   View,
@@ -159,6 +159,12 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
   const [saved,          setSaved]          = useState(false);
   const [saveError,      setSaveError]      = useState<string | null>(null);
 
+  // Guard: tracks the pending close-after-animation timer so handleDismiss can
+  // cancel it when the user taps "Not right now" during the 700 ms window.
+  // Also prevents onSaved from being invoked more than once per save cycle.
+  const closeTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSavedFiredRef = useRef(false);
+
   const meta = DOMAIN_META[domain];
 
   const hasSelection =
@@ -171,6 +177,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
     if (!hasSelection || saving) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setSaving(true);
+    onSavedFiredRef.current = false;
     try {
       let savedLog: DailyLog | null = null;
       if (domain === "flow" && selectedFlow) {
@@ -184,8 +191,15 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
         savedLog = await mergeAndSave("pain", selectedPain, [...(painOpt?.symptoms ?? [])]);
       }
       setSaved(true);
-      if (savedLog) onSaved?.(domain, savedLog);
-      setTimeout(() => {
+      // Fire onSaved exactly once — guard prevents a second call if the parent
+      // re-renders or the user dismisses early and triggers another code path.
+      if (savedLog && !onSavedFiredRef.current) {
+        onSavedFiredRef.current = true;
+        onSaved?.(domain, savedLog);
+      }
+      // Store the timer so handleDismiss can cancel it during the animation window.
+      closeTimerRef.current = setTimeout(() => {
+        closeTimerRef.current = null;
         setSaved(false);
         setSaving(false);
         resetSelections();
@@ -207,6 +221,14 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
   };
 
   const handleDismiss = () => {
+    // Cancel any pending close-after-animation timer so the sheet doesn't call
+    // onDismiss a second time after the user already dismissed it manually.
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setSaved(false);
+    setSaving(false);
     resetSelections();
     onDismiss();
   };
