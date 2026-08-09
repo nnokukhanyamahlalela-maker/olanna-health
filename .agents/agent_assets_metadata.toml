@@ -388,3 +388,10 @@ uri = "file://attached_assets/mascot/lanna_luteal.svg"
 type = "image"
 title = "Luteal — Settling"
 description = "Soft-teal petals · 72% opacity · 16° rotation droop · calm small eyes"
+
+[[outputs]]
+id = "dBF0iMn7XSTP9wY30VtPa"
+uri = "file://assets/images/icon.png"
+type = "image"
+title = "New App Icon — Dot Cluster"
+description = "Mint, coral, cream, and lavender circles on dark navy — 1024×1024 PNG"

@@ -7,6 +7,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-cont
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import { LaunchOverlay } from "@/components/LaunchOverlay";
 import {
   DMSans_300Light,
   DMSans_400Regular,
@@ -210,15 +211,26 @@ export default function App() {
     Poppins_900Black,
   });
 
+  // Determined during font-load phase so the navigator starts at the right
+  // screen the moment it renders — the LaunchOverlay covers it while animating.
+  const [initialRoute, setInitialRoute] = useState<"Main" | "Onboarding" | null>(null);
+
+  // Flipped to true by LaunchOverlay when its animation completes → overlay unmounts.
+  const [launchDone, setLaunchDone] = useState(false);
+
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
+      // Determine initial nav route in parallel with hiding the native splash.
+      storage.getUserProfile()
+        .then((profile) => setInitialRoute(profile ? "Main" : "Onboarding"))
+        .catch(() => setInitialRoute("Onboarding"));
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
+  // Wait for fonts AND the profile check before rendering navigation.
+  if (!fontsLoaded && !fontError) return null;
+  if (!initialRoute) return null;
 
   if (SHOW_TYPOGRAPHY_DEMO) {
     return (
@@ -240,9 +252,14 @@ export default function App() {
             <ReduceTransparencyProvider>
               <KeyboardProvider>
                 <NavigationContainer>
-                  <RootStackNavigator />
+                  <RootStackNavigator initialRoute={initialRoute} />
                 </NavigationContainer>
-                <StatusBar style="light" />
+                {/* LaunchOverlay sits above the nav stack and unmounts once its
+                    animation completes. Only rendered on the very first mount. */}
+                {!launchDone && (
+                  <LaunchOverlay onComplete={() => setLaunchDone(true)} />
+                )}
+                <StatusBar style={launchDone ? "dark" : "light"} />
               </KeyboardProvider>
             </ReduceTransparencyProvider>
           </GestureHandlerRootView>

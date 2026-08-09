@@ -87,11 +87,17 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function RootStackNavigator() {
+interface RootStackNavigatorProps {
+  /** Determined in App before the NavigationContainer mounts so the navigator
+   *  starts at the correct screen immediately, underneath the LaunchOverlay. */
+  initialRoute: "Main" | "Onboarding";
+}
+
+export default function RootStackNavigator({ initialRoute }: RootStackNavigatorProps) {
   const screenOptions = useScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions} initialRouteName="IntroLogo">
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRoute}>
       <Stack.Screen
         name="IntroLogo"
         component={IntroLogo}
