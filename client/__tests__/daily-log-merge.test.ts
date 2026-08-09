@@ -17,11 +17,15 @@
  *
  * 3. QuickLog save fails (storage throws) → the save helper rejects so the
  *    caller can surface an error state instead of a false success.
+ *
+ * 4. (Task 43) Quick-log pain + body-map pain points: body-map BodyPainPoint
+ *    objects must be stored only in DailyCheckIn.painPoints, never injected
+ *    into DailyLog.symptoms — no duplication with the quick-log symptom IDs.
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// ─── Types (copied from storage.ts to avoid importing RN deps) ────────────────
+// ─── Types (mirrored from storage.ts / symptomSchema.ts to avoid RN deps) ─────
 
 interface DailyLog {
   id: string;
@@ -35,21 +39,53 @@ interface DailyLog {
   createdAt: string;
 }
 
-// ─── In-memory storage mock ───────────────────────────────────────────────────
+/** Mirrors symptomSchema.ts BodyPainPoint */
+interface BodyPainPoint {
+  id: string;
+  date: string;
+  region: string;
+  painType: string;
+  severity: number;
+  timestamp: number;
+}
 
-let store: DailyLog[] = [];
+/** Mirrors symptomSchema.ts DailyCheckIn (subset used in tests) */
+interface DailyCheckIn {
+  date: string;
+  symptoms: { symptomId: string; categoryId: string }[];
+  painPoints: BodyPainPoint[];
+  completedAt: number;
+}
+
+// ─── In-memory storage mocks ──────────────────────────────────────────────────
+
+let dailyLogStore: DailyLog[] = [];
+/** Separate store that mirrors what saveDailyCheckIn writes in symptomStorage */
+let checkInStore: DailyCheckIn[] = [];
 
 const storageMock = {
   async getDailyLogs(): Promise<DailyLog[]> {
-    return JSON.parse(JSON.stringify(store)); // return a copy
+    return JSON.parse(JSON.stringify(dailyLogStore));
   },
   async addDailyLog(log: DailyLog): Promise<void> {
-    const idx = store.findIndex((l) => l.date === log.date);
+    const idx = dailyLogStore.findIndex((l) => l.date === log.date);
     if (idx >= 0) {
-      store[idx] = log;
+      dailyLogStore[idx] = log;
     } else {
-      store.push(log);
+      dailyLogStore.push(log);
     }
+  },
+  /** Mirrors saveDailyCheckIn — upserts by date */
+  async saveDailyCheckIn(checkIn: DailyCheckIn): Promise<void> {
+    const idx = checkInStore.findIndex((c) => c.date === checkIn.date);
+    if (idx >= 0) {
+      checkInStore[idx] = checkIn;
+    } else {
+      checkInStore.push(checkIn);
+    }
+  },
+  async getDailyCheckIn(date: string): Promise<DailyCheckIn | undefined> {
+    return checkInStore.find((c) => c.date === date);
   },
 };
 
@@ -58,6 +94,9 @@ const failingStorageMock = {
     throw new Error("Storage read failure");
   },
   async addDailyLog(_log: DailyLog): Promise<void> {
+    throw new Error("Storage write failure");
+  },
+  async saveDailyCheckIn(_c: DailyCheckIn): Promise<void> {
     throw new Error("Storage write failure");
   },
 };
@@ -106,12 +145,28 @@ async function quickLogMergeAndSave(
   return merged;
 }
 
-/** Replicates the merge logic inside CheckInScreen.handleSave */
+/**
+ * Replicates the full handleSave logic in CheckInScreen:
+ *   1. Calls saveDailyCheckIn (writes symptoms + painPoints to the check-in store).
+ *   2. Merges only the symptom-grid IDs into DailyLog.symptoms — painPoints are
+ *      never touched in this merge, mirroring the actual implementation.
+ */
 async function checkInMergeAndSave(
   storage: typeof storageMock,
   today: string,
-  checkInSymptomIds: string[]
-): Promise<DailyLog> {
+  checkInSymptomIds: string[],
+  painPoints: BodyPainPoint[] = []
+): Promise<{ dailyLog: DailyLog; checkIn: DailyCheckIn }> {
+  // Step 1 — persist the full check-in record (symptom grid + body-map points)
+  const checkIn: DailyCheckIn = {
+    date: today,
+    symptoms: checkInSymptomIds.map((id) => ({ symptomId: id, categoryId: "general" })),
+    painPoints,
+    completedAt: Date.now(),
+  };
+  await storage.saveDailyCheckIn(checkIn);
+
+  // Step 2 — merge ONLY the symptom-grid IDs into DailyLog (mirrors handleSave)
   const logs = await storage.getDailyLogs();
   const existing = logs.find((l) => l.date === today);
 
@@ -129,7 +184,7 @@ async function checkInMergeAndSave(
   };
 
   await storage.addDailyLog(mergedLog);
-  return mergedLog;
+  return { dailyLog: mergedLog, checkIn };
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -137,7 +192,8 @@ async function checkInMergeAndSave(
 const TODAY = "2026-07-31";
 
 beforeEach(() => {
-  store = [];
+  dailyLogStore = [];
+  checkInStore = [];
 });
 
 describe("DailyLog merge — quick-log and full Check-In used on the same day", () => {
@@ -231,5 +287,134 @@ describe("DailyLog merge — quick-log and full Check-In used on the same day", 
     expect(log.symptoms).toContain("cramps");
     expect(log.symptoms).toContain("fatigue");
     expect(log.symptoms).toContain("bloating");
+  });
+
+  /**
+   * ── Task 43: body-map pain points must not duplicate quick-log symptoms ────
+   *
+   * Scenario A — symptom grid AND body map both reference the same pain:
+   *   1. User quick-logs "mild" pain → "cramps" added to DailyLog.symptoms.
+   *   2. User opens Check-In, selects "cramps" in the symptom grid, and also
+   *      taps the lower-abdomen region on the body map.
+   *   3. handleSave (mirrored by checkInMergeAndSave):
+   *        a. Saves a DailyCheckIn record with painPoints=[abdomenPoint].
+   *        b. Merges ONLY the symptom-grid IDs into DailyLog.symptoms.
+   *   4. DailyLog.symptoms must contain "cramps" exactly once.
+   *   5. DailyCheckIn.painPoints must hold the body-map entry (not lost).
+   *   6. The BodyPainPoint region/painType must NOT appear as a symptom ID in
+   *      DailyLog.symptoms (it is a separate data type).
+   */
+  it("cramps appears exactly once and body-map point stays in its own store when quick-log pain + body-map + symptom grid all used", async () => {
+    // ── Step 1: quick-log mild pain ──────────────────────────────────────────
+    await quickLogMergeAndSave(storageMock, TODAY, "pain", "mild", ["cramps"]);
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs[0].symptoms).toEqual(["cramps"]);
+
+    // ── Step 2: Check-In with cramps on symptom grid + abdomen on body map ──
+    const abdomenPoint: BodyPainPoint = {
+      id: `${TODAY}-pain-1`,
+      date: TODAY,
+      region: "lower-abdomen",
+      painType: "cramping",
+      severity: 6,
+      timestamp: Date.now(),
+    };
+
+    const { checkIn } = await checkInMergeAndSave(
+      storageMock,
+      TODAY,
+      ["cramps"],       // symptom grid selection
+      [abdomenPoint],   // body-map selection
+    );
+
+    // ── Step 3: verify DailyLog.symptoms ────────────────────────────────────
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+
+    // "cramps" must appear exactly once — no duplication from body map
+    const crampsOccurrences = logs[0].symptoms.filter((s) => s === "cramps").length;
+    expect(crampsOccurrences).toBe(1);
+
+    // The body-map region and painType must NOT be injected as symptom IDs
+    expect(logs[0].symptoms).not.toContain("lower-abdomen");
+    expect(logs[0].symptoms).not.toContain("cramping");
+
+    // ── Step 4: verify DailyCheckIn.painPoints has the body-map entry ───────
+    const savedCheckIn = await storageMock.getDailyCheckIn(TODAY);
+    expect(savedCheckIn).toBeDefined();
+    expect(savedCheckIn!.painPoints).toHaveLength(1);
+    expect(savedCheckIn!.painPoints[0].region).toBe("lower-abdomen");
+    expect(savedCheckIn!.painPoints[0].severity).toBe(6);
+  });
+
+  /**
+   * Scenario B — quick-log pain preserved when Check-In uses only body map
+   * (no symptom-grid selection):
+   *   1. User quick-logs "severe pain" → three symptom IDs in DailyLog.
+   *   2. User opens Check-In, taps multiple body-map regions (no symptom grid).
+   *   3. handleSave saves pain points to DailyCheckIn but writes an empty
+   *      symptom-grid list to the merge — so ALL three quick-log IDs survive.
+   */
+  it("quick-log pain symptoms are preserved when Check-In uses only the body map", async () => {
+    // ── Step 1: quick-log severe pain ────────────────────────────────────────
+    await quickLogMergeAndSave(storageMock, TODAY, "pain", "severe", [
+      "cramps",
+      "pelvic-heaviness",
+      "deep-pelvic-pain",
+    ]);
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs[0].symptoms).toEqual([
+      "cramps",
+      "pelvic-heaviness",
+      "deep-pelvic-pain",
+    ]);
+
+    // ── Step 2: Check-In with two body-map points, no symptom-grid selection ─
+    const backPoint: BodyPainPoint = {
+      id: `${TODAY}-pain-2`,
+      date: TODAY,
+      region: "lower-back",
+      painType: "aching",
+      severity: 4,
+      timestamp: Date.now(),
+    };
+    const pelvisPoint: BodyPainPoint = {
+      id: `${TODAY}-pain-3`,
+      date: TODAY,
+      region: "pelvis",
+      painType: "pressure",
+      severity: 7,
+      timestamp: Date.now(),
+    };
+
+    await checkInMergeAndSave(
+      storageMock,
+      TODAY,
+      [],                         // no symptom-grid selections
+      [backPoint, pelvisPoint],   // two body-map points
+    );
+
+    // ── Step 3: all quick-log pain IDs must still be present ─────────────────
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    const log = logs[0];
+    expect(log.symptoms).toContain("cramps");
+    expect(log.symptoms).toContain("pelvic-heaviness");
+    expect(log.symptoms).toContain("deep-pelvic-pain");
+    // Exactly one of each — no duplication
+    expect(log.symptoms.filter((s) => s === "cramps").length).toBe(1);
+
+    // Body-map region names must not bleed into DailyLog.symptoms
+    expect(log.symptoms).not.toContain("lower-back");
+    expect(log.symptoms).not.toContain("pelvis");
+
+    // Both body-map points must be in DailyCheckIn, not in DailyLog
+    const savedCheckIn = await storageMock.getDailyCheckIn(TODAY);
+    expect(savedCheckIn!.painPoints).toHaveLength(2);
+    expect(savedCheckIn!.painPoints.map((p) => p.region)).toEqual(
+      expect.arrayContaining(["lower-back", "pelvis"])
+    );
   });
 });
