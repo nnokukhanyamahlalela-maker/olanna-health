@@ -148,25 +148,17 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
   }, [visible, load, checkAiAvailable]);
 
   /**
-   * When the user turns off "Include personal notes", automatically clear any
-   * AI narrative that was generated with notes on. This prevents note-derived
-   * content from leaking into the share/copy payload.
+   * Whether the current AI narrative was generated under different privacy
+   * settings than the current toggle state.  When true we show a "Regenerate"
+   * button so the user can refresh the narrative without having to dismiss and
+   * reopen the sheet.
    */
-  useEffect(() => {
-    if (!includeNotes && aiNarrativeIncludedNotes && aiNarrative) {
-      setAiNarrative(null);
-      setAiNarrativeIncludedNotes(false);
-      setAiError(
-        "AI summary was generated with personal notes and has been removed. Re-generate with notes off for a shareable AI summary."
-      );
-    }
-  }, [includeNotes, aiNarrativeIncludedNotes, aiNarrative]);
+  const needsRegenerate =
+    aiNarrative !== null && includeNotes !== aiNarrativeIncludedNotes;
 
   /**
    * Build the share text. The AI narrative is only included when it is safe to
    * share: either it was generated without notes, or notes are currently on.
-   * (The effect above clears it when that invariant is violated, so this is a
-   * belt-and-suspenders guard.)
    */
   const canShareNarrative =
     aiNarrative !== null && (includeNotes || !aiNarrativeIncludedNotes);
@@ -298,6 +290,45 @@ export function HealthSummarySheet({ visible, onDismiss }: Props) {
                     <Text style={styles.aiCardTitle}>AI Clinical Summary</Text>
                   </View>
                   <Text style={styles.aiCardText}>{aiNarrative}</Text>
+
+                  {/* Privacy notice — narrative has notes but toggle is now off */}
+                  {needsRegenerate && aiNarrativeIncludedNotes && !includeNotes && (
+                    <View style={styles.aiRegenerateNotice}>
+                      <Feather name="eye-off" size={13} color={TEXT_SOFT} />
+                      <Text style={styles.aiRegenerateNoticeText}>
+                        This summary included personal notes. Regenerate to get a shareable version.
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Regenerate button — appears when toggle changed after generation */}
+                  {needsRegenerate && (
+                    <Pressable
+                      onPress={handleEnhanceWithAI}
+                      disabled={aiLoading}
+                      style={({ pressed }) => [
+                        styles.aiRegenerateBtn,
+                        { opacity: pressed || aiLoading ? 0.7 : 1 },
+                      ]}
+                    >
+                      {aiLoading ? (
+                        <>
+                          <ActivityIndicator color={PINK} size="small" />
+                          <Text style={styles.aiRegeneateBtnText}>
+                            Generating…
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Feather name="refresh-cw" size={13} color={PINK} />
+                          <Text style={styles.aiRegeneateBtnText}>
+                            Regenerate
+                          </Text>
+                        </>
+                      )}
+                    </Pressable>
+                  )}
+
                   <Pressable
                     onPress={() => {
                       setAiNarrative(null);
@@ -621,6 +652,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: TEXT_DARK,
+  },
+  aiRegenerateNotice: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: "rgba(38,33,92,0.06)",
+    borderRadius: 8,
+    padding: 10,
+  },
+  aiRegenerateNoticeText: {
+    flex: 1,
+    fontSize: 12,
+    color: TEXT_SOFT,
+    lineHeight: 17,
+  },
+  aiRegenerateBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: PINK,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  aiRegeneateBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: PINK,
   },
   aiClearBtn: {
     alignSelf: "flex-start",
