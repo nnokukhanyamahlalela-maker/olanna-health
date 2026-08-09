@@ -197,6 +197,9 @@ export default function ProfileScreen() {
 
       {/* My Health Summary — primary CTA, reachable from Profile */}
       <View style={styles.section}>
+        <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
+          Health
+        </ThemedText>
         <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
             icon="clipboard"
