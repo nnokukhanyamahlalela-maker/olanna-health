@@ -91,6 +91,94 @@ function SymptomCard({
   );
 }
 
+// ─── Quick-log summary banner ─────────────────────────────────────────────────
+
+const FLOW_LABELS: Record<string, string> = {
+  spotting: '🩸 Spotting',
+  light:    '🩸 Light',
+  medium:   '🩸 Medium',
+  heavy:    '🩸 Heavy',
+};
+
+const MOOD_LABELS: Record<string, string> = {
+  happy:     '😊 Happy',
+  calm:      '😌 Calm',
+  anxious:   '😟 Anxious',
+  sad:       '😢 Sad',
+  irritable: '😤 Irritable',
+  energetic: '⚡ Energetic',
+};
+
+const ENERGY_LABELS: Record<number, string> = {
+  1: '😴 Very Low',
+  2: '🥱 Low',
+  3: '🙂 Medium',
+  4: '😄 High',
+  5: '🚀 Very High',
+};
+
+function QuickLogBanner({
+  flow,
+  mood,
+  energy,
+  phaseColor,
+}: {
+  flow:    string | null;
+  mood:    string | null;
+  energy:  number | null;
+  phaseColor: string;
+}) {
+  const items: { label: string; value: string }[] = [];
+  if (flow   != null) items.push({ label: 'Flow',   value: FLOW_LABELS[flow]   ?? flow });
+  if (mood   != null) items.push({ label: 'Mood',   value: MOOD_LABELS[mood]   ?? mood });
+  if (energy != null) items.push({ label: 'Energy', value: ENERGY_LABELS[energy] ?? String(energy) });
+
+  if (items.length === 0) return null;
+
+  return (
+    <View style={[bannerStyles.card, { borderLeftColor: phaseColor }]}>
+      <Text style={[bannerStyles.heading, { color: phaseColor }]}>Already logged today</Text>
+      <View style={bannerStyles.row}>
+        {items.map((item) => (
+          <View key={item.label} style={[bannerStyles.pill, { backgroundColor: phaseColor + '1A' }]}>
+            <Text style={[bannerStyles.pillText, { color: phaseColor }]}>{item.value}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const bannerStyles = StyleSheet.create({
+  card: {
+    backgroundColor: '#FAF8F3',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    padding: 12,
+    gap: 8,
+  },
+  heading: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  pill: {
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+});
+
 // ─── Pattern insight card ─────────────────────────────────────────────────────
 
 function PatternInsightCard({
@@ -125,17 +213,32 @@ export default function CheckInScreen() {
   const [currentPhase, setCurrentPhase] = useState<Phase>('follicular');
   const [summaryVisible, setSummaryVisible] = useState(false);
 
+  // Quick-log fields already recorded earlier today (read-only display)
+  const [quickLogFlow, setQuickLogFlow] = useState<string | null>(null);
+  const [quickLogMood, setQuickLogMood] = useState<string | null>(null);
+  const [quickLogEnergy, setQuickLogEnergy] = useState<number | null>(null);
+
   useEffect(() => {
     (async () => {
       try {
-        const existingCheckIn = await getDailyCheckIn(today);
+        const [existingCheckIn, allLogs, profile] = await Promise.all([
+          getDailyCheckIn(today),
+          storage.getDailyLogs(),
+          storage.getUserProfile(),
+        ]);
         if (existingCheckIn) {
           const m = new Map<string, SymptomLog>();
           existingCheckIn.symptoms.forEach((s) => m.set(`${s.categoryId}-${s.symptomId}`, s));
           setSelectedSymptoms(m);
           setPainPoints(existingCheckIn.painPoints || []);
         }
-        const profile = await storage.getUserProfile();
+        // Surface any quick-log fields (flow / mood / energy) recorded earlier today
+        const todayLog = allLogs.find((l) => l.date === today);
+        if (todayLog) {
+          if (todayLog.flow)   setQuickLogFlow(todayLog.flow);
+          if (todayLog.mood)   setQuickLogMood(todayLog.mood);
+          if (todayLog.energy != null) setQuickLogEnergy(todayLog.energy);
+        }
         if (profile?.lastPeriodStart) {
           const start = new Date(profile.lastPeriodStart + "T12:00:00");
           const daysSince = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
@@ -266,6 +369,14 @@ export default function CheckInScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + 80 }]}
           showsVerticalScrollIndicator={false}
         >
+          {/* Quick-log data recorded earlier today */}
+          <QuickLogBanner
+            flow={quickLogFlow}
+            mood={quickLogMood}
+            energy={quickLogEnergy}
+            phaseColor={phaseColor}
+          />
+
           {/* Pattern insight */}
           {patternMessage && (
             <PatternInsightCard message={patternMessage} phaseColor={phaseColor} />
