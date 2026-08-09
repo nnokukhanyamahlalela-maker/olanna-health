@@ -563,7 +563,8 @@ export function LotusCycleScreen() {
             const msg = buildLannaReaction(
               recent,
               { domain, log: savedLog },
-              hadExistingTodayLog
+              hadExistingTodayLog,
+              currentPhase
             );
             setReactionMessage(msg);
             setReactionVisible(true);

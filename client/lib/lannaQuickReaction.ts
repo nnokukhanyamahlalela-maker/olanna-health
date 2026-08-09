@@ -132,11 +132,14 @@ export interface JustSavedLog {
  * @param justSaved          The domain and log entry that was just saved
  * @param hadExistingTodayLog  Whether today already had a log *before* this save.
  *                           Must be captured from local state before the save fires.
+ * @param currentPhase       Optional phase name (e.g. "luteal") used to personalise
+ *                           cluster-match copy. Falls back to "this phase" when absent.
  */
 export function buildLannaReaction(
   recentLogs: DailyLog[],
   justSaved: JustSavedLog,
-  hadExistingTodayLog: boolean
+  hadExistingTodayLog: boolean,
+  currentPhase?: string
 ): string {
   const { domain, log } = justSaved;
 
@@ -160,7 +163,8 @@ export function buildLannaReaction(
   // ── 2. Frequent symptom / mood cluster ──────────────────────────────────────
   const freqSymptom = frequentSymptom(recentLogs, domain);
   if (freqSymptom) {
-    return `You've been logging ${freqSymptom} a lot lately. Lanna's noticed a pattern — check your Check-In.`;
+    const phaseLabel = currentPhase ? `this ${currentPhase} phase` : "this phase";
+    return `You've been logging ${freqSymptom} a lot ${phaseLabel}. Lanna's noticed a pattern — check your Check-In.`;
   }
 
   // ── 3. Repeated low energy ───────────────────────────────────────────────────
