@@ -289,6 +289,82 @@ describe("DailyLog merge — quick-log and full Check-In used on the same day", 
     expect(log.symptoms).toContain("bloating");
   });
 
+  it("preserves quick-log energy (numeric) after a full Check-In saves symptoms on the same day", async () => {
+    // 1. User quick-logs energy level 3 in the morning
+    await quickLogMergeAndSave(storageMock, TODAY, "energy", 3);
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    expect(logs[0].energy).toBe(3);
+
+    // 2. User then completes a full Check-In with symptoms
+    await checkInMergeAndSave(storageMock, TODAY, ["fatigue", "bloating"]);
+
+    // 3. DailyLog must still carry energy:3 alongside the check-in symptoms
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    const log = logs[0];
+    expect(log.energy).toBe(3);
+    expect(log.symptoms).toContain("fatigue");
+    expect(log.symptoms).toContain("bloating");
+  });
+
+  it("preserves a sleep value already in the DailyLog after a full Check-In saves symptoms on the same day", async () => {
+    // sleep is not a QuickLog domain; it can be written by other app paths.
+    // CheckInScreen.handleSave spreads the existing DailyLog (...existing),
+    // so sleep must survive regardless of which code path originally set it.
+
+    // 1. Seed today's DailyLog with sleep:7 directly (mirrors any non-QuickLog writer)
+    await storageMock.addDailyLog({
+      id: makeId(),
+      date: TODAY,
+      symptoms: [],
+      sleep: 7,
+      createdAt: new Date().toISOString(),
+    });
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    expect(logs[0].sleep).toBe(7);
+
+    // 2. User then completes a full Check-In with symptoms
+    await checkInMergeAndSave(storageMock, TODAY, ["headache", "cramps"]);
+
+    // 3. DailyLog must still carry sleep:7 alongside the check-in symptoms —
+    //    the spread in handleSave must not drop numeric fields it didn't write
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    const log = logs[0];
+    expect(log.sleep).toBe(7);
+    expect(log.symptoms).toContain("headache");
+    expect(log.symptoms).toContain("cramps");
+  });
+
+  it("preserves both energy (quick-logged) and sleep (pre-existing) when a Check-In follows on the same day", async () => {
+    // 1. energy: set via QuickLogSheet (real production path)
+    await quickLogMergeAndSave(storageMock, TODAY, "energy", 5);
+
+    // 2. sleep: seed directly, as if written by a separate app path
+    const existing = (await storageMock.getDailyLogs())[0];
+    await storageMock.addDailyLog({ ...existing, sleep: 6 });
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    expect(logs[0].energy).toBe(5);
+    expect(logs[0].sleep).toBe(6);
+
+    // 3. Full Check-In runs
+    await checkInMergeAndSave(storageMock, TODAY, ["nausea"]);
+
+    // 4. Both numeric fields must survive unchanged; still only one DailyLog entry
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    const log = logs[0];
+    expect(log.energy).toBe(5);
+    expect(log.sleep).toBe(6);
+    expect(log.symptoms).toContain("nausea");
+  });
+
   /**
    * ── Task 43: body-map pain points must not duplicate quick-log symptoms ────
    *
