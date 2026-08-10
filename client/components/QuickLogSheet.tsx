@@ -25,6 +25,7 @@ import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path, Ellipse, Polygon, Rect } from "react-native-svg";
 import { storage, DailyLog } from "@/lib/storage";
 import { generateId } from "@/lib/storage";
+import { localDateString } from "@/lib/quickLogHelpers";
 
 // ─── Domain types ─────────────────────────────────────────────────────────────
 
@@ -234,7 +235,7 @@ async function mergeAndSave(
   value: string | number,
   symptoms?: string[]
 ): Promise<DailyLog> {
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateString();
   const allLogs = await storage.getDailyLogs();
   const existing = allLogs.find((l) => l.date === today);
 

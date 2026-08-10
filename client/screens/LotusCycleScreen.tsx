@@ -19,6 +19,12 @@ import {
 } from "@/constants/phaseConfig";
 import { neutral } from "@/constants/colors";
 import { storage, UserProfile, DailyLog } from "@/lib/storage";
+import {
+  getTodayQuickLog,
+  localDateString,
+  TodayQuickLog,
+  ENERGY_LABELS,
+} from "@/lib/quickLogHelpers";
 import { useLotusCycle } from "@/hooks/useLotusCycle";
 import { LannaMascot } from "@/components/LannaMascot";
 import { LannaInsightBadge } from "@/components/LannaInsightBadge";
@@ -134,49 +140,8 @@ const QUICK_LOG_ITEMS: Array<{
 ];
 
 // ─── Today quick-log summary ─────────────────────────────────────────────────
-
-interface TodayQuickLog {
-  flow?: string;
-  mood?: string;
-  pain?: string;
-  energy?: string;
-}
-
-const ENERGY_LABELS: Record<number, string> = {
-  1: "Very Low",
-  2: "Low",
-  3: "Medium",
-  4: "High",
-  5: "Very High",
-};
-
-function getTodayQuickLog(logs: DailyLog[]): TodayQuickLog {
-  const today = new Date().toISOString().split("T")[0];
-  const todayLog = logs.find((l) => l.date.slice(0, 10) === today);
-  if (!todayLog) return {};
-
-  const result: TodayQuickLog = {};
-
-  if (todayLog.flow) {
-    result.flow = todayLog.flow.charAt(0).toUpperCase() + todayLog.flow.slice(1);
-  }
-  if (todayLog.mood) {
-    result.mood = todayLog.mood.charAt(0).toUpperCase() + todayLog.mood.slice(1);
-  }
-  if (todayLog.energy != null) {
-    result.energy = ENERGY_LABELS[todayLog.energy] ?? String(todayLog.energy);
-  }
-  // Derive pain level from symptom IDs written by QuickLogSheet
-  if (todayLog.symptoms.includes("deep-pelvic-pain")) {
-    result.pain = "Severe";
-  } else if (todayLog.symptoms.includes("pelvic-heaviness")) {
-    result.pain = "Moderate";
-  } else if (todayLog.symptoms.includes("cramps")) {
-    result.pain = "Mild";
-  }
-
-  return result;
-}
+// getTodayQuickLog, TodayQuickLog, ENERGY_LABELS are imported from
+// @/lib/quickLogHelpers — see that file for timezone-safety notes.
 
 function QuickLogRow({
   onPress,
@@ -343,8 +308,9 @@ export function LotusCycleScreen() {
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
   // Today's raw log — used to pre-fill the QuickLogSheet with the user's earlier selection.
+  // Uses localDateString() to avoid UTC-vs-local midnight mismatch (see quickLogHelpers.ts).
   const todayRawLog = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = localDateString();
     return dailyLogs.find((l) => l.date.slice(0, 10) === today) ?? null;
   }, [dailyLogs]);
 
@@ -561,7 +527,7 @@ export function LotusCycleScreen() {
           // Capture whether today already had a log BEFORE the save refreshed state.
           // This must be read from pre-save dailyLogs so pattern logic is not
           // masked by the upserted single-log-per-date storage model.
-          const today = new Date().toISOString().split("T")[0];
+          const today = localDateString();
           const hadExistingTodayLog = dailyLogs.some(
             (l) => l.date.slice(0, 10) === today
           );
