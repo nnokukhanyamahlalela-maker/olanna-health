@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -32,7 +32,7 @@ import { detectConsecutiveHighPain } from "@/lib/painStreakDetector";
 import { QUICK_LOG_MASCOTS } from "@/components/QuickLogMascot";
 import { TAB_BAR_HEIGHT } from "@/components/CustomTabBar";
 import { HealthSummarySheet } from "@/components/HealthSummarySheet";
-import { QuickLogSheet, QuickLogDomain } from "@/components/QuickLogSheet";
+import { QuickLogSheet, QuickLogDomain, QuickLogPrefill } from "@/components/QuickLogSheet";
 import { LannaReactionCard } from "@/components/LannaReactionCard";
 import { buildLannaReaction } from "@/lib/lannaQuickReaction";
 import {
@@ -342,6 +342,21 @@ export function LotusCycleScreen() {
   const userName = profile?.name || "";
   const greeting = userName ? `Hey ${userName}` : "Hey";
 
+  // Today's raw log — used to pre-fill the QuickLogSheet with the user's earlier selection.
+  const todayRawLog = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return dailyLogs.find((l) => l.date.slice(0, 10) === today) ?? null;
+  }, [dailyLogs]);
+
+  const quickLogPrefill: QuickLogPrefill | undefined = todayRawLog
+    ? {
+        flow: todayRawLog.flow,
+        mood: todayRawLog.mood ?? undefined,
+        energy: todayRawLog.energy ?? undefined,
+        symptoms: todayRawLog.symptoms,
+      }
+    : undefined;
+
   // Count cycles from actual logged period start events (flow days) in dailyLogs.
   const cycleCount = countLoggedCycles(dailyLogs);
   const milestone = calcMilestone(dailyLogs, cycleCount);
@@ -540,6 +555,7 @@ export function LotusCycleScreen() {
       <QuickLogSheet
         visible={quickLogVisible}
         domain={quickLogDomain}
+        prefill={quickLogPrefill}
         onDismiss={() => setQuickLogVisible(false)}
         onSaved={(domain, savedLog) => {
           // Capture whether today already had a log BEFORE the save refreshed state.

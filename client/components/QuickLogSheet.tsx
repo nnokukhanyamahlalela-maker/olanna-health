@@ -10,7 +10,7 @@
  * can read it. Previous pain quick-log symptoms are replaced on each save.
  */
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Modal,
   View,
@@ -292,15 +292,26 @@ function OptionPill({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+// Values from today's existing log, used to pre-select pills on open.
+export interface QuickLogPrefill {
+  flow?: string;
+  mood?: string;
+  energy?: number;
+  /** Raw symptom IDs from today's DailyLog — pain level is derived from these. */
+  symptoms?: string[];
+}
+
 interface Props {
   visible: boolean;
   domain: QuickLogDomain;
   onDismiss: () => void;
   /** Called after the log is persisted. Receives the domain and the merged log. */
   onSaved?: (domain: QuickLogDomain, log: import("@/lib/storage").DailyLog) => void;
+  /** Today's already-logged values. When provided, the matching pill is pre-selected on open. */
+  prefill?: QuickLogPrefill;
 }
 
-export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
+export function QuickLogSheet({ visible, domain, onDismiss, onSaved, prefill }: Props) {
   const insets = useSafeAreaInsets();
 
   const [selectedFlow,   setSelectedFlow]   = useState<string | null>(null);
@@ -310,6 +321,28 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
   const [saving,         setSaving]         = useState(false);
   const [saved,          setSaved]          = useState(false);
   const [saveError,      setSaveError]      = useState<string | null>(null);
+
+  // Pre-select the previously logged value for the active domain when the sheet opens.
+  useEffect(() => {
+    if (!visible) return;
+    if (domain === "flow" && prefill?.flow) {
+      setSelectedFlow(prefill.flow);
+    } else if (domain === "mood" && prefill?.mood) {
+      setSelectedMood(prefill.mood);
+    } else if (domain === "energy" && prefill?.energy != null) {
+      setSelectedEnergy(prefill.energy);
+    } else if (domain === "pain" && prefill?.symptoms) {
+      const syms = prefill.symptoms;
+      if (syms.includes("deep-pelvic-pain")) {
+        setSelectedPain("severe");
+      } else if (syms.includes("pelvic-heaviness")) {
+        setSelectedPain("moderate");
+      } else if (syms.includes("cramps")) {
+        setSelectedPain("mild");
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   // Guard: tracks the pending close-after-animation timer so handleDismiss can
   // cancel it when the user taps "Not right now" during the 700 ms window.
