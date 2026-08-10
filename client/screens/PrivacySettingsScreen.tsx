@@ -317,6 +317,19 @@ export default function PrivacySettingsScreen() {
 
       <Animated.View entering={FadeInDown.duration(300).delay(400)}>
         <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.error }]}>Delete Data</ThemedText>
+
+        <GlassSurface style={[styles.erasureNote, { borderColor: theme.error + "30" }]}>
+          <Feather name="info" size={16} color={theme.error} style={{ marginTop: 2 }} />
+          <View style={{ flex: 1 }}>
+            <ThemedText type="body" style={{ fontWeight: "600", color: theme.error, marginBottom: 4 }}>
+              No server account to delete
+            </ThemedText>
+            <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
+              Olanna does not create an account on our servers. We never receive a copy of your health data, so there is nothing on our end to erase. To permanently remove everything, use "Delete All Data" below — this immediately and irreversibly deletes all data from this device only.
+            </ThemedText>
+          </View>
+        </GlassSurface>
+
         <View style={styles.section}>
           <ActionRow
             icon="trash-2"
@@ -335,7 +348,7 @@ export default function PrivacySettingsScreen() {
           <ActionRow
             icon="trash-2"
             title="Delete All Data"
-            description="Permanently remove all your data from this device."
+            description="Permanently and immediately erases all data from this device. This fulfils your right to erasure — it cannot be undone."
             onPress={() => handleDeleteData("all")}
             destructive
           />
@@ -429,5 +442,14 @@ const styles = StyleSheet.create({
   },
   policyText: {
     flex: 1,
+  },
+  erasureNote: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    alignItems: "flex-start",
   },
 });

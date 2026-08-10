@@ -449,37 +449,707 @@ function GenericSymptom({ size, color = "#D4B8C8" }: { size: number; color?: str
   );
 }
 
+// ─── Additional characters ────────────────────────────────────────────────────
+
+/** Irritable — orange face, V-brows, tight mouth, steam wisps */
+function Irritable({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#E89060" />
+      <Cheeks lx={20} rx={44} y={38} color="#F5C0A0" />
+      <Path d="M 17 24 Q 21 20 25 23" stroke="#5A2000" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+      <Path d="M 39 23 Q 43 20 47 24" stroke="#5A2000" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+      <DotEyes lx={25} rx={39} y={32} r={2.5} fill="#5A2000" />
+      <Path d="M 24 44 L 40 44" stroke="#5A2000" strokeWidth={2.2} strokeLinecap="round" />
+      <Path d="M 47 22 Q 49 18 47 14" stroke="#5A2000" strokeWidth={1.2} fill="none" strokeLinecap="round" opacity={0.5} />
+      <Path d="M 51 25 Q 53 21 51 17" stroke="#5A2000" strokeWidth={1.2} fill="none" strokeLinecap="round" opacity={0.5} />
+    </Svg>
+  );
+}
+
+/** Anxious — lavender face, worried brows, sweat drop */
+function Anxious({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#C4B8D8" />
+      <Cheeks lx={20} rx={44} y={38} color="#D8C8F0" />
+      <Path d="M 17 25 Q 21 21 25 24" stroke="#3A2860" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 39 24 Q 43 21 47 25" stroke="#3A2860" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <DotEyes lx={25} rx={39} y={33} r={2.5} fill="#3A2860" />
+      <Path d="M 25 42 Q 28 39 32 42 Q 36 45 39 42" stroke="#3A2860" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 48 22 L 47 28 Q 46 30 48 30 Q 50 30 49 28 Z" fill="#A898C8" opacity={0.7} />
+    </Svg>
+  );
+}
+
+/** Low mood — blue face with frown and rain drops */
+function LowMood({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={36} r={22} fill="#7AAAD0" />
+      <Cheeks lx={21} rx={43} y={42} color="#A0C8F0" />
+      <SleepyEyes lx={25} rx={39} y={32} stroke="#1A3858" />
+      <Frown cx={32} cy={44} w={12} stroke="#1A3858" />
+      {[22,30,38,26,34].map((x, i) => (
+        <Path key={i} d={`M ${x} ${14 + (i % 3) * 3} L ${x - 1} ${20 + (i % 3) * 3}`}
+          stroke="#4A88C0" strokeWidth={2} strokeLinecap="round" />
+      ))}
+    </Svg>
+  );
+}
+
+/** Calm & grounded — soft green face, closed eyes, leaf motif */
+function CalmGrounded({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={32} cy={34} rx={24} ry={22} fill="#7DC89A" />
+      <Ellipse cx={22} cy={24} rx={7} ry={5} fill="white" opacity={0.15} />
+      <SleepyEyes lx={24} rx={40} y={32} stroke="#1A4828" />
+      <Smile cx={32} cy={42} w={12} stroke="#1A4828" />
+      <Path d="M 50 16 Q 54 10 58 12 Q 56 18 50 16 Z" fill="#5AA870" />
+      <Path d="M 50 16 L 54 12" stroke="#3A8050" strokeWidth={1.5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Tearful — face with rolling tear */
+function Tearful({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#8EB8D8" />
+      <Cheeks lx={20} rx={44} y={38} color="#C0D8F0" />
+      <SleepyEyes lx={25} rx={39} y={28} stroke="#1A3858" />
+      <Frown cx={32} cy={42} w={10} stroke="#1A3858" />
+      <Path d="M 25 30 L 24 36 Q 23 39 25 39 Q 27 39 26 36 Z" fill="#7AAAD0" opacity={0.85} />
+    </Svg>
+  );
+}
+
+/** Brain fog — grey cloud face with hazy squint eyes (distinct from Fatigue) */
+function BrainFogChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 72 64">
+      <Circle cx={36} cy={42} r={18} fill="#9AAABE" />
+      <Circle cx={22} cy={44} r={13} fill="#9AAABE" />
+      <Circle cx={50} cy={44} r={13} fill="#9AAABE" />
+      <Circle cx={28} cy={32} r={13} fill="#A8B8CC" />
+      <Circle cx={44} cy={30} r={15} fill="#A8B8CC" />
+      <Circle cx={36} cy={26} r={11} fill="#B8C8DC" />
+      <Path d="M 27 44 Q 29 42 31 44 Q 33 46 35 44" stroke="#3A4858" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 37 44 Q 39 42 41 44 Q 43 46 45 44" stroke="#3A4858" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <NeutralMouth cx={36} cy={52} w={10} stroke="#3A4858" />
+    </Svg>
+  );
+}
+
+/** Insomnia — dark circle, wide open eyes, crescent moon and stars */
+function InsomniaChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={34} r={22} fill="#4A3870" />
+      <Cheeks lx={21} rx={43} y={40} color="#9880C0" />
+      <DotEyes lx={25} rx={39} y={30} r={3.5} fill="#E8D8F0" />
+      <Circle cx={25.8} cy={28.8} r={1} fill="white" />
+      <Circle cx={39.8} cy={28.8} r={1} fill="white" />
+      <NeutralMouth cx={32} cy={44} w={10} stroke="#9880C0" />
+      <Path d="M 42 8 Q 48 12 46 20 Q 54 16 54 10 Q 52 4 44 4 Q 40 4 38 8 Q 40 7 42 8 Z" fill="#F0D080" />
+      <Circle cx={20} cy={10} r={1.5} fill="#F0D080" />
+      <Circle cx={28} cy={6}  r={1}   fill="#F0D080" />
+      <Circle cx={14} cy={18} r={1}   fill="#F0D080" />
+    </Svg>
+  );
+}
+
+/** Good sleep — crescent moon with peaceful face and Zs */
+function SleepGoodChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 6 Q 44 10 48 24 Q 52 38 44 50 Q 38 56 30 56 Q 20 56 14 48 Q 8 38 12 26 Q 20 28 28 22 Q 36 16 32 6 Z"
+        fill="#9080C0" />
+      <SleepyEyes lx={26} rx={38} y={36} stroke="#F0E8FF" />
+      <Smile cx={32} cy={44} w={10} stroke="#F0E8FF" />
+      <Path d="M 46 18 L 52 18 L 46 24 L 52 24" stroke="#F0D080" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M 50 10 L 54 10 L 50 15 L 54 15" stroke="#F0D080" strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Poor sleep — heavy dark circles under droopy eyes */
+function SleepPoorChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#A898B8" />
+      <Ellipse cx={24} cy={33} rx={8}  ry={5} fill="#7870A0" opacity={0.5} />
+      <Ellipse cx={40} cy={33} rx={8}  ry={5} fill="#7870A0" opacity={0.5} />
+      <SleepyEyes lx={24} rx={40} y={30} stroke="#3A2858" />
+      <Frown cx={32} cy={44} w={10} stroke="#3A2858" />
+      <Path d="M 48 14 L 54 14 L 48 20 L 54 20" stroke="#9888B0" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** High physical energy — sun face with radiating rays */
+function EnergyHighChar({ size }: { size: number }) {
+  const rays = Array.from({ length: 8 }, (_, i) => {
+    const angle = (i / 8) * Math.PI * 2;
+    return { x1: 32 + 26 * Math.cos(angle), y1: 32 + 26 * Math.sin(angle), x2: 32 + 32 * Math.cos(angle), y2: 32 + 32 * Math.sin(angle) };
+  });
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      {rays.map((r, i) => (
+        <Path key={i} d={`M ${r.x1} ${r.y1} L ${r.x2} ${r.y2}`} stroke="#E09030" strokeWidth={2.5} strokeLinecap="round" />
+      ))}
+      <Circle cx={32} cy={32} r={20} fill="#F5C840" />
+      <Cheeks lx={21} rx={43} y={36} color="#F0A840" />
+      <DotEyes lx={26} rx={38} y={28} r={2.5} fill="#4A2800" />
+      <Smile cx={32} cy={38} w={12} stroke="#4A2800" />
+    </Svg>
+  );
+}
+
+/** Libido rising — heart with upward arrow */
+function LibidoUpChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 56 C 16 44 8 34 8 24 C 8 16 14 10 22 10 C 26 10 30 12 32 16 C 34 12 38 10 42 10 C 50 10 56 16 56 24 C 56 34 48 44 32 56 Z"
+        fill="#F07090" />
+      <Path d="M 32 40 L 32 18" stroke="white" strokeWidth={3} strokeLinecap="round" />
+      <Path d="M 24 26 L 32 18 L 40 26" stroke="white" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Libido falling — greyed heart with downward arrow */
+function LibidoDownChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 56 C 16 44 8 34 8 24 C 8 16 14 10 22 10 C 26 10 30 12 32 16 C 34 12 38 10 42 10 C 50 10 56 16 56 24 C 56 34 48 44 32 56 Z"
+        fill="#B09098" />
+      <Path d="M 32 20 L 32 42" stroke="white" strokeWidth={3} strokeLinecap="round" />
+      <Path d="M 24 34 L 32 42 L 40 34" stroke="white" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Constipation — strained oval face, pressure lines below */
+function ConstipationChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={32} cy={32} rx={22} ry={20} fill="#C4905C" />
+      <Cheeks lx={21} rx={43} y={36} color="#E0B880" />
+      <PainedEyes lx={25} rx={39} y={27} stroke="#5A2800" />
+      <Path d="M 26 42 Q 30 38 34 42 Q 38 46 42 42" stroke="#5A2800" strokeWidth={2} fill="none" strokeLinecap="round" />
+      {[18, 25, 32, 39, 46].map((x) => (
+        <Path key={x} d={`M ${x} 55 L ${x} 62`} stroke="#A06030" strokeWidth={2} strokeLinecap="round" />
+      ))}
+    </Svg>
+  );
+}
+
+/** Diarrhea — rushing oval with motion lines */
+function DiarrheaChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 4 28 L 16 28" stroke="#60A8A0" strokeWidth={2.5} strokeLinecap="round" opacity={0.6} />
+      <Path d="M 6 36 L 18 36" stroke="#60A8A0" strokeWidth={2}   strokeLinecap="round" opacity={0.4} />
+      <Path d="M 4 44 L 14 44" stroke="#60A8A0" strokeWidth={1.5} strokeLinecap="round" opacity={0.3} />
+      <Ellipse cx={36} cy={36} rx={22} ry={20} fill="#60A8A0" />
+      <Cheeks lx={26} rx={46} y={40} color="#A0D8D0" />
+      <DotEyes lx={30} rx={42} y={30} r={2.5} fill="#1A3830" />
+      <Path d="M 28 44 Q 32 48 36 44 Q 40 40 44 44" stroke="#1A3830" strokeWidth={2} fill="none" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Ovary pain — oval with pulse rings */
+function OvaryPain({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={28} fill="none" stroke="#F5A0B8" strokeWidth={1.5} strokeDasharray="4,4" opacity={0.4} />
+      <Circle cx={32} cy={32} r={22} fill="none" stroke="#F5A0B8" strokeWidth={1.5} strokeDasharray="4,4" opacity={0.65} />
+      <Ellipse cx={32} cy={34} rx={14} ry={12} fill="#F0B8CC" />
+      <Cheeks lx={24} rx={40} y={38} color="#E07090" />
+      <PainedEyes lx={27} rx={37} y={30} stroke="#8B304C" />
+      <Frown cx={32} cy={40} w={8} stroke="#8B304C" />
+    </Svg>
+  );
+}
+
+/** Hip pain — angled oval with radiating pain dot */
+function HipPainChar({ size }: { size: number }) {
+  const rays = Array.from({ length: 6 }, (_, i) => {
+    const angle = (i / 6) * Math.PI * 2;
+    return { x1: 46 + 5 * Math.cos(angle), y1: 26 + 5 * Math.sin(angle), x2: 46 + 9 * Math.cos(angle), y2: 26 + 9 * Math.sin(angle) };
+  });
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={32} cy={38} rx={26} ry={18} fill="#C8A090" transform="rotate(-15, 32, 38)" />
+      <Circle cx={46} cy={26} r={8} fill="#E8B090" />
+      <Circle cx={46} cy={26} r={4} fill="#D85A30" opacity={0.7} />
+      {rays.map((r, i) => (
+        <Path key={i} d={`M ${r.x1} ${r.y1} L ${r.x2} ${r.y2}`} stroke="#D85A30" strokeWidth={1.5} strokeLinecap="round" opacity={0.6} />
+      ))}
+    </Svg>
+  );
+}
+
+/** Rectal pain — face with pain star at back */
+function RectalPainChar({ size }: { size: number }) {
+  const rays = Array.from({ length: 8 }, (_, i) => {
+    const angle = (i / 8) * Math.PI * 2;
+    return { x1: 52 + 5 * Math.cos(angle), y1: 18 + 5 * Math.sin(angle), x2: 52 + 9 * Math.cos(angle), y2: 18 + 9 * Math.sin(angle) };
+  });
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={30} cy={36} rx={24} ry={20} fill="#C89080" />
+      <Cheeks lx={19} rx={41} y={42} color="#E0B090" />
+      <SleepyEyes lx={23} rx={37} y={31} stroke="#5A2000" />
+      <Frown cx={30} cy={46} w={10} stroke="#5A2000" />
+      <Circle cx={52} cy={18} r={5} fill="#D85A30" opacity={0.8} />
+      {rays.map((r, i) => (
+        <Path key={i} d={`M ${r.x1} ${r.y1} L ${r.x2} ${r.y2}`} stroke="#D85A30" strokeWidth={1.5} strokeLinecap="round" />
+      ))}
+    </Svg>
+  );
+}
+
+/** Leg radiating pain — vertical leg with lightning running down */
+function LegPainChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size * 1.2} viewBox="0 0 48 64">
+      <Rect x={16} y={2} width={16} height={60} rx={8} fill="#C8B090" />
+      <Path d="M 28 8 L 22 28 L 27 28 L 21 52 L 34 30 L 29 30 Z" fill="#D85A30" opacity={0.85} />
+    </Svg>
+  );
+}
+
+/** Frequent infections — face with germ spots radiating spikes */
+function FrequentInfectionsChar({ size }: { size: number }) {
+  const spots = [{ x: 14, y: 18 }, { x: 50, y: 24 }, { x: 48, y: 46 }, { x: 12, y: 42 }];
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={22} fill="#88B888" />
+      <Cheeks lx={21} rx={43} y={38} color="#A8D0A8" />
+      <DotEyes lx={25} rx={39} y={27} r={2.5} fill="#1A3820" />
+      <NeutralMouth cx={32} cy={40} w={10} stroke="#1A3820" />
+      {spots.map(({ x, y }, si) => (
+        <React.Fragment key={si}>
+          <Circle cx={x} cy={y} r={5} fill="#D85A30" opacity={0.75} />
+          {Array.from({ length: 6 }, (_, j) => {
+            const a = (j / 6) * Math.PI * 2;
+            return <Path key={j} d={`M ${x + 4 * Math.cos(a)} ${y + 4 * Math.sin(a)} L ${x + 7.5 * Math.cos(a)} ${y + 7.5 * Math.sin(a)}`}
+              stroke="#D85A30" strokeWidth={1.2} strokeLinecap="round" opacity={0.7} />;
+          })}
+        </React.Fragment>
+      ))}
+    </Svg>
+  );
+}
+
+/** Heat face — sweating orange face with sun overhead */
+function HeatFaceChar({ size }: { size: number }) {
+  const sunRays = [0, 60, 120, 180, 240, 300];
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={10} r={7} fill="#F5C840" />
+      {sunRays.map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return <Path key={i} d={`M ${32 + 8 * Math.cos(rad)} ${10 + 8 * Math.sin(rad)} L ${32 + 13 * Math.cos(rad)} ${10 + 13 * Math.sin(rad)}`}
+          stroke="#F5C840" strokeWidth={2} strokeLinecap="round" />;
+      })}
+      <Circle cx={32} cy={40} r={20} fill="#F0A860" />
+      <Cheeks lx={20} rx={44} y={44} color="#F5C8A0" />
+      <DotEyes lx={25} rx={39} y={35} r={2.5} fill="#5A2800" />
+      <Frown cx={32} cy={48} w={10} stroke="#5A2800" />
+      <Path d="M 47 28 L 46 33 Q 45 35 47 35 Q 49 35 48 33 Z" fill="#F5C840" opacity={0.8} />
+      <Path d="M 52 34 L 51 38 Q 50 40 52 40 Q 54 40 53 38 Z" fill="#F5C840" opacity={0.6} />
+    </Svg>
+  );
+}
+
+/** Cold face — blue shivering face with snowflake */
+function ColdFaceChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={22} fill="#80B0D8" />
+      <Cheeks lx={20} rx={44} y={38} color="#A8D0F0" />
+      <Path d="M 22 27 Q 25 25 28 27" stroke="#1A3858" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 36 27 Q 39 25 42 27" stroke="#1A3858" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 26 42 Q 30 38 34 42 Q 38 46 42 42" stroke="#1A3858" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 52 10 L 52 24 M 46 13 L 58 21 M 46 21 L 58 13" stroke="#A8D8F8" strokeWidth={1.8} strokeLinecap="round" />
+      <Circle cx={52} cy={17} r={1.5} fill="#A8D8F8" />
+    </Svg>
+  );
+}
+
+/** Dehydration — dry cracked droplet */
+function DehydrationChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size * 1.1} viewBox="0 0 48 56">
+      <Path d="M 24 4 C 36 16 42 28 42 38 C 42 48 34 54 24 54 C 14 54 6 48 6 38 C 6 28 12 16 24 4 Z"
+        fill="#D8C8A8" stroke="#A89878" strokeWidth={1} />
+      <Path d="M 18 30 L 24 38 L 20 46" stroke="#A89878" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M 28 34 L 32 40 L 30 46" stroke="#A89878" strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M 14 38 L 20 34" stroke="#A89878" strokeWidth={1.5} fill="none" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Feeling intuitive — eye inside a crescent moon */
+function FeelingIntuitiveChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 6 Q 44 10 48 24 Q 52 38 44 50 Q 38 56 30 56 Q 20 56 14 48 Q 8 38 12 26 Q 20 28 28 22 Q 36 16 32 6 Z"
+        fill="#9880C0" />
+      <Ellipse cx={30} cy={36} rx={10} ry={7} fill="white" />
+      <Circle cx={30} cy={36} r={5} fill="#6A50A0" />
+      <Circle cx={30} cy={36} r={3} fill="#3A2870" />
+      <Circle cx={32} cy={34} r={1.2} fill="white" />
+      <Circle cx={46} cy={18} r={1.5} fill="#F0D080" />
+      <Circle cx={50} cy={28} r={1}   fill="#F0D080" />
+    </Svg>
+  );
+}
+
+/** Weather sensitivity — circle split: sunny left, rainy right */
+function WeatherSensitivityChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 8 A 24 24 0 0 1 32 56 L 32 8 Z" fill="#F5D060" />
+      <Path d="M 32 8 A 24 24 0 0 0 32 56 L 32 8 Z" fill="#9AAABE" />
+      <Path d="M 32 8 L 32 56" stroke="white" strokeWidth={2} />
+      {[270, 225, 180].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return <Path key={i} d={`M ${32 + 25 * Math.cos(rad)} ${32 + 25 * Math.sin(rad)} L ${32 + 30 * Math.cos(rad)} ${32 + 30 * Math.sin(rad)}`}
+          stroke="#E0B000" strokeWidth={2} strokeLinecap="round" />;
+      })}
+      {[{ x: 42, y: 40 }, { x: 48, y: 34 }, { x: 44, y: 48 }].map(({ x, y }, i) => (
+        <Path key={i} d={`M ${x} ${y} L ${x - 2} ${y + 6} Q ${x - 2} ${y + 8} ${x} ${y + 8} Q ${x + 2} ${y + 8} ${x + 2} ${y + 6} Z`}
+          fill="#5A8AC0" opacity={0.8} />
+      ))}
+    </Svg>
+  );
+}
+
+/** Stress flare — face with lightning bolt at temple */
+function StressFlareChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={36} r={22} fill="#E8A890" />
+      <Cheeks lx={21} rx={43} y={42} color="#F0C0A8" />
+      <Path d="M 21 30 Q 24 27 27 30" stroke="#5A2800" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 37 30 Q 40 27 43 30" stroke="#5A2800" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <DotEyes lx={25} rx={39} y={32} r={2} fill="#5A2800" />
+      <Frown cx={32} cy={46} w={10} stroke="#5A2800" />
+      <Path d="M 52 18 L 46 30 L 50 30 L 44 44 L 58 26 L 54 26 Z"
+        fill="#F5C840" stroke="#D4A000" strokeWidth={0.8} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Back pain — oval with spine bars and pain dot */
+function BackPainChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={32} cy={34} rx={22} ry={20} fill="#B8A880" />
+      <Cheeks lx={21} rx={43} y={40} color="#D8C8A0" />
+      <SleepyEyes lx={25} rx={39} y={28} stroke="#4A3010" />
+      <Frown cx={32} cy={44} w={10} stroke="#4A3010" />
+      {[20, 26, 32, 38, 44].map((y) => (
+        <Rect key={y} x={29} y={y} width={6} height={3} rx={1} fill="#8A7050" opacity={0.6} />
+      ))}
+      <Rect x={30.5} y={18} width={3} height={30} rx={1} fill="#8A7050" opacity={0.3} />
+      <Circle cx={46} cy={20} r={5} fill="#D85A30" opacity={0.7} />
+    </Svg>
+  );
+}
+
+/** Dizziness — face with swirl eyes */
+function DizzinessChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#B8C8D8" />
+      <Cheeks lx={20} rx={44} y={38} color="#D0D8F0" />
+      <Path d="M 22 26 Q 20 22 24 20 Q 28 18 30 22 Q 32 26 28 28 Q 24 30 22 28"
+        stroke="#2A3848" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 42 26 Q 40 22 44 20 Q 48 18 50 22 Q 52 26 48 28 Q 44 30 42 28"
+        stroke="#2A3848" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <NeutralMouth cx={32} cy={44} w={10} stroke="#2A3848" />
+    </Svg>
+  );
+}
+
+/** Oily skin — shiny face with oil droplets on surface */
+function OilySkinChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Circle cx={32} cy={32} r={24} fill="#F0D090" />
+      <Ellipse cx={22} cy={22} rx={8} ry={6} fill="white" opacity={0.25} />
+      <Cheeks lx={20} rx={44} y={38} color="#F0A870" />
+      <DotEyes lx={25} rx={39} y={28} r={2.5} fill="#4A2810" />
+      <NeutralMouth cx={32} cy={42} w={9} stroke="#4A2810" />
+      {[{ x: 44, y: 16 }, { x: 50, y: 26 }, { x: 14, y: 22 }, { x: 12, y: 34 }].map(({ x, y }, i) => (
+        <Path key={i}
+          d={`M ${x} ${y} C ${x + 3} ${y + 2} ${x + 3} ${y + 6} ${x} ${y + 7} C ${x - 3} ${y + 6} ${x - 3} ${y + 2} ${x} ${y} Z`}
+          fill="#F5D040" opacity={0.75} />
+      ))}
+    </Svg>
+  );
+}
+
+/** Vaginal irritation — oval with zigzag scratch marks */
+function VaginalIrritationChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Ellipse cx={32} cy={34} rx={22} ry={20} fill="#D8A8B8" />
+      <Cheeks lx={21} rx={43} y={40} color="#E8C8D8" />
+      <DotEyes lx={25} rx={39} y={28} r={2.2} fill="#5A2040" />
+      <Path d="M 26 43 Q 30 40 34 43 Q 38 46 42 43" stroke="#5A2040" strokeWidth={2} fill="none" strokeLinecap="round" />
+      <Path d="M 10 28 L 14 24 L 18 28 L 22 24" stroke="#B07090" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M 42 20 L 46 16 L 50 20 L 54 16" stroke="#B07090" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Egg-white CM — translucent stretchy droplet */
+function CMEggwhiteChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size * 1.2} viewBox="0 0 48 60">
+      <Path d="M 24 4 C 30 12 36 22 36 34 C 36 46 30 54 24 54 C 18 54 12 46 12 34 C 12 22 18 12 24 4 Z"
+        fill="#D0E8F0" stroke="#80B8D0" strokeWidth={1.2} />
+      <Ellipse cx={19} cy={20} rx={5} ry={8} fill="white" opacity={0.3} transform="rotate(-20,19,20)" />
+      <Path d="M 22 54 Q 24 60 24 64 Q 24 68 26 64" stroke="#80B8D0" strokeWidth={2} fill="none" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Medication effective — capsule with checkmark */
+function MedEffectiveChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 12 32 A 12 12 0 0 1 12 8 L 36 8 L 36 32 Z" fill="#60A870" />
+      <Path d="M 36 8 L 36 32 L 52 32 A 12 12 0 0 0 52 8 Z" fill="#E0E8D8" />
+      <Path d="M 18 22 L 26 30 L 46 14" stroke="white" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M 12 32 L 52 32 A 12 12 0 0 1 12 56 A 12 12 0 0 1 12 32" fill="#D4C8E8" />
+      <Path d="M 22 46 L 42 46" stroke="#9888C0" strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Medication NOT effective — capsule with X */
+function MedNotEffectiveChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 12 32 A 12 12 0 0 1 12 8 L 36 8 L 36 32 Z" fill="#D85A30" />
+      <Path d="M 36 8 L 36 32 L 52 32 A 12 12 0 0 0 52 8 Z" fill="#E0E8D8" />
+      <Path d="M 18 14 L 28 26 M 28 14 L 18 26" stroke="white" strokeWidth={3} strokeLinecap="round" />
+      <Path d="M 12 32 L 52 32 A 12 12 0 0 1 12 56 A 12 12 0 0 1 12 32" fill="#D4C8E8" />
+      <Path d="M 22 46 L 42 46" stroke="#9888C0" strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Load-shedding disruption — lightning bolt with strike-through */
+function LoadSheddingChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 40 4 L 22 34 L 32 34 L 24 60 L 52 28 L 40 28 Z"
+        fill="#C0C0C0" stroke="#909090" strokeWidth={1} strokeLinejoin="round" />
+      <Path d="M 8 8 L 56 56" stroke="#D85A30" strokeWidth={5} strokeLinecap="round" />
+      <Path d="M 8 8 L 56 56" stroke="white" strokeWidth={2.5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Flow drop — simple teardrop for flow-type symptoms in check-in */
+function FlowDropChar({ size }: { size: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64">
+      <Path d="M 32 4 C 44 16 54 30 54 42 C 54 56 44 64 32 64 C 20 64 10 56 10 42 C 10 30 20 16 32 4 Z"
+        fill="#F07090" stroke="#C25080" strokeWidth={1} />
+      <Ellipse cx={22} cy={28} rx={7} ry={10} fill="white" opacity={0.15} transform="rotate(-20,22,28)" />
+    </Svg>
+  );
+}
+
 // ─── Symptom ID → component map ───────────────────────────────────────────────
 
 const CHARACTER_MAP: Record<string, React.ComponentType<{ size: number }>> = {
-  // Physical / hormonal
-  cramps: Cramps,
-  bloating: Bloating,
-  fatigue: Fatigue,
-  "pelvic-pain": PelvicPain,
-  "pelvic-heaviness": PelvicHeaviness,
-  "sugar-cravings": SugarCravings,
-  "water-retention": WaterRetention,
-  headache: Headache,
-  nausea: Nausea,
+  // ── Core cycle & hormonal ──
+  cramps:              Cramps,
+  bloating:            Bloating,
+  fatigue:             Fatigue,
+  "pelvic-pain":       PelvicPain,
+  "pelvic-heaviness":  PelvicHeaviness,
+  "sugar-cravings":    SugarCravings,
+  "water-retention":   WaterRetention,
+  headache:            Headache,
+  nausea:              Nausea,
   "breast-tenderness": BreastTenderness,
-  "breast-swelling": BreastSwelling,
-  migraine: Migraine,
+  "breast-swelling":   BreastSwelling,
+  migraine:            Migraine,
+  "lower-back-pain":   BackPainChar,
+  "upper-back-pain":   BackPainChar,
+  dizziness:           DizzinessChar,
+  "fatigue-mild":      Fatigue,
+  "fatigue-moderate":  Fatigue,
+  "fatigue-extreme":   Fatigue,
+  "appetite-increase": SugarCravings,
+  "appetite-decrease": Fatigue,
 
-  // PMOS indicators
-  "excess-hair": ExcessHair,
+  // ── Flow ──
+  spotting:            FlowDropChar,
+  "flow-light":        FlowDropChar,
+  "flow-medium":       FlowDropChar,
+  "flow-heavy":        FlowDropChar,
+  "clots-small":       FlowDropChar,
+  "clots-large":       FlowDropChar,
+  "color-bright-red":  FlowDropChar,
+  "color-dark-red":    FlowDropChar,
+  "color-brown":       FlowDropChar,
+  "irregular-bleeding": IrregularCycle,
+
+  // ── Emotional ──
+  calm:                 CalmGrounded,
+  irritable:            Irritable,
+  anxious:              Anxious,
+  "low-mood":           LowMood,
+  "emotional-sensitivity": Anxious,
+  anger:                Irritable,
+  tearful:              Tearful,
+  "emotional-numbness": LowMood,
+
+  // ── Cognitive ──
+  "brain-fog":          BrainFogChar,
+  "mental-clarity":     SugarCravings,
+  "poor-concentration": DizzinessChar,
+  "racing-thoughts":    BrainFogChar,
+  "decision-fatigue":   Fatigue,
+  "creativity-surge":   OvulationFertility,
+  "motivation-boost":   EnergyHighChar,
+  "motivation-drop":    LowMood,
+
+  // ── Energy & sleep ──
+  "physical-energy-high": EnergyHighChar,
+  "physical-energy-low":  Fatigue,
+  "social-energy-high":   SugarCravings,
+  "social-energy-low":    Fatigue,
+  "need-rest":            SleepPoorChar,
+  "need-solitude":        Fatigue,
+  "desire-to-move":       EnergyHighChar,
+  "sleep-quality-good":   SleepGoodChar,
+  "sleep-quality-poor":   SleepPoorChar,
+  insomnia:               InsomniaChar,
+  "early-waking":         InsomniaChar,
+  "afternoon-crash":      Fatigue,
+  overstimulation:        Anxious,
+
+  // ── Sexual & reproductive ──
+  "libido-up":              LibidoUpChar,
+  "libido-down":            LibidoDownChar,
+  "pain-during-sex":        PelvicPain,
+  "vaginal-dryness":        DehydrationChar,
+  sensitivity:              VaginalIrritationChar,
+  "desire-emotional-intimacy": LibidoUpChar,
+  "desire-physical-intimacy":  LibidoUpChar,
+
+  // ── Vaginal & cervical ──
+  "cm-dry":          DehydrationChar,
+  "cm-sticky":       WaterRetention,
+  "cm-creamy":       WaterRetention,
+  "cm-eggwhite":     CMEggwhiteChar,
+  "vaginal-itching": VaginalIrritationChar,
+  "vaginal-burning": Headache,
+  "unusual-discharge": VaginalIrritationChar,
+  "odor-changes":    VaginalIrritationChar,
+
+  // ── Gut & metabolic ──
+  constipation:        ConstipationChar,
+  diarrhea:            DiarrheaChar,
+  "ibs-symptoms":      Bloating,
+  "bloating-after-meals": Bloating,
+  "salt-cravings":     SugarCravings,
+  "nausea-with-food":  Nausea,
+  reflux:              Nausea,
+  "food-sensitivity":  Nausea,
+
+  // ── Skin & hair ──
+  "acne-skin":      AcneSkin,
+  "acne-jawline":   AcneSkin,
+  "acne-chin":      AcneSkin,
+  "acne-cheeks":    AcneSkin,
+  "acne-back":      AcneSkin,
+  "acne-chest":     AcneSkin,
+  "oily-skin":      OilySkinChar,
+  "dry-skin":       DehydrationChar,
+  "hair-thinning":  HairThinning,
   "excess-facial-hair": ExcessHair,
-  "hair-thinning": HairThinning,
-  "acne-skin": AcneSkin,
-  "acne-jawline": AcneSkin,
-  "acne-chin": AcneSkin,
-  "irregular-cycle": IrregularCycle,
-  "irregular-cycles": IrregularCycle,
-  "long-cycles": IrregularCycle,
-  "skin-darkening": SkinDarkening,
-  "weight-changes": WeightChanges,
-  "ovulation-fertility": OvulationFertility,
-  "fatigue-after-meals": Fatigue,
+  "excess-hair":    ExcessHair,
+  "darkened-patches":  SkinDarkening,
+  "brittle-nails":  SkinDarkening,
+  hives:            FrequentInfectionsChar,
+
+  // ── Pain mapping ──
+  "left-ovary-pain":      OvaryPain,
+  "right-ovary-pain":     OvaryPain,
+  "deep-pelvic-pain":     PelvicPain,
+  "rectal-pain":          RectalPainChar,
+  "leg-radiating-pain":   LegPainChar,
+  "hip-pain":             HipPainChar,
+  "pain-bowel-movement":  ConstipationChar,
+  "pain-before-period":   PelvicPain,
+  "pain-after-period":    PelvicPain,
+  "pain-after-sex":       PelvicPain,
+
+  // ── PMOS indicators ──
+  "irregular-cycle":      IrregularCycle,
+  "irregular-cycles":     IrregularCycle,
+  "long-cycles":          IrregularCycle,
+  "missed-ovulation":     OvulationFertility,
+  "sudden-weight-change": WeightChanges,
+  "insulin-resistance":   SugarCravings,
+  "reactive-hypoglycemia": SugarCravings,
+  "fatigue-after-meals":  Fatigue,
+  "blood-sugar-mood":     SugarCravings,
+  "skin-darkening":       SkinDarkening,
+  "weight-changes":       WeightChanges,
+  "ovulation-fertility":  OvulationFertility,
+
+  // ── Endometriosis indicators ──
+  "chronic-pelvic-pain":     PelvicPain,
+  "pain-outside-period":     PelvicPain,
+  "pain-severity-score":     Cramps,
+  "medication-effective":    MedEffectiveChar,
+  "medication-not-effective": MedNotEffectiveChar,
+  "stress-triggered-pain":   StressFlareChar,
+  "movement-triggered-pain": HipPainChar,
+  "flare-duration":          PelvicPain,
+
+  // ── Immune & stress ──
+  "frequent-infections": FrequentInfectionsChar,
+  "slow-recovery":       Fatigue,
+  "stress-flareups":     StressFlareChar,
+  "inflamed-feeling":    HeatFaceChar,
+  "heat-intolerance":    HeatFaceChar,
+  "cold-sensitivity":    ColdFaceChar,
+
+  // ── Environmental ──
+  "weather-sensitivity": WeatherSensitivityChar,
+  "heat-exposure":       HeatFaceChar,
+  dehydration:           DehydrationChar,
+  "physical-labor":      EnergyHighChar,
+  "commute-stress":      StressFlareChar,
+  "load-shedding":       LoadSheddingChar,
+  "financial-stress":    StressFlareChar,
+  "caregiving-burden":   Fatigue,
+
+  // ── Spiritual & intuitive ──
+  "feeling-intuitive":  FeelingIntuitiveChar,
+  "need-reflection":    FeelingIntuitiveChar,
+  "desire-grounding":   FeelingIntuitiveChar,
+  "feeling-disconnected": LowMood,
+  "feeling-aligned":    FeelingIntuitiveChar,
+  "emotional-release":  Tearful,
 };
 
 export interface SymptomCharacterProps {

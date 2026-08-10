@@ -382,47 +382,52 @@ export default function CheckInScreen() {
             <PatternInsightCard message={patternMessage} phaseColor={phaseColor} />
           )}
 
-          {/* Physical and hormonal */}
-          <Text style={styles.sectionTitle}>Physical and hormonal</Text>
-          <View style={styles.symptomsGrid}>
-            {physicalCats.flatMap((cat) =>
-              cat.items.map((symptom) => {
-                const key = `${cat.id}-${symptom.id}`;
-                return (
-                  <SymptomCard
-                    key={key}
-                    symptom={symptom}
-                    isSelected={selectedSymptoms.has(key)}
-                    isCorrelated={correlatedIds.has(symptom.id)}
-                    onPress={() => toggleSymptom(cat, symptom)}
-                    phaseColor={phaseColor}
-                  />
-                );
-              })
-            )}
-          </View>
+          {/* Per-category symptom sections */}
+          {physicalCats.map((cat) => (
+            <View key={cat.id}>
+              <Text style={styles.categoryHeader}>{cat.name}</Text>
+              <View style={styles.symptomsGrid}>
+                {cat.items.map((symptom) => {
+                  const key = `${cat.id}-${symptom.id}`;
+                  return (
+                    <SymptomCard
+                      key={key}
+                      symptom={symptom}
+                      isSelected={selectedSymptoms.has(key)}
+                      isCorrelated={correlatedIds.has(symptom.id)}
+                      onPress={() => toggleSymptom(cat, symptom)}
+                      phaseColor={phaseColor}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          ))}
 
-          {/* PMOS indicators */}
+          {/* PMOS indicators — same per-category treatment */}
           {pmosCats.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>PMOS indicators</Text>
-              <View style={styles.symptomsGrid}>
-                {pmosCats.flatMap((cat) =>
-                  cat.items.map((symptom) => {
-                    const key = `${cat.id}-${symptom.id}`;
-                    return (
-                      <SymptomCard
-                        key={key}
-                        symptom={symptom}
-                        isSelected={selectedSymptoms.has(key)}
-                        isCorrelated={false}
-                        onPress={() => toggleSymptom(cat, symptom)}
-                        phaseColor={phaseColor}
-                      />
-                    );
-                  })
-                )}
-              </View>
+              {pmosCats.map((cat) => (
+                <View key={cat.id}>
+                  <Text style={styles.categoryHeader}>{cat.name}</Text>
+                  <View style={styles.symptomsGrid}>
+                    {cat.items.map((symptom) => {
+                      const key = `${cat.id}-${symptom.id}`;
+                      return (
+                        <SymptomCard
+                          key={key}
+                          symptom={symptom}
+                          isSelected={selectedSymptoms.has(key)}
+                          isCorrelated={false}
+                          onPress={() => toggleSymptom(cat, symptom)}
+                          phaseColor={phaseColor}
+                        />
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
             </>
           )}
         </ScrollView>
@@ -542,6 +547,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: TEXT_DARK,
     marginBottom: 4,
+  },
+  categoryHeader: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: "#8880B0",
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginTop: 16,
+    marginBottom: 8,
   },
   symptomsGrid: {
     flexDirection: 'row',

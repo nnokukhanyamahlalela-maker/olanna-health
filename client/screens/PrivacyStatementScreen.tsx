@@ -121,13 +121,14 @@ export default function PrivacyStatementScreen() {
 
         <PolicySection icon="unlock" title="Your Rights" delay={300}>
           <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
-            You are always in control of your data. At any time, you can:
+            Because your data never leaves your device, you exercise these rights directly — no request to us is needed:
           </ThemedText>
-          <BulletPoint text="Export all your data as a file from Privacy & Data settings" />
-          <BulletPoint text="Delete specific categories of data or all data at once" />
-          <BulletPoint text="Use Anonymous Mode to operate without a profile" />
-          <BulletPoint text="Revoke Partner Mode access immediately" />
-          <BulletPoint text="Uninstall the app to permanently remove all local data" />
+          <BulletPoint text="Right to access — export all your data as a JSON file at any time from Privacy & Data settings" />
+          <BulletPoint text="Right to rectification — edit or update your profile and health information at any time" />
+          <BulletPoint text="Right to erasure — delete specific categories or all data instantly from Privacy & Data settings. Since Olanna never receives a copy of your data, there is nothing on our server to delete. You hold 100% of your data at all times" />
+          <BulletPoint text="Right to restriction of processing — disable AI features, Partner Mode, or data sharing at any time" />
+          <BulletPoint text="Right to data portability — export your data as a structured JSON file and use it however you choose" />
+          <BulletPoint text="Right to object / withdraw consent — disable Share Anonymized Data at any time in Privacy & Data settings. Partner Mode can be revoked instantly" />
         </PolicySection>
 
         <PolicySection icon="users" title="Partner Mode Privacy" delay={350}>
@@ -151,9 +152,18 @@ export default function PrivacyStatementScreen() {
           <BulletPoint text="Server endpoints require authentication" />
         </PolicySection>
 
-        <PolicySection icon="globe" title="For Users in South Africa" delay={450}>
+        <PolicySection icon="globe" title="Your Legal Rights (GDPR & POPIA)" delay={450}>
           <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary }]}>
-            Olanna Health respects the Protection of Personal Information Act (POPIA). You have the right to access, correct, and delete your personal information. Since your data is stored locally on your device, you maintain full control at all times.
+            Olanna Health is designed to fulfil GDPR (EU/UK) and POPIA (South Africa) rights by default — not as a compliance exercise, but as an architectural choice.
+          </ThemedText>
+          <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary, marginTop: 8 }]}>
+            Because Olanna never receives a copy of your personal health data, there is nothing on our servers that could be improperly accessed, shared, or breached. You hold 100% of your data on your own device at all times. This means:
+          </ThemedText>
+          <BulletPoint text="Your right to erasure is exercised by you, directly, by deleting data from Privacy & Data settings — no request to us required" />
+          <BulletPoint text="Your right to data portability is exercised by you, directly, by exporting a JSON file at any time" />
+          <BulletPoint text="There is no Olanna server account to delete. We never receive your data, so there is nothing for us to erase on our end" />
+          <ThemedText type="body" style={[styles.bodyText, { color: theme.textSecondary, marginTop: 8 }]}>
+            If you have any questions about your rights under GDPR or POPIA, or if you believe your data has been handled improperly in any way, contact us at admin@olanna.health.
           </ThemedText>
         </PolicySection>
 

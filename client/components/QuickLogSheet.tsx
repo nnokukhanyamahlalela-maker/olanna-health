@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import Svg, { Circle, Path, Ellipse, Polygon, Rect } from "react-native-svg";
 import { storage, DailyLog } from "@/lib/storage";
 import { generateId } from "@/lib/storage";
 
@@ -65,6 +66,157 @@ const ENERGY_OPTIONS = [
   { id: 4, label: "High",      emoji: "😄" },
   { id: 5, label: "Very High", emoji: "🚀" },
 ] as const;
+
+// ─── Chip icon components (SVG, drawn in the same flat style as SymptomCharacter)
+
+function FlowIcon({ level }: { level: string }) {
+  const fills: Record<string, string> = {
+    spotting: "#FDDEE8", light: "#F4A0BF", medium: "#E8739E", heavy: "#C2185B",
+  };
+  const strokes: Record<string, string> = {
+    spotting: "#F0A8C0", light: "#E07090", medium: "#C25080", heavy: "#8B1040",
+  };
+  const fill   = fills[level]   ?? "#F4A0BF";
+  const stroke = strokes[level] ?? "#E07090";
+  const D = "M 12 2 C 18 8 21 14 21 18 C 21 23 17 27 12 27 C 7 27 3 23 3 18 C 3 14 6 8 12 2 Z";
+  return (
+    <Svg width={18} height={22} viewBox="0 0 24 28">
+      <Path d={D} fill={fill} stroke={stroke} strokeWidth={1.2} />
+      {level === "spotting" && <Ellipse cx={12} cy={13} rx={6} ry={8} fill="white" opacity={0.55} />}
+      {level === "light"    && <Ellipse cx={12} cy={12} rx={6} ry={6} fill="white" opacity={0.42} />}
+    </Svg>
+  );
+}
+
+function MoodIcon({ mood }: { mood: string }) {
+  const bgs: Record<string, string> = {
+    happy: "#F5D060", calm: "#A8C8E0", anxious: "#C4B8D8",
+    sad: "#8EB8D8", irritable: "#E89060", energetic: "#F0D040",
+  };
+  const bg  = bgs[mood] ?? "#C8C0D8";
+  const ink = "#26215C";
+  if (mood === "energetic") {
+    return (
+      <Svg width={22} height={22} viewBox="0 0 22 22">
+        <Path d="M 15 2 L 8 11 L 12 11 L 7 20 L 18 10 L 13 10 Z"
+          fill="#F0D040" stroke="#A08000" strokeWidth={0.8} strokeLinejoin="round" />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Circle cx={11} cy={11} r={9} fill={bg} />
+      {/* eyes */}
+      {mood === "calm" ? (
+        <>
+          <Path d="M 7 9.5 Q 8.5 8 10 9.5" stroke={ink} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+          <Path d="M 12 9.5 Q 13.5 8 15 9.5" stroke={ink} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+        </>
+      ) : (
+        <>
+          <Circle cx={8}  cy={10} r={1.3} fill={ink} />
+          <Circle cx={14} cy={10} r={1.3} fill={ink} />
+        </>
+      )}
+      {/* brows */}
+      {mood === "irritable" && (
+        <>
+          <Path d="M 6 8 Q 7.5 6.8 9 7.8"   stroke={ink} strokeWidth={1.6} fill="none" strokeLinecap="round" />
+          <Path d="M 13 7.8 Q 14.5 6.8 16 8" stroke={ink} strokeWidth={1.6} fill="none" strokeLinecap="round" />
+        </>
+      )}
+      {mood === "anxious" && (
+        <>
+          <Path d="M 6.5 8 Q 8 7 9 8.5"    stroke={ink} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+          <Path d="M 13 8.5 Q 14 7 15.5 8" stroke={ink} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+        </>
+      )}
+      {/* mouth */}
+      {(mood === "happy" || mood === "calm") && (
+        <Path d="M 7.5 13 Q 11 16.5 14.5 13" stroke={ink} strokeWidth={1.5} fill="none" strokeLinecap="round" />
+      )}
+      {(mood === "sad" || mood === "irritable") && (
+        <Path d="M 7.5 14.5 Q 11 12 14.5 14.5" stroke={ink} strokeWidth={1.5} fill="none" strokeLinecap="round" />
+      )}
+      {mood === "anxious" && (
+        <Path d="M 8 13.5 Q 9.5 12.5 11 13.5 Q 12.5 14.5 14 13.5"
+          stroke={ink} strokeWidth={1.3} fill="none" strokeLinecap="round" />
+      )}
+      {/* tear */}
+      {mood === "sad" && (
+        <Path d="M 8 11 L 7.5 13 Q 7 14 8 14 Q 9 14 8.5 13 Z" fill="#8EB8D8" opacity={0.8} />
+      )}
+      {/* steam */}
+      {mood === "irritable" && (
+        <>
+          <Path d="M 17 7 Q 18 5.5 17 4"   stroke={ink} strokeWidth={0.9} fill="none" strokeLinecap="round" opacity={0.5} />
+          <Path d="M 19 8.5 Q 20 7 19 5.5" stroke={ink} strokeWidth={0.9} fill="none" strokeLinecap="round" opacity={0.5} />
+        </>
+      )}
+    </Svg>
+  );
+}
+
+function PainIcon({ level }: { level: string }) {
+  if (level === "none") {
+    return (
+      <Svg width={22} height={22} viewBox="0 0 22 22">
+        <Circle cx={11} cy={11} r={9} fill="#0F6E56" />
+        <Path d="M 7 11 L 10 14 L 16 8" stroke="white" strokeWidth={2}
+          fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    );
+  }
+  if (level === "mild") {
+    return (
+      <Svg width={22} height={22} viewBox="0 0 22 22">
+        <Circle cx={11} cy={11} r={6}   fill="#F9C4D7" />
+        <Circle cx={11} cy={11} r={9.5} fill="none" stroke="#F9C4D7" strokeWidth={1.5} opacity={0.55} />
+      </Svg>
+    );
+  }
+  if (level === "moderate") {
+    return (
+      <Svg width={22} height={22} viewBox="0 0 22 22">
+        <Circle cx={11} cy={11} r={5.5}  fill="#F07090" />
+        <Circle cx={11} cy={11} r={8}    fill="none" stroke="#F07090" strokeWidth={1.5} opacity={0.6} />
+        <Circle cx={11} cy={11} r={10.5} fill="none" stroke="#F07090" strokeWidth={1}   opacity={0.3} />
+      </Svg>
+    );
+  }
+  // severe: spiky starburst
+  const spikes = 8, cx = 11, cy = 11, r1 = 6, r2 = 10;
+  const pts: string[] = [];
+  for (let i = 0; i < spikes * 2; i++) {
+    const r = i % 2 === 0 ? r2 : r1;
+    const angle = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+    pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+  }
+  return (
+    <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Polygon points={pts.join(" ")} fill="#D85A30" />
+      <Circle cx={11} cy={11} r={4.5} fill="#F07060" />
+    </Svg>
+  );
+}
+
+function EnergyIcon({ level }: { level: number }) {
+  const pct    = level / 5;
+  const barW   = Math.max(2, Math.round(13 * pct));
+  const colors = ["#D85A30", "#E89040", "#D4B800", "#0F9E6A", "#0F6E56"];
+  const fillColor = colors[level - 1] ?? "#D4B800";
+  return (
+    <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Rect x={1}    y={7} width={17}  height={8} rx={2}   fill="none" stroke="#26215C" strokeWidth={1.4} />
+      <Rect x={18.3} y={9} width={2.5} height={4} rx={0.8} fill="#26215C" />
+      <Rect x={2.5}  y={8.5} width={barW} height={5} rx={0.8} fill={fillColor} />
+      {level === 5 && (
+        <Path d="M 11 6 L 9.5 11 L 11 11 L 9.5 16 L 14 10 L 12 10 Z"
+          fill="#F5E040" opacity={0.9} />
+      )}
+    </Svg>
+  );
+}
 
 // ─── Domain config ────────────────────────────────────────────────────────────
 
@@ -115,12 +267,12 @@ async function mergeAndSave(
 // ─── Option pill ──────────────────────────────────────────────────────────────
 
 function OptionPill({
-  emoji,
+  icon,
   label,
   selected,
   onPress,
 }: {
-  emoji: string;
+  icon: React.ReactNode;
   label: string;
   selected: boolean;
   onPress: () => void;
@@ -130,7 +282,7 @@ function OptionPill({
       onPress={onPress}
       style={[styles.pill, selected && styles.pillSelected]}
     >
-      <Text style={styles.pillEmoji}>{emoji}</Text>
+      {icon}
       <Text style={[styles.pillLabel, selected && styles.pillLabelSelected]}>
         {label}
       </Text>
@@ -265,7 +417,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
               {FLOW_OPTIONS.map((opt) => (
                 <OptionPill
                   key={opt.id}
-                  emoji={opt.emoji}
+                  icon={<FlowIcon level={opt.id} />}
                   label={opt.label}
                   selected={selectedFlow === opt.id}
                   onPress={() => {
@@ -282,7 +434,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
               {MOOD_OPTIONS.map((opt) => (
                 <OptionPill
                   key={opt.id}
-                  emoji={opt.emoji}
+                  icon={<MoodIcon mood={opt.id} />}
                   label={opt.label}
                   selected={selectedMood === opt.id}
                   onPress={() => {
@@ -299,7 +451,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
               {PAIN_OPTIONS.map((opt) => (
                 <OptionPill
                   key={opt.id}
-                  emoji={opt.emoji}
+                  icon={<PainIcon level={opt.id} />}
                   label={opt.label}
                   selected={selectedPain === opt.id}
                   onPress={() => {
@@ -316,7 +468,7 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved }: Props) {
               {ENERGY_OPTIONS.map((opt) => (
                 <OptionPill
                   key={opt.id}
-                  emoji={opt.emoji}
+                  icon={<EnergyIcon level={opt.id} />}
                   label={opt.label}
                   selected={selectedEnergy === opt.id}
                   onPress={() => {
@@ -413,29 +565,26 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
+    gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: "rgba(38,33,92,0.06)",
+    backgroundColor: "#EEEDFE",
     borderWidth: 1.5,
-    borderColor: "rgba(38,33,92,0.12)",
+    borderColor: "#D8D6F0",
   },
   pillSelected: {
-    backgroundColor: "rgba(216,90,48,0.14)",
+    backgroundColor: "#FAECE7",
     borderColor: CORAL,
-  },
-  pillEmoji: {
-    fontSize: 18,
   },
   pillLabel: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#4A4580",
+    color: "#26215C",
   },
   pillLabelSelected: {
     fontWeight: "700",
-    color: "#26215C",
+    color: "#D85A30",
   },
   saveBtn: {
     marginTop: 24,
@@ -446,7 +595,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   saveBtnDisabled: {
-    backgroundColor: "rgba(216,90,48,0.35)",
+    opacity: 0.38,
   },
   saveBtnSaved: {
     backgroundColor: "#0F6E56",

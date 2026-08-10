@@ -43,6 +43,7 @@ type OnboardingStep =
   | "ttcnote"     // Warm note shown only when user selects "Trying to conceive"
   | "cyclelength" // How long is your cycle?
   | "lastperiod"  // When did your last period start?
+  | "consent"     // Privacy Policy + Terms checkbox (must agree to finish)
   | "done";
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
@@ -512,6 +513,67 @@ function CycleLengthStep({
   );
 }
 
+// ─── Step 7: Consent (Privacy Policy + Terms) ─────────────────────────────────
+
+function ConsentStep({
+  onNext,
+  onBack,
+  onOpenPrivacy,
+  onOpenTerms,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onOpenPrivacy: () => void;
+  onOpenTerms: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [agreed, setAgreed] = useState(false);
+
+  return (
+    <View style={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+      <BackBtn onPress={onBack} />
+      <View style={styles.stepCenter}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="follicular" size={90} expression="bright" />
+        </View>
+        <Text style={styles.stepTitle}>Almost done</Text>
+        <Text style={styles.stepSubtitle}>
+          Your data stays on your device. Before you begin,{"\n"}please review how we handle your information.
+        </Text>
+      </View>
+
+      <Pressable
+        onPress={() => setAgreed(!agreed)}
+        style={styles.consentRow}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: agreed }}
+      >
+        <View style={[styles.consentCheckbox, agreed && styles.consentCheckboxChecked]}>
+          {agreed && <Text style={styles.consentCheckMark}>✓</Text>}
+        </View>
+        <Text style={styles.consentText}>
+          {"I've read and agree to the "}
+          <Text
+            style={styles.consentLink}
+            onPress={(e) => { e.stopPropagation?.(); onOpenPrivacy(); }}
+          >
+            Privacy Policy
+          </Text>
+          {" and "}
+          <Text
+            style={styles.consentLink}
+            onPress={(e) => { e.stopPropagation?.(); onOpenTerms(); }}
+          >
+            Terms of Use
+          </Text>
+        </Text>
+      </Pressable>
+
+      <PrimaryBtn label="Get started" onPress={onNext} disabled={!agreed} />
+    </View>
+  );
+}
+
 // ─── Root OnboardingScreen ────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
@@ -576,12 +638,14 @@ export default function OnboardingScreen() {
   const handleDataExtracted = (data: ExtractedCycleData) => {
     const extracted = data.lastPeriodStartDate || undefined;
     if (extracted) setLastPeriodDate(extracted);
-    finishOnboarding(extracted);
+    // Go to consent before finishing — lastPeriodDate state is set above
+    setStep("consent");
   };
 
   const handleLastPeriodNext = (date: string) => {
     setLastPeriodDate(date);
-    finishOnboarding(date);
+    // Go to consent before finishing — finishOnboarding will read lastPeriodDate
+    setStep("consent");
   };
 
   const renderStep = () => {
@@ -635,6 +699,15 @@ export default function OnboardingScreen() {
             onNext={handleLastPeriodNext}
             onBack={() => setStep("cyclelength")}
             onDataExtracted={handleDataExtracted}
+          />
+        );
+      case "consent":
+        return (
+          <ConsentStep
+            onNext={() => finishOnboarding()}
+            onBack={() => setStep("lastperiod")}
+            onOpenPrivacy={() => navigation.navigate("PrivacyStatement")}
+            onOpenTerms={() => navigation.navigate("TermsOfService")}
           />
         );
       default:
@@ -991,5 +1064,46 @@ const styles = StyleSheet.create({
   skipBtnText: {
     fontSize: 15,
     color: TEXT_SOFT,
+  },
+  // Consent step
+  consentRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  consentCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "#D8D6F0",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  consentCheckboxChecked: {
+    backgroundColor: PINK,
+    borderColor: PINK,
+  },
+  consentCheckMark: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 16,
+  },
+  consentText: {
+    flex: 1,
+    fontSize: 15,
+    color: TEXT_DARK,
+    lineHeight: 23,
+  },
+  consentLink: {
+    color: PINK,
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
 });

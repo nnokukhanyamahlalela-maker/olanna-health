@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, Pressable, Alert, Platform, Share, Switch, ScrollView } from "react-native";
+import { View, StyleSheet, Pressable, Alert, Platform, Share, Switch, ScrollView, Modal } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -69,6 +69,7 @@ export default function PartnerSettingsScreen() {
   const [inviteExpiry, setInviteExpiry] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
+  const [showPrivacyNotice, setShowPrivacyNotice] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -122,7 +123,8 @@ export default function PartnerSettingsScreen() {
     }, [])
   );
 
-  const handleGenerateInvite = async () => {
+  const handleGenerateInviteConfirmed = async () => {
+    setShowPrivacyNotice(false);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const deviceId = await getDeviceId();
@@ -293,7 +295,7 @@ export default function PartnerSettingsScreen() {
             </ThemedText>
             <Pressable
               testID="button-generate-invite"
-              onPress={handleGenerateInvite}
+              onPress={() => setShowPrivacyNotice(true)}
               style={({ pressed }) => [
                 styles.primaryButton,
                 { backgroundColor: theme.primary, opacity: pressed ? 0.85 : 1 },
@@ -457,6 +459,78 @@ export default function PartnerSettingsScreen() {
           </>
         ) : null}
       </ScrollView>
+
+      {/* ── Partner Mode privacy notice ── shown once before generating an invite */}
+      <Modal
+        visible={showPrivacyNotice}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPrivacyNotice(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: theme.background }]}>
+            <View style={[styles.modalIconRow, { backgroundColor: theme.primary + "15" }]}>
+              <Feather name="shield" size={22} color={theme.primary} />
+            </View>
+
+            <ThemedText type="h4" style={[styles.modalTitle, { color: theme.text }]}>
+              Before you share with a partner
+            </ThemedText>
+
+            <ThemedText type="body" style={[styles.modalBody, { color: theme.textSecondary }]}>
+              Partner Mode sends a limited snapshot to Olanna's server so your partner can read it securely. Here is exactly what that snapshot may contain — you control each item individually after setup:
+            </ThemedText>
+
+            <View style={styles.modalList}>
+              {[
+                { icon: "moon"      as const, text: "Which cycle phase you're in (e.g. Luteal)" },
+                { icon: "calendar"  as const, text: "Approximate next period dates (shown as a range, not an exact date)" },
+                { icon: "sunrise"   as const, text: "Approximate fertile window (off by default)" },
+                { icon: "sun"       as const, text: "Approximate ovulation window (off by default)" },
+                { icon: "smile"     as const, text: "Mood as a level and a short canned note (off by default)" },
+                { icon: "zap"       as const, text: "Energy as a level and a short canned note (off by default)" },
+                { icon: "heart"     as const, text: "Supportive tips for your partner" },
+              ].map(({ icon, text }) => (
+                <View key={icon} style={styles.modalListRow}>
+                  <Feather name={icon} size={14} color={theme.primary} style={{ marginTop: 3, flexShrink: 0 }} />
+                  <ThemedText type="small" style={[styles.modalListText, { color: theme.textSecondary }]}>
+                    {text}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+
+            <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25" }]}>
+              <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
+                <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>What is never shared: </ThemedText>
+                your full symptom logs, pain records, body-map data, diagnosis details, notes, or any other health record. Only the snapshot fields above are ever sent.
+              </ThemedText>
+            </View>
+
+            <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25", marginTop: 8 }]}>
+              <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
+                <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>Not shared with third parties: </ThemedText>
+                this snapshot is stored only on Olanna's server for your partner to read. It is never sold, shared with advertisers, or passed to any third party. You can revoke access instantly at any time.
+              </ThemedText>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                onPress={() => setShowPrivacyNotice(false)}
+                style={[styles.modalCancelBtn, { borderColor: theme.border }]}
+              >
+                <ThemedText type="body" style={{ color: theme.textSecondary }}>Cancel</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleGenerateInviteConfirmed}
+                style={[styles.modalConfirmBtn, { backgroundColor: theme.primary }]}
+              >
+                <ThemedText type="body" style={{ color: "#fff", fontWeight: "600" }}>I understand, continue</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </AppGradient>
   );
 }
@@ -565,6 +639,70 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
+  },
+  // Partner privacy notice modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.lg,
+  },
+  modalCard: {
+    width: "100%",
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    gap: Spacing.md,
+    maxHeight: "90%",
+  },
+  modalIconRow: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+  },
+  modalTitle: {
+    marginTop: Spacing.xs,
+  },
+  modalBody: {
+    lineHeight: 22,
+  },
+  modalList: {
+    gap: 8,
+  },
+  modalListRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  modalListText: {
+    flex: 1,
+    lineHeight: 20,
+  },
+  modalNote: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    alignItems: "center",
+  },
+  modalConfirmBtn: {
+    flex: 2,
+    paddingVertical: 13,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
   },
