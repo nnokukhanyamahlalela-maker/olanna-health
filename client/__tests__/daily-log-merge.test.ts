@@ -173,7 +173,8 @@ async function checkInMergeAndSave(
   const preservedSymptoms = (existing?.symptoms ?? []).filter(
     (id) => !checkInSymptomIds.includes(id)
   );
-  const mergedSymptoms = [...preservedSymptoms, ...checkInSymptomIds];
+  // Mirrors the Set-dedup fix in CheckInScreen.handleSave
+  const mergedSymptoms = Array.from(new Set([...preservedSymptoms, ...checkInSymptomIds]));
 
   const mergedLog: DailyLog = {
     id: existing?.id ?? makeId(),
@@ -422,6 +423,62 @@ describe("DailyLog merge — quick-log and full Check-In used on the same day", 
     expect(savedCheckIn!.painPoints).toHaveLength(1);
     expect(savedCheckIn!.painPoints[0].region).toBe("lower-abdomen");
     expect(savedCheckIn!.painPoints[0].severity).toBe(6);
+  });
+
+  /**
+   * ── Task 47: second quick-log tap must not create duplicate symptom IDs ─────
+   *
+   * Scenario: pain quick-log saves "cramps", then Check-In saves with
+   * overlapping symptom IDs (including "cramps"), then a second pain quick-log
+   * tap runs again. At every stage DailyLog.symptoms must contain no duplicates.
+   *
+   * Also covers: the same symptomId appearing under two categories in a single
+   * Check-In save (different Map keys → same symptomId in checkInSymptomIds),
+   * which is the root edge-case described in the task.
+   */
+  it("no symptom ID appears more than once after pain quick-log → Check-In → second quick-log", async () => {
+    // Step 1: pain quick-log saves "cramps"
+    await quickLogMergeAndSave(storageMock, TODAY, "pain", "mild", ["cramps"]);
+
+    let logs = await storageMock.getDailyLogs();
+    expect(logs[0].symptoms).toEqual(["cramps"]);
+
+    // Step 2: Check-In saves "cramps" (overlapping) + "fatigue"
+    await checkInMergeAndSave(storageMock, TODAY, ["cramps", "fatigue"]);
+
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    // cramps must appear exactly once despite being in both logs
+    expect(logs[0].symptoms.filter((s) => s === "cramps").length).toBe(1);
+    expect(logs[0].symptoms).toContain("fatigue");
+
+    // Step 3: second pain quick-log tap (same symptoms)
+    await quickLogMergeAndSave(storageMock, TODAY, "pain", "mild", ["cramps"]);
+
+    logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    const log = logs[0];
+
+    // No symptom ID may appear more than once in the final DailyLog
+    const seen = new Set<string>();
+    for (const id of log.symptoms) {
+      expect(seen.has(id)).toBe(false);
+      seen.add(id);
+    }
+    expect(log.symptoms).toContain("cramps");
+    expect(log.symptoms).toContain("fatigue");
+  });
+
+  it("no duplicates when the same symptomId appears under two categories in one Check-In save", async () => {
+    // Edge case: "cramps" selected in category A AND category B → same symptomId
+    // ends up twice in checkInSymptomIds before the Set-dedup fix.
+    const duplicatedIds = ["cramps", "fatigue", "cramps"]; // simulates two-category same ID
+
+    await checkInMergeAndSave(storageMock, TODAY, duplicatedIds);
+
+    const logs = await storageMock.getDailyLogs();
+    expect(logs).toHaveLength(1);
+    expect(logs[0].symptoms.filter((s) => s === "cramps").length).toBe(1);
   });
 
   /**

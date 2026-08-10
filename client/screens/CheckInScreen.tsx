@@ -286,7 +286,9 @@ export default function CheckInScreen() {
       const preservedSymptoms = (existing?.symptoms ?? []).filter(
         (id) => !checkInSymptomIds.includes(id),
       );
-      const mergedSymptoms = [...preservedSymptoms, ...checkInSymptomIds];
+      // Deduplicate via Set to guard against the same symptomId appearing under
+      // multiple categories, or any pre-existing duplicates in the stored log.
+      const mergedSymptoms = Array.from(new Set([...preservedSymptoms, ...checkInSymptomIds]));
 
       const mergedLog = {
         id: existing?.id ?? generateId(),
