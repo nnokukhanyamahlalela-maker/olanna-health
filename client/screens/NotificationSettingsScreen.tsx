@@ -188,6 +188,22 @@ export default function NotificationSettingsScreen() {
           />
         </Animated.View>
 
+        {/* Category 7 — Fertile window */}
+        <Animated.View entering={FadeInDown.delay(90).duration(300)}>
+          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
+            Fertile window
+          </ThemedText>
+          <SettingRow
+            icon="sun"
+            iconColor="#0F6E56"
+            title="Fertile window alerts"
+            description="Notified when your fertile window opens and again at predicted ovulation. Based on your logged cycle length — turns itself off if birth control is recorded."
+            value={settings.fertileWindow ?? true}
+            onToggle={(v) => toggle("fertileWindow", v)}
+            disabled={notPermitted}
+          />
+        </Animated.View>
+
         {/* Categories 2–4 — Logging & re-engagement */}
         <Animated.View entering={FadeInDown.delay(120).duration(300)}>
           <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>

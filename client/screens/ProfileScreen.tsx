@@ -219,6 +219,14 @@ export default function ProfileScreen() {
         </ThemedText>
         <GlassSurface noPadding borderRadius={BorderRadius.xl}>
           <MenuItem
+            icon="settings"
+            label="Cycle & Health Settings"
+            color="#0F6E56"
+            onPress={() => navigation.navigate("Settings" as any)}
+            theme={theme}
+            isDark={isDark}
+          />
+          <MenuItem
             icon="heart"
             label="Partner Mode"
             color="#C2185B"

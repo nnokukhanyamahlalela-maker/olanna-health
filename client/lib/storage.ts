@@ -30,6 +30,7 @@ export interface UserProfile {
   healthGoals: string[];
   hasPCOS: boolean;
   hasEndometriosis: boolean;
+  birthControl?: string; // e.g. "none" | "pill" | "iud-hormonal" | "iud-copper" | "implant" | "injection" | "ring" | "patch" | "condom" | "other"
   createdAt: string;
 }
 

@@ -41,6 +41,7 @@ import GutHealthScreen from "@/screens/GutHealthScreen";
 import LannaCheckInScreen from "@/screens/LannaCheckInScreen";
 import NotificationSettingsScreen from "@/screens/NotificationSettingsScreen";
 import ResetupOnboardingScreen from "@/screens/ResetupOnboardingScreen";
+import SettingsScreen from "@/screens/SettingsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { DailyDecodeOutput } from "@/lib/dailyDecode";
 import type { ConditionId } from "@/data/lannaContent";
@@ -83,6 +84,7 @@ export type RootStackParamList = {
   GutHealth: undefined;
   LannaCheckIn: { conditionId: ConditionId };
   ResetupOnboarding: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -338,6 +340,11 @@ export default function RootStackNavigator({ initialRoute }: RootStackNavigatorP
           headerShown: false,
           animation: "slide_from_bottom",
         }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ headerTitle: "Settings" }}
       />
     </Stack.Navigator>
   );

@@ -108,7 +108,7 @@ function CycleWheel({
       );
     } else {
       dayDots.push(
-        <Circle key={d} cx={pos.x} cy={pos.y} r={dotR} fill={color} opacity={0.45} />
+        <Circle key={d} cx={pos.x} cy={pos.y} r={dotR} fill={color} opacity={0.78} />
       );
     }
   }

@@ -16,7 +16,8 @@ export type NotificationCategory =
   | "dataMilestone"       // 3. Data-milestone nudges
   | "lapsedUser"          // 4. Re-engagement
   | "healthSummaryRefresh" // 5. Periodic summary nudge
-  | "partnerMode";        // 6. Partner notifications (needs consent step)
+  | "partnerMode"         // 6. Partner notifications (needs consent step)
+  | "fertileWindow";      // 7. Fertile window / ovulation alerts
 
 export interface NotificationSettings {
   /** Whether the OS permission has been granted */
@@ -29,6 +30,7 @@ export interface NotificationSettings {
   lapsedUser: boolean;
   healthSummaryRefresh: boolean;
   partnerMode: boolean;
+  fertileWindow: boolean;
 }
 
 export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
@@ -40,6 +42,7 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   lapsedUser: true,
   healthSummaryRefresh: false, // off by default — lower priority
   partnerMode: false,          // off by default — needs explicit consent
+  fertileWindow: true,         // on by default — high-value signal
 };
 
 export const notificationSettingsStorage = {
