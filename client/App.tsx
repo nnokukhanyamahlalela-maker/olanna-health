@@ -3,6 +3,13 @@ import { StyleSheet, View, ScrollView, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import Constants from "expo-constants";
+
+// react-native-keyboard-controller is a native module not bundled in Expo Go.
+// Fall back to a no-op wrapper so the app loads in Expo Go for dev testing.
+const isExpoGo = Constants.appOwnership === "expo";
+const KeyboardProviderWrapper: React.FC<{ children: React.ReactNode }> =
+  isExpoGo ? ({ children }) => <>{children}</> : KeyboardProvider;
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -250,7 +257,7 @@ export default function App() {
         <SafeAreaProvider>
           <GestureHandlerRootView style={styles.root}>
             <ReduceTransparencyProvider>
-              <KeyboardProvider>
+              <KeyboardProviderWrapper>
                 <NavigationContainer>
                   <RootStackNavigator initialRoute={initialRoute} />
                 </NavigationContainer>
@@ -260,7 +267,7 @@ export default function App() {
                   <LaunchOverlay onComplete={() => setLaunchDone(true)} />
                 )}
                 <StatusBar style={launchDone ? "dark" : "light"} />
-              </KeyboardProvider>
+              </KeyboardProviderWrapper>
             </ReduceTransparencyProvider>
           </GestureHandlerRootView>
         </SafeAreaProvider>

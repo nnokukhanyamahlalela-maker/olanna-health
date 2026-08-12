@@ -6,6 +6,7 @@ import CheckInStackNavigator from "@/navigation/CheckInStackNavigator";
 import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
 import HealthStackNavigator from "@/navigation/HealthStackNavigator";
 import LearnStackNavigator from "@/navigation/LearnStackNavigator";
+import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { CustomTabBar } from "@/components/CustomTabBar";
 
 export type MainTabParamList = {
@@ -14,6 +15,7 @@ export type MainTabParamList = {
   CheckInTab: undefined;
   HealthTab: undefined;
   LearnTab: undefined;
+  ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -51,6 +53,12 @@ export default function MainTabNavigator() {
         name="LearnTab"
         component={LearnStackNavigator}
         options={{ title: "Learn" }}
+      />
+      {/* ProfileTab is hidden from the tab bar — accessed via the header icon */}
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStackNavigator}
+        options={{ title: "Profile" }}
       />
     </Tab.Navigator>
   );

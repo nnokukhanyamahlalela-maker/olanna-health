@@ -37,10 +37,39 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type ResetupStep =
   | "name"
-  | "personalize"
+  | "goals"
   | "ttcnote"
+  | "symptoms"
   | "cyclelength"
   | "lastperiod";
+
+// ─── Internal symptom inference (never shown to user as condition names) ───────
+
+interface SymptomAnswers {
+  pelvisPain?: number;
+  bleeding?: string;
+  sexActivity?: string;
+  sexPain?: boolean;
+  bowelPain?: boolean;
+  urinaryPain?: boolean;
+}
+
+function inferFlags(
+  goals: string[],
+  answers: SymptomAnswers
+): { hasEndometriosis: boolean; hasPCOS: boolean } {
+  if (!goals.includes("manage_symptoms")) {
+    return { hasEndometriosis: false, hasPCOS: false };
+  }
+  const pelvisPain  = answers.pelvisPain  ?? 0;
+  const bowelPain   = answers.bowelPain   === true;
+  const sexPain     = answers.sexPain     === true;
+  const urinaryPain = answers.urinaryPain === true;
+  const isHeavyFlow = answers.bleeding === "heavy";
+  const endoPattern = pelvisPain >= 4 && (bowelPain || sexPain || urinaryPain);
+  const pcosPattern = !endoPattern && pelvisPain >= 2 && isHeavyFlow;
+  return { hasEndometriosis: endoPattern, hasPCOS: pcosPattern };
+}
 
 // ─── Colors (match OnboardingScreen palette) ──────────────────────────────────
 
@@ -126,17 +155,18 @@ function NameStep({
   );
 }
 
-// ─── Step: Personalize ────────────────────────────────────────────────────────
+// ─── Step: Goals ─────────────────────────────────────────────────────────────
 
-const PERSONALIZE_OPTIONS = [
-  { id: "pmos", label: "PMOS" },
-  { id: "endo", label: "Endometriosis" },
-  { id: "irregular", label: "Irregular cycles" },
-  { id: "ttc", label: "Trying to conceive" },
-  { id: "none", label: "None of these" },
+const GOAL_OPTIONS = [
+  { id: "track_cycle",     label: "Track my periods & cycle",  emoji: "📅" },
+  { id: "manage_symptoms", label: "Manage symptoms or pain",   emoji: "💙" },
+  { id: "understand_body", label: "Understand my body better", emoji: "✨" },
+  { id: "ttc",             label: "Trying to conceive",        emoji: "🌱" },
+  { id: "avoid_pregnancy", label: "Avoid pregnancy",           emoji: "🛡️" },
+  { id: "exploring",       label: "Just exploring for now",    emoji: "🔍" },
 ];
 
-function PersonalizeStep({
+function GoalsStep({
   selected,
   onToggle,
   onNext,
@@ -159,54 +189,35 @@ function PersonalizeStep({
       <BackBtn onPress={onBack} />
       <View style={{ alignItems: "center", marginBottom: 24 }}>
         <View style={styles.mascotSmall}>
-          <LannaMascot phase="menstrual" size={80} />
+          <LannaMascot phase="follicular" size={80} expression="bright" />
         </View>
-        <Text style={styles.stepTitle}>Does any of this apply?</Text>
+        <Text style={styles.stepTitle}>What do you want to focus on?</Text>
         <Text style={styles.stepSubtitle}>
-          We'll tailor your check-ins around it.{"\n"}You can always change this
-          again.
+          Update anything that's changed.{"\n"}You can always adjust this again.
         </Text>
       </View>
       <View style={styles.optionsList}>
-        {PERSONALIZE_OPTIONS.map((opt) => {
+        {GOAL_OPTIONS.map((opt) => {
           const isSelected = selected.includes(opt.id);
           return (
             <Pressable
               key={opt.id}
               onPress={() => onToggle(opt.id)}
-              style={[
-                styles.optionRow,
-                isSelected && styles.optionRowSelected,
-              ]}
+              style={[styles.optionRow, isSelected && styles.optionRowSelected]}
             >
-              <Text
-                style={[
-                  styles.optionLabel,
-                  isSelected && styles.optionLabelSelected,
-                ]}
-              >
+              <Text style={styles.optionEmoji}>{opt.emoji}</Text>
+              <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
                 {opt.label}
               </Text>
-              <View
-                style={[
-                  styles.optionCheck,
-                  isSelected && styles.optionCheckSelected,
-                ]}
-              >
-                {isSelected && (
-                  <Text style={styles.optionCheckMark}>✓</Text>
-                )}
+              <View style={[styles.optionCheck, isSelected && styles.optionCheckSelected]}>
+                {isSelected && <Text style={styles.optionCheckMark}>✓</Text>}
               </View>
             </Pressable>
           );
         })}
       </View>
       <View style={{ marginTop: 24 }}>
-        <PrimaryBtn
-          label="Continue"
-          onPress={onNext}
-          disabled={selected.length === 0}
-        />
+        <PrimaryBtn label="Continue" onPress={onNext} disabled={selected.length === 0} />
       </View>
     </ScrollView>
   );
@@ -244,8 +255,8 @@ function TTCNoteStep({
             not for fertility or ovulation monitoring.
           </Text>
           <Text style={[styles.ttcBody, { marginTop: 12 }]}>
-            If you're trying to conceive and you have PMOS, endometriosis, or
-            irregular cycles, your symptoms are still worth logging here.
+            Your cycle and symptom patterns are still worth logging here —
+            your data matters, and your provider or a fertility specialist can use it.
           </Text>
           <Text style={[styles.ttcBody, { marginTop: 12 }]}>
             We'd gently encourage looping in a specialist sooner rather than
@@ -254,6 +265,151 @@ function TTCNoteStep({
         </View>
       </View>
       <PrimaryBtn label="Got it, let's continue" onPress={onNext} />
+    </ScrollView>
+  );
+}
+
+// ─── Step: Symptom questionnaire ──────────────────────────────────────────────
+
+const PAIN_SCORES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const BLEEDING_OPTIONS = [
+  { id: "none",     label: "None" },
+  { id: "spotting", label: "Spotting" },
+  { id: "light",    label: "Light" },
+  { id: "normal",   label: "Normal" },
+  { id: "heavy",    label: "Heavy" },
+];
+const YES_NO_SKIP = [
+  { id: "yes",  label: "Yes" },
+  { id: "no",   label: "No" },
+  { id: "skip", label: "Prefer not to say" },
+];
+const YES_NO = [
+  { id: "yes", label: "Yes" },
+  { id: "no",  label: "No" },
+];
+
+function SymptomQuestionnaireStep({
+  answers,
+  onChange,
+  onNext,
+  onBack,
+}: {
+  answers: SymptomAnswers;
+  onChange: (updates: Partial<SymptomAnswers>) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  const ChipRow = ({
+    options,
+    value,
+    onSelect,
+  }: {
+    options: { id: string; label: string }[];
+    value: string | undefined;
+    onSelect: (id: string) => void;
+  }) => (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+      {options.map((opt) => {
+        const active = value === opt.id;
+        return (
+          <Pressable
+            key={opt.id}
+            onPress={() => onSelect(opt.id)}
+            style={[styles.symptomChip, active && styles.symptomChipActive]}
+          >
+            <Text style={[styles.symptomChipText, active && styles.symptomChipTextActive]}>
+              {opt.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  return (
+    <ScrollView
+      contentContainerStyle={[
+        styles.stepContainer,
+        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },
+      ]}
+      keyboardShouldPersistTaps="handled"
+    >
+      <BackBtn onPress={onBack} />
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="luteal" size={80} />
+        </View>
+        <Text style={styles.stepTitle}>A few quick questions</Text>
+        <Text style={styles.stepSubtitle}>
+          Pattern-tracking, not a diagnosis.{"\n"}Update anything that's changed.
+        </Text>
+      </View>
+
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>
+          How bad is pelvic or abdominal pain for you, most of the time?
+        </Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          {PAIN_SCORES.map((n) => {
+            const active = answers.pelvisPain === n;
+            return (
+              <Pressable
+                key={n}
+                onPress={() => onChange({ pelvisPain: n })}
+                style={[styles.painScoreBtn, active && styles.painScoreBtnActive]}
+              >
+                <Text style={[styles.painScoreText, active && styles.painScoreTextActive]}>{n}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
+          <Text style={styles.painScaleHint}>No pain</Text>
+          <Text style={styles.painScaleHint}>Worst imaginable</Text>
+        </View>
+      </View>
+
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>How would you describe your typical flow?</Text>
+        <ChipRow options={BLEEDING_OPTIONS} value={answers.bleeding} onSelect={(id) => onChange({ bleeding: id })} />
+      </View>
+
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever feel pain during or after sex?</Text>
+        <ChipRow
+          options={YES_NO_SKIP}
+          value={answers.sexActivity === "skip" ? "skip" : answers.sexPain === true ? "yes" : answers.sexPain === false ? "no" : undefined}
+          onSelect={(id) => {
+            if (id === "skip") onChange({ sexActivity: "skip", sexPain: undefined });
+            else onChange({ sexActivity: "yes", sexPain: id === "yes" });
+          }}
+        />
+      </View>
+
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever have painful bowel movements?</Text>
+        <ChipRow
+          options={YES_NO}
+          value={answers.bowelPain === true ? "yes" : answers.bowelPain === false ? "no" : undefined}
+          onSelect={(id) => onChange({ bowelPain: id === "yes" })}
+        />
+      </View>
+
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever feel pain or pressure when urinating?</Text>
+        <ChipRow
+          options={YES_NO}
+          value={answers.urinaryPain === true ? "yes" : answers.urinaryPain === false ? "no" : undefined}
+          onSelect={(id) => onChange({ urinaryPain: id === "yes" })}
+        />
+      </View>
+
+      <View style={{ marginTop: 24 }}>
+        <PrimaryBtn label="Continue" onPress={onNext} />
+      </View>
     </ScrollView>
   );
 }
@@ -433,8 +589,9 @@ export default function ResetupOnboardingScreen() {
   const [existingProfile, setExistingProfile] = useState<UserProfile | null>(null);
   const [step, setStep] = useState<ResetupStep>("name");
   const [name, setName] = useState("");
-  const [personalized, setPersonalized] = useState<string[]>([]);
-  const [cycleLength, setCycleLength] = useState(28);
+  const [goals,          setGoals]          = useState<string[]>([]);
+  const [symptomAnswers, setSymptomAnswers] = useState<SymptomAnswers>({});
+  const [cycleLength,    setCycleLength]    = useState(28);
   const [initialLastPeriodDate, setInitialLastPeriodDate] = useState(new Date());
 
   // Load current profile on mount to pre-fill fields
@@ -444,14 +601,14 @@ export default function ResetupOnboardingScreen() {
         setExistingProfile(profile);
         setName(profile.name || "");
         setCycleLength(profile.cycleLength || 28);
-
-        // Build conditions list from profile flags
-        const conds: string[] = [];
-        if (profile.hasPCOS) conds.push("pmos");
-        if (profile.hasEndometriosis) conds.push("endo");
-        if (conds.length === 0) conds.push("none");
-        setPersonalized(conds);
-
+        // Pre-fill goals from saved healthGoals, or derive from flags if goals not set
+        if (profile.healthGoals && profile.healthGoals.length > 0) {
+          setGoals(profile.healthGoals);
+        } else {
+          const derived: string[] = ["track_cycle"];
+          if (profile.hasPCOS || profile.hasEndometriosis) derived.push("manage_symptoms");
+          setGoals(derived);
+        }
         if (profile.lastPeriodStart) {
           setInitialLastPeriodDate(
             new Date(profile.lastPeriodStart + "T00:00:00")
@@ -462,26 +619,19 @@ export default function ResetupOnboardingScreen() {
     });
   }, []);
 
-  const togglePersonalize = (id: string) => {
-    if (id === "none") {
-      setPersonalized(["none"]);
-      return;
-    }
-    const without = personalized.filter((x) => x !== "none");
-    if (without.includes(id)) {
-      setPersonalized(without.filter((x) => x !== id));
-    } else {
-      setPersonalized([...without, id]);
-    }
+  const toggleGoal = (id: string) => {
+    setGoals((prev) =>
+      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
+    );
   };
 
   const finishResetup = async (lastPeriodIso: string) => {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const hasPMOS = personalized.includes("pmos");
-      const hasEndo = personalized.includes("endo");
+      // Infer internal flags from symptom answers — not shown to user as condition names
+      const { hasEndometriosis, hasPCOS } = inferFlags(goals, symptomAnswers);
 
-      // Preserve existing profile data (id, dateOfBirth, createdAt, healthGoals)
+      // Preserve existing profile data (id, dateOfBirth, createdAt)
       // and only overwrite the fields the user just updated.
       const updatedProfile: UserProfile = {
         id: existingProfile?.id ?? generateId(),
@@ -490,9 +640,9 @@ export default function ResetupOnboardingScreen() {
         cycleLength,
         periodLength: existingProfile?.periodLength ?? 5,
         lastPeriodStart: lastPeriodIso,
-        healthGoals: existingProfile?.healthGoals ?? [],
-        hasPCOS: hasPMOS,
-        hasEndometriosis: hasEndo,
+        healthGoals: goals,
+        hasPCOS,
+        hasEndometriosis,
         createdAt: existingProfile?.createdAt ?? new Date().toISOString(),
       };
 
@@ -527,18 +677,20 @@ export default function ResetupOnboardingScreen() {
           <NameStep
             name={name}
             setName={setName}
-            onNext={() => setStep("personalize")}
+            onNext={() => setStep("goals")}
             onCancel={() => (navigation as any).goBack()}
           />
         );
-      case "personalize":
+      case "goals":
         return (
-          <PersonalizeStep
-            selected={personalized}
-            onToggle={togglePersonalize}
+          <GoalsStep
+            selected={goals}
+            onToggle={toggleGoal}
             onNext={() =>
-              personalized.includes("ttc")
+              goals.includes("ttc")
                 ? setStep("ttcnote")
+                : goals.includes("manage_symptoms")
+                ? setStep("symptoms")
                 : setStep("cyclelength")
             }
             onBack={() => setStep("name")}
@@ -547,8 +699,17 @@ export default function ResetupOnboardingScreen() {
       case "ttcnote":
         return (
           <TTCNoteStep
+            onNext={() => goals.includes("manage_symptoms") ? setStep("symptoms") : setStep("cyclelength")}
+            onBack={() => setStep("goals")}
+          />
+        );
+      case "symptoms":
+        return (
+          <SymptomQuestionnaireStep
+            answers={symptomAnswers}
+            onChange={(updates) => setSymptomAnswers((prev) => ({ ...prev, ...updates }))}
             onNext={() => setStep("cyclelength")}
-            onBack={() => setStep("personalize")}
+            onBack={() => goals.includes("ttc") ? setStep("ttcnote") : setStep("goals")}
           />
         );
       case "cyclelength":
@@ -558,9 +719,11 @@ export default function ResetupOnboardingScreen() {
             onChange={setCycleLength}
             onNext={() => setStep("lastperiod")}
             onBack={() =>
-              personalized.includes("ttc")
+              goals.includes("manage_symptoms")
+                ? setStep("symptoms")
+                : goals.includes("ttc")
                 ? setStep("ttcnote")
-                : setStep("personalize")
+                : setStep("goals")
             }
           />
         );
@@ -636,19 +799,25 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: "#D8D6F0",
     backgroundColor: "#FFFFFF",
+    gap: 10,
   },
   optionRowSelected: {
     borderColor: PINK,
     backgroundColor: "#FDF0F5",
   },
+  optionEmoji: {
+    fontSize: 18,
+    width: 26,
+    textAlign: "center",
+  },
   optionLabel: {
+    flex: 1,
     fontSize: 15,
     color: TEXT_DARK,
     fontWeight: "500",
@@ -674,6 +843,65 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
+  },
+  // Symptom questionnaire styles
+  symptomQuestion: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  symptomQLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: TEXT_DARK,
+    lineHeight: 21,
+  },
+  symptomChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#D8D6F0",
+    backgroundColor: "#FFFFFF",
+  },
+  symptomChipActive: {
+    borderColor: PINK,
+    backgroundColor: "#FDF0F5",
+  },
+  symptomChipText: {
+    fontSize: 14,
+    color: TEXT_MID,
+    fontWeight: "500",
+  },
+  symptomChipTextActive: {
+    color: PINK,
+    fontWeight: "600",
+  },
+  painScoreBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: "#D8D6F0",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  painScoreBtnActive: {
+    borderColor: PINK,
+    backgroundColor: PINK,
+  },
+  painScoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: TEXT_MID,
+  },
+  painScoreTextActive: {
+    color: "#FFFFFF",
+  },
+  painScaleHint: {
+    fontSize: 10,
+    color: TEXT_SOFT,
+    marginTop: 2,
   },
   ttcCard: {
     backgroundColor: "rgba(209,120,179,0.10)",

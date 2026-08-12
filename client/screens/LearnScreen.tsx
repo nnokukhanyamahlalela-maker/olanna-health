@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: 20, gap: 0 },
   header: { gap: 16, marginBottom: 12 },
   titleRow: { gap: 2 },
-  pageTitle: { fontSize: 24, fontWeight: "700", color: TEXT_DARK },
+  pageTitle: { fontFamily: "Poppins_800ExtraBold", fontSize: 24, fontWeight: "800", color: TEXT_DARK, letterSpacing: -0.5 },
   pageSubtitle: { fontSize: 13, color: TEXT_SOFT },
   searchBar: {
     flexDirection: "row",
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   forTodayText: { fontSize: 11, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
-  featuredTitle: { fontSize: 18, fontWeight: "700", color: TEXT_DARK, lineHeight: 24 },
+  featuredTitle: { fontFamily: "Poppins_700Bold", fontSize: 18, fontWeight: "700", color: TEXT_DARK, lineHeight: 26, letterSpacing: -0.2 },
   featuredReadTime: { fontSize: 12, color: TEXT_SOFT },
   filterChips: { gap: 8, paddingRight: 8 },
   filterChip: {
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: { fontSize: 13, color: TEXT_MID, fontWeight: "500" },
   filterChipTextActive: { color: "#FFFFFF", fontWeight: "700" },
-  sectionLabel: { fontSize: 15, fontWeight: "700", color: TEXT_DARK },
+  sectionLabel: { fontFamily: "Poppins_600SemiBold", fontSize: 15, fontWeight: "600", color: TEXT_DARK, letterSpacing: -0.1 },
   articleRow: {
     paddingVertical: 14,
     gap: 5,

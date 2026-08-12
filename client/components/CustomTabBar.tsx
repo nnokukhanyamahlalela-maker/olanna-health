@@ -152,6 +152,31 @@ function HealthIcon({ color, size }: { color: string; size: number }) {
   );
 }
 
+function ProfileIcon({ color, size }: { color: string; size: number }) {
+  const s = size;
+  const cx = s / 2;
+  // Head
+  const headR = s * 0.18;
+  const headCY = s * 0.32;
+  // Shoulders arc
+  const shX1 = s * 0.1;
+  const shX2 = s * 0.9;
+  const shCY = s * 0.82;
+  const arcCtrlY = s * 0.52;
+  return (
+    <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <Circle cx={cx} cy={headCY} r={headR} fill={color} />
+      <Path
+        d={`M ${shX1} ${shCY} Q ${cx} ${arcCtrlY} ${shX2} ${shCY}`}
+        stroke={color}
+        strokeWidth={s * 0.13}
+        strokeLinecap="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
 function LearnIcon({ color, size }: { color: string; size: number }) {
   // Two-column grid icon (two sets of horizontal lines side-by-side)
   const s = size;
@@ -204,6 +229,7 @@ const TAB_LABELS: Record<string, string> = {
   CheckInTab: "Check-in",
   HealthTab: "Health",
   LearnTab: "Learn",
+  // ProfileTab is intentionally omitted — it lives in the home header, not the bar
 };
 
 function TabIcon({
@@ -221,6 +247,7 @@ function TabIcon({
     case "CheckInTab": return <CheckInIcon color={color} size={size} />;
     case "HealthTab": return <HealthIcon color={color} size={size} />;
     case "LearnTab": return <LearnIcon color={color} size={size} />;
+    case "ProfileTab": return <ProfileIcon color={color} size={size} />;
     default: return <Circle cx={size / 2} cy={size / 2} r={size / 4} fill={color} />;
   }
 }
@@ -292,6 +319,9 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const activeColor = useCurrentPhaseColor();
 
   const renderTabItem = (route: typeof state.routes[0], index: number) => {
+    // ProfileTab lives in the home header — never rendered in the tab bar
+    if (route.name === "ProfileTab") return null;
+
     const isFocused = state.index === index;
 
     const onPress = () => {

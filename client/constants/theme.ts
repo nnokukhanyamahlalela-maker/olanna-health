@@ -23,47 +23,49 @@ export const BorderRadius = {
 } as const;
 
 export const Fonts = {
-  heading: "DMSans_600SemiBold",
-  headingMedium: "DMSans_500Medium",
-  headingLight: "DMSans_400Regular",
-  body: "DMSans_400Regular",
-  bodyMedium: "DMSans_500Medium",
-  bodyLight: "DMSans_300Light",
-  bodySemibold: "DMSans_500Medium",
-  numeric: "DMSans_500Medium",
-  numericBold: "DMSans_700Bold",
-  light: "DMSans_300Light",
-  mono: "DMSans_400Regular",
+  // Headings — Poppins bold for the Gen Z rebrand
+  heading:       "Poppins_800ExtraBold",
+  headingMedium: "Poppins_700Bold",
+  headingLight:  "Poppins_600SemiBold",
+  // Body — DM Sans stays (highly legible at small sizes)
+  body:          "DMSans_400Regular",
+  bodyMedium:    "DMSans_500Medium",
+  bodyLight:     "DMSans_300Light",
+  bodySemibold:  "DMSans_500Medium",
+  numeric:       "DMSans_500Medium",
+  numericBold:   "DMSans_700Bold",
+  light:         "DMSans_300Light",
+  mono:          "DMSans_400Regular",
 } as const;
 
 export const Typography = {
   h1: {
-    fontFamily: Fonts.heading,
-    fontSize: 28,
-    lineHeight: 42,
-    fontWeight: "600" as const,
-    letterSpacing: 0.2,
+    fontFamily:    Fonts.heading,       // Poppins_800ExtraBold
+    fontSize:      28,
+    lineHeight:    36,
+    fontWeight:    "800" as const,
+    letterSpacing: -0.5,
   },
   h2: {
-    fontFamily: Fonts.headingMedium,
-    fontSize: 22,
-    lineHeight: 34,
-    fontWeight: "500" as const,
-    letterSpacing: 0.1,
+    fontFamily:    Fonts.headingMedium, // Poppins_700Bold
+    fontSize:      22,
+    lineHeight:    30,
+    fontWeight:    "700" as const,
+    letterSpacing: -0.3,
   },
   h3: {
-    fontFamily: Fonts.headingLight,
-    fontSize: 18,
-    lineHeight: 28,
-    fontWeight: "400" as const,
-    letterSpacing: 0.1,
+    fontFamily:    Fonts.headingLight,  // Poppins_600SemiBold
+    fontSize:      18,
+    lineHeight:    26,
+    fontWeight:    "600" as const,
+    letterSpacing: -0.2,
   },
   h4: {
-    fontFamily: Fonts.body,
-    fontSize: 15,
-    lineHeight: 24,
-    fontWeight: "400" as const,
-    letterSpacing: 0.1,
+    fontFamily:    Fonts.headingLight,  // Poppins_600SemiBold
+    fontSize:      15,
+    lineHeight:    22,
+    fontWeight:    "600" as const,
+    letterSpacing: -0.1,
   },
   body: {
     fontFamily: Fonts.body,

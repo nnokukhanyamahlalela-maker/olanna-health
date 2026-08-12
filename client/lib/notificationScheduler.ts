@@ -5,13 +5,15 @@
  * app focus or save. They check notification settings, de-duplicate via stable
  * notification IDs and scheduler state, and respect quiet hours via the service.
  *
- * Category mapping:
- *   1. fireThresholdPatternAlert   — Tier-3 pattern detection (called from useLannaCheckIn)
- *   2. maybeSchedulePhaseReminder  — Phase-aware log reminders (called from LotusCycleScreen)
- *   3. maybeFireMilestoneNudge     — Data-collection milestones (called from LotusCycleScreen)
- *   4. maybeScheduleLapsedUserNudge — Re-engagement after 14+ days quiet (from LotusCycleScreen)
- *   5. maybeScheduleHealthSummaryReminder — Periodic summary nudge (from LotusCycleScreen)
- *   6. Partner mode — infrastructure in place; actual notifications gated on consent UI (TODO)
+ * Gates now use the four user-facing category keys set during onboarding:
+ *   checkInReminders  → maybeSchedulePhaseReminder
+ *   tipsContent       → maybeFireMilestoneNudge, maybeScheduleLapsedUserNudge,
+ *                        maybeScheduleHealthSummaryReminder
+ *   cyclePredictions  → fertile-window alerts (scheduler added when task ships)
+ *   thresholdAlert    → fireThresholdPatternAlert (critical, own key)
+ *
+ * Copy rules: <15 words, warm and conversational, one emoji max, no guilt,
+ * no streak-shaming, no condition names (never write PMOS or Endometriosis).
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,21 +26,23 @@ import type { UserProfile, DailyLog, CycleData } from "./storage";
 const SCHEDULER_STATE_KEY = "@olanna_notification_scheduler";
 
 interface SchedulerState {
-  firedMilestoneKeys: string[];
-  lastLapsedNotifiedAt: string | null;
+  firedMilestoneKeys:    string[];
+  lastLapsedNotifiedAt:  string | null;
   lastSummaryReminderAt: string | null;
 }
 
 const DEFAULT_SCHEDULER_STATE: SchedulerState = {
-  firedMilestoneKeys: [],
-  lastLapsedNotifiedAt: null,
+  firedMilestoneKeys:    [],
+  lastLapsedNotifiedAt:  null,
   lastSummaryReminderAt: null,
 };
 
 async function getState(): Promise<SchedulerState> {
   try {
     const raw = await AsyncStorage.getItem(SCHEDULER_STATE_KEY);
-    return raw ? { ...DEFAULT_SCHEDULER_STATE, ...JSON.parse(raw) } : { ...DEFAULT_SCHEDULER_STATE };
+    return raw
+      ? { ...DEFAULT_SCHEDULER_STATE, ...JSON.parse(raw) }
+      : { ...DEFAULT_SCHEDULER_STATE };
   } catch {
     return { ...DEFAULT_SCHEDULER_STATE };
   }
@@ -47,7 +51,10 @@ async function getState(): Promise<SchedulerState> {
 async function saveState(partial: Partial<SchedulerState>): Promise<void> {
   try {
     const current = await getState();
-    await AsyncStorage.setItem(SCHEDULER_STATE_KEY, JSON.stringify({ ...current, ...partial }));
+    await AsyncStorage.setItem(
+      SCHEDULER_STATE_KEY,
+      JSON.stringify({ ...current, ...partial }),
+    );
   } catch {}
 }
 
@@ -57,7 +64,9 @@ function today(): string {
 
 function daysSince(dateStr: string | null | undefined): number {
   if (!dateStr) return Infinity;
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+  return Math.floor(
+    (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24),
+  );
 }
 
 function tomorrowAt(hour: number): Date {
@@ -74,31 +83,26 @@ function daysFromNowAt(days: number, hour: number): Date {
   return d;
 }
 
-// ─── Category 1 — Threshold Pattern Alert ────────────────────────────────────
-
-const CONDITION_DISPLAY: Record<string, string> = {
-  irregular_periods: "a cycle pattern",
-  pmos: "a PMOS pattern",
-  endometriosis: "an endometriosis pattern",
-  menopause: "a cycle change pattern",
-};
+// ─── Category: Threshold Pattern Alert ───────────────────────────────────────
+// Gated on: thresholdAlert (own key — most important, never bundled)
+// Tone: calm, validating, never alarming. No condition names.
 
 /**
- * Fire a calm, immediate notification when Lanna's pattern engine first detects
- * a Tier-3 pattern. Called directly from useLannaCheckIn when a new Tier 3 is seen.
- * Tone: validating, never alarming — "worth a look" not "urgent warning."
+ * Fire an immediate notification when Lanna's pattern engine first detects
+ * a Tier-3 pattern. Called from useLannaCheckIn when a new Tier 3 is seen.
  */
 export async function fireThresholdPatternAlert(conditionId: string): Promise<void> {
   try {
     const settings = await notificationSettingsStorage.get();
     if (!settings.thresholdAlert) return;
 
-    const name = CONDITION_DISPLAY[conditionId] ?? "a pattern";
+    // conditionId is used internally only — never shown to user as a label
+    void conditionId;
 
     await fireImmediateNotification({
       notificationId: `olanna_threshold_${conditionId}`,
-      title: "Something worth a look",
-      body: `We've noticed ${name} in your recent logs. Nothing to worry about — open the app to see what Lanna found. It might be worth mentioning to your provider.`,
+      title: "Something worth a look 🌿",
+      body: "Lanna noticed a pattern in your recent logs. Might be worth mentioning to your provider.",
       data: { screen: "LannaCheckIn", conditionId },
       relaxedQuietHours: true,
     });
@@ -107,21 +111,24 @@ export async function fireThresholdPatternAlert(conditionId: string): Promise<vo
   }
 }
 
-// ─── Category 2 — Phase-Aware Log Reminders ──────────────────────────────────
+// ─── Category: Check-In Reminders ────────────────────────────────────────────
+// Gated on: checkInReminders
+// Tone: gentle nudge, no pressure, no streak language.
 
 /**
- * Schedule the next phase-aware log reminder.
- * Backs off to weekly for consistent loggers (5+ days/week).
- * Luteal phase gets more frequent nudges (PMOS symptom clustering).
+ * Schedule the next log reminder, phase-aware.
+ * Backs off to weekly for consistent loggers (5+ logs in the past 7 days).
  */
 export async function maybeSchedulePhaseReminder(
   profile: UserProfile,
   cycleData: CycleData | null,
-  dailyLogs: DailyLog[]
+  dailyLogs: DailyLog[],
 ): Promise<void> {
   try {
     const settings = await notificationSettingsStorage.get();
-    if (!settings.phaseReminder) return;
+    // Check new user-facing key; fall back to legacy key for existing installs
+    const enabled = settings.checkInReminders ?? settings.phaseReminder ?? true;
+    if (!enabled) return;
 
     const ID = "olanna_phase_reminder";
 
@@ -130,12 +137,12 @@ export async function maybeSchedulePhaseReminder(
     cutoff.setDate(cutoff.getDate() - 7);
     const recentCount = dailyLogs.filter((l) => new Date(l.date) >= cutoff).length;
 
-    // Consistent logger: back off to weekly
+    // Consistent logger — back off to weekly
     if (recentCount >= 5) {
       await scheduleLocalNotification({
         notificationId: ID,
-        title: "Your cycle data is building",
-        body: "You're logging regularly — keep it up. Data across multiple cycles is most useful to a provider.",
+        title: "Your data is building up nicely 🌱",
+        body: "Logging regularly makes the picture so much clearer. Keep going.",
         fireAt: daysFromNowAt(7, 9),
         data: { screen: "CheckIn" },
       });
@@ -144,22 +151,18 @@ export async function maybeSchedulePhaseReminder(
 
     const phase = cycleData?.phase ?? "follicular";
 
-    let title = "Log how you're feeling today";
-    let body = "A quick check-in takes less than a minute and builds a picture your provider can actually use.";
+    let title = "Want to log how you're feeling today?";
+    let body  = "No pressure — even a quick note helps Lanna build a clearer picture. 🌿";
     let daysOut = 3;
 
     if (phase === "luteal") {
-      title = "Luteal phase check-in";
-      body = "This is when PMOS symptoms often cluster. Even a brief note helps Lanna build a clearer picture.";
+      title   = "How are you feeling this week? 🌙";
+      body    = "This part of your cycle can feel heavier. Worth noting if it does.";
       daysOut = 2;
     } else if (phase === "menstrual") {
-      title = "Period log reminder";
-      body = "Logging your flow accurately tracks your cycle length. Worth 30 seconds if you can.";
+      title   = "A gentle check-in 🌸";
+      body    = "Want to note how today's feeling? No rush — whenever you're ready.";
       daysOut = 1;
-    } else if (phase === "follicular") {
-      daysOut = 3;
-    } else if (phase === "ovulation") {
-      daysOut = 3;
     }
 
     await scheduleLocalNotification({
@@ -174,51 +177,54 @@ export async function maybeSchedulePhaseReminder(
   }
 }
 
-// ─── Category 3 — Data Milestone Nudges ──────────────────────────────────────
+// ─── Category: Tips and Insights — Milestone Nudges ──────────────────────────
+// Gated on: tipsContent
+// Tone: warm acknowledgement, no streak language.
 
-/** milestoneKey → user-facing notification copy */
+/** milestoneKey → notification copy (all bodies ≤15 words) */
 const MILESTONE_COPY: Record<string, { title: string; body: string }> = {
   firstlog: {
-    title: "First log saved",
-    body: "Good start. The more you log, the clearer the picture — for you and anyone you choose to share it with.",
+    title: "First log saved ✨",
+    body:  "Good start. The more you log, the clearer the picture becomes.",
   },
   "7days": {
-    title: "7 days of data",
-    body: "A week of logs is a solid foundation. Keep going — patterns take a bit of time to emerge.",
+    title: "A week of data 🌱",
+    body:  "Seven days in — patterns start to emerge around here.",
   },
   "14days": {
     title: "Two weeks tracked",
-    body: "You're building a useful picture. Two weeks shows how your cycle affects your week-to-week experience.",
+    body:  "A fortnight of logs. You're building something genuinely useful.",
   },
   "28days": {
-    title: "One month of data",
-    body: "A full month logged. Your cycle history is building into something genuinely useful.",
+    title: "One month of data ✨",
+    body:  "A full month logged. Your cycle history is really taking shape.",
   },
   "1cycle": {
-    title: "First complete cycle",
-    body: "One full cycle tracked. Lanna can start noticing patterns — and your Health Summary is worth generating.",
+    title: "First full cycle tracked 🌸",
+    body:  "One complete cycle. Lanna can start spotting patterns now.",
   },
   "2cycles": {
     title: "Two cycles logged",
-    body: "Two cycles gives your provider a real baseline. Your Health Summary is worth updating.",
+    body:  "Two cycles gives a real baseline — your Health Summary is worth updating.",
   },
   "3cycles": {
-    title: "Three cycles tracked",
-    body: "Three cycles of data — enough for a provider to see a genuine pattern. Your Health Summary could make a real difference at your next appointment.",
+    title: "Three cycles of data ✨",
+    body:  "Enough for a provider to see genuine patterns. Well done for sticking with it.",
   },
 };
 
 /**
  * Fire a one-time milestone notification when a new milestone is reached.
- * De-duplicated by milestoneKey so each milestone fires at most once.
+ * De-duplicated by milestoneKey — each milestone fires at most once.
  */
 export async function maybeFireMilestoneNudge(
   milestoneKey: string,
-  _label: string
+  _label: string,
 ): Promise<void> {
   try {
     const settings = await notificationSettingsStorage.get();
-    if (!settings.dataMilestone) return;
+    const enabled = settings.tipsContent ?? settings.dataMilestone ?? true;
+    if (!enabled) return;
 
     const state = await getState();
     if (state.firedMilestoneKeys.includes(milestoneKey)) return;
@@ -226,13 +232,13 @@ export async function maybeFireMilestoneNudge(
     const copy = MILESTONE_COPY[milestoneKey];
     if (!copy) return;
 
-    // Fire in 5 minutes so it doesn't interrupt whatever the user is doing now
+    // Fire in 5 minutes so it doesn't interrupt what the user is doing now
     const fireAt = new Date(Date.now() + 5 * 60 * 1000);
 
     await scheduleLocalNotification({
       notificationId: `olanna_milestone_${milestoneKey}`,
       title: copy.title,
-      body: copy.body,
+      body:  copy.body,
       fireAt,
       data: { screen: "Home", milestoneKey },
     });
@@ -248,31 +254,34 @@ export async function maybeFireMilestoneNudge(
 /** Map a milestone label back to its stable key for de-duplication. */
 export function milestoneKeyFromLabel(label: string): string | null {
   const map: Record<string, string> = {
-    "First log!": "firstlog",
-    "7 days tracked": "7days",
-    "14 days tracked": "14days",
-    "28 days tracked": "28days",
-    "1 cycle logged": "1cycle",
-    "2 cycles logged": "2cycles",
-    "3 cycles logged": "3cycles",
-    "60 days of data": "60days",
-    "90 days of data": "90days",
+    "First log!":       "firstlog",
+    "7 days tracked":   "7days",
+    "14 days tracked":  "14days",
+    "28 days tracked":  "28days",
+    "1 cycle logged":   "1cycle",
+    "2 cycles logged":  "2cycles",
+    "3 cycles logged":  "3cycles",
+    "60 days of data":  "60days",
+    "90 days of data":  "90days",
   };
   return map[label] ?? null;
 }
 
-// ─── Category 4 — Lapsed User Re-engagement ──────────────────────────────────
+// ─── Category: Tips and Insights — Re-engagement ─────────────────────────────
+// Gated on: tipsContent
+// Tone: zero guilt, zero streak language, pure warmth.
 
 /**
  * Schedule a re-engagement nudge if the user hasn't logged in 14+ days.
- * Zero guilt, no streak language. Fires at most once per 30 days.
+ * Fires at most once per 30 days.
  */
 export async function maybeScheduleLapsedUserNudge(
-  lastLogDate: string | null
+  lastLogDate: string | null,
 ): Promise<void> {
   try {
     const settings = await notificationSettingsStorage.get();
-    if (!settings.lapsedUser) return;
+    const enabled = settings.tipsContent ?? settings.lapsedUser ?? true;
+    if (!enabled) return;
 
     if (daysSince(lastLogDate) < 14) return;
 
@@ -281,8 +290,8 @@ export async function maybeScheduleLapsedUserNudge(
 
     await scheduleLocalNotification({
       notificationId: "olanna_lapsed_user",
-      title: "Whenever you're ready",
-      body: "Your cycle data is still here, exactly where you left it. No pressure — even one log builds the picture.",
+      title: "Whenever you're ready 💙",
+      body:  "Your cycle data is still here, exactly where you left it.",
       fireAt: tomorrowAt(10),
       data: { screen: "Home" },
     });
@@ -293,18 +302,20 @@ export async function maybeScheduleLapsedUserNudge(
   }
 }
 
-// ─── Category 5 — Health Summary Refresh Reminder ────────────────────────────
+// ─── Category: Tips and Insights — Health Summary Refresh ────────────────────
+// Gated on: tipsContent
+// Fires if: 10+ logs + 30+ days since last reminder.
 
 /**
  * Schedule a gentle reminder to regenerate the Health Summary.
- * Fires if: category enabled + 10+ logs + 30+ days since last reminder.
  */
 export async function maybeScheduleHealthSummaryReminder(
-  dailyLogs: DailyLog[]
+  dailyLogs: DailyLog[],
 ): Promise<void> {
   try {
     const settings = await notificationSettingsStorage.get();
-    if (!settings.healthSummaryRefresh) return;
+    const enabled = settings.tipsContent ?? settings.healthSummaryRefresh ?? false;
+    if (!enabled) return;
     if (dailyLogs.length < 10) return;
 
     const state = await getState();
@@ -312,8 +323,8 @@ export async function maybeScheduleHealthSummaryReminder(
 
     await scheduleLocalNotification({
       notificationId: "olanna_summary_refresh",
-      title: "Worth updating your Health Summary",
-      body: "Your cycle data has been building. An updated summary could be useful if you have an appointment coming up.",
+      title: "Good time to refresh your Health Summary 📋",
+      body:  "Your data has been building. Worth updating before your next appointment.",
       fireAt: tomorrowAt(9),
       data: { screen: "HealthSummary" },
     });

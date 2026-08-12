@@ -39,6 +39,7 @@ import SupplementsScreen from "@/screens/SupplementsScreen";
 import MedicationsScreen from "@/screens/MedicationsScreen";
 import GutHealthScreen from "@/screens/GutHealthScreen";
 import LannaCheckInScreen from "@/screens/LannaCheckInScreen";
+import EndoTrackerScreen from "@/screens/EndoTrackerScreen";
 import NotificationSettingsScreen from "@/screens/NotificationSettingsScreen";
 import ResetupOnboardingScreen from "@/screens/ResetupOnboardingScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
@@ -83,6 +84,7 @@ export type RootStackParamList = {
   Medications: undefined;
   GutHealth: undefined;
   LannaCheckIn: { conditionId: ConditionId };
+  EndoTracker: undefined;
   ResetupOnboarding: undefined;
   Settings: undefined;
 };
@@ -328,6 +330,14 @@ export default function RootStackNavigator({ initialRoute }: RootStackNavigatorP
       <Stack.Screen
         name="LannaCheckIn"
         component={LannaCheckInScreen}
+        options={{
+          headerShown: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="EndoTracker"
+        component={EndoTrackerScreen}
         options={{
           headerShown: false,
           animation: "slide_from_bottom",

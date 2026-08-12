@@ -1,9 +1,18 @@
 /**
  * Notification Settings Storage
  *
- * Per-category opt-in flags plus permission state.
- * All categories default on except healthSummaryRefresh (lowest priority)
- * and partnerMode (requires its own consent step).
+ * Four user-facing category prefs (set during onboarding, editable in Settings)
+ * plus the internal permission state and the critical health-alert toggle.
+ *
+ * User-facing categories:
+ *   cyclePredictions  — period estimates + fertile window
+ *   checkInReminders  — gentle log reminders
+ *   learningContent   — phase-relevant educational content
+ *   tipsContent       — milestones, encouragements, re-engagement
+ *
+ * Internal-only (not surfaced in the 4-category onboarding UI):
+ *   thresholdAlert    — pattern alert (most important, kept separate)
+ *   partnerMode       — requires its own consent step
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,38 +20,62 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const STORAGE_KEY = "@olanna_notification_settings";
 
 export type NotificationCategory =
-  | "thresholdAlert"      // 1. Tier-3 pattern alert — highest priority
-  | "phaseReminder"       // 2. Phase-aware log reminders
-  | "dataMilestone"       // 3. Data-milestone nudges
-  | "lapsedUser"          // 4. Re-engagement
-  | "healthSummaryRefresh" // 5. Periodic summary nudge
-  | "partnerMode"         // 6. Partner notifications (needs consent step)
-  | "fertileWindow";      // 7. Fertile window / ovulation alerts
+  // ── User-facing (onboarding + settings) ──────────────────────────────────
+  | "cyclePredictions"   // 1. Cycle phase + fertile window updates
+  | "checkInReminders"   // 2. Gentle log / symptom reminders
+  | "learningContent"    // 3. Educational phase content
+  | "tipsContent"        // 4. Milestones, encouragements, re-engagement
+  // ── Internal / special-case ──────────────────────────────────────────────
+  | "thresholdAlert"     // Health pattern alert — separate section in Settings
+  | "partnerMode"        // Partner notifications — needs its own consent UI
+  // ── Legacy (kept for backward-compat; scheduler now reads user-facing keys) ──
+  | "phaseReminder"
+  | "dataMilestone"
+  | "lapsedUser"
+  | "healthSummaryRefresh"
+  | "fertileWindow";
 
 export interface NotificationSettings {
-  /** Whether the OS permission has been granted */
-  permissionGranted: boolean;
-  /** Whether we've already shown the OS permission dialog */
+  /** OS permission state */
+  permissionGranted:   boolean;
   permissionRequested: boolean;
-  thresholdAlert: boolean;
-  phaseReminder: boolean;
-  dataMilestone: boolean;
-  lapsedUser: boolean;
-  healthSummaryRefresh: boolean;
-  partnerMode: boolean;
-  fertileWindow: boolean;
+
+  /** ── User-facing categories (set in onboarding, editable in Settings) ── */
+  cyclePredictions:  boolean;  // period estimates + fertile window
+  checkInReminders:  boolean;  // gentle log reminders
+  learningContent:   boolean;  // phase-relevant reads
+  tipsContent:       boolean;  // milestones + encouragements + re-engagement
+
+  /** ── Internal / special-case ── */
+  thresholdAlert:      boolean;  // pattern alert — most important, own row
+  partnerMode:         boolean;  // partner notifications (own consent step)
+
+  /** ── Legacy fields — scheduler reads user-facing keys now ── */
+  phaseReminder:         boolean;
+  dataMilestone:         boolean;
+  lapsedUser:            boolean;
+  healthSummaryRefresh:  boolean;
+  fertileWindow:         boolean;
 }
 
 export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
-  permissionGranted: false,
+  permissionGranted:   false,
   permissionRequested: false,
+
+  cyclePredictions: true,
+  checkInReminders: true,
+  learningContent:  false,  // off by default — lower-priority
+  tipsContent:      true,
+
   thresholdAlert: true,
-  phaseReminder: true,
-  dataMilestone: true,
-  lapsedUser: true,
-  healthSummaryRefresh: false, // off by default — lower priority
-  partnerMode: false,          // off by default — needs explicit consent
-  fertileWindow: true,         // on by default — high-value signal
+  partnerMode:    false,   // off — needs explicit consent
+
+  // Legacy
+  phaseReminder:        true,
+  dataMilestone:        true,
+  lapsedUser:           true,
+  healthSummaryRefresh: false,
+  fertileWindow:        true,
 };
 
 export const notificationSettingsStorage = {
@@ -62,7 +95,7 @@ export const notificationSettingsStorage = {
       const current = await this.get();
       await AsyncStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ ...current, ...partial })
+        JSON.stringify({ ...current, ...partial }),
       );
     } catch (e) {
       console.error("[NotificationSettings] save error:", e);

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   Pressable,
+  Switch,
   Dimensions,
   ScrollView,
   FlatList,
@@ -27,6 +28,7 @@ import { ScreenshotImport, CycleReviewScreen } from "@/components/onboarding";
 import type { ExtractedCycleData } from "@/components/onboarding";
 import { storage, UserProfile, generateId } from "@/lib/storage";
 import { maybeRequestPermission } from "@/lib/notificationService";
+import { notificationSettingsStorage } from "@/lib/notificationSettings";
 import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import type { CycleRegularity } from "@/constants/onboardingTokens";
@@ -36,15 +38,51 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type OnboardingStep =
-  | "welcome"     // Hi, I'm Lanna
-  | "valueprop"   // Meet your four phases
-  | "name"        // What shall I call you?
-  | "personalize" // Does any of this apply?
-  | "ttcnote"     // Warm note shown only when user selects "Trying to conceive"
-  | "cyclelength" // How long is your cycle?
-  | "lastperiod"  // When did your last period start?
-  | "consent"     // Privacy Policy + Terms checkbox (must agree to finish)
+  | "welcome"       // Hi, I'm Lanna
+  | "valueprop"     // Meet your four phases
+  | "name"          // What shall I call you?
+  | "goals"         // What do you want to focus on?
+  | "ttcnote"       // Warm note shown only when user selects "Trying to conceive"
+  | "symptoms"      // Short symptom questionnaire (only when "manage symptoms" selected)
+  | "cyclelength"   // How long is your cycle?
+  | "lastperiod"    // When did your last period start?
+  | "consent"       // Privacy Policy + Terms checkbox (must agree to finish)
+  | "notifications" // Category-based notification preferences
   | "done";
+
+// ─── Symptom answers (internal only — never labels a condition to the user) ───
+
+interface SymptomAnswers {
+  pelvisPain?: number;       // 0–10
+  bleeding?: string;         // "none" | "spotting" | "light" | "normal" | "heavy"
+  sexActivity?: string;      // "yes" | "no" | "skip"
+  sexPain?: boolean;
+  bowelPain?: boolean;
+  urinaryPain?: boolean;
+}
+
+/** Infer internal condition flags from symptom questionnaire — never shown to user. */
+function inferFlags(
+  goals: string[],
+  answers: SymptomAnswers
+): { hasEndometriosis: boolean; hasPCOS: boolean } {
+  if (!goals.includes("manage_symptoms")) {
+    return { hasEndometriosis: false, hasPCOS: false };
+  }
+  const pelvisPain  = answers.pelvisPain  ?? 0;
+  const bowelPain   = answers.bowelPain   === true;
+  const sexPain     = answers.sexPain     === true;
+  const urinaryPain = answers.urinaryPain === true;
+  const isHeavyFlow = answers.bleeding === "heavy";
+
+  // Endo-consistent pattern: significant pelvic pain + at least one secondary symptom
+  const endoPattern = pelvisPain >= 4 && (bowelPain || sexPain || urinaryPain);
+
+  // PCOS-consistent pattern: managed symptoms without endo-secondary cluster, heavy flow
+  const pcosPattern = !endoPattern && pelvisPain >= 2 && isHeavyFlow;
+
+  return { hasEndometriosis: endoPattern, hasPCOS: pcosPattern };
+}
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -143,8 +181,8 @@ const VALUE_SLIDES = [
     phases: ["luteal", "menstrual", "follicular", "ovulation"] as const,
   },
   {
-    title: "Built for PMOS support",
-    body: "Tailored check-ins and insights for people navigating PMOS, endometriosis, and irregular cycles.",
+    title: "Built for how you feel",
+    body: "Tailored check-ins and insights that adapt to your symptoms, your patterns, and where you are in your cycle.",
     phases: ["ovulation", "luteal", "menstrual", "follicular"] as const,
   },
 ];
@@ -234,17 +272,18 @@ function NameStep({
   );
 }
 
-// ─── Step 4: Personalization ──────────────────────────────────────────────────
+// ─── Step 4: Goals selection ──────────────────────────────────────────────────
 
-const PERSONALIZE_OPTIONS = [
-  { id: "pmos", label: "PMOS" },
-  { id: "endo", label: "Endometriosis" },
-  { id: "irregular", label: "Irregular cycles" },
-  { id: "ttc", label: "Trying to conceive" },
-  { id: "none", label: "None of these" },
+const GOAL_OPTIONS = [
+  { id: "track_cycle",      label: "Track my periods & cycle",   emoji: "📅" },
+  { id: "manage_symptoms",  label: "Manage symptoms or pain",    emoji: "💙" },
+  { id: "understand_body",  label: "Understand my body better",  emoji: "✨" },
+  { id: "ttc",              label: "Trying to conceive",         emoji: "🌱" },
+  { id: "avoid_pregnancy",  label: "Avoid pregnancy",            emoji: "🛡️" },
+  { id: "exploring",        label: "Just exploring for now",     emoji: "🔍" },
 ];
 
-function PersonalizeStep({
+function GoalsStep({
   selected,
   onToggle,
   onNext,
@@ -264,13 +303,13 @@ function PersonalizeStep({
       <BackBtn onPress={onBack} />
       <View style={{ alignItems: "center", marginBottom: 24 }}>
         <View style={styles.mascotSmall}>
-          <LannaMascot phase="menstrual" size={80} />
+          <LannaMascot phase="follicular" size={80} expression="bright" />
         </View>
-        <Text style={styles.stepTitle}>Does any of this apply?</Text>
-        <Text style={styles.stepSubtitle}>We'll tailor your check-ins around it.{"\n"}You can always change this later.</Text>
+        <Text style={styles.stepTitle}>What do you want to focus on?</Text>
+        <Text style={styles.stepSubtitle}>Pick everything that fits — you can update this any time.</Text>
       </View>
       <View style={styles.optionsList}>
-        {PERSONALIZE_OPTIONS.map((opt) => {
+        {GOAL_OPTIONS.map((opt) => {
           const isSelected = selected.includes(opt.id);
           return (
             <Pressable
@@ -278,6 +317,7 @@ function PersonalizeStep({
               onPress={() => onToggle(opt.id)}
               style={[styles.optionRow, isSelected && styles.optionRowSelected]}
             >
+              <Text style={styles.optionEmoji}>{opt.emoji}</Text>
               <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
                 {opt.label}
               </Text>
@@ -295,7 +335,7 @@ function PersonalizeStep({
   );
 }
 
-// ─── Step 4b: TTC warm note (only shown when user selects "Trying to conceive") ─
+// ─── Step 4b: TTC warm note (shown when "Trying to conceive" is selected) ─────
 
 function TTCNoteStep({
   onNext,
@@ -323,7 +363,7 @@ function TTCNoteStep({
             Olanna is built for tracking symptoms, pain, and cycle patterns — not for fertility or ovulation monitoring. There's no conception timing, basal body temperature logging, or LH surge tracking here yet.
           </Text>
           <Text style={[styles.ttcBody, { marginTop: 12 }]}>
-            If you're trying to conceive and you have PMOS, endometriosis, or irregular cycles, your symptoms are still worth logging here — your patterns matter, and your provider or a fertility specialist can use that data.
+            If you're trying to conceive, your cycle and symptom patterns are still worth logging here — your data matters, and your provider or a fertility specialist can use it.
           </Text>
           <Text style={[styles.ttcBody, { marginTop: 12 }]}>
             We'd gently encourage looping in a specialist sooner rather than later. You deserve care that's tailored to your situation.
@@ -331,6 +371,172 @@ function TTCNoteStep({
         </View>
       </View>
       <PrimaryBtn label="Got it, let's continue" onPress={onNext} />
+    </ScrollView>
+  );
+}
+
+// ─── Step 4c: Symptom questionnaire (shown when "Manage symptoms" selected) ───
+// Framed as pattern-tracking only — no condition names shown to user.
+
+const PAIN_SCORES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const BLEEDING_OPTIONS = [
+  { id: "none",    label: "None" },
+  { id: "spotting",label: "Spotting" },
+  { id: "light",   label: "Light" },
+  { id: "normal",  label: "Normal" },
+  { id: "heavy",   label: "Heavy" },
+];
+const YES_NO_SKIP = [
+  { id: "yes",  label: "Yes" },
+  { id: "no",   label: "No" },
+  { id: "skip", label: "Prefer not to say" },
+];
+const YES_NO = [
+  { id: "yes", label: "Yes" },
+  { id: "no",  label: "No" },
+];
+
+function SymptomQuestionnaireStep({
+  answers,
+  onChange,
+  onNext,
+  onBack,
+}: {
+  answers: SymptomAnswers;
+  onChange: (updates: Partial<SymptomAnswers>) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  const ChipRow = ({
+    options,
+    value,
+    onSelect,
+  }: {
+    options: { id: string; label: string }[];
+    value: string | undefined;
+    onSelect: (id: string) => void;
+  }) => (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+      {options.map((opt) => {
+        const active = value === opt.id;
+        return (
+          <Pressable
+            key={opt.id}
+            onPress={() => onSelect(opt.id)}
+            style={[
+              styles.symptomChip,
+              active && styles.symptomChipActive,
+            ]}
+          >
+            <Text style={[styles.symptomChipText, active && styles.symptomChipTextActive]}>
+              {opt.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.stepContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+      keyboardShouldPersistTaps="handled"
+    >
+      <BackBtn onPress={onBack} />
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="luteal" size={80} />
+        </View>
+        <Text style={styles.stepTitle}>A few quick questions</Text>
+        <Text style={styles.stepSubtitle}>
+          This helps us understand what you're experiencing.{"\n"}
+          It's pattern-tracking, not a diagnosis.
+        </Text>
+      </View>
+
+      {/* Q1: Pelvic / abdominal pain */}
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>
+          How bad is pelvic or abdominal pain for you, most of the time?
+        </Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          {PAIN_SCORES.map((n) => {
+            const active = answers.pelvisPain === n;
+            return (
+              <Pressable
+                key={n}
+                onPress={() => onChange({ pelvisPain: n })}
+                style={[styles.painScoreBtn, active && styles.painScoreBtnActive]}
+              >
+                <Text style={[styles.painScoreText, active && styles.painScoreTextActive]}>
+                  {n}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
+          <Text style={styles.painScaleHint}>No pain</Text>
+          <Text style={styles.painScaleHint}>Worst imaginable</Text>
+        </View>
+      </View>
+
+      {/* Q2: Flow heaviness */}
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>How would you describe your typical flow?</Text>
+        <ChipRow
+          options={BLEEDING_OPTIONS}
+          value={answers.bleeding}
+          onSelect={(id) => onChange({ bleeding: id })}
+        />
+      </View>
+
+      {/* Q3: Sex pain */}
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever feel pain during or after sex?</Text>
+        <ChipRow
+          options={YES_NO_SKIP}
+          value={
+            answers.sexActivity === "skip" ? "skip"
+            : answers.sexPain === true ? "yes"
+            : answers.sexPain === false ? "no"
+            : undefined
+          }
+          onSelect={(id) => {
+            if (id === "skip") {
+              onChange({ sexActivity: "skip", sexPain: undefined });
+            } else {
+              onChange({ sexActivity: "yes", sexPain: id === "yes" });
+            }
+          }}
+        />
+      </View>
+
+      {/* Q4: Bowel pain */}
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever have painful bowel movements?</Text>
+        <ChipRow
+          options={YES_NO}
+          value={answers.bowelPain === true ? "yes" : answers.bowelPain === false ? "no" : undefined}
+          onSelect={(id) => onChange({ bowelPain: id === "yes" })}
+        />
+      </View>
+
+      {/* Q5: Urinary pain */}
+      <View style={styles.symptomQuestion}>
+        <Text style={styles.symptomQLabel}>Do you ever feel pain or pressure when urinating?</Text>
+        <ChipRow
+          options={YES_NO}
+          value={answers.urinaryPain === true ? "yes" : answers.urinaryPain === false ? "no" : undefined}
+          onSelect={(id) => onChange({ urinaryPain: id === "yes" })}
+        />
+      </View>
+
+      <View style={{ marginTop: 24 }}>
+        <PrimaryBtn label="Continue" onPress={onNext} />
+      </View>
     </ScrollView>
   );
 }
@@ -574,35 +780,148 @@ function ConsentStep({
   );
 }
 
+// ─── Notification Preferences Step ───────────────────────────────────────────
+
+interface NotifPrefs {
+  cyclePredictions: boolean;
+  checkInReminders: boolean;
+  learningContent:  boolean;
+  tipsContent:      boolean;
+}
+
+const DEFAULT_NOTIF_PREFS: NotifPrefs = {
+  cyclePredictions: true,
+  checkInReminders: true,
+  learningContent:  false,
+  tipsContent:      true,
+};
+
+const NOTIF_CATEGORIES: Array<{
+  id: keyof NotifPrefs;
+  label: string;
+  desc: string;
+}> = [
+  {
+    id:    "cyclePredictions",
+    label: "Cycle predictions",
+    desc:  "Period start estimates and fertile window updates.",
+  },
+  {
+    id:    "checkInReminders",
+    label: "Check-in reminders",
+    desc:  "A gentle nudge to log how you're feeling. No pressure.",
+  },
+  {
+    id:    "learningContent",
+    label: "Learning content",
+    desc:  "Short reads about what's happening in your body right now.",
+  },
+  {
+    id:    "tipsContent",
+    label: "Tips and insights",
+    desc:  "Small encouragements and cycle insights from Lanna.",
+  },
+];
+
+function NotificationsStep({
+  onNext,
+  onBack,
+}: {
+  onNext: (prefs: NotifPrefs) => void;
+  onBack: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [prefs, setPrefs] = useState<NotifPrefs>({ ...DEFAULT_NOTIF_PREFS });
+
+  const toggle = (id: keyof NotifPrefs) =>
+    setPrefs((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  return (
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={[
+        styles.stepContainer,
+        { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 32 },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <BackBtn onPress={onBack} />
+
+      <View style={[styles.stepCenter, { gap: 8, marginBottom: 28 }]}>
+        <View style={styles.mascotSmall}>
+          <LannaMascot phase="follicular" size={80} expression="bright" />
+        </View>
+        <Text style={styles.stepTitle}>How should Lanna stay in touch?</Text>
+        <Text style={styles.stepSubtitle}>
+          Turn off anything that doesn't feel useful. You can always change this in Settings.
+        </Text>
+      </View>
+
+      <View style={styles.notifCategories}>
+        {NOTIF_CATEGORIES.map((cat) => (
+          <View key={cat.id} style={styles.notifCategoryRow}>
+            <View style={styles.notifCategoryText}>
+              <Text style={styles.notifCategoryLabel}>{cat.label}</Text>
+              <Text style={styles.notifCategoryDesc}>{cat.desc}</Text>
+            </View>
+            <Switch
+              value={prefs[cat.id]}
+              onValueChange={() => toggle(cat.id)}
+              trackColor={{ false: "#D8D6F0", true: PINK + "80" }}
+              thumbColor={prefs[cat.id] ? PINK : "#F0EEF8"}
+              ios_backgroundColor="#D8D6F0"
+            />
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.notifPrivacyNote}>
+        <Text style={styles.notifPrivacyText}>
+          🔒 Your data stays on your device. Olanna never sells or shares it.
+        </Text>
+      </View>
+
+      <PrimaryBtn label="Let's go 🌸" onPress={() => onNext(prefs)} />
+    </ScrollView>
+  );
+}
+
 // ─── Root OnboardingScreen ────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [name, setName] = useState("");
-  const [personalized, setPersonalized] = useState<string[]>([]);
-  const [cycleLength, setCycleLength] = useState(28);
+  const [goals,          setGoals]          = useState<string[]>([]);
+  const [symptomAnswers, setSymptomAnswers] = useState<SymptomAnswers>({});
+  const [cycleLength,    setCycleLength]    = useState(28);
   const [lastPeriodDate, setLastPeriodDate] = useState<string | undefined>();
 
-  const togglePersonalize = (id: string) => {
-    if (id === "none") {
-      setPersonalized(["none"]);
-      return;
-    }
-    const without = personalized.filter((x) => x !== "none");
-    if (without.includes(id)) {
-      setPersonalized(without.filter((x) => x !== id));
-    } else {
-      setPersonalized([...without, id]);
-    }
+  const toggleGoal = (id: string) => {
+    setGoals((prev) =>
+      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
+    );
+  };
+
+  const handleNotificationsNext = async (prefs: NotifPrefs) => {
+    // Save user-facing notification category prefs before navigating
+    await notificationSettingsStorage
+      .save({
+        cyclePredictions: prefs.cyclePredictions,
+        checkInReminders: prefs.checkInReminders,
+        learningContent:  prefs.learningContent,
+        tipsContent:      prefs.tipsContent,
+      })
+      .catch(() => {});
+    finishOnboarding();
   };
 
   const finishOnboarding = async (resolvedPeriodDate?: string) => {
     const periodDate = resolvedPeriodDate ?? lastPeriodDate;
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const hasPMOS = personalized.includes("pmos");
-      const hasEndo = personalized.includes("endo");
+      // Infer internal flags from symptom answers — never shown to user as condition names
+      const { hasEndometriosis, hasPCOS } = inferFlags(goals, symptomAnswers);
       const profileId = generateId();
       const profile: UserProfile = {
         id: profileId,
@@ -611,9 +930,9 @@ export default function OnboardingScreen() {
         cycleLength,
         periodLength: 5,
         lastPeriodStart: periodDate ?? "",
-        healthGoals: [],
-        hasPCOS: hasPMOS,
-        hasEndometriosis: hasEndo,
+        healthGoals: goals,
+        hasPCOS,
+        hasEndometriosis,
         createdAt: new Date().toISOString(),
       };
       await storage.setUserProfile(profile);
@@ -664,24 +983,33 @@ export default function OnboardingScreen() {
           <NameStep
             name={name}
             setName={setName}
-            onNext={() => setStep("personalize")}
+            onNext={() => setStep("goals")}
             onBack={() => setStep("valueprop")}
           />
         );
-      case "personalize":
+      case "goals":
         return (
-          <PersonalizeStep
-            selected={personalized}
-            onToggle={togglePersonalize}
-            onNext={() => personalized.includes("ttc") ? setStep("ttcnote") : setStep("cyclelength")}
+          <GoalsStep
+            selected={goals}
+            onToggle={toggleGoal}
+            onNext={() => goals.includes("ttc") ? setStep("ttcnote") : goals.includes("manage_symptoms") ? setStep("symptoms") : setStep("cyclelength")}
             onBack={() => setStep("name")}
           />
         );
       case "ttcnote":
         return (
           <TTCNoteStep
+            onNext={() => goals.includes("manage_symptoms") ? setStep("symptoms") : setStep("cyclelength")}
+            onBack={() => setStep("goals")}
+          />
+        );
+      case "symptoms":
+        return (
+          <SymptomQuestionnaireStep
+            answers={symptomAnswers}
+            onChange={(updates) => setSymptomAnswers((prev) => ({ ...prev, ...updates }))}
             onNext={() => setStep("cyclelength")}
-            onBack={() => setStep("personalize")}
+            onBack={() => goals.includes("ttc") ? setStep("ttcnote") : setStep("goals")}
           />
         );
       case "cyclelength":
@@ -690,7 +1018,7 @@ export default function OnboardingScreen() {
             value={cycleLength}
             onChange={setCycleLength}
             onNext={() => setStep("lastperiod")}
-            onBack={() => setStep("personalize")}
+            onBack={() => goals.includes("manage_symptoms") ? setStep("symptoms") : goals.includes("ttc") ? setStep("ttcnote") : setStep("goals")}
           />
         );
       case "lastperiod":
@@ -704,10 +1032,17 @@ export default function OnboardingScreen() {
       case "consent":
         return (
           <ConsentStep
-            onNext={() => finishOnboarding()}
+            onNext={() => setStep("notifications")}
             onBack={() => setStep("lastperiod")}
             onOpenPrivacy={() => navigation.navigate("PrivacyStatement")}
             onOpenTerms={() => navigation.navigate("TermsOfService")}
+          />
+        );
+      case "notifications":
+        return (
+          <NotificationsStep
+            onNext={handleNotificationsNext}
+            onBack={() => setStep("consent")}
           />
         );
       default:
@@ -740,11 +1075,13 @@ const styles = StyleSheet.create({
   },
   // Welcome
   welcomeTitle: {
+    fontFamily: "Poppins_800ExtraBold",
     fontSize: 30,
-    fontWeight: "700",
+    fontWeight: "800",
     color: TEXT_DARK,
     textAlign: "center",
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
   mascotLarge: {
     marginVertical: 24,
@@ -770,10 +1107,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   valuePropTitle: {
+    fontFamily: "Poppins_700Bold",
     fontSize: 24,
     fontWeight: "700",
     color: TEXT_DARK,
     textAlign: "center",
+    letterSpacing: -0.3,
   },
   valuePropBody: {
     fontSize: 15,
@@ -814,10 +1153,12 @@ const styles = StyleSheet.create({
     color: TEXT_DARK,
   },
   stepTitle: {
+    fontFamily: "Poppins_700Bold",
     fontSize: 24,
     fontWeight: "700",
     color: TEXT_DARK,
     textAlign: "center",
+    letterSpacing: -0.3,
   },
   stepSubtitle: {
     fontSize: 14,
@@ -837,7 +1178,7 @@ const styles = StyleSheet.create({
     color: TEXT_DARK,
     marginTop: 8,
   },
-  // Personalize
+  // Goals / options list
   optionsList: {
     width: "100%",
     gap: 10,
@@ -845,19 +1186,25 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: "#D8D6F0",
     backgroundColor: "#FFFFFF",
+    gap: 10,
   },
   optionRowSelected: {
     borderColor: PINK,
     backgroundColor: "#FDF0F5",
   },
+  optionEmoji: {
+    fontSize: 18,
+    width: 26,
+    textAlign: "center",
+  },
   optionLabel: {
+    flex: 1,
     fontSize: 15,
     color: TEXT_DARK,
     fontWeight: "500",
@@ -883,6 +1230,65 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
+  },
+  // Symptom questionnaire
+  symptomQuestion: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  symptomQLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: TEXT_DARK,
+    lineHeight: 21,
+  },
+  symptomChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#D8D6F0",
+    backgroundColor: "#FFFFFF",
+  },
+  symptomChipActive: {
+    borderColor: PINK,
+    backgroundColor: "#FDF0F5",
+  },
+  symptomChipText: {
+    fontSize: 14,
+    color: TEXT_MID,
+    fontWeight: "500",
+  },
+  symptomChipTextActive: {
+    color: PINK,
+    fontWeight: "600",
+  },
+  painScoreBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: "#D8D6F0",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  painScoreBtnActive: {
+    borderColor: PINK,
+    backgroundColor: PINK,
+  },
+  painScoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: TEXT_MID,
+  },
+  painScoreTextActive: {
+    color: "#FFFFFF",
+  },
+  painScaleHint: {
+    fontSize: 10,
+    color: TEXT_SOFT,
+    marginTop: 2,
   },
   // Last period
   modeToggle: {
@@ -1105,5 +1511,45 @@ const styles = StyleSheet.create({
     color: PINK,
     fontWeight: "600",
     textDecorationLine: "underline",
+  },
+  // ── Notifications step ────────────────────────────────────────────────────
+  notifCategories: {
+    gap: 2,
+    marginBottom: 20,
+  },
+  notifCategoryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#D8D6F0",
+  },
+  notifCategoryText: {
+    flex: 1,
+    gap: 3,
+  },
+  notifCategoryLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: TEXT_DARK,
+  },
+  notifCategoryDesc: {
+    fontSize: 13,
+    color: TEXT_SOFT,
+    lineHeight: 18,
+  },
+  notifPrivacyNote: {
+    backgroundColor: "#F5F4FD",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 24,
+  },
+  notifPrivacyText: {
+    fontSize: 13,
+    color: TEXT_MID,
+    lineHeight: 19,
   },
 });

@@ -172,8 +172,52 @@ export default function NotificationSettingsScreen() {
           </Animated.View>
         )}
 
-        {/* Category 1 — Threshold alerts */}
+        {/* ── Section: Your preferences (4 user-facing categories) ── */}
         <Animated.View entering={FadeInDown.delay(60).duration(300)}>
+          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
+            Your preferences
+          </ThemedText>
+
+          <SettingRow
+            icon="moon"
+            iconColor="#0F6E56"
+            title="Cycle predictions"
+            description="Period start estimates and fertile window updates, tailored to your logged cycle."
+            value={settings.cyclePredictions ?? true}
+            onToggle={(v) => toggle("cyclePredictions", v)}
+            disabled={notPermitted}
+          />
+          <SettingRow
+            icon="edit-2"
+            iconColor="#C2185B"
+            title="Check-in reminders"
+            description="A gentle nudge to log how you're feeling. Timed to your cycle — quieter when you're already logging consistently."
+            value={settings.checkInReminders ?? true}
+            onToggle={(v) => toggle("checkInReminders", v)}
+            disabled={notPermitted}
+          />
+          <SettingRow
+            icon="book-open"
+            iconColor="#7B5EA7"
+            title="Learning content"
+            description="Short reads about what's happening in your body right now, sent when they're most relevant to your phase."
+            value={settings.learningContent ?? false}
+            onToggle={(v) => toggle("learningContent", v)}
+            disabled={notPermitted}
+          />
+          <SettingRow
+            icon="sun"
+            iconColor="#D4764E"
+            title="Tips and insights"
+            description="Small encouragements, milestone moments, and cycle insights from Lanna."
+            value={settings.tipsContent ?? true}
+            onToggle={(v) => toggle("tipsContent", v)}
+            disabled={notPermitted}
+          />
+        </Animated.View>
+
+        {/* ── Section: Health alerts (kept separate — most important) ── */}
+        <Animated.View entering={FadeInDown.delay(120).duration(300)}>
           <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
             Health alerts
           </ThemedText>
@@ -181,102 +225,20 @@ export default function NotificationSettingsScreen() {
             icon="activity"
             iconColor="#E8739E"
             title="Pattern alerts"
-            description="A calm heads-up when Lanna's pattern engine detects something worth discussing with a provider. This is the most important notification — we recommend keeping it on."
+            description="A calm heads-up when Lanna notices something in your logs worth mentioning to a provider. We recommend keeping this one on."
             value={settings.thresholdAlert}
             onToggle={(v) => toggle("thresholdAlert", v)}
             disabled={notPermitted}
           />
         </Animated.View>
 
-        {/* Category 7 — Fertile window */}
-        <Animated.View entering={FadeInDown.delay(90).duration(300)}>
-          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
-            Fertile window
-          </ThemedText>
-          <SettingRow
-            icon="sun"
-            iconColor="#0F6E56"
-            title="Fertile window alerts"
-            description="Notified when your fertile window opens and again at predicted ovulation. Based on your logged cycle length — turns itself off if birth control is recorded."
-            value={settings.fertileWindow ?? true}
-            onToggle={(v) => toggle("fertileWindow", v)}
-            disabled={notPermitted}
-          />
-        </Animated.View>
-
-        {/* Categories 2–4 — Logging & re-engagement */}
-        <Animated.View entering={FadeInDown.delay(120).duration(300)}>
-          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
-            Logging reminders
-          </ThemedText>
-          <SettingRow
-            icon="calendar"
-            iconColor="#C2185B"
-            title="Phase-aware reminders"
-            description="Timed to when symptoms are most likely — luteal phase for PMOS, around your expected period for flow tracking. Quieter automatically when you're already logging consistently."
-            value={settings.phaseReminder}
-            onToggle={(v) => toggle("phaseReminder", v)}
-            disabled={notPermitted}
-          />
-          <SettingRow
-            icon="trending-up"
-            iconColor="#7B5EA7"
-            title="Data milestone nudges"
-            description="Celebrates how much you've logged — first cycle tracked, two weeks of data, three cycles recorded — and links back to your Health Summary when it's worth sharing."
-            value={settings.dataMilestone}
-            onToggle={(v) => toggle("dataMilestone", v)}
-            disabled={notPermitted}
-          />
-          <SettingRow
-            icon="moon"
-            iconColor="#6A5B7B"
-            title="Re-engagement nudge"
-            description="If you've been away for a while, a gentle reminder that your data is still here — no pressure, no guilt, no streak language."
-            value={settings.lapsedUser}
-            onToggle={(v) => toggle("lapsedUser", v)}
-            disabled={notPermitted}
-          />
-        </Animated.View>
-
-        {/* Category 5 — Health Summary */}
+        {/* ── Privacy note ── */}
         <Animated.View entering={FadeInDown.delay(180).duration(300)}>
-          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
-            Provider prep
-          </ThemedText>
-          <SettingRow
-            icon="clipboard"
-            iconColor="#5A8A6A"
-            title="Health Summary refresh"
-            description="A low-priority monthly nudge suggesting you update your Health Summary — useful ahead of an appointment. Off by default."
-            value={settings.healthSummaryRefresh}
-            onToggle={(v) => toggle("healthSummaryRefresh", v)}
-            disabled={notPermitted}
-          />
-        </Animated.View>
-
-        {/* Category 6 — Partner Mode */}
-        <Animated.View entering={FadeInDown.delay(240).duration(300)}>
-          <ThemedText type="h4" style={[styles.sectionTitle, { color: theme.text }]}>
-            Partner Mode
-          </ThemedText>
-          <SettingRow
-            icon="heart"
-            iconColor="#D4764E"
-            title="Partner notifications"
-            description="Light notifications shared with your connected partner — no raw health data, summary context only. Requires your partner's explicit opt-in in Partner Mode settings."
-            value={settings.partnerMode}
-            onToggle={(v) => toggle("partnerMode", v)}
-            disabled={notPermitted}
-          />
-        </Animated.View>
-
-        {/* Quiet hours note */}
-        <Animated.View entering={FadeInDown.delay(300).duration(300)}>
           <GlassSurface style={styles.noteCard} noPadding>
             <View style={styles.noteCardInner}>
-              <Feather name="moon" size={16} color={theme.textSecondary} />
+              <Feather name="lock" size={16} color={theme.textSecondary} />
               <ThemedText type="caption" style={[styles.noteText, { color: theme.textSecondary }]}>
-                Reminders and milestone nudges respect quiet hours (10pm–8am). Pattern alerts use a slightly lighter window given their importance.
+                Your data stays on your device. Olanna never sells or shares it. Reminders respect quiet hours (10pm–8am).
               </ThemedText>
             </View>
           </GlassSurface>

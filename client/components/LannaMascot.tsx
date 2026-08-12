@@ -11,7 +11,14 @@
  * Only petal colour, petal size, and rotation change.
  */
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { View } from "react-native";
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  useReducedMotion,
+} from "react-native-reanimated";
 import Svg, { Circle, Path, G, Ellipse } from "react-native-svg";
 import { Phase } from "@/constants/phaseConfig";
 
@@ -226,22 +233,11 @@ function FaceExpression({
   );
 }
 
-// ─── Public component ─────────────────────────────────────────────────────────
+// ─── Inner SVG renderer (pure, no animation logic) ───────────────────────────
 
-interface LannaMascotProps {
-  phase:       Phase;
-  size?:       number;
-  /** Kept for API compatibility — phase drives the expression in the new design. */
-  expression?: MascotExpression;
-}
-
-export function LannaMascot({ phase, size = 100 }: LannaMascotProps) {
-  // Map "late" and "ovulation" to config keys
-  const key  = phase === "late" ? "luteal" : phase === "ovulation" ? "ovulation" : phase;
-  const cfg  = PHASE_CONFIG[key] ?? PHASE_CONFIG.menstrual;
-  const cx   = size / 2;
-  const cy   = size / 2;
-
+function MascotSvg({ cfg, size }: { cfg: PhaseMascotConfig; size: number }) {
+  const cx = size / 2;
+  const cy = size / 2;
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {/* Back ring (deeper colour, larger petals) */}
@@ -272,6 +268,66 @@ export function LannaMascot({ phase, size = 100 }: LannaMascotProps) {
         skinColor={cfg.skinColor}
       />
     </Svg>
+  );
+}
+
+// ─── Public component ─────────────────────────────────────────────────────────
+
+interface LannaMascotProps {
+  phase:       Phase;
+  size?:       number;
+  /** Kept for API compatibility — phase drives the expression in the new design. */
+  expression?: MascotExpression;
+}
+
+function resolveKey(phase: Phase): string {
+  if (phase === "late")      return "luteal";
+  if (phase === "ovulation") return "ovulation";
+  return phase;
+}
+
+export function LannaMascot({ phase, size = 100 }: LannaMascotProps) {
+  const reducedMotion  = useReducedMotion();
+
+  // Current config
+  const cfg            = PHASE_CONFIG[resolveKey(phase)] ?? PHASE_CONFIG.menstrual;
+
+  // Track the previous phase config so we can crossfade from it
+  const prevCfgRef     = useRef<PhaseMascotConfig>(cfg);
+  const prevPhaseRef   = useRef<Phase>(phase);
+
+  // 0 = fully prev, 1 = fully current
+  const fadeProgress   = useSharedValue(1);
+
+  useEffect(() => {
+    if (phase !== prevPhaseRef.current) {
+      // Snapshot the outgoing config before updating the ref
+      prevCfgRef.current   = PHASE_CONFIG[resolveKey(prevPhaseRef.current)] ?? PHASE_CONFIG.menstrual;
+      prevPhaseRef.current = phase;
+
+      if (!reducedMotion) {
+        // Jump to 0 (show prev) then animate to 1 (show curr)
+        fadeProgress.value = 0;
+        fadeProgress.value = withTiming(1, { duration: 1100 });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - fadeProgress.value }));
+  const currStyle = useAnimatedStyle(() => ({ opacity: fadeProgress.value }));
+
+  return (
+    <View style={{ width: size, height: size }}>
+      {/* Outgoing phase — fades out on phase change */}
+      <Animated.View style={[{ position: "absolute" }, prevStyle]} pointerEvents="none">
+        <MascotSvg cfg={prevCfgRef.current} size={size} />
+      </Animated.View>
+      {/* Incoming / current phase — fades in */}
+      <Animated.View style={[{ position: "absolute" }, currStyle]}>
+        <MascotSvg cfg={cfg} size={size} />
+      </Animated.View>
+    </View>
   );
 }
 

@@ -395,3 +395,31 @@ uri = "file://assets/images/icon.png"
 type = "image"
 title = "New App Icon — Dot Cluster"
 description = "Mint, coral, cream, and lavender circles on dark navy — 1024×1024 PNG"
+
+[[outputs]]
+id = "xxG3ACTx5fgp5L0ngLaWi"
+uri = "file://attached_assets/generated_images/screen_cycle_home.jpg"
+type = "image"
+title = "Cycle Home"
+description = "The main cycle wheel screen — phase ring, day dots, Lanna mascot centre, Quick Log row, and Log Today CTA."
+
+[[outputs]]
+id = "FjRJnJsCzshzmOqvjZIdE"
+uri = "file://attached_assets/generated_images/screen_quick_log.jpg"
+type = "image"
+title = "Quick Log Sheet"
+description = "The slide-up pain logger — lavender option pills, selected coral pill, and Log it button."
+
+[[outputs]]
+id = "_XtJETV3WUujWcMSIo4VZ"
+uri = "file://attached_assets/generated_images/screen_checkin_2.jpg"
+type = "image"
+title = "Check-In"
+description = "Full Check-In flow — segmented Symptoms/Body Map tabs, already-logged banner, per-category symptom card grid, fixed Save bar."
+
+[[outputs]]
+id = "KPmWe28a3kNOL0COO82hk"
+uri = "file://attached_assets/generated_images/screen_lanna_2.jpg"
+type = "image"
+title = "Lanna AI Insight"
+description = "Lanna's pattern-detection card — mascot + speech bubble, condition chips, evidence rows, care-provider card, and action buttons."
