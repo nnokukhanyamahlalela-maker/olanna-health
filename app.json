@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Olanna Health",
-    "slug": "olanna-health",
+    "slug": "olanna-period-tracker",
+    "owner": "olanna-health",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
