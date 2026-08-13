@@ -273,6 +273,11 @@ function checkAiConfiguration(): void {
   setupRequestLogging(app);
   setupRateLimiting(app);
 
+  // Health-check endpoint — registered before everything else so the
+  // deployment probe gets a 200 as soon as the port is open, even while
+  // the rest of the routes are still initialising.
+  app.get("/healthz", (_req, res) => res.status(200).json({ ok: true }));
+
   configureExpoAndLanding(app);
 
   const server = await registerRoutes(app);
@@ -280,14 +285,20 @@ function checkAiConfiguration(): void {
   setupErrorHandler(app);
 
   const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`express server serving on port ${port}`);
-    },
-  );
+
+  // Start listening before the callback fires so health checks can reach
+  // the landing page handler immediately.
+  await new Promise<void>((resolve) => {
+    server.listen(
+      {
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      },
+      () => {
+        log(`express server serving on port ${port}`);
+        resolve();
+      },
+    );
+  });
 })();
