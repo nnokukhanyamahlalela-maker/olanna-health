@@ -33,7 +33,9 @@ export type QuickLogDomain = "flow" | "mood" | "pain" | "energy";
 
 // Symptom IDs written for pain quick-logs. Cleared on each pain save so the
 // previous selection is always replaced rather than accumulated.
-const PAIN_SYMPTOM_IDS = ["cramps", "pelvic-heaviness", "deep-pelvic-pain"];
+// "pain-none" is a sentinel that marks an explicit "No pain" choice so the
+// sheet can pre-select None correctly when the user re-opens it.
+const PAIN_SYMPTOM_IDS = ["cramps", "pelvic-heaviness", "deep-pelvic-pain", "pain-none"];
 
 // ─── Option definitions ───────────────────────────────────────────────────────
 
@@ -54,7 +56,7 @@ const MOOD_OPTIONS = [
 ] as const;
 
 const PAIN_OPTIONS = [
-  { id: "none",     label: "None",     emoji: "✅", symptoms: [] as string[] },
+  { id: "none",     label: "None",     emoji: "✅", symptoms: ["pain-none"] as string[] },
   { id: "mild",     label: "Mild",     emoji: "😕", symptoms: ["cramps"] },
   { id: "moderate", label: "Moderate", emoji: "😣", symptoms: ["cramps", "pelvic-heaviness"] },
   { id: "severe",   label: "Severe",   emoji: "😖", symptoms: ["cramps", "pelvic-heaviness", "deep-pelvic-pain"] },
@@ -334,7 +336,10 @@ export function QuickLogSheet({ visible, domain, onDismiss, onSaved, prefill }: 
       setSelectedEnergy(prefill.energy);
     } else if (domain === "pain" && prefill?.symptoms) {
       const syms = prefill.symptoms;
-      if (syms.includes("deep-pelvic-pain")) {
+      if (syms.includes("pain-none")) {
+        // User explicitly logged "No pain" last time — pre-select None.
+        setSelectedPain("none");
+      } else if (syms.includes("deep-pelvic-pain")) {
         setSelectedPain("severe");
       } else if (syms.includes("pelvic-heaviness")) {
         setSelectedPain("moderate");

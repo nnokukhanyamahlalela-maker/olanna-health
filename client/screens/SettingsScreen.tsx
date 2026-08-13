@@ -26,6 +26,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { storage, UserProfile } from "@/lib/storage";
 import { saveOnboardingCycleProfile } from "@/services/cycleProfileService";
@@ -43,6 +44,22 @@ const INK_MID  = "#6B6490";   // mid plum
 const CORAL    = "#D85A30";
 const TEAL     = "#0F6E56";
 const BORDER   = "#E8E6F0";
+
+// ─── Dark-mode colour overrides ───────────────────────────────────────────────
+// Returns null in light mode so callsites can use `dk && { ... }` safely.
+function getDarkC(isDark: boolean) {
+  if (!isDark) return null;
+  return {
+    BG:      "#1C193A",
+    SURFACE: "#28244A",
+    INK:     "#F5F0F3",
+    INK_MID: "#C4B3BF",
+    BORDER:  "rgba(255,255,255,0.12)",
+    BTN_BG:  "rgba(238,237,254,0.18)",
+    BC_BG:   "rgba(245,244,251,0.10)",
+    BC_SEL:  "rgba(250,236,231,0.18)",
+  };
+}
 
 // ─── Birth control options ────────────────────────────────────────────────────
 const BIRTH_CONTROL_OPTIONS: { id: string; label: string; icon: string }[] = [
@@ -74,25 +91,26 @@ function Stepper({
   onIncrement: () => void;
   unit: string;
 }) {
+  const dk = getDarkC(useColorScheme() === "dark");
   return (
     <View style={stepperStyles.row}>
       <Pressable
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onDecrement(); }}
         disabled={value <= min}
-        style={[stepperStyles.btn, value <= min && stepperStyles.btnDisabled]}
+        style={[stepperStyles.btn, value <= min && stepperStyles.btnDisabled, dk && { backgroundColor: dk.BTN_BG }]}
       >
-        <Feather name="minus" size={18} color={value <= min ? INK_MID : INK} />
+        <Feather name="minus" size={18} color={value <= min ? (dk?.INK_MID ?? INK_MID) : (dk?.INK ?? INK)} />
       </Pressable>
       <View style={stepperStyles.valueBox}>
-        <Text style={stepperStyles.valueText}>{value}</Text>
-        <Text style={stepperStyles.unitText}> {unit}</Text>
+        <Text style={[stepperStyles.valueText, dk && { color: dk.INK }]}>{value}</Text>
+        <Text style={[stepperStyles.unitText, dk && { color: dk.INK_MID }]}> {unit}</Text>
       </View>
       <Pressable
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onIncrement(); }}
         disabled={value >= max}
-        style={[stepperStyles.btn, value >= max && stepperStyles.btnDisabled]}
+        style={[stepperStyles.btn, value >= max && stepperStyles.btnDisabled, dk && { backgroundColor: dk.BTN_BG }]}
       >
-        <Feather name="plus" size={18} color={value >= max ? INK_MID : INK} />
+        <Feather name="plus" size={18} color={value >= max ? (dk?.INK_MID ?? INK_MID) : (dk?.INK ?? INK)} />
       </Pressable>
     </View>
   );
@@ -120,12 +138,13 @@ const stepperStyles = StyleSheet.create({
 
 // ─── Section heading ──────────────────────────────────────────────────────────
 function SectionHead({ title, icon }: { title: string; icon: string }) {
+  const dk = getDarkC(useColorScheme() === "dark");
   return (
     <View style={headStyles.row}>
       <View style={headStyles.iconBox}>
         <Feather name={icon as any} size={15} color={TEAL} />
       </View>
-      <Text style={headStyles.title}>{title}</Text>
+      <Text style={[headStyles.title, dk && { color: dk.INK }]}>{title}</Text>
     </View>
   );
 }
@@ -154,11 +173,16 @@ function NotifRow({
   onToggle: (v: boolean) => void;
   isLast?: boolean;
 }) {
+  const dk = getDarkC(useColorScheme() === "dark");
   return (
-    <View style={[notifStyles.row, !isLast && notifStyles.rowBorder]}>
+    <View style={[
+      notifStyles.row,
+      !isLast && notifStyles.rowBorder,
+      dk && !isLast && { borderBottomColor: dk.BORDER },
+    ]}>
       <View style={notifStyles.text}>
-        <Text style={notifStyles.label}>{label}</Text>
-        <Text style={notifStyles.desc}>{description}</Text>
+        <Text style={[notifStyles.label, dk && { color: dk.INK }]}>{label}</Text>
+        <Text style={[notifStyles.desc,  dk && { color: dk.INK_MID }]}>{description}</Text>
       </View>
       <Switch
         value={value}
@@ -166,8 +190,8 @@ function NotifRow({
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onToggle(v);
         }}
-        trackColor={{ false: BORDER, true: TEAL }}
-        thumbColor={SURFACE}
+        trackColor={{ false: dk?.BORDER ?? BORDER, true: TEAL }}
+        thumbColor="#FFFFFF"
       />
     </View>
   );
@@ -195,11 +219,16 @@ function ConditionRow({
   onToggle: (v: boolean) => void;
   isLast?: boolean;
 }) {
+  const dk = getDarkC(useColorScheme() === "dark");
   return (
-    <View style={[notifStyles.row, !isLast && notifStyles.rowBorder]}>
+    <View style={[
+      notifStyles.row,
+      !isLast && notifStyles.rowBorder,
+      dk && !isLast && { borderBottomColor: dk.BORDER },
+    ]}>
       <View style={notifStyles.text}>
-        <Text style={notifStyles.label}>{label}</Text>
-        <Text style={notifStyles.desc}>{description}</Text>
+        <Text style={[notifStyles.label, dk && { color: dk.INK }]}>{label}</Text>
+        <Text style={[notifStyles.desc,  dk && { color: dk.INK_MID }]}>{description}</Text>
       </View>
       <Switch
         value={value}
@@ -207,8 +236,8 @@ function ConditionRow({
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onToggle(v);
         }}
-        trackColor={{ false: BORDER, true: CORAL }}
-        thumbColor={SURFACE}
+        trackColor={{ false: dk?.BORDER ?? BORDER, true: CORAL }}
+        thumbColor="#FFFFFF"
       />
     </View>
   );
@@ -219,6 +248,7 @@ export default function SettingsScreen() {
   const insets      = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const navigation  = useNavigation();
+  const dk          = getDarkC(useColorScheme() === "dark");
 
   // Profile state
   const [profile,       setProfile]       = useState<UserProfile | null>(null);
@@ -318,7 +348,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      style={styles.root}
+      style={[styles.root, dk && { backgroundColor: dk.BG }]}
       contentContainerStyle={{
         paddingTop: headerHeight + 8,
         paddingBottom: insets.bottom + 40,
@@ -329,13 +359,13 @@ export default function SettingsScreen() {
 
       {/* ── 1. Cycle Details ── */}
       <SectionHead title="Cycle Details" icon="refresh-cw" />
-      <View style={styles.card}>
+      <View style={[styles.card, dk && { backgroundColor: dk.SURFACE, borderColor: dk.BORDER }]}>
 
         {/* Cycle length */}
         <View style={styles.fieldRow}>
           <View style={styles.fieldLabel}>
-            <Text style={styles.fieldTitle}>Cycle length</Text>
-            <Text style={styles.fieldSub}>How many days your typical cycle lasts</Text>
+            <Text style={[styles.fieldTitle, dk && { color: dk.INK }]}>Cycle length</Text>
+            <Text style={[styles.fieldSub,   dk && { color: dk.INK_MID }]}>How many days your typical cycle lasts</Text>
           </View>
           <Stepper
             value={cycleLength}
@@ -346,13 +376,13 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, dk && { backgroundColor: dk.BORDER }]} />
 
         {/* Period length */}
         <View style={styles.fieldRow}>
           <View style={styles.fieldLabel}>
-            <Text style={styles.fieldTitle}>Period length</Text>
-            <Text style={styles.fieldSub}>How many days your period typically lasts</Text>
+            <Text style={[styles.fieldTitle, dk && { color: dk.INK }]}>Period length</Text>
+            <Text style={[styles.fieldSub,   dk && { color: dk.INK_MID }]}>How many days your period typically lasts</Text>
           </View>
           <Stepper
             value={periodLength}
@@ -363,21 +393,21 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, dk && { backgroundColor: dk.BORDER }]} />
 
         {/* Last period start */}
         <View style={styles.fieldRowVertical}>
           <View style={{ marginBottom: 10 }}>
-            <Text style={styles.fieldTitle}>Last period start date</Text>
-            <Text style={styles.fieldSub}>Used to calculate your current cycle day</Text>
+            <Text style={[styles.fieldTitle, dk && { color: dk.INK }]}>Last period start date</Text>
+            <Text style={[styles.fieldSub,   dk && { color: dk.INK_MID }]}>Used to calculate your current cycle day</Text>
           </View>
           <Pressable
             onPress={() => setShowPicker(true)}
-            style={styles.dateBtn}
+            style={[styles.dateBtn, dk && { backgroundColor: dk.BTN_BG }]}
           >
-            <Feather name="calendar" size={16} color={INK_MID} />
-            <Text style={styles.dateBtnText}>{formatDate(lastPeriod)}</Text>
-            <Feather name="chevron-down" size={14} color={INK_MID} />
+            <Feather name="calendar" size={16} color={dk?.INK_MID ?? INK_MID} />
+            <Text style={[styles.dateBtnText, dk && { color: dk.INK }]}>{formatDate(lastPeriod)}</Text>
+            <Feather name="chevron-down" size={14} color={dk?.INK_MID ?? INK_MID} />
           </Pressable>
           {showPicker && (
             <DateTimePicker
@@ -404,11 +434,11 @@ export default function SettingsScreen() {
 
       {/* ── 2. Health Profile ── */}
       <SectionHead title="Health Profile" icon="heart" />
-      <View style={styles.card}>
+      <View style={[styles.card, dk && { backgroundColor: dk.SURFACE, borderColor: dk.BORDER }]}>
 
         {/* Birth control */}
-        <Text style={styles.fieldTitle}>Birth control</Text>
-        <Text style={[styles.fieldSub, { marginBottom: 12 }]}>
+        <Text style={[styles.fieldTitle, dk && { color: dk.INK }]}>Birth control</Text>
+        <Text style={[styles.fieldSub, { marginBottom: 12 }, dk && { color: dk.INK_MID }]}>
           Helps Lanna contextualise your cycle patterns
         </Text>
         <View style={styles.bcGrid}>
@@ -421,14 +451,19 @@ export default function SettingsScreen() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setBirthControl(opt.id);
                 }}
-                style={[styles.bcChip, selected && styles.bcChipSelected]}
+                style={[
+                  styles.bcChip,
+                  selected && styles.bcChipSelected,
+                  dk && { backgroundColor: dk.BC_BG, borderColor: dk.BORDER },
+                  dk && selected && { backgroundColor: dk.BC_SEL, borderColor: CORAL },
+                ]}
               >
                 <Feather
                   name={opt.icon as any}
                   size={13}
-                  color={selected ? CORAL : INK_MID}
+                  color={selected ? CORAL : (dk?.INK_MID ?? INK_MID)}
                 />
-                <Text style={[styles.bcLabel, selected && styles.bcLabelSelected]}>
+                <Text style={[styles.bcLabel, selected && styles.bcLabelSelected, dk && !selected && { color: dk.INK_MID }]}>
                   {opt.label}
                 </Text>
               </Pressable>
@@ -436,11 +471,11 @@ export default function SettingsScreen() {
           })}
         </View>
 
-        <View style={[styles.divider, { marginTop: 16 }]} />
+        <View style={[styles.divider, { marginTop: 16 }, dk && { backgroundColor: dk.BORDER }]} />
 
         {/* Conditions */}
-        <Text style={[styles.fieldTitle, { marginTop: 12 }]}>Health conditions</Text>
-        <Text style={[styles.fieldSub, { marginBottom: 8 }]}>
+        <Text style={[styles.fieldTitle, { marginTop: 12 }, dk && { color: dk.INK }]}>Health conditions</Text>
+        <Text style={[styles.fieldSub, { marginBottom: 8 }, dk && { color: dk.INK_MID }]}>
           Enables condition-specific insights and symptom tracking
         </Text>
         <ConditionRow
@@ -468,7 +503,7 @@ export default function SettingsScreen() {
 
       {/* ── 3. Notifications ── */}
       <SectionHead title="Notifications" icon="bell" />
-      <View style={styles.card}>
+      <View style={[styles.card, dk && { backgroundColor: dk.SURFACE, borderColor: dk.BORDER }]}>
         <NotifRow
           label="Fertile window alerts"
           description="Notified when your fertile window opens and at ovulation"
@@ -510,7 +545,7 @@ export default function SettingsScreen() {
 
       {/* Quick links */}
       <SectionHead title="More Settings" icon="settings" />
-      <View style={styles.card}>
+      <View style={[styles.card, dk && { backgroundColor: dk.SURFACE, borderColor: dk.BORDER }]}>
         {[
           { label: "Edit full profile",  icon: "user",       route: "EditProfile" },
           { label: "Privacy & Data",     icon: "lock",       route: "PrivacySettings" },
@@ -522,12 +557,13 @@ export default function SettingsScreen() {
             style={({ pressed }) => [
               styles.linkRow,
               i < arr.length - 1 && styles.linkRowBorder,
+              dk && i < arr.length - 1 && { borderBottomColor: dk.BORDER },
               { opacity: pressed ? 0.7 : 1 },
             ]}
           >
-            <Feather name={icon as any} size={16} color={INK_MID} />
-            <Text style={styles.linkLabel}>{label}</Text>
-            <Feather name="chevron-right" size={16} color={INK_MID} />
+            <Feather name={icon as any} size={16} color={dk?.INK_MID ?? INK_MID} />
+            <Text style={[styles.linkLabel, dk && { color: dk.INK }]}>{label}</Text>
+            <Feather name="chevron-right" size={16} color={dk?.INK_MID ?? INK_MID} />
           </Pressable>
         ))}
       </View>

@@ -82,8 +82,11 @@ export function getTodayQuickLog(
     result.energy = ENERGY_LABELS[todayLog.energy] ?? String(todayLog.energy);
   }
 
-  // Derive pain level from symptom IDs written by QuickLogSheet
-  if (todayLog.symptoms.includes("deep-pelvic-pain")) {
+  // Derive pain level from symptom IDs written by QuickLogSheet.
+  // "pain-none" is a sentinel for an explicit "No pain" choice.
+  if (todayLog.symptoms.includes("pain-none")) {
+    result.pain = "None";
+  } else if (todayLog.symptoms.includes("deep-pelvic-pain")) {
     result.pain = "Severe";
   } else if (todayLog.symptoms.includes("pelvic-heaviness")) {
     result.pain = "Moderate";
