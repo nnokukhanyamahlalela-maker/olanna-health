@@ -111,6 +111,47 @@ export async function fireThresholdPatternAlert(conditionId: string): Promise<vo
   }
 }
 
+// ─── Category: Cycle Predictions — Fertile Window Alert ──────────────────────
+// Gated on: cyclePredictions
+// Fires once per cycle, rescheduled on each cycle start.
+
+/**
+ * Schedule a notification for when the fertile window opens this cycle.
+ * Re-schedules on every cycle if days until fertile window > 0.
+ * No-ops if the fertile window has already passed this cycle.
+ */
+export async function maybeScheduleFertileWindowAlert(
+  profile: { cycleLength?: number; lastPeriodStart?: string },
+  currentCycleDay: number,
+): Promise<void> {
+  try {
+    const settings = await notificationSettingsStorage.get();
+    const enabled = settings.cyclePredictions ?? settings.fertileWindow ?? true;
+    if (!enabled) return;
+    if (!profile.lastPeriodStart) return;
+
+    const cycleLength = profile.cycleLength ?? 28;
+
+    // Fertile window starts ~5 days before estimated ovulation
+    // Ovulation ≈ cycleLength - 14; fertile start ≈ cycleLength - 19
+    const fertileStartDay = Math.max(1, cycleLength - 19);
+    const daysUntilFertile = fertileStartDay - currentCycleDay;
+
+    // Already past fertile window this cycle — skip
+    if (daysUntilFertile < 0) return;
+
+    await scheduleLocalNotification({
+      notificationId: "olanna_fertile_window",
+      title: "Your fertile window is opening 🌿",
+      body:  "Your most fertile days are beginning. Check your dashboard for details.",
+      fireAt: daysFromNowAt(Math.max(0, daysUntilFertile), 9),
+      data:   { screen: "Home" },
+    });
+  } catch (e) {
+    console.error("[NotificationScheduler] fertile window alert error:", e);
+  }
+}
+
 // ─── Category: Check-In Reminders ────────────────────────────────────────────
 // Gated on: checkInReminders
 // Tone: gentle nudge, no pressure, no streak language.
@@ -235,7 +276,7 @@ export async function maybeFireMilestoneNudge(
     // Fire in 5 minutes so it doesn't interrupt what the user is doing now
     const fireAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    await scheduleLocalNotification({
+    const scheduled = await scheduleLocalNotification({
       notificationId: `olanna_milestone_${milestoneKey}`,
       title: copy.title,
       body:  copy.body,
@@ -243,9 +284,12 @@ export async function maybeFireMilestoneNudge(
       data: { screen: "Home", milestoneKey },
     });
 
-    await saveState({
-      firedMilestoneKeys: [...state.firedMilestoneKeys, milestoneKey],
-    });
+    // Only mark as fired when scheduling actually succeeded
+    if (scheduled) {
+      await saveState({
+        firedMilestoneKeys: [...state.firedMilestoneKeys, milestoneKey],
+      });
+    }
   } catch (e) {
     console.error("[NotificationScheduler] milestone nudge error:", e);
   }

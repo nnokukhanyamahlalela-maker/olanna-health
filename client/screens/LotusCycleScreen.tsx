@@ -55,7 +55,9 @@ import {
   maybeScheduleHealthSummaryReminder,
   maybeFireMilestoneNudge,
   milestoneKeyFromLabel,
+  maybeScheduleFertileWindowAlert,
 } from "@/lib/notificationScheduler";
+import { registerPushToken } from "@/lib/notificationService";
 import { countLoggedCycles } from "@/services/cycleCalculator";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -561,6 +563,12 @@ export function LotusCycleScreen() {
   const milestone  = calcMilestone(dailyLogs, cycleCount);
   const streak     = calcStreak(dailyLogs);
 
+  // Register push token whenever we have a profile (no-ops if already registered or no permission)
+  useEffect(() => {
+    if (!profile) return;
+    registerPushToken().catch(() => {});
+  }, [profile?.id]);
+
   useEffect(() => {
     if (!profile) return;
     const cycleData   = data ?? null;
@@ -570,7 +578,8 @@ export function LotusCycleScreen() {
     maybeSchedulePhaseReminder(profile, cycleData as any, dailyLogs).catch(() => {});
     maybeScheduleLapsedUserNudge(lastLogDate).catch(() => {});
     maybeScheduleHealthSummaryReminder(dailyLogs).catch(() => {});
-  }, [profile?.id, dailyLogs.length, data?.currentPhase]);
+    maybeScheduleFertileWindowAlert(profile, clampedDay).catch(() => {});
+  }, [profile?.id, dailyLogs.length, data?.currentPhase, clampedDay]);
 
   useEffect(() => {
     if (!milestone?.label) return;

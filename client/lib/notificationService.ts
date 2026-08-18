@@ -10,7 +10,60 @@
 
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { notificationSettingsStorage } from "./notificationSettings";
+import { getApiUrl } from "./query-client";
+import { getDeviceId } from "./deviceId";
+
+// Expo project ID (must match app.json extra.eas.projectId)
+const EXPO_PROJECT_ID = "73342dce-db45-4b6e-a6f6-657a75b138b6";
+const PUSH_TOKEN_KEY  = "@olanna_push_token";
+
+// ─── Push token registration ──────────────────────────────────────────────────
+
+/**
+ * Fetch the Expo push token for this device and register it with the server.
+ * Safe to call on every app focus — skips if token is unchanged.
+ */
+export async function registerPushToken(): Promise<void> {
+  try {
+    if (Platform.OS === "web") return;
+
+    const settings = await notificationSettingsStorage.get();
+    if (!settings.permissionGranted) return;
+
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: EXPO_PROJECT_ID,
+    });
+    const token = tokenData.data;
+    if (!token) return;
+
+    // Skip server call if token hasn't changed since last registration
+    const cached = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+    if (cached === token) return;
+
+    const deviceId = await getDeviceId();
+    const baseUrl  = getApiUrl();
+
+    const res = await fetch(new URL("/api/push/register", baseUrl).toString(), {
+      method:  "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id":  deviceId,
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (res.ok) {
+      await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
+    } else {
+      console.warn("[NotificationService] push token registration failed:", res.status);
+    }
+  } catch (e) {
+    // Non-fatal — local notifications still work without a remote token
+    console.warn("[NotificationService] registerPushToken error:", e);
+  }
+}
 
 // ─── Handler (must be set at module level) ────────────────────────────────────
 
@@ -68,6 +121,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const result = await Notifications.requestPermissionsAsync() as any;
     const granted: boolean = result.granted ?? (result.status === "granted");
     await notificationSettingsStorage.save({ permissionRequested: true, permissionGranted: granted });
+    // Register push token immediately after permission is granted
+    if (granted) registerPushToken().catch(() => {});
     return granted;
   } catch (e) {
     console.error("[NotificationService] permission request error:", e);

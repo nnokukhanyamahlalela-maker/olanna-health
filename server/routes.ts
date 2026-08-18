@@ -5,6 +5,7 @@ import { registerProductLogRoutes } from "./productLogRoutes";
 import { registerPartnerRoutes } from "./partnerRoutes";
 import { registerCycleImportRoutes } from "./cycleImportRoutes";
 import { registerHealthSummaryRoutes } from "./healthSummaryRoutes";
+import { registerPushRoutes } from "./pushRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", (_req, res) => {
@@ -16,6 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerPartnerRoutes(app);
   registerCycleImportRoutes(app);
   registerHealthSummaryRoutes(app);
+  registerPushRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

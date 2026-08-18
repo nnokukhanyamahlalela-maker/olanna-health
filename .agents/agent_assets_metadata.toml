@@ -423,3 +423,59 @@ uri = "file://attached_assets/generated_images/screen_lanna_2.jpg"
 type = "image"
 title = "Lanna AI Insight"
 description = "Lanna's pattern-detection card — mascot + speech bubble, condition chips, evidence rows, care-provider card, and action buttons."
+
+[[outputs]]
+id = "tw1m3F7Rf4-7C1K4YeQDp"
+uri = "file://assets/previews/screen-home.jpg"
+type = "image"
+title = "Screen 1 — Home Dashboard"
+description = "Cycle wheel, phase info, and daily stats"
+
+[[outputs]]
+id = "gSitIc_-9l7yaM3dyPO3S"
+uri = "file://assets/previews/screen-quicklog.jpg"
+type = "image"
+title = "Screen 2 — Quick Log"
+description = "Mood, pain, and energy logging sheet"
+
+[[outputs]]
+id = "9QPwHQAvN3s-L0utvCBTt"
+uri = "file://assets/previews/screen-checkin.jpg"
+type = "image"
+title = "Screen 3 — AI Check-In"
+description = "Lanna conversational check-in with symptom chips"
+
+[[outputs]]
+id = "esZywOxAF36NBOG_znbOc"
+uri = "file://assets/previews/screen-insights.jpg"
+type = "image"
+title = "Screen 4 — Insights"
+description = "Cycle patterns, pain trends, and mood/energy charts"
+
+[[outputs]]
+id = "BS9x4XiVXq5EdfXPuLiFI"
+uri = "file://assets/previews/screen-goals.jpg"
+type = "image"
+title = "Screen 1 — Goals Selection"
+description = "Onboarding: What do you want to focus on?"
+
+[[outputs]]
+id = "XTr6DhrIyMh4mStcKHHGS"
+uri = "file://assets/previews/screen-notifications.jpg"
+type = "image"
+title = "Screen 2 — Notification Preferences"
+description = "Onboarding: How should Lanna stay in touch?"
+
+[[outputs]]
+id = "3uUyJdBk-t17QKpXrrGnJ"
+uri = "file://assets/previews/screen-partner.jpg"
+type = "image"
+title = "Screen 3 — Partner Mode Privacy"
+description = "Before you share with a partner"
+
+[[outputs]]
+id = "6H4E0rdjMchbSIlaNCKGv"
+uri = "file://assets/previews/screen-dashboard.jpg"
+type = "image"
+title = "Screen 4 — Home Dashboard"
+description = "Cycle wheel, phase, quick stats, log button"

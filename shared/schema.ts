@@ -3,6 +3,13 @@ import { pgTable, text, varchar, serial, integer, timestamp, boolean, date, json
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Push notification tokens — one row per device, upserted on registration
+export const devicePushTokens = pgTable("device_push_tokens", {
+  deviceId:  varchar("device_id", { length: 64 }).primaryKey(),
+  token:     text("token").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const users = pgTable("users", {
   id: varchar("id")
     .primaryKey()
