@@ -469,52 +469,59 @@ export default function PartnerSettingsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, { backgroundColor: theme.background }]}>
-            <View style={[styles.modalIconRow, { backgroundColor: theme.primary + "15" }]}>
-              <Feather name="shield" size={22} color={theme.primary} />
-            </View>
+            <ScrollView
+              style={{ flexGrow: 0 }}
+              contentContainerStyle={{ gap: Spacing.md, paddingBottom: Spacing.sm }}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              <View style={[styles.modalIconRow, { backgroundColor: theme.primary + "15" }]}>
+                <Feather name="shield" size={22} color={theme.primary} />
+              </View>
 
-            <ThemedText type="h4" style={[styles.modalTitle, { color: theme.text }]}>
-              Before you share with a partner
-            </ThemedText>
-
-            <ThemedText type="body" style={[styles.modalBody, { color: theme.textSecondary }]}>
-              Partner Mode sends a limited snapshot to Olanna's server so your partner can read it securely. Here is exactly what that snapshot may contain — you control each item individually after setup:
-            </ThemedText>
-
-            <View style={styles.modalList}>
-              {[
-                { icon: "moon"      as const, text: "Which cycle phase you're in (e.g. Luteal)" },
-                { icon: "calendar"  as const, text: "Approximate next period dates (shown as a range, not an exact date)" },
-                { icon: "sunrise"   as const, text: "Approximate fertile window (off by default)" },
-                { icon: "sun"       as const, text: "Approximate ovulation window (off by default)" },
-                { icon: "smile"     as const, text: "Mood as a level and a short canned note (off by default)" },
-                { icon: "zap"       as const, text: "Energy as a level and a short canned note (off by default)" },
-                { icon: "heart"     as const, text: "Supportive tips for your partner" },
-              ].map(({ icon, text }) => (
-                <View key={icon} style={styles.modalListRow}>
-                  <Feather name={icon} size={14} color={theme.primary} style={{ marginTop: 3, flexShrink: 0 }} />
-                  <ThemedText type="small" style={[styles.modalListText, { color: theme.textSecondary }]}>
-                    {text}
-                  </ThemedText>
-                </View>
-              ))}
-            </View>
-
-            <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25" }]}>
-              <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
-                <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>What is never shared: </ThemedText>
-                your full symptom logs, pain records, body-map data, diagnosis details, notes, or any other health record. Only the snapshot fields above are ever sent.
+              <ThemedText type="h4" style={[styles.modalTitle, { color: theme.text }]}>
+                Before you share with a partner
               </ThemedText>
-            </View>
 
-            <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25", marginTop: 8 }]}>
-              <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
-                <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>Not shared with third parties: </ThemedText>
-                this snapshot is stored only on Olanna's server for your partner to read. It is never sold, shared with advertisers, or passed to any third party. You can revoke access instantly at any time.
+              <ThemedText type="body" style={[styles.modalBody, { color: theme.textSecondary }]}>
+                Partner Mode sends a limited snapshot to Olanna's server so your partner can read it securely. Here is exactly what that snapshot may contain — you control each item individually after setup:
               </ThemedText>
-            </View>
 
-            <View style={styles.modalButtons}>
+              <View style={styles.modalList}>
+                {[
+                  { icon: "moon"      as const, text: "Which cycle phase you're in (e.g. Luteal)" },
+                  { icon: "calendar"  as const, text: "Approximate next period dates (shown as a range, not an exact date)" },
+                  { icon: "sunrise"   as const, text: "Approximate fertile window (off by default)" },
+                  { icon: "sun"       as const, text: "Approximate ovulation window (off by default)" },
+                  { icon: "smile"     as const, text: "Mood as a level and a short canned note (off by default)" },
+                  { icon: "zap"       as const, text: "Energy as a level and a short canned note (off by default)" },
+                  { icon: "heart"     as const, text: "Supportive tips for your partner" },
+                ].map(({ icon, text }) => (
+                  <View key={icon} style={styles.modalListRow}>
+                    <Feather name={icon} size={14} color={theme.primary} style={{ marginTop: 3, flexShrink: 0 }} />
+                    <ThemedText type="small" style={[styles.modalListText, { color: theme.textSecondary }]}>
+                      {text}
+                    </ThemedText>
+                  </View>
+                ))}
+              </View>
+
+              <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25" }]}>
+                <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
+                  <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>What is never shared: </ThemedText>
+                  your full symptom logs, pain records, body-map data, diagnosis details, notes, or any other health record. Only the snapshot fields above are ever sent.
+                </ThemedText>
+              </View>
+
+              <View style={[styles.modalNote, { backgroundColor: theme.primary + "10", borderColor: theme.primary + "25" }]}>
+                <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 19 }}>
+                  <ThemedText type="small" style={{ fontWeight: "700", color: theme.text }}>Not shared with third parties: </ThemedText>
+                  this snapshot is stored only on Olanna's server for your partner to read. It is never sold, shared with advertisers, or passed to any third party. You can revoke access instantly at any time.
+                </ThemedText>
+              </View>
+            </ScrollView>
+
+            <View style={[styles.modalButtons, { marginTop: Spacing.md }]}>
               <Pressable
                 onPress={() => setShowPrivacyNotice(false)}
                 style={[styles.modalCancelBtn, { borderColor: theme.border }]}
