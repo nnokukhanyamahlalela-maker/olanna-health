@@ -35,13 +35,6 @@ export const TOPIC_CATEGORIES = [
     color: "#C2664E",
   },
   {
-    id: "pcos",
-    label: "PCOS",
-    description: "Understanding and managing polycystic ovarian syndrome",
-    icon: "activity" as const,
-    color: "#4A7A4E",
-  },
-  {
     id: "endometriosis",
     label: "Endometriosis",
     description: "Everything you need to know about endo",
@@ -491,7 +484,7 @@ export const articles: Article[] = [
     title: "Is It PCOS? The Signs Your Body Has Been Trying to Tell You",
     subtitle: "Sometimes the signs are quiet, but they deserve to be heard.",
     summary: "A gentle, clear breakdown of PCOS symptoms, causes, and steps you can take to support your reproductive health.",
-    category: "PCOS",
+    category: "PMOS",
     topic: "pcos",
     author: "Olanna Editorial",
     date: "8 December 2025",

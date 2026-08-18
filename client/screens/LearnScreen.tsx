@@ -36,13 +36,11 @@ const FILTER_CHIPS = [
   { id: "Nutrition", label: "Nutrition" },
   { id: "Mental health", label: "Mental health" },
   { id: "Periods", label: "Periods" },
-  { id: "PCOS", label: "PCOS" },
 ];
 
 // Tag pill colors (subtle, no icons)
 const TAG_COLORS: Record<string, string> = {
   PMOS: "#E8A070",
-  PCOS: "#E8A070",
   Nutrition: "#7ABFB0",
   "Mental health": "#4A4580",
   Periods: "#D85A30",
