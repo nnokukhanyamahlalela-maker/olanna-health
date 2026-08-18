@@ -13,6 +13,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
+import { Feather } from "@expo/vector-icons";
 import { LannaMascot } from "@/components/LannaMascot";
 import { storage, UserProfile } from "@/lib/storage";
 import { Phase, getPhaseForDay } from "@/constants/phaseConfig";
@@ -165,7 +166,7 @@ export default function LearnScreen() {
 
             {/* Search bar */}
             <View style={styles.searchBar}>
-              <Text style={styles.searchIcon}>🔍</Text>
+              <Feather name="search" size={16} color={TEXT_SOFT} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search articles"
@@ -175,7 +176,7 @@ export default function LearnScreen() {
               />
               {searchQuery.length > 0 && (
                 <Pressable onPress={() => setSearchQuery("")}>
-                  <Text style={styles.searchClear}>✕</Text>
+                  <Feather name="x" size={16} color={TEXT_SOFT} />
                 </Pressable>
               )}
             </View>
@@ -256,9 +257,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 8,
   },
-  searchIcon: { fontSize: 16 },
   searchInput: { flex: 1, fontSize: 15, color: TEXT_DARK },
-  searchClear: { fontSize: 14, color: TEXT_SOFT },
   featuredCard: {
     borderRadius: 18,
     padding: 18,
